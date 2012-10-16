@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<legoList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="src/main/resources/LEGO.xsd">
+	<groupName>Mockup</groupName>
+	<legoListUUID>8db4b1c0-0be2-11e2-892e-0800200c9a66</legoListUUID>
+	<groupDescription>Mockup XML showing valid entries</groupDescription>
+	<lego>
+		<legoUUID>8cd4b1c0-0be7-11e2-891e-0813200c9a66</legoUUID>
+		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
+
+		<!-- pncs is required, and all 3 attributes are required -->
+		<pncs value="Yes" name="PHYSICAL EXAM_CARDIO_Standard_Cardiac_Exam_Abnormal_Heart_Sounds_S3" id="24261" />
+		<assertion>
+			<assertionUUID>8dd4b1c0-0be4-11e2-892e-0800200c9a66</assertionUUID>
+			<discernible>
+				<conceptAndRel sctid="67551009" desc="Abnormal third heart sound, S3"/>
+			</discernible>
+			<qualifier>
+				<concept sctid="5880005" desc="Physical examination procedure" />
+			</qualifier>
+			<value>
+				<concept sctid="52101004" desc="Present" />
+			</value>
+			<!-- timing is optional -->
+			<!-- subAssertions are optional -->
+
+		</assertion>
+
+		<!-- Multiple assertions in a lego are allowed -->
+		<assertion>
+			<assertionUUID>7dd4b1c0-0be2-11e2-892e-0800200c9a66</assertionUUID>
+			<discernible>
+				<conceptAndRel sctid="86484008" desc="Abnormal fourth heart sound, S&gt;4&lt;"/>
+			</discernible>
+			<qualifier>
+				<concept sctid="5880005" desc="Physical examination procedure" />
+			</qualifier>
+			<value>
+				<concept sctid="52101004" desc="Present" />
+			</value>
+
+			<timing>  <!-- One or more measurements is allowed within timing -->
+				<measurement>
+					<units>
+						<concept desc="minutes" sctid="45" />
+					</units>
+					<numericValue>37.45</numericValue> <!-- currently defined as a float -->
+				</measurement>
+
+				<!-- units are optional -->
+				<measurement>
+					<!-- String values are limited to values from an enumeration -->
+					<stringValue>NOW</stringValue>
+				</measurement>
+
+
+				<!-- And we do ranges - greaterThan, lessThan, or both -->
+				<measurement>
+					<measuredRange>
+						<greaterThan inclusive="true">
+							<numericValue>5</numericValue>
+						</greaterThan>
+					</measuredRange>
+				</measurement>
+
+				<measurement>
+					<measuredRange>
+						<greaterThan inclusive="true">
+							<numericValue>5</numericValue>
+						</greaterThan>
+						<lessThan inclusive="false">
+							<numericValue>25</numericValue>
+						</lessThan>
+					</measuredRange>
+				</measurement>
+
+				<!-- Ranges can also have text strings -->
+				<measurement>
+					<measuredRange>
+						<greaterThan inclusive="true">
+							<stringValue>DOB</stringValue>
+						</greaterThan>
+						<lessThan inclusive="false">
+							<stringValue>end active service</stringValue>
+						</lessThan>
+					</measuredRange>
+				</measurement>
+				
+				<!-- Numeric ranges can also have a relaxed range bound -->
+				<measurement>
+					<measuredRange>
+						<greaterThan inclusive="true">
+							<relaxedRangeBound>
+								<greaterThan>5</greaterThan>
+								<lessThan>6</lessThan>
+							</relaxedRangeBound>
+						</greaterThan>
+						<lessThan inclusive="false">
+							<relaxedRangeBound>
+								<greaterThan>20</greaterThan>
+								<lessThan>30.5</lessThan>
+							</relaxedRangeBound>
+						</lessThan>
+					</measuredRange>
+				</measurement>
+			</timing>
+
+			<assertionComponents>
+				<assertionComponent>
+					<assertionUUID>8dd4b1c0-0be2-11e2-892e-0800200c9a66</assertionUUID>
+					<typeConcept sctid="258706009" desc="partOf"/>
+				</assertionComponent>
+				<assertionComponent>
+					<assertionUUID>9dd4b1c0-0be2-11e2-892e-0900200c9a66</assertionUUID>
+					<typeConcept uuid="8dd4b1c0-0be2-11e2-892e-0900200c4a66" desc="somethingElse"/>
+				</assertionComponent>
+			</assertionComponents>
+		</assertion>
+	</lego>
+
+	<!-- discernible can have rel's -->
+	<lego>
+		<legoUUID>8cd4b1c0-0be7-11e2-891e-0813900c9a66</legoUUID>
+		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
+		<pncs value="6th ICS MCL" name="PHYSICAL EXAM_CARDIO_Standard_Cardiac_Exam_Abnormal_PMI" id="24265" />
+		<assertion>
+			<assertionUUID>7dd4b1c0-9be2-11e2-892e-0800200c9a66</assertionUUID>
+			<discernible>
+				<conceptAndRel sctid="248661003" desc="Apex beat displaced">
+					<rel>
+						<typeConcept sctid="363698007" desc="Finding site" />
+						<!-- Each rel must contain a type, and either a concept or a measurement -->
+						<!-- Concepts may be referenced by UUID, instead of sctid -->
+						<concept uuid="8dd4b7c0-0be2-11e2-892e-1100200c9a66" desc="Sixth intercostal space midclavicular line" />
+					</rel>
+				</conceptAndRel>
+			</discernible>
+			<qualifier>
+				<concept sctid="5880005" desc="Physical examination procedure" />
+			</qualifier>
+
+			<!-- Values can contain 1 concept OR 1+ measurements -->
+			<value>
+				<measurement>
+					<numericValue>15</numericValue>
+				</measurement>
+				<measurement>
+					<numericValue>65</numericValue>
+				</measurement>
+			</value>
+		</assertion>
+
+	</lego>
+
+	<!-- real example with two rels -->
+	<lego>
+		<legoUUID>8fd4b1c0-0be7-11e2-891e-0813900c9a66</legoUUID>
+		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
+		<pncs value="Every 5 to 6 months" name="HISTORY_MISC_Standard_Flareups_Frequency" id="24619" />
+		<assertion>
+			<assertionUUID>8fd4b1c0-0ce7-11e2-891e-0813900c9a66</assertionUUID>
+			<discernible>
+				<conceptAndRel sctid="404684003" desc="Clinical finding" >
+					<rel>
+						<typeConcept sctid="47429007" desc="Associated with" />
+						<concept sctid="410661009" desc="Exacerbated" />
+					</rel>
+					<rel>
+						<typeConcept sctid="260864003" desc="Frequency" />
+						<measurement>
+							<units>
+								<concept sctid="258706009" desc="month" />
+							</units>
+							<measuredRange>
+								<greaterThan inclusive="true">
+									<numericValue>5</numericValue>
+								</greaterThan>
+								<lessThan inclusive="true">
+									<numericValue>6</numericValue>
+								</lessThan>
+							</measuredRange>
+						</measurement>
+					</rel>
+				</conceptAndRel>
+			</discernible>
+			<qualifier>
+				<concept sctid="108217004" desc="Interview, history AND/OR physical examination" />
+			</qualifier>
+			<value>
+				<measurement>
+					<numericValue>1</numericValue>
+				</measurement>
+			</value>
+		</assertion>
+	</lego>
+</legoList>

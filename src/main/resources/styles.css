@@ -1,0 +1,21 @@
+
+.boldLabel {
+    -fx-font-weight: bold;
+}
+
+.headerBackground {
+    -fx-background-color: linear-gradient(#98a8bd 0%, #8195af 25%, #6d86a4 100%);
+}
+
+.tab-pane *.tab-header-background {
+    -fx-background-color: linear-gradient(#98a8bd 0%, #8195af 25%, #6d86a4 100%);
+}
+
+.menu .label
+{
+    -fx-text-fill: black;
+}
+
+.menu-bar {
+    -fx-background-color: lightgrey;
+}

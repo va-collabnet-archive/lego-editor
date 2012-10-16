@@ -1,0 +1,140 @@
+package gov.va.legoEdit.model.bdbModel;
+
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
+import com.sleepycat.persist.model.Relationship;
+import com.sleepycat.persist.model.SecondaryKey;
+import gov.va.legoEdit.model.schemaModel.Lego;
+import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.storage.DataStoreException;
+import gov.va.legoEdit.storage.WriteException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+@Entity
+public class LegoListBDB
+{
+
+    @SecondaryKey(relate = Relationship.ONE_TO_ONE)
+    protected String groupName;
+    @PrimaryKey
+    protected String legoListUUID;
+    protected String groupDescription;
+    protected List<String> legoUniqueIds;
+    @SecondaryKey(relate = Relationship.ONE_TO_MANY)
+    protected Set<String> legoUUIDs;
+    
+    private transient List<LegoBDB> legoBDBRefs;
+
+    private LegoListBDB()
+    {
+        //required by BDB
+    }
+
+    public LegoListBDB(String groupName, String groupDescription)
+    {
+        this.groupName = groupName;
+        this.groupDescription = groupDescription;
+        this.legoListUUID = UUID.nameUUIDFromBytes(groupName.getBytes()).toString();
+        this.legoUniqueIds = new ArrayList();
+        this.legoUUIDs = new HashSet();
+    }
+
+    public LegoListBDB(LegoList ll) throws WriteException
+    {
+        groupDescription = ll.getGroupDescription();
+        groupName = ll.getGroupName();
+        legoListUUID = ll.getLegoListUUID();
+        legoUniqueIds = new ArrayList();
+        legoBDBRefs = new ArrayList();
+        this.legoUUIDs = new HashSet();
+        for (Lego l : ll.getLego())
+        {
+            LegoBDB lBDB = new LegoBDB(l);
+            
+            verifyLegoUUID(l.getLegoUUID());
+            legoUniqueIds.add(lBDB.getUniqueId());
+            legoBDBRefs.add(lBDB);
+            legoUUIDs.add(l.getLegoUUID());
+        }
+    }
+    
+    public List<LegoBDB> getLegoBDBs()
+    {
+        return legoBDBRefs;
+    }
+    
+    public void addLego(LegoBDB lego) throws WriteException
+    {
+        verifyLegoUUID(lego.getLegoUUID());
+        legoUniqueIds.add(lego.getUniqueId());
+        legoUUIDs.add(lego.getLegoUUID());
+    }
+    
+    private void verifyLegoUUID(String legoUUID) throws WriteException
+    {
+        //legoUUID should only be used by this legoList (no other)
+        List<String> legoListUUIDs = BDBDataStoreImpl.getInstance().getLegoListByLego(legoUUID);
+        for (String s : legoListUUIDs)
+        {
+            if (!this.legoListUUID.equals(s))
+            {
+                throw new WriteException("The LEGO UUID '" + legoUUID + "' is already in use by the legoList '" 
+                        + s + "'.  Lego UUIDs should not cross legoLists.");
+            }
+        }
+    }
+
+    public String getGroupName()
+    {
+        return groupName;
+    }
+
+    public String getGroupDescription()
+    {
+        return groupDescription;
+    }
+    
+    public String getLegoListUUID()
+    {
+        return legoListUUID;
+    }
+
+    public List<String> getUniqueLegoIds()
+    {
+        ArrayList<String> result = new ArrayList();
+        if (legoUniqueIds != null)
+        {
+            for (String s : this.legoUniqueIds)
+            {
+                result.add(s);
+            }
+        }
+        return result;
+    }
+
+    public LegoList toSchemaLegoList()
+    {
+        LegoList ll = new LegoList();
+        ll.setGroupDescription(groupDescription);
+        ll.setGroupName(groupName);
+        ll.setLegoListUUID(legoListUUID);
+        List<Lego> legos = ll.getLego();
+
+        for (String lui : legoUniqueIds)
+        {
+            Lego l = ((BDBDataStoreImpl)BDBDataStoreImpl.getInstance()).getLegoByUniqueId(lui);
+            if (l == null)
+            {
+                throw new DataStoreException("This shouldn't have been null!");
+            }
+            legos.add(l);
+        }
+
+        return ll;
+    }
+}

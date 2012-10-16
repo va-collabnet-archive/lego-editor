@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.ErrorDialogController">
+  <children>
+    <Button fx:id="okButton" mnemonicParsing="false" text="Ok" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="180.0" AnchorPane.rightAnchor="180.0" />
+    <Label fx:id="errorMessage" text="Error Message" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0" />
+    <TextArea fx:id="detailedMessage" editable="false" prefHeight="144.0" prefWidth="365.0" wrapText="true" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="50.0" />
+  </children>
+</AnchorPane>
