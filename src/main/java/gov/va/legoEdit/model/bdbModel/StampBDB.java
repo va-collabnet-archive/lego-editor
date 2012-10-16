@@ -9,7 +9,8 @@ import java.util.UUID;
 @Entity
 public class StampBDB
 {
-    private StampBDB()
+    @SuppressWarnings("unused")
+	private StampBDB()
     {
         //required by BDB
     }

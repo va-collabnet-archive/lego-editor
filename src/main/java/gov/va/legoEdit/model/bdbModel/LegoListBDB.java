@@ -30,7 +30,8 @@ public class LegoListBDB
     
     private transient List<LegoBDB> legoBDBRefs;
 
-    private LegoListBDB()
+    @SuppressWarnings("unused")
+	private LegoListBDB()
     {
         //required by BDB
     }
@@ -40,8 +41,8 @@ public class LegoListBDB
         this.groupName = groupName;
         this.groupDescription = groupDescription;
         this.legoListUUID = UUID.nameUUIDFromBytes(groupName.getBytes()).toString();
-        this.legoUniqueIds = new ArrayList();
-        this.legoUUIDs = new HashSet();
+        this.legoUniqueIds = new ArrayList<>();
+        this.legoUUIDs = new HashSet<>();
     }
 
     public LegoListBDB(LegoList ll) throws WriteException
@@ -49,9 +50,9 @@ public class LegoListBDB
         groupDescription = ll.getGroupDescription();
         groupName = ll.getGroupName();
         legoListUUID = ll.getLegoListUUID();
-        legoUniqueIds = new ArrayList();
-        legoBDBRefs = new ArrayList();
-        this.legoUUIDs = new HashSet();
+        legoUniqueIds = new ArrayList<>();
+        legoBDBRefs = new ArrayList<>();
+        this.legoUUIDs = new HashSet<>();
         for (Lego l : ll.getLego())
         {
             LegoBDB lBDB = new LegoBDB(l);
@@ -106,7 +107,7 @@ public class LegoListBDB
 
     public List<String> getUniqueLegoIds()
     {
-        ArrayList<String> result = new ArrayList();
+        ArrayList<String> result = new ArrayList<>();
         if (legoUniqueIds != null)
         {
             for (String s : this.legoUniqueIds)

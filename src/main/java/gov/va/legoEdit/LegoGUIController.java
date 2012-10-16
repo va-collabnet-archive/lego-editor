@@ -53,7 +53,7 @@ public class LegoGUIController implements Initializable
     Logger logger = LoggerFactory.getLogger(LegoGUIController.class);
     private LegoList currentLegoList = null;
     private MenuItem menuDeleteLego;
-    private HashSet<Tab> tabsRenderedSinceSelect = new HashSet();
+    private HashSet<Tab> tabsRenderedSinceSelect = new HashSet<>();
     //Copypaste from gui tool
     //
     @FXML //  fx:id="editTab"
@@ -163,8 +163,6 @@ public class LegoGUIController implements Initializable
         menuFileImport.setAccelerator(new KeyCodeCombination(KeyCode.I, KeyCombination.CONTROL_DOWN));
         menuFileImport.setOnAction(new EventHandler<ActionEvent>()
         {
-            int i = 0;
-
             @Override
             public void handle(ActionEvent t)
             {

@@ -6,8 +6,9 @@ package gov.va.legoEdit.storage;
  */
 public class IteratorClosedException extends RuntimeException
 {
+	private static final long serialVersionUID = -6837709385047808197L;
 
-    public IteratorClosedException()
+	public IteratorClosedException()
     {
         super();
     }

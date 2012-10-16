@@ -226,7 +226,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoBDB> ec = null;
         try
         {
-            ArrayList<Lego> result = new ArrayList();
+            ArrayList<Lego> result = new ArrayList<>();
             EntityIndex<String, LegoBDB> ei = legoByUUID.subIndex(legoUUID);
             ec = ei.entities();
 
@@ -267,7 +267,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoBDB> ec = null;
         try
         {
-            ArrayList<Lego> result = new ArrayList();
+            ArrayList<Lego> result = new ArrayList<>();
             EntityIndex<String, LegoBDB> ei = legoByContainingAssertionUUID.subIndex(assertionUUID);
             ec = ei.entities();
 
@@ -333,7 +333,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoBDB> ec = null;
         try
         {
-            HashMap<String, LegoBDB> uniqueLegos = new HashMap();
+            HashMap<String, LegoBDB> uniqueLegos = new HashMap<>();
             EntityIndex<String, LegoBDB> ei = legoBySctIdentifiers.subIndex(conceptUuidOrSCTId);
             ec = ei.entities();
 
@@ -346,7 +346,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
                 }
             }
 
-            ArrayList<Lego> result = new ArrayList();
+            ArrayList<Lego> result = new ArrayList<>();
             for (LegoBDB lego : uniqueLegos.values())
             {
                 result.add(lego.toSchemaLego());
@@ -395,7 +395,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoBDB> ec = null;
         try
         {
-            HashMap<String, LegoBDB> uniqueLegos = new HashMap();
+            HashMap<String, LegoBDB> uniqueLegos = new HashMap<>();
             EntityIndex<String, LegoBDB> ei = legoByPncsId.subIndex(PncsBDB.makeUniqueId(id, value));
             ec = ei.entities();
 
@@ -408,7 +408,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
                 }
             }
 
-            ArrayList<Lego> result = new ArrayList();
+            ArrayList<Lego> result = new ArrayList<>();
             for (LegoBDB lego : uniqueLegos.values())
             {
                 result.add(lego.toSchemaLego());
@@ -445,7 +445,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         {
             // First go to the pncs table to get all of the pncs objects by ID, get a unique list of their unique IDs.
 
-            HashSet<String> uniquePncsIds = new HashSet();
+            HashSet<String> uniquePncsIds = new HashSet<>();
             EntityIndex<String, PncsBDB> pei = pncsById.subIndex(id);
             pec = pei.entities();
 
@@ -461,7 +461,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
 
             //Now go get all the LEGOs that are involved with this pncs IDs
 
-            HashMap<String, LegoBDB> uniqueLegos = new HashMap();
+            HashMap<String, LegoBDB> uniqueLegos = new HashMap<>();
             for (String pncsId : uniquePncsIds)
             {
                 EntityIndex<String, LegoBDB> lei = legoByPncsId.subIndex(pncsId);
@@ -478,7 +478,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
                 lec.close();
             }
 
-            ArrayList<Lego> result = new ArrayList();
+            ArrayList<Lego> result = new ArrayList<>();
             for (LegoBDB lego : uniqueLegos.values())
             {
                 result.add(lego.toSchemaLego());
@@ -538,7 +538,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoListBDB> ec = null;
         try
         {
-            ArrayList<String> uniqueLegoLists = new ArrayList();
+            ArrayList<String> uniqueLegoLists = new ArrayList<>();
             EntityIndex<String, LegoListBDB> ei = legoListByContainedLego.subIndex(legoUUID);
             ec = ei.entities();
 
@@ -547,7 +547,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
                 uniqueLegoLists.add(current.getLegoListUUID());
             }
 
-            return new ArrayList(uniqueLegoLists);
+            return uniqueLegoLists;
         }
         catch (DatabaseException e)
         {
@@ -853,7 +853,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoBDB> ec = null;
         try
         {
-            HashSet<String> result = new HashSet();
+            HashSet<String> result = new HashSet<>();
             EntityIndex<String, LegoBDB> ei = legoByContainingAssertionUUID.subIndex(assertionUUID);
             ec = ei.entities();
 

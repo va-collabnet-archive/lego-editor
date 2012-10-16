@@ -1,24 +1,25 @@
 package gov.va.legoEdit.storage.util;
 
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.persist.EntityCursor;
 import gov.va.legoEdit.storage.CloseableIterator;
 import gov.va.legoEdit.storage.IteratorClosedException;
-import java.util.Date;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.persist.EntityCursor;
 
 /**
  *
  * @author darmbrust
  */
-public class  BDBIterator<T> implements CloseableIterator
+public class  BDBIterator<T> implements CloseableIterator<T>
 {
     public static int timeoutInSeconds = 15;
     Logger logger = LoggerFactory.getLogger(BDBIterator.class);
@@ -27,7 +28,7 @@ public class  BDBIterator<T> implements CloseableIterator
     private Iterator<T> iterator;
     private ScheduledExecutorService scheduledExecutorService;
     private Runnable runnable;
-    private ScheduledFuture scheduledFuture;
+    private ScheduledFuture<?> scheduledFuture;
     private long expireAt;
     
     public BDBIterator(ScheduledExecutorService sec, EntityCursor<T> c)

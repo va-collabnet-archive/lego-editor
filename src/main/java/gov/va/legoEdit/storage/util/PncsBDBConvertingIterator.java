@@ -1,11 +1,12 @@
 package gov.va.legoEdit.storage.util;
 
-import com.sleepycat.persist.EntityCursor;
 import gov.va.legoEdit.model.bdbModel.PncsBDB;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.storage.CloseableIterator;
-import java.util.Timer;
+
 import java.util.concurrent.ScheduledExecutorService;
+
+import com.sleepycat.persist.EntityCursor;
 
 /**
  *
@@ -18,7 +19,7 @@ public class PncsBDBConvertingIterator implements CloseableIterator<Pncs>
 
     public PncsBDBConvertingIterator(ScheduledExecutorService sec, EntityCursor<PncsBDB> c)
     {
-        iter = new BDBIterator(sec, c);
+        iter = new BDBIterator<>(sec, c);
     }
 
     @Override

@@ -6,8 +6,9 @@ package gov.va.legoEdit.storage;
  */
 public class WriteException extends Exception
 {
+	private static final long serialVersionUID = -7869305643117695385L;
 
-    public WriteException()
+	public WriteException()
     {
         super();
     }

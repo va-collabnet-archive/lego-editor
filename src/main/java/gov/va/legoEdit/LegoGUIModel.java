@@ -1,15 +1,17 @@
 package gov.va.legoEdit;
 
-import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.guiUtil.AlphanumComparator;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +53,7 @@ public class LegoGUIModel
     {
         if (legoNames_ == null)
         {
-            ArrayList<String> legoListNames = new ArrayList();
+            ArrayList<String> legoListNames = new ArrayList<>();
             Iterator<LegoList> ll = BDBDataStoreImpl.getInstance().getLegoLists();
             while (ll.hasNext())
             {

@@ -6,8 +6,9 @@ package gov.va.legoEdit.storage;
  */
 public class DataStoreException extends RuntimeException
 {
+	private static final long serialVersionUID = 4628690782411628595L;
 
-    public DataStoreException()
+	public DataStoreException()
     {
         super();
     }

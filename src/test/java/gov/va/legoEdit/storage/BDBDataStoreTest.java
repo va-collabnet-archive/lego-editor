@@ -1,5 +1,10 @@
 package gov.va.legoEdit.storage;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import gov.va.legoEdit.model.bdbModel.PncsBDB;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Concept;
@@ -9,19 +14,19 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
-import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.storage.util.BDBIterator;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -61,7 +66,7 @@ public class BDBDataStoreTest
     private void clearDB() throws WriteException
     {
         CloseableIterator<LegoList> iterator = BDBDataStoreImpl.getInstance().getLegoLists();
-        ArrayList<String> toDelete = new ArrayList();
+        ArrayList<String> toDelete = new ArrayList<>();
         while (iterator.hasNext())
         {
             LegoList ll = iterator.next();
@@ -82,7 +87,7 @@ public class BDBDataStoreTest
 
         CloseableIterator<LegoList> iterator = BDBDataStoreImpl.getInstance().getLegoLists();
         int count = 0;
-        ArrayList<String> uuids = new ArrayList();
+        ArrayList<String> uuids = new ArrayList<>();
         while (iterator.hasNext())
         {
             LegoList ll = iterator.next();
@@ -160,8 +165,6 @@ public class BDBDataStoreTest
 
 
         assertEquals("Failed to find lego", BDBDataStoreImpl.getInstance().getLegos(UUID.nameUUIDFromBytes("foo".getBytes()).toString()).size(), 1);
-
-        Stamp s = BDBDataStoreImpl.getInstance().getLegos(UUID.nameUUIDFromBytes("foo".getBytes()).toString()).get(0).getStamp();
 
         //Commit it again - should now exists twice - with different stamp values
         BDBDataStoreImpl.getInstance().commitLego(l1, aId);
@@ -449,7 +452,7 @@ public class BDBDataStoreTest
     public void testIterators() throws WriteException, InterruptedException
     {
         int count = 0;
-        Iterator i = BDBDataStoreImpl.getInstance().getLegoLists();
+        Iterator<LegoList> i = BDBDataStoreImpl.getInstance().getLegoLists();
         while (i.hasNext())
         {
             i.next();

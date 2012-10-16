@@ -17,7 +17,8 @@ public class PncsBDB {
     protected String name;
     protected String value;
     
-    private PncsBDB()
+    @SuppressWarnings("unused")
+	private PncsBDB()
     {
         //required by BDB
     }

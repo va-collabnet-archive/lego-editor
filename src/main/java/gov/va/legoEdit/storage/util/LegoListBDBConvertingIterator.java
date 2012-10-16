@@ -17,7 +17,7 @@ public class LegoListBDBConvertingIterator implements CloseableIterator<LegoList
 
     public LegoListBDBConvertingIterator(ScheduledExecutorService sec, EntityCursor<LegoListBDB> c)
     {
-        iter = new BDBIterator(sec, c);
+        iter = new BDBIterator<>(sec, c);
     }
 
     @Override
