@@ -106,7 +106,7 @@
 			<xs:sequence>
 				<xs:choice>
 					<xs:element name="concept" type="concept" />
-					<xs:element ref="measurement" maxOccurs="unbounded" />
+					<xs:element ref="measurement" />
 				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
@@ -127,7 +127,7 @@
 	<xs:element name="timing">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element minOccurs="0" maxOccurs="unbounded" ref="measurement" />
+				<xs:element minOccurs="0" ref="measurement" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

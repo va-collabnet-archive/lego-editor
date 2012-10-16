@@ -38,69 +38,12 @@
 				<concept sctid="52101004" desc="Present" />
 			</value>
 
-			<timing>  <!-- One or more measurements is allowed within timing -->
+			<timing>  
 				<measurement>
 					<units>
 						<concept desc="minutes" sctid="45" />
 					</units>
 					<numericValue>37.45</numericValue> <!-- currently defined as a float -->
-				</measurement>
-
-				<!-- units are optional -->
-				<measurement>
-					<!-- String values are limited to values from an enumeration -->
-					<stringValue>NOW</stringValue>
-				</measurement>
-
-
-				<!-- And we do ranges - greaterThan, lessThan, or both -->
-				<measurement>
-					<measuredRange>
-						<greaterThan inclusive="true">
-							<numericValue>5</numericValue>
-						</greaterThan>
-					</measuredRange>
-				</measurement>
-
-				<measurement>
-					<measuredRange>
-						<greaterThan inclusive="true">
-							<numericValue>5</numericValue>
-						</greaterThan>
-						<lessThan inclusive="false">
-							<numericValue>25</numericValue>
-						</lessThan>
-					</measuredRange>
-				</measurement>
-
-				<!-- Ranges can also have text strings -->
-				<measurement>
-					<measuredRange>
-						<greaterThan inclusive="true">
-							<stringValue>DOB</stringValue>
-						</greaterThan>
-						<lessThan inclusive="false">
-							<stringValue>end active service</stringValue>
-						</lessThan>
-					</measuredRange>
-				</measurement>
-				
-				<!-- Numeric ranges can also have a relaxed range bound -->
-				<measurement>
-					<measuredRange>
-						<greaterThan inclusive="true">
-							<relaxedRangeBound>
-								<greaterThan>5</greaterThan>
-								<lessThan>6</lessThan>
-							</relaxedRangeBound>
-						</greaterThan>
-						<lessThan inclusive="false">
-							<relaxedRangeBound>
-								<greaterThan>20</greaterThan>
-								<lessThan>30.5</lessThan>
-							</relaxedRangeBound>
-						</lessThan>
-					</measuredRange>
 				</measurement>
 			</timing>
 
@@ -137,16 +80,18 @@
 			<qualifier>
 				<concept sctid="5880005" desc="Physical examination procedure" />
 			</qualifier>
-
-			<!-- Values can contain 1 concept OR 1+ measurements -->
 			<value>
 				<measurement>
 					<numericValue>15</numericValue>
 				</measurement>
-				<measurement>
-					<numericValue>65</numericValue>
-				</measurement>
 			</value>
+			<timing>
+				<!-- units are optional -->
+				<measurement>
+					<!-- String values are limited to values from an enumeration -->
+					<stringValue>NOW</stringValue>
+				</measurement>
+			</timing>
 		</assertion>
 
 	</lego>
@@ -190,6 +135,79 @@
 					<numericValue>1</numericValue>
 				</measurement>
 			</value>
+			<timing>
+				<!-- And we do ranges - greaterThan, lessThan, or both -->
+				<measurement>
+					<measuredRange>
+						<greaterThan inclusive="true">
+							<numericValue>5</numericValue>
+						</greaterThan>
+					</measuredRange>
+				</measurement>
+			</timing>
+		</assertion>
+	</lego>
+		<lego>
+		<legoUUID>8cd4b6c0-0be7-11e2-891e-0813200c9a66</legoUUID>
+		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
+
+		<!-- pncs is required, and all 3 attributes are required -->
+		<pncs value="Yes" name="stuff" id="5" />
+		<assertion>
+			<assertionUUID>8dd4b1c0-0be4-41e2-892e-0800200c9a66</assertionUUID>
+			<discernible>
+				<conceptAndRel sctid="67551009" desc="Abnormal third heart sound, S3">
+					<rel>
+						<typeConcept desc="foo" sctid="5"/>
+						<!-- Numeric ranges can also have a relaxed range bound -->
+						<measurement>
+							<measuredRange>
+								<greaterThan inclusive="true">
+									<relaxedRangeBound>
+										<greaterThan>5</greaterThan>
+										<lessThan>6</lessThan>
+									</relaxedRangeBound>
+								</greaterThan>
+								<lessThan inclusive="false">
+									<relaxedRangeBound>
+										<greaterThan>20</greaterThan>
+										<lessThan>30.5</lessThan>
+									</relaxedRangeBound>
+								</lessThan>
+							</measuredRange>
+						</measurement>
+					</rel>
+				</conceptAndRel>
+			</discernible>
+			<qualifier>
+				<concept sctid="5880005" desc="Physical examination procedure" />
+			</qualifier>
+			<value>
+				<!-- Ranges can also have text strings -->
+				<measurement>
+					<measuredRange>
+						<greaterThan inclusive="true">
+							<stringValue>DOB</stringValue>
+						</greaterThan>
+						<lessThan inclusive="false">
+							<stringValue>end active service</stringValue>
+						</lessThan>
+					</measuredRange>
+				</measurement>
+			</value>
+			<timing>
+				<!-- measurement range -->
+				<measurement>
+					<measuredRange>
+						<greaterThan inclusive="true">
+							<numericValue>5</numericValue>
+						</greaterThan>
+						<lessThan inclusive="false">
+							<numericValue>25</numericValue>
+						</lessThan>
+					</measuredRange>
+				</measurement>
+			</timing>
 		</assertion>
 	</lego>
 </legoList>

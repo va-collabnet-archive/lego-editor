@@ -42,7 +42,8 @@ public class LegoBDB
     private transient PncsBDB pncsBDBRef;
     private transient StampBDB stampBDBRef;
 
-    private LegoBDB()
+    @SuppressWarnings("unused")
+	private LegoBDB()
     {
         //required by BDB
     }
@@ -54,9 +55,9 @@ public class LegoBDB
         pncsId = pncsBDBRef.getUniqueId();
         stampBDBRef = new StampBDB(lego.getStamp());
         stampId = stampBDBRef.getStampId();
-        assertions = new ArrayList();
-        usedAssertionUUIDs = new HashSet();
-        usedSCTIdentifiers = new HashSet();
+        assertions = new ArrayList<>();
+        usedAssertionUUIDs = new HashSet<>();
+        usedSCTIdentifiers = new HashSet<>();
         for (Assertion a : lego.getAssertion())
         {
             assertions.add(a);
@@ -71,21 +72,17 @@ public class LegoBDB
             indexConcept(a.getQualifier().getConcept());
             if (a.getTiming() != null)
             {
-                for (Measurement m : a.getTiming().getMeasurement())
-                {
-                    if (m.getUnits() != null)
-                    {
-                        indexConcept(m.getUnits().getConcept());
-                    }
-                }
-            }
-            indexConcept(a.getValue().getConcept());
-            for (Measurement m : a.getValue().getMeasurement())
-            {
-                if (m.getUnits() != null)
+                Measurement m = a.getTiming().getMeasurement();
+                if (m != null && m.getUnits() != null)
                 {
                     indexConcept(m.getUnits().getConcept());
                 }
+            }
+            indexConcept(a.getValue().getConcept());
+            Measurement m = a.getValue().getMeasurement();
+            if (m != null && m.getUnits() != null)
+            {
+                indexConcept(m.getUnits().getConcept());
             }
         }
 
@@ -140,7 +137,7 @@ public class LegoBDB
     {
         if (assertions == null)
         {
-            assertions = new ArrayList();
+            assertions = new ArrayList<>();
         }
         assertions.add(assertion);
         checkAndUpdateAssertionList(assertion);
@@ -154,21 +151,18 @@ public class LegoBDB
         indexConcept(assertion.getQualifier().getConcept());
         if (assertion.getTiming() != null)
         {
-            for (Measurement m : assertion.getTiming().getMeasurement())
-            {
-                if (m.getUnits() != null)
-                {
-                    indexConcept(m.getUnits().getConcept());
-                }
-            }
-        }
-        indexConcept(assertion.getValue().getConcept());
-        for (Measurement m : assertion.getValue().getMeasurement())
-        {
-            if (m.getUnits() != null)
+            Measurement m = assertion.getTiming().getMeasurement();
+            if (m != null && m.getUnits() != null)
             {
                 indexConcept(m.getUnits().getConcept());
             }
+            
+        }
+        indexConcept(assertion.getValue().getConcept());
+        Measurement m = assertion.getValue().getMeasurement();
+        if (m != null && m.getUnits() != null)
+        {
+            indexConcept(m.getUnits().getConcept());
         }
     }
 
@@ -177,7 +171,7 @@ public class LegoBDB
      */
     public List<Assertion> getAssertions()
     {
-        ArrayList<Assertion> result = new ArrayList();
+        ArrayList<Assertion> result = new ArrayList<>();
         if (assertions == null)
         {
             return result;
