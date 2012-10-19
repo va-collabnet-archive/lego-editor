@@ -1,6 +1,8 @@
 package gov.va.legoEdit;
 
+import gov.va.legoEdit.search.PNCS.PncsSearchModel;
 import gov.va.legoEdit.guiUtil.AlphanumComparator;
+import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
@@ -49,6 +51,11 @@ public class LegoGUIModel
         return BDBDataStoreImpl.getInstance().getLegoListByName(legoName);
     }
 
+    public Lego getLego(String legoName)
+    {
+        return PncsSearchModel.getInstance().getSearchResultLego(legoName);
+    }
+
     public ObservableList<String> getLegoListNames()
     {
         if (legoNames_ == null)
@@ -81,5 +88,14 @@ public class LegoGUIModel
         }
         BDBDataStoreImpl.getInstance().deleteLegoList(ll.getLegoListUUID());
         legoNames_.remove(legoName);
+    }
+
+    public void replaceLegoList(ObservableList<String> replacements) throws WriteException
+    {
+        legoNames_.clear();
+        for (String s : replacements) {
+            legoNames_.add(s);
+        }
+        FXCollections.sort(legoNames_, new AlphanumComparator(true));
     }
 }

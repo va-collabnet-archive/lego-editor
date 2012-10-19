@@ -1,5 +1,7 @@
 package gov.va.legoEdit;
 
+import gov.va.legoEdit.search.PNCS.PncsSearchDialogController;
+import java.util.List;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,7 +18,9 @@ public class LegoGUI extends Application
     private static Logger logger = LoggerFactory.getLogger(LegoGUI.class);
     private static Stage mainStage_;
     private static Stage errorDialogStage_;
+    private static Stage pncsSearchDialogStage_;
     private static ErrorDialogController edc_;
+    private static PncsSearchDialogController psc_;
 
     public static void main(String[] args)
     {
@@ -43,7 +47,15 @@ public class LegoGUI extends Application
         
         Parent errorDialog = FXMLLoader.load(getClass().getResource("ErrorDialog.fxml"));
         errorDialogStage_.setScene(new Scene(errorDialog));
-    }
+
+        pncsSearchDialogStage_ = new Stage();
+        pncsSearchDialogStage_.initModality(Modality.WINDOW_MODAL);
+        pncsSearchDialogStage_.initOwner(mainStage_);
+        pncsSearchDialogStage_.initStyle(StageStyle.UTILITY);
+        
+        Parent pncsSearchDialog = FXMLLoader.load(getClass().getResource("/gov/va/legoEdit/search/PNCS/PNCSSearchDialog.fxml"));
+        pncsSearchDialogStage_.setScene(new Scene(pncsSearchDialog));
+}
 
     public static Stage getMainStage()
     {
@@ -55,9 +67,19 @@ public class LegoGUI extends Application
         return errorDialogStage_;
     }
     
+    public static Stage getPNCSSearchDialogStage()
+    {
+        return pncsSearchDialogStage_;
+    }
+    
     protected static void setErrorDialogController(ErrorDialogController edc)
     {
         edc_ = edc;
+    }
+    
+    public static void setPNCSSearchDialogController(PncsSearchDialogController edc)
+    {
+        psc_ = edc;
     }
     
     public static void showErrorDialog(String title, String errorMessage, String detailedErrorMessage)
@@ -65,5 +87,12 @@ public class LegoGUI extends Application
         edc_.setVariables(errorMessage, detailedErrorMessage);
         errorDialogStage_.setTitle(title);
         errorDialogStage_.showAndWait();
+    }
+
+    public static boolean showPNCSSearchDialog(List<String> pncsIdList) 
+    {
+        psc_.setVariables(pncsIdList);
+        pncsSearchDialogStage_.showAndWait();
+        return psc_.isDisplaying();
     }
 }

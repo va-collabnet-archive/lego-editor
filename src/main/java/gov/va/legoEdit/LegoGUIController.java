@@ -1,5 +1,6 @@
 package gov.va.legoEdit;
 
+import gov.va.legoEdit.search.PNCS.PncsSearchModel;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.guiUtil.ContextMenuListCell;
 import gov.va.legoEdit.model.schemaModel.Assertion;
@@ -12,6 +13,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -96,6 +98,10 @@ public class LegoGUIController implements Initializable
     private Menu menuView; // Value injected by FXMLLoader
     @FXML //  fx:id="menuViewShowALL"
     private CheckMenuItem menuViewShowAllLL; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuSearchLegos"
+    private Menu menuSearchLegos; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuSearchByPNCS"
+    private MenuItem menuSearchByPNCS; // Value injected by FXMLLoader
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources)
@@ -111,6 +117,8 @@ public class LegoGUIController implements Initializable
         assert menuFile != null : "fx:id=\"menuFile\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileExit != null : "fx:id=\"menuFileExit\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileImport != null : "fx:id=\"menuFileImport\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert menuSearchLegos != null : "fx:id=\"menuSearchLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert menuSearchByPNCS != null : "fx:id=\"menuSearchByPNCS\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitLeft != null : "fx:id=\"splitLeft\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitPane != null : "fx:id=\"splitPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitRight != null : "fx:id=\"splitRight\" was not injected: check your FXML file 'LegoGUI.fxml'.";
@@ -219,12 +227,21 @@ public class LegoGUIController implements Initializable
             @Override
             public void handle(ActionEvent event)
             {
+                if (PncsSearchModel.getInstance().isDisplaying()) {
+                    try {
+                        LegoGUIModel.getInstance().replaceLegoList(PncsSearchModel.getInstance().getImportedLegos());
+                    } catch (WriteException ex) {
+                        java.util.logging.Logger.getLogger(LegoGUIController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    PncsSearchModel.getInstance().setDisplaying(false);
+                }
                 if (menuViewShowAllLL.isSelected())
                 {
                     if (!splitPane.getItems().contains(splitLeft))
                     {
                         splitPane.getItems().add(0, splitLeft);
                     }
+                    
                 }
                 else
                 {
@@ -233,6 +250,21 @@ public class LegoGUIController implements Initializable
             }
         });
         
+        menuSearchByPNCS.setGraphic(new ImageView(new Image(LegoGUI.class.getResourceAsStream("/fugue/16x16/icons/cross.png"))));
+        menuSearchByPNCS.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+        menuSearchByPNCS.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent t)
+            {                    
+                LegoGUI.showPNCSSearchDialog(PncsSearchModel.getInstance().getPncsIdComboList());
+                
+                if (PncsSearchModel.getInstance().isDisplaying()) {
+                    menuViewShowAllLL.setSelected(false);
+                }
+            }
+        });
+
         //Floating Context menus
         
         menuDeleteLego = new MenuItem("Delete Lego");
@@ -280,7 +312,14 @@ public class LegoGUIController implements Initializable
         }
         else
         {
-            currentLegoList = LegoGUIModel.getInstance().getLegoList(newLego);
+            if (newLego.contains("PNCS:") && newLego.contains("Val:")) {
+                Lego l = LegoGUIModel.getInstance().getLego(newLego);
+                currentLegoList = new LegoList();
+                currentLegoList.getLego().add(l);
+            } else {
+                currentLegoList = LegoGUIModel.getInstance().getLegoList(newLego);
+            }
+            
             if (currentLegoList == null)
             {
                 LegoGUI.showErrorDialog("Error Reading LegoList", "Unexpected error reading LegoList from storage", "The LegoList for '" + newLego + "' could not be found");
