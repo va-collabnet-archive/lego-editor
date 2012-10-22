@@ -53,7 +53,7 @@ public class LegoGUI extends Application
         pncsSearchDialogStage_.initOwner(mainStage_);
         pncsSearchDialogStage_.initStyle(StageStyle.UTILITY);
         
-        Parent pncsSearchDialog = FXMLLoader.load(getClass().getResource("/gov/va/legoEdit/search/PNCS/PNCSSearchDialog.fxml"));
+        Parent pncsSearchDialog = FXMLLoader.load(getClass().getResource("/gov/va/legoEdit/search/PNCS/PncsSearchDialog.fxml"));
         pncsSearchDialogStage_.setScene(new Scene(pncsSearchDialog));
 }
 
