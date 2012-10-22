@@ -8,12 +8,12 @@
 
 package gov.va.legoEdit.model.schemaModel;
 
-import com.sleepycat.persist.model.Persistent;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+
+import com.sleepycat.persist.model.Persistent;
 
 
 /**
@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="assertionUUID" type="{}UUID"/>
- *         &lt;element name="typeConcept" type="{}concept"/>
+ *         &lt;element name="greaterThan" type="{}bound" minOccurs="0"/>
+ *         &lt;element name="lessThan" type="{}bound" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -38,64 +38,62 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "assertionUUID",
-    "typeConcept"
+    "greaterThan",
+    "lessThan"
 })
-@XmlRootElement(name = "assertionComponent")
+@XmlRootElement(name = "interval")
 @Persistent
-public class AssertionComponent {
+public class Interval {
 
-    @XmlElement(required = true)
-    protected String assertionUUID;
-    @XmlElement(required = true)
-    protected Concept typeConcept;
+    protected Bound greaterThan;
+    protected Bound lessThan;
 
     /**
-     * Gets the value of the assertionUUID property.
+     * Gets the value of the greaterThan property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link Bound }
      *     
      */
-    public String getAssertionUUID() {
-        return assertionUUID;
+    public Bound getGreaterThan() {
+        return greaterThan;
     }
 
     /**
-     * Sets the value of the assertionUUID property.
+     * Sets the value of the greaterThan property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link Bound }
      *     
      */
-    public void setAssertionUUID(String value) {
-        this.assertionUUID = value;
+    public void setGreaterThan(Bound value) {
+        this.greaterThan = value;
     }
 
     /**
-     * Gets the value of the typeConcept property.
+     * Gets the value of the lessThan property.
      * 
      * @return
      *     possible object is
-     *     {@link Concept }
+     *     {@link Bound }
      *     
      */
-    public Concept getTypeConcept() {
-        return typeConcept;
+    public Bound getLessThan() {
+        return lessThan;
     }
 
     /**
-     * Sets the value of the typeConcept property.
+     * Sets the value of the lessThan property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Concept }
+     *     {@link Bound }
      *     
      */
-    public void setTypeConcept(Concept value) {
-        this.typeConcept = value;
+    public void setLessThan(Bound value) {
+        this.lessThan = value;
     }
 
 }

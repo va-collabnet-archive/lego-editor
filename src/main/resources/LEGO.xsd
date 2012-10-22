@@ -149,35 +149,35 @@
 			<xs:sequence>
 				<xs:element ref="units" minOccurs="0" maxOccurs="1" />
 				<xs:choice>
-					<xs:element name="stringValue" type="measurementString" />
-					<xs:element name="numericValue" type="xs:float" />
-					<xs:element ref="measuredRange" />
+					<xs:element name="stringPoint" type="measurementString" />
+					<xs:element name="numericPoint" type="xs:float" />
+					<xs:element ref="interval" />
 				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 
-	<xs:complexType name="rangeComponent">
+	<xs:complexType name="bound">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element name="numericValue" type="xs:float" />
-				<xs:element name="stringValue" type="measurementString" />
-				<xs:element ref="relaxedRangeBound" />
+				<xs:element name="numericPoint" type="xs:float" />
+				<xs:element name="stringPoint" type="measurementString" />
+				<xs:element ref="pointPair" />
 			</xs:choice>
 		</xs:sequence>
 		<xs:attribute name="inclusive" type="xs:boolean" />
 	</xs:complexType>
 
-	<xs:element name="measuredRange">
+	<xs:element name="interval">
 		<xs:complexType>
 			<xs:sequence> <!-- I'd like to define that at least one of these must exist, but when you do that the really cryptic way that xml schema requires, it makes the generated jaxb really ugly. -->
-				<xs:element name="greaterThan" type="rangeComponent" minOccurs="0" />
-				<xs:element name="lessThan" type="rangeComponent" minOccurs="0" />
+				<xs:element name="greaterThan" type="bound" minOccurs="0" />
+				<xs:element name="lessThan" type="bound" minOccurs="0" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 
-	<xs:element name="relaxedRangeBound">
+	<xs:element name="pointPair">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="greaterThan" type="xs:float" />

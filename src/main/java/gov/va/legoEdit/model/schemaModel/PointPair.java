@@ -8,12 +8,12 @@
 
 package gov.va.legoEdit.model.schemaModel;
 
-import com.sleepycat.persist.model.Persistent;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+
+import com.sleepycat.persist.model.Persistent;
 
 
 /**
@@ -26,7 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{}conceptAndRel"/>
+ *         &lt;element name="greaterThan" type="{http://www.w3.org/2001/XMLSchema}float"/>
+ *         &lt;element name="lessThan" type="{http://www.w3.org/2001/XMLSchema}float"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -37,37 +38,46 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "conceptAndRel"
+    "greaterThan",
+    "lessThan"
 })
-@XmlRootElement(name = "discernible")
+@XmlRootElement(name = "pointPair")
 @Persistent
-public class Discernible {
+public class PointPair {
 
-    @XmlElement(required = true)
-    protected ConceptAndRel conceptAndRel;
+    protected float greaterThan;
+    protected float lessThan;
 
     /**
-     * Gets the value of the conceptAndRel property.
+     * Gets the value of the greaterThan property.
      * 
-     * @return
-     *     possible object is
-     *     {@link ConceptAndRel }
-     *     
      */
-    public ConceptAndRel getConceptAndRel() {
-        return conceptAndRel;
+    public float getGreaterThan() {
+        return greaterThan;
     }
 
     /**
-     * Sets the value of the conceptAndRel property.
+     * Sets the value of the greaterThan property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link ConceptAndRel }
-     *     
      */
-    public void setConceptAndRel(ConceptAndRel value) {
-        this.conceptAndRel = value;
+    public void setGreaterThan(float value) {
+        this.greaterThan = value;
+    }
+
+    /**
+     * Gets the value of the lessThan property.
+     * 
+     */
+    public float getLessThan() {
+        return lessThan;
+    }
+
+    /**
+     * Sets the value of the lessThan property.
+     * 
+     */
+    public void setLessThan(float value) {
+        this.lessThan = value;
     }
 
 }

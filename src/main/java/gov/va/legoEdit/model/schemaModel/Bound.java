@@ -8,30 +8,31 @@
 
 package gov.va.legoEdit.model.schemaModel;
 
-import com.sleepycat.persist.model.Persistent;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+
+import com.sleepycat.persist.model.Persistent;
 
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>Java class for bound complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType>
+ * &lt;complexType name="bound">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{}units" minOccurs="0"/>
  *         &lt;choice>
- *           &lt;element name="stringPoint" type="{}measurementString"/>
  *           &lt;element name="numericPoint" type="{http://www.w3.org/2001/XMLSchema}float"/>
- *           &lt;element ref="{}interval"/>
+ *           &lt;element name="stringPoint" type="{}measurementString"/>
+ *           &lt;element ref="{}pointPair"/>
  *         &lt;/choice>
  *       &lt;/sequence>
+ *       &lt;attribute name="inclusive" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -40,43 +41,42 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "units",
-    "stringPoint",
+@XmlType(name = "bound", propOrder = {
     "numericPoint",
-    "interval"
+    "stringPoint",
+    "pointPair"
 })
-@XmlRootElement(name = "measurement")
 @Persistent
-public class Measurement {
+public class Bound {
 
-    protected Units units;
-    protected MeasurementString stringPoint;
     protected Float numericPoint;
-    protected Interval interval;
+    protected MeasurementString stringPoint;
+    protected PointPair pointPair;
+    @XmlAttribute(name = "inclusive")
+    protected Boolean inclusive;
 
     /**
-     * Gets the value of the units property.
+     * Gets the value of the numericPoint property.
      * 
      * @return
      *     possible object is
-     *     {@link Units }
+     *     {@link Float }
      *     
      */
-    public Units getUnits() {
-        return units;
+    public Float getNumericPoint() {
+        return numericPoint;
     }
 
     /**
-     * Sets the value of the units property.
+     * Sets the value of the numericPoint property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Units }
+     *     {@link Float }
      *     
      */
-    public void setUnits(Units value) {
-        this.units = value;
+    public void setNumericPoint(Float value) {
+        this.numericPoint = value;
     }
 
     /**
@@ -104,51 +104,51 @@ public class Measurement {
     }
 
     /**
-     * Gets the value of the numericPoint property.
+     * Gets the value of the pointPair property.
      * 
      * @return
      *     possible object is
-     *     {@link Float }
+     *     {@link PointPair }
      *     
      */
-    public Float getNumericPoint() {
-        return numericPoint;
+    public PointPair getPointPair() {
+        return pointPair;
     }
 
     /**
-     * Sets the value of the numericPoint property.
+     * Sets the value of the pointPair property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Float }
+     *     {@link PointPair }
      *     
      */
-    public void setNumericPoint(Float value) {
-        this.numericPoint = value;
+    public void setPointPair(PointPair value) {
+        this.pointPair = value;
     }
 
     /**
-     * Gets the value of the interval property.
+     * Gets the value of the inclusive property.
      * 
      * @return
      *     possible object is
-     *     {@link Interval }
+     *     {@link Boolean }
      *     
      */
-    public Interval getInterval() {
-        return interval;
+    public Boolean isInclusive() {
+        return inclusive;
     }
 
     /**
-     * Sets the value of the interval property.
+     * Sets the value of the inclusive property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Interval }
+     *     {@link Boolean }
      *     
      */
-    public void setInterval(Interval value) {
-        this.interval = value;
+    public void setInclusive(Boolean value) {
+        this.inclusive = value;
     }
 
 }
