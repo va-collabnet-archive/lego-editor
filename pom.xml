@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
-            <artifactId>javafx</artifactId>
+            <artifactId>jfxrt</artifactId>
             <version>${javafx.version}</version>
             <scope>compile</scope>
         </dependency>
