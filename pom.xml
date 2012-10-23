@@ -10,6 +10,12 @@
     <name>lego-editor</name>
     <url>http://maven.apache.org</url>
 
+    <scm>
+      <connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/lego-editor/trunk/lego-editor</connection>
+      <developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/lego-editor/trunk/lego-editor</developerConnection>
+      <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/trunk/lego-editor/?root=lego-editor&amp;system=exsy1002</url>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javafx.version>2.2</javafx.version>
