@@ -1,10 +1,7 @@
 package gov.va.legoEdit.model.bdbModel;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.Relationship;
-import com.sleepycat.persist.model.SecondaryKey;
 import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Measurement;
@@ -12,10 +9,16 @@ import gov.va.legoEdit.model.schemaModel.Rel;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
+import com.sleepycat.persist.model.Relationship;
+import com.sleepycat.persist.model.SecondaryKey;
 
 /**
  * This class handles the storage of the LEGO object into the BerkeleyDB.
@@ -35,8 +38,12 @@ public class LegoBDB
     protected List<Assertion> assertions;
     @SecondaryKey(relate = Relationship.MANY_TO_MANY)
     protected Set<String> usedSCTIdentifiers;
+    //This is the list of assertions defined within this lego.  
     @SecondaryKey(relate = Relationship.MANY_TO_MANY)
     protected Set<String> usedAssertionUUIDs;
+    //This is the list of assertions linked to by this lego in the form of composite assertions.
+    @SecondaryKey(relate = Relationship.MANY_TO_MANY)
+    protected Set<String> compositeAssertionUUIDs;
     
     //not stored
     private transient PncsBDB pncsBDBRef;
@@ -57,6 +64,7 @@ public class LegoBDB
         stampId = stampBDBRef.getStampId();
         assertions = new ArrayList<>();
         usedAssertionUUIDs = new HashSet<>();
+        compositeAssertionUUIDs = new HashSet<>();
         usedSCTIdentifiers = new HashSet<>();
         for (Assertion a : lego.getAssertion())
         {
@@ -83,6 +91,14 @@ public class LegoBDB
             if (m != null && m.getUnits() != null)
             {
                 indexConcept(m.getUnits().getConcept());
+            }
+            
+            if (a.getAssertionComponents() != null)
+            {
+	            for (AssertionComponent ac : a.getAssertionComponents().getAssertionComponent())
+	            {
+	            	compositeAssertionUUIDs.add(ac.getAssertionUUID());
+	            }
             }
         }
 
@@ -141,6 +157,11 @@ public class LegoBDB
         }
         assertions.add(assertion);
         checkAndUpdateAssertionList(assertion);
+        
+        for (AssertionComponent ac : assertion.getAssertionComponents().getAssertionComponent())
+        {
+        	compositeAssertionUUIDs.add(ac.getAssertionUUID());
+        }
         
         indexConcept(assertion.getDiscernible().getConceptAndRel());
         for (Rel r : assertion.getDiscernible().getConceptAndRel().getRel())

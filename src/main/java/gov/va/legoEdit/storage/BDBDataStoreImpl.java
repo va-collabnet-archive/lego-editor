@@ -57,6 +57,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
     private SecondaryIndex<String, String, LegoBDB> legoByPncsId;
     private SecondaryIndex<String, String, LegoBDB> legoByContainingAssertionUUID;
     private SecondaryIndex<String, String, LegoBDB> legoBySctIdentifiers;
+    private SecondaryIndex<String, String, LegoBDB> legoByUsingAssertionUUID;
     //Stamp accessors
     private PrimaryIndex<String, StampBDB> stampByUniqueId;
     //pncs accessors
@@ -113,6 +114,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
             legoByUUID = store.getSecondaryIndex(legoByUniqueId, String.class, "legoUUID");
             legoByPncsId = store.getSecondaryIndex(legoByUniqueId, String.class, "pncsId");
             legoByContainingAssertionUUID = store.getSecondaryIndex(legoByUniqueId, String.class, "usedAssertionUUIDs");
+            legoByUsingAssertionUUID = store.getSecondaryIndex(legoByUniqueId, String.class, "compositeAssertionUUIDs");
             legoBySctIdentifiers = store.getSecondaryIndex(legoByUniqueId, String.class, "usedSCTIdentifiers");
 
             stampByUniqueId = store.getPrimaryIndex(String.class, StampBDB.class);
@@ -303,16 +305,50 @@ public class BDBDataStoreImpl implements DataStoreInterface
     @Override
     public List<Lego> getLegosUsingAssertion(String assertionUUID)
     {
-        //TODO implement - need the new schema first
+    	EntityCursor<LegoBDB> ec = null;
         try
         {
+        	HashMap<String, LegoBDB> uniqueLegos = new HashMap<>();
             
+            EntityIndex<String, LegoBDB> ei = legoByUsingAssertionUUID.subIndex(assertionUUID);
+            ec = ei.entities();
+
+            for (LegoBDB current = ec.first(); current != null; current = ec.nextNoDup())
+            {
+            	 while (current != null)
+                 {
+                     uniqueLegos.put(current.getUniqueId(), current);
+                     current = ec.nextDup();
+                 }
+            }
+            
+            ArrayList<Lego> result = new ArrayList<>();
+            for (LegoBDB lego : uniqueLegos.values())
+            {
+                result.add(lego.toSchemaLego());
+            }
+
+            return result;
         }
-        catch (Exception e)
+        catch (DatabaseException e)
         {
-            //return null;
+            logger.error("Unexpected error reading data", e);
+            throw new DataStoreException("Data read failure", e);
         }
-        throw new UnsupportedOperationException("Not supported yet.");
+        finally
+        {
+            if (ec != null)
+            {
+                try
+                {
+                    ec.close();
+                }
+                catch (DatabaseException e)
+                {
+                    logger.error("Unexpected error closing cursor", e);
+                }
+            }
+        }
     }
     
     

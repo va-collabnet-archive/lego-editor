@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import gov.va.legoEdit.model.bdbModel.PncsBDB;
 import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.AssertionComponent;
+import gov.va.legoEdit.model.schemaModel.AssertionComponents;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.ConceptAndRel;
 import gov.va.legoEdit.model.schemaModel.Discernible;
@@ -225,6 +227,104 @@ public class BDBDataStoreTest
 
         assertEquals("Didn't find lego",
                 BDBDataStoreImpl.getInstance().getLegosContainingConcept(99).get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+    }
+    
+    @Test
+    public void testLegoSearchByUsingAssertion() throws WriteException
+    {
+        Lego l1 = new Lego();
+        l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        l1.setPncs(makeRandomPncs());
+
+        Assertion a = createAssertion();
+        String knownAssertionId = a.getAssertionUUID();
+        AssertionComponents ac = new AssertionComponents();
+        a.setAssertionComponents(ac);
+        ac.getAssertionComponent().add(makeAssertionComponent("fred"));
+        ac.getAssertionComponent().add(makeAssertionComponent("jane"));
+        ac.getAssertionComponent().add(makeAssertionComponent("mary"));
+
+        l1.getAssertion().add(a);
+        
+        BDBDataStoreImpl.getInstance().commitLego(l1, BDBDataStoreImpl.getInstance().createLegoList("a", "a description").getLegoListUUID());
+        
+        Lego l2 = new Lego();
+        l2.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
+        l2.setPncs(makeRandomPncs());
+
+        a = createAssertion();
+        ac = new AssertionComponents();
+        a.setAssertionComponents(ac);
+        ac.getAssertionComponent().add(makeAssertionComponent("fred"));
+        ac.getAssertionComponent().add(makeAssertionComponent("joy"));
+        ac.getAssertionComponent().add(makeAssertionComponent("james"));
+
+        l2.getAssertion().add(a);
+        
+        BDBDataStoreImpl.getInstance().commitLego(l2, BDBDataStoreImpl.getInstance().createLegoList("b", "b description").getLegoListUUID());
+        BDBDataStoreImpl.getInstance().createLegoList("c", "c description");
+        
+        assertEquals("Didn't find lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("jane").get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        assertEquals("Didn't find lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("james").get(0).getLegoUUID(), UUID.nameUUIDFromBytes("bar".getBytes()).toString());
+        assertEquals("Didn't find right number of legos",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("fred").size(), 2);
+        assertEquals("Shouldn't have found a lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("foo").size(), 0);
+        assertEquals("Shouldn't have found a lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion(knownAssertionId).size(), 0);
+        
+        //recommit a lego (new stamp)
+        BDBDataStoreImpl.getInstance().commitLego(l2, BDBDataStoreImpl.getInstance().getLegoListByName("b").getLegoListUUID());
+        assertEquals("Didn't find lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("jane").get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        assertEquals("Didn't find lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("james").get(0).getLegoUUID(), UUID.nameUUIDFromBytes("bar".getBytes()).toString());
+        assertEquals("Didn't find lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("james").get(1).getLegoUUID(), UUID.nameUUIDFromBytes("bar".getBytes()).toString());
+        assertEquals("Didn't find right number of legos",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("fred").size(), 3);
+        assertEquals("Shouldn't have found a lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion("foo").size(), 0);
+        assertEquals("Shouldn't have found a lego",
+                BDBDataStoreImpl.getInstance().getLegosUsingAssertion(knownAssertionId).size(), 0);
+
+    }
+    
+    private AssertionComponent makeAssertionComponent(String assertionUUID)
+    {
+    	 AssertionComponent ac = new AssertionComponent();
+         ac.setAssertionUUID(assertionUUID);
+         return ac;
+    }
+    
+    private Assertion createAssertion()
+    {
+    	 Assertion a = new Assertion();
+         a.setAssertionUUID(UUID.randomUUID().toString());
+
+         Discernible d = new Discernible();
+         ConceptAndRel c = new ConceptAndRel();
+         c.setDesc("foo");
+         c.setSctid(5l);
+         d.setConceptAndRel(c);
+         a.setDiscernible(d);
+
+         Value v = new Value();
+         Concept c1 = new Concept();
+         c1.setDesc("bar");
+         c1.setUuid(UUID.randomUUID().toString());
+         v.setConcept(c1);
+         a.setValue(v);
+
+         Qualifier q = new Qualifier();
+         Concept c2 = new Concept();
+         c2.setDesc("me");
+         c2.setSctid(99l);
+         q.setConcept(c2);
+         a.setQualifier(q);
+         return a;
     }
 
     @Test
