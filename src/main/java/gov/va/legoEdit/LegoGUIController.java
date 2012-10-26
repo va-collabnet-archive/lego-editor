@@ -220,7 +220,7 @@ public class LegoGUIController implements Initializable
         });
         
         menuViewShowAllLL.setSelected(true);
-        //Note this doesn't work:  http://javafx-jira.kenai.com/browse/RT-21192
+        //TODO Note this doesn't work:  http://javafx-jira.kenai.com/browse/RT-21192
         //menuViewShowAllLL.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN));
         menuViewShowAllLL.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -288,7 +288,7 @@ public class LegoGUIController implements Initializable
             }
         });
         
-        //This doesn't work either http://javafx-jira.kenai.com/browse/RT-24518
+        //TODO note: this doesn't work either http://javafx-jira.kenai.com/browse/RT-24518
         //menuHideLL.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN));
         menuHideLL.setOnAction(new EventHandler<ActionEvent>()
         {
