@@ -3,6 +3,7 @@ package gov.va.legoEdit.model.bdbModel;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Concept;
+import gov.va.legoEdit.model.schemaModel.ConceptAndRel;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Rel;
@@ -71,11 +72,20 @@ public class LegoBDB
             assertions.add(a);
             checkAndUpdateAssertionList(a);
             
-            indexConcept(a.getDiscernible().getConceptAndRel());
-            for (Rel r : a.getDiscernible().getConceptAndRel().getRel())
+            //Keith requested this schema change, which results in this ugly API... sigh.
+            Concept discernibleConcept = a.getDiscernible().getConcept();
+            if (discernibleConcept == null)
             {
-                indexConcept(r.getConcept());
-                indexConcept(r.getTypeConcept());
+            	discernibleConcept = a.getDiscernible().getConceptAndRel();
+            }
+            indexConcept(discernibleConcept);
+            if (discernibleConcept instanceof ConceptAndRel)
+            {
+	            for (Rel r : ((ConceptAndRel)discernibleConcept).getRel())
+	            {
+	                indexConcept(r.getConcept());
+	                indexConcept(r.getTypeConcept());
+	            }
             }
             indexConcept(a.getQualifier().getConcept());
             if (a.getTiming() != null)
@@ -163,12 +173,21 @@ public class LegoBDB
         	compositeAssertionUUIDs.add(ac.getAssertionUUID());
         }
         
-        indexConcept(assertion.getDiscernible().getConceptAndRel());
-        for (Rel r : assertion.getDiscernible().getConceptAndRel().getRel())
+        Concept discernibleConcept = assertion.getDiscernible().getConcept();
+        if (discernibleConcept == null)
         {
-            indexConcept(r.getConcept());
-            indexConcept(r.getTypeConcept());
+        	discernibleConcept = assertion.getDiscernible().getConceptAndRel();
         }
+        indexConcept(discernibleConcept);
+        if (discernibleConcept instanceof ConceptAndRel)
+        {
+            for (Rel r : ((ConceptAndRel)discernibleConcept).getRel())
+            {
+                indexConcept(r.getConcept());
+                indexConcept(r.getTypeConcept());
+            }
+        }
+
         indexConcept(assertion.getQualifier().getConcept());
         if (assertion.getTiming() != null)
         {

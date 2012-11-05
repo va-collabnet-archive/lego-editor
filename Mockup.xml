@@ -12,7 +12,7 @@
 		<assertion>
 			<assertionUUID>8dd4b1c0-0be4-11e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<conceptAndRel sctid="67551009" desc="Abnormal third heart sound, S3"/>
+				<concept sctid="67551009" desc="Abnormal third heart sound, S3"/>
 			</discernible>
 			<qualifier>
 				<concept sctid="5880005" desc="Physical examination procedure" />
@@ -29,7 +29,7 @@
 		<assertion>
 			<assertionUUID>7dd4b1c0-0be2-11e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<conceptAndRel sctid="86484008" desc="Abnormal fourth heart sound, S&gt;4&lt;"/>
+				<concept sctid="86484008" desc="Abnormal fourth heart sound, S&gt;4&lt;"/>
 			</discernible>
 			<qualifier>
 				<concept sctid="5880005" desc="Physical examination procedure" />

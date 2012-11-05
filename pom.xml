@@ -22,6 +22,7 @@
         <!--javafx.version>2.2.3-b05</javafx.version--> <!-- From java 1.7.0_09 -->
         <javafx.version>2.2.4-ea-b13</javafx.version> <!-- From java 1.7.0_10-b13 -->
         <icons.version>1.0-SNAPSHOT</icons.version>
+        <trek.version>3.0.1-SNAPSHOT</trek.version>
         <je.version>5.0.55</je.version>
     </properties>
 
@@ -72,7 +73,17 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
-    </dependency>
+    	</dependency>
+    	<dependency>
+            <groupId>org.ihtsdo.tk</groupId>
+            <artifactId>tk-api-dto</artifactId>
+            <version>${trek.version}</version>
+    	</dependency>
+    	<dependency>
+            <groupId>org.ihtsdo.tk</groupId>
+            <artifactId>tk-bdb</artifactId>
+            <version>${trek.version}</version>
+    	</dependency>
     </dependencies>
     <build>
         <plugins>

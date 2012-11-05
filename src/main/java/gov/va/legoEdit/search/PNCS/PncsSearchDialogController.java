@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.SortedSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -29,7 +27,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.WindowEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class PncsSearchDialogController
@@ -57,6 +56,8 @@ public class PncsSearchDialogController
     private String selectedVal;
     private int selectedPncsId;
     
+    Logger logger = LoggerFactory.getLogger(PncsSearchDialogController.class);
+    
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         assert PNCSIdSelector != null : "fx:id=\"PNCSIdSelector\" was not injected: check your FXML file 'PNCSSearchDialog.fxml'.";
@@ -74,8 +75,8 @@ public class PncsSearchDialogController
             @Override
             public void handle(ActionEvent event)
             {
-                List<String> items = new ArrayList();
-                Map<String, Lego> searchResultMap = new HashMap();
+                List<String> items = new ArrayList<>();
+                Map<String, Lego> searchResultMap = new HashMap<>();
                 
                 List<Lego> legoSearchResultList = BDBDataStoreImpl.getInstance().getLegosForPncs(selectedPncsId, selectedVal);
                 for (Lego l : legoSearchResultList) {
@@ -96,7 +97,7 @@ public class PncsSearchDialogController
                 try {
                     LegoGUIModel.getInstance().replaceLegoList(options);
                 } catch (WriteException ex) {
-                    Logger.getLogger(PncsSearchDialogController.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.error("Unexpected error replacing the lego list", ex);
                 }
                 PncsSearchModel.getInstance().setDisplaying(true);
 

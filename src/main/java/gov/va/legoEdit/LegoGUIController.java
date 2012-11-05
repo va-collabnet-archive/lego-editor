@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -192,8 +191,9 @@ public class LegoGUIController implements Initializable
                             }
                             catch (Exception ex)
                             {
+                            	logger.info("Error loading file " + f.getName(), ex);
                                 errors.append("Error loading file " + f.getName() + ": ");
-                                errors.append(ex.getLocalizedMessage());
+                                errors.append((ex.getLocalizedMessage() == null ? ex.toString() : ex.getLocalizedMessage()));
                                 errors.append(System.getProperty("line.separator"));
                                 errors.append(System.getProperty("line.separator"));
                             }
@@ -231,7 +231,7 @@ public class LegoGUIController implements Initializable
                     try {
                         LegoGUIModel.getInstance().replaceLegoList(PncsSearchModel.getInstance().getImportedLegos());
                     } catch (WriteException ex) {
-                        java.util.logging.Logger.getLogger(LegoGUIController.class.getName()).log(Level.SEVERE, null, ex);
+                    	logger.error("Unexpected error replacing the lego list", ex);
                     }
                     PncsSearchModel.getInstance().setDisplaying(false);
                 }

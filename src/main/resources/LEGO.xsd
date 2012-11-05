@@ -78,7 +78,7 @@
 			<xs:complexContent>
 				<xs:extension base="concept">
 					<xs:sequence>
-						<xs:element ref="rel" minOccurs="0" maxOccurs="unbounded" />
+						<xs:element ref="rel" maxOccurs="unbounded"/>
 					</xs:sequence>
 				</xs:extension>
 			</xs:complexContent>
@@ -88,7 +88,10 @@
 	<xs:element name="discernible">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="conceptAndRel" />
+				<xs:choice>
+					<xs:element ref="conceptAndRel"/>
+					<xs:element name="concept" type="concept" />
+				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -205,4 +208,3 @@
 	</xs:element>
 
 </xs:schema>
-
