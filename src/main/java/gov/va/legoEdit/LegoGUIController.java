@@ -8,14 +8,23 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
+import gov.va.ohi.sim.fx.concept.GetConceptService;
+import gov.va.ohi.sim.fx.taxonomy.Icons;
+import gov.va.ohi.sim.fx.taxonomy.SimTreeCell;
+import gov.va.ohi.sim.fx.taxonomy.SimTreeItem;
+import gov.va.ohi.sim.fx.taxonomy.TaxonomyProgressIndicatorSkin;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.UUID;
+import java.util.logging.Level;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,13 +36,17 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -48,15 +61,42 @@ import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import javafx.scene.control.TreeView;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Effect;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.paint.Color;
+import javafx.util.Callback;
+import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
+import org.ihtsdo.fxmodel.concept.FxConcept;
+import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
+import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
+import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
+import org.ihtsdo.tk.binding.Taxonomies;
+import org.ihtsdo.tk.rest.client.TtkRestClient;
 
 public class LegoGUIController implements Initializable
 {
-    Logger logger = LoggerFactory.getLogger(LegoGUIController.class);
+    private static final DataFormat simDragItem =
+        new DataFormat("SimItem");
+
+	Logger logger = LoggerFactory.getLogger(LegoGUIController.class);
     private LegoList currentLegoList = null;
     private MenuItem menuDeleteLego;
     private HashSet<Tab> tabsRenderedSinceSelect = new HashSet<>();
     //Copypaste from gui tool
     //
+    private GetConceptService         getConceptService = new GetConceptService();
+    
+    @FXML //  fx:id="dragTest"
+    private TextField dragTest; // Value injected by FXMLLoader
+    @FXML //  fx:id="sctTree"
+    private TreeView sctTree; // Value injected by FXMLLoader
     @FXML //  fx:id="editTab"
     private Tab editTab; // Value injected by FXMLLoader
     @FXML //  fx:id="editorGridPane"
@@ -101,11 +141,13 @@ public class LegoGUIController implements Initializable
     private Menu menuSearchLegos; // Value injected by FXMLLoader
     @FXML //  fx:id="menuSearchByPNCS"
     private MenuItem menuSearchByPNCS; // Value injected by FXMLLoader
+    private FxConcept fxc;
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources)
     {
         //Copy paste from gui tool
+        assert dragTest != null : "fx:id=\"dragTest\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert editTab != null : "fx:id=\"editTab\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert editorGridPane != null : "fx:id=\"editorGridPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert legoGroupDescription != null : "fx:id=\"legoGroupDescription\" was not injected: check your FXML file 'LegoGUI.fxml'.";
@@ -162,6 +204,173 @@ public class LegoGUIController implements Initializable
                 }
             }
         });
+
+    
+    
+      sctTree.setCellFactory(new Callback<TreeView<FxTaxonomyReferenceWithConcept>,
+              TreeCell<FxTaxonomyReferenceWithConcept>>() {
+         @Override
+         public TreeCell<FxTaxonomyReferenceWithConcept> call(TreeView<FxTaxonomyReferenceWithConcept> p) {
+            return new SimTreeCell();
+         }
+      });
+      
+      sctTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+      sctTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+         @Override
+         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            if (newValue instanceof SimTreeItem) {
+               SimTreeItem simTreeItem = (SimTreeItem) newValue;
+//
+//               getConceptService.setConceptUuid(simTreeItem.getValue().getConcept().getPrimordialUuid());
+//               getConceptService.restart();
+            }
+         }
+      });
+      sctTree.setOnDragDetected(new EventHandler<MouseEvent>() {
+        public void handle(MouseEvent event) {
+            /* drag was detected, start a drag-and-drop gesture*/
+            /* allow any transfer mode */
+            Dragboard db = sctTree.startDragAndDrop(TransferMode.ANY);
+
+            /* Put a string on a dragboard */
+            SimTreeItem dragItem = (SimTreeItem)sctTree.getSelectionModel().getSelectedItem();
+    
+            ClipboardContent content = new ClipboardContent();
+            content.putString(dragItem.getValue().getConcept().getPrimordialUuid().toString());
+            db.setContent(content);
+
+            event.consume();
+        }
+    });
+      
+      dragTest.setOnDragOver(new EventHandler<DragEvent>() {
+        public void handle(DragEvent event) {
+            /* data is dragged over the target */
+            /* accept it only if it is not dragged from the same node 
+             * and if it has a string data */
+            if (event.getGestureSource() != dragTest &&
+                    event.getDragboard().hasString()) {
+                /* allow for both copying and moving, whatever user chooses */
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+
+            event.consume();
+        }
+    });
+
+      dragTest.setOnDragEntered(new EventHandler<DragEvent>() {
+        public void handle(DragEvent event) {
+        /* the drag-and-drop gesture entered the target */
+        /* show to the user that it is an actual gesture target */
+             if (event.getGestureSource() != dragTest &&
+                     event.getDragboard().hasString()) {
+                  DropShadow ds = new DropShadow();
+                 ds.setColor(Color.GREEN);
+
+                 dragTest.setEffect(ds);
+             }
+
+             event.consume();
+        }
+    });
+
+      dragTest.setOnDragExited(new EventHandler<DragEvent>() {
+        public void handle(DragEvent event) {
+            /* mouse moved away, remove the graphical cues */
+                  DropShadow ds = new DropShadow();
+                 ds.setColor(Color.WHITE);
+
+                 dragTest.setEffect(ds);
+
+            event.consume();
+        }
+    });
+
+      dragTest.setOnDragDropped(new EventHandler<DragEvent>() {
+        public void handle(DragEvent event) {
+            /* data dropped */
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                UUID conId = UUID.fromString(db.getString());
+                FxConcept con;
+                try {
+                    con = TtkRestClient.getRestClient().getFxConcept(conId,
+                              UUID.fromString("d0a05080-b5de-11e1-afa6-0800200c9a66"));
+//                    con = TtkRestClient.getRestClient().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
+//                        conId, VersionPolicy.ACTIVE_VERSIONS,
+//                        RefexPolicy.REFEX_MEMBERS,
+//                        RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS);
+                    dragTest.setText(con.toString());
+                } catch (IOException ex) {
+                    java.util.logging.Logger.getLogger(LegoGUIController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+               success = true;
+            }
+            /* let the source know whether the string was successfully 
+             * transferred and used */
+            event.setDropCompleted(success);
+
+            event.consume();
+         }
+    });
+
+
+      sctTree.setShowRoot(true);
+
+      FxTaxonomyReferenceWithConcept root       = new FxTaxonomyReferenceWithConcept();
+      SimTreeItem                    rootItem   = new SimTreeItem(root);
+      FxTaxonomyReferenceWithConcept snomedRoot = new FxTaxonomyReferenceWithConcept();
+        try {
+            fxc = TtkRestClient.getRestClient().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
+                    UUID.fromString("d0a05080-b5de-11e1-afa6-0800200c9a66"));
+            fxc = TtkRestClient.getRestClient().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
+                    UUID.fromString("d0a05080-b5de-11e1-afa6-0800200c9a66"), VersionPolicy.ACTIVE_VERSIONS,
+                    RefexPolicy.REFEX_MEMBERS,
+                    RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS);
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(LegoGUIController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+      snomedRoot.setConcept(fxc);
+
+      SimTreeItem item = new SimTreeItem(snomedRoot, Icons.ROOT.getImageView());
+
+      rootItem.getChildren().add(item);
+
+      // item.computeGraphic();
+      item.addChildren();
+
+      // put this event handler on the root
+      item.addEventHandler(TreeItem.branchCollapsedEvent(), new EventHandler() {
+         @Override
+         public void handle(Event t) {
+
+            // remove grandchildren
+            SimTreeItem sourceTreeItem = (SimTreeItem) t.getSource();
+
+            sourceTreeItem.removeGrandchildren();
+         }
+      });
+      item.addEventHandler(TreeItem.branchExpandedEvent(), new EventHandler() {
+         @Override
+         public void handle(Event t) {
+
+            // add grandchildren
+            SimTreeItem       sourceTreeItem = (SimTreeItem) t.getSource();
+            ProgressIndicator p2             = new ProgressIndicator();
+
+            p2.setSkin(new TaxonomyProgressIndicatorSkin(p2));
+            p2.setPrefSize(16, 16);
+            p2.setProgress(-1);
+            sourceTreeItem.setProgressIndicator(p2);
+            sourceTreeItem.addChildrenConceptsAndGrandchildrenItems(p2);
+         }
+      });
+      sctTree.setRoot(rootItem);
+
+    
     }
     
     private void setupMenus()
