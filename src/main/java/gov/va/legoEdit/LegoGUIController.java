@@ -1,26 +1,27 @@
 package gov.va.legoEdit;
 
-import gov.va.legoEdit.search.PNCS.PncsSearchModel;
 import gov.va.legoEdit.formats.LegoXMLUtils;
-import gov.va.legoEdit.guiUtil.ContextMenuListCell;
+import gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanel;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
+import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
+import gov.va.legoEdit.gui.util.DropTargetLabel;
+import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
-import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.search.PNCS.PncsSearchModel;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
-import gov.va.legoEdit.storage.WriteException;
-import gov.va.ohi.sim.fx.concept.GetConceptService;
-import gov.va.ohi.sim.fx.taxonomy.Icons;
-import gov.va.ohi.sim.fx.taxonomy.SimTreeCell;
-import gov.va.ohi.sim.fx.taxonomy.SimTreeItem;
-import gov.va.ohi.sim.fx.taxonomy.TaxonomyProgressIndicatorSkin;
+import gov.va.legoEdit.storage.wb.WBDataStore;
+import gov.va.legoEdit.util.TimeConvert;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.UUID;
-import java.util.logging.Level;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -28,91 +29,69 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.CheckMenuItem;
+import javafx.geometry.Side;
+import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
-import javafx.scene.control.TreeCell;
+import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import javafx.scene.control.TreeView;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Effect;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
-import javafx.util.Callback;
+import javafx.stage.FileChooser;
+import javafx.stage.WindowEvent;
 import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
 import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
 import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
+import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.binding.Taxonomies;
-import org.ihtsdo.tk.rest.client.TtkRestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LegoGUIController implements Initializable
 {
-    private static final DataFormat simDragItem =
-        new DataFormat("SimItem");
+    Logger logger = LoggerFactory.getLogger(LegoGUIController.class);
+  
+    private MenuItem menuDeleteLegoList;
+    private SimTreeView sctTree;
+    private LegoTreeView legoListTV;
+    private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
+    private HashMap<String, Tab> displayedLegos = new HashMap<>();
+    private Thread dbConnectThread;
 
-	Logger logger = LoggerFactory.getLogger(LegoGUIController.class);
-    private LegoList currentLegoList = null;
-    private MenuItem menuDeleteLego;
-    private HashSet<Tab> tabsRenderedSinceSelect = new HashSet<>();
-    //Copypaste from gui tool
-    //
-    private GetConceptService         getConceptService = new GetConceptService();
-    
-    @FXML //  fx:id="dragTest"
-    private TextField dragTest; // Value injected by FXMLLoader
-    @FXML //  fx:id="sctTree"
-    private TreeView sctTree; // Value injected by FXMLLoader
-    @FXML //  fx:id="editTab"
-    private Tab editTab; // Value injected by FXMLLoader
-    @FXML //  fx:id="editorGridPane"
-    private GridPane editorGridPane; // Value injected by FXMLLoader
-    @FXML //  fx:id="hideLegoListMenu"
-    private MenuItem menuHideLL; // Value injected by FXMLLoader
-    @FXML //  fx:id="legoAccordion"
-    private Accordion legoAccordion; // Value injected by FXMLLoader
-    @FXML //  fx:id="legoGroupDescription"
-    private TextField legoGroupDescription; // Value injected by FXMLLoader
-    @FXML //  fx:id="legoGroupName"
-    private Label legoGroupName; // Value injected by FXMLLoader
-    @FXML //  fx:id="legoGroupUUID"
-    private Label legoGroupUUID; // Value injected by FXMLLoader
-    @FXML //  fx:id="legoList"
-    private ListView<String> legoList; // Value injected by FXMLLoader
+    // Copypaste from gui tool
+    @FXML //  fx:id="rootPane"
+    private AnchorPane rootPane; // Value injected by FXMLLoader
+    @FXML //  fx:id="editorTabPane"
+    private TabPane editorTabPane; // Value injected by FXMLLoader
+    @FXML //  fx:id="leftButtons"
+    private AnchorPane leftButtons; // Value injected by FXMLLoader
+    @FXML //  fx:id="leftPaneLabel"
+    private Label leftPaneLabel; // Value injected by FXMLLoader
     @FXML //  fx:id="menu"
     private MenuBar menu; // Value injected by FXMLLoader
     @FXML //  fx:id="menuFile"
@@ -121,261 +100,439 @@ public class LegoGUIController implements Initializable
     private MenuItem menuFileExit; // Value injected by FXMLLoader
     @FXML //  fx:id="menuFileImport"
     private MenuItem menuFileImport; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuSearchByPNCS"
+    private MenuItem menuSearchByPNCS; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuSearchLegos"
+    private Menu menuSearchLegos; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuView"
+    private Menu menuView; // Value injected by FXMLLoader
+    @FXML //  fx:id="showAllLegoListBtn"
+    private ToggleButton showAllLegoListBtn; // Value injected by FXMLLoader
+    @FXML //  fx:id="showSearchLegoListBtn"
+    private ToggleButton showSearchLegoListBtn; // Value injected by FXMLLoader
+    @FXML //  fx:id="showSnomedBtn"
+    private ToggleButton showSnomedBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeft"
     private AnchorPane splitLeft; // Value injected by FXMLLoader
+    @FXML //  fx:id="splitLeftAllLegos"
+    private AnchorPane splitLeftAllLegos; // Value injected by FXMLLoader
+    @FXML //  fx:id="splitLeftFilteredLegos"
+    private AnchorPane splitLeftFilteredLegos; // Value injected by FXMLLoader
+    @FXML //  fx:id="splitLeftSct"
+    private AnchorPane splitLeftSct; // Value injected by FXMLLoader
     @FXML //  fx:id="splitPane"
     private SplitPane splitPane; // Value injected by FXMLLoader
     @FXML //  fx:id="splitRight"
     private AnchorPane splitRight; // Value injected by FXMLLoader
-    @FXML //  fx:id="tabPane"
-    private TabPane tabPane; // Value injected by FXMLLoader
-    @FXML //  fx:id="xmlTab"
-    private Tab xmlTab; // Value injected by FXMLLoader
-    @FXML //  fx:id="xmlViewer"
-    private WebView xmlViewer; // Value injected by FXMLLoader
-    @FXML //  fx:id="menuView"
-    private Menu menuView; // Value injected by FXMLLoader
-    @FXML //  fx:id="menuViewShowALL"
-    private CheckMenuItem menuViewShowAllLL; // Value injected by FXMLLoader
-    @FXML //  fx:id="menuSearchLegos"
-    private Menu menuSearchLegos; // Value injected by FXMLLoader
-    @FXML //  fx:id="menuSearchByPNCS"
-    private MenuItem menuSearchByPNCS; // Value injected by FXMLLoader
-    private FxConcept fxc;
 
-    @Override // This method is called by the FXMLLoader when initialization is complete
+    @Override
+    // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources)
     {
-        //Copy paste from gui tool
-        assert dragTest != null : "fx:id=\"dragTest\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert editTab != null : "fx:id=\"editTab\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert editorGridPane != null : "fx:id=\"editorGridPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert legoGroupDescription != null : "fx:id=\"legoGroupDescription\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert legoGroupName != null : "fx:id=\"legoGroupName\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert legoList != null : "fx:id=\"legoList\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert legoAccordion != null : "fx:id=\"legoTree\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        // Copy paste from gui tool
+        assert editorTabPane != null : "fx:id=\"editorTabPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert leftButtons != null : "fx:id=\"leftButtons\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert leftPaneLabel != null : "fx:id=\"leftPaneLabel\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menu != null : "fx:id=\"menu\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFile != null : "fx:id=\"menuFile\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileExit != null : "fx:id=\"menuFileExit\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileImport != null : "fx:id=\"menuFileImport\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert menuSearchLegos != null : "fx:id=\"menuSearchLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuSearchByPNCS != null : "fx:id=\"menuSearchByPNCS\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert menuSearchLegos != null : "fx:id=\"menuSearchLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert menuView != null : "fx:id=\"menuView\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert showAllLegoListBtn != null : "fx:id=\"showAllLegoListBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert showSearchLegoListBtn != null : "fx:id=\"showSearchLegoListBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert showSnomedBtn != null : "fx:id=\"showSnomedBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitLeft != null : "fx:id=\"splitLeft\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert splitLeftAllLegos != null : "fx:id=\"splitLeftAllLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert splitLeftFilteredLegos != null : "fx:id=\"splitLeftFilteredLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert splitLeftSct != null : "fx:id=\"splitLeftSct\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitPane != null : "fx:id=\"splitPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitRight != null : "fx:id=\"splitRight\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert tabPane != null : "fx:id=\"tabPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert xmlTab != null : "fx:id=\"xmlTab\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+
 
         // initialize your logic here: all @FXML variables will have been injected
-        legoList.setItems(LegoGUIModel.getInstance().getLegoListNames());
-        xmlViewer.setContextMenuEnabled(false);
+
+       
+
+        // legoList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
+        // {
+        // @Override
+        // public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue)
+        // {
+        // changeSelectedLego(newValue);
+        // }
+        // });
+        //
+        // filteredLegoList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
+        // {
+        // @Override
+        // public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue)
+        // {
+        // changeSelectedLego(newValue);
+        // }
+        // });
+
+
+    }
+    
+    /**
+     * Some of our init code needs the scene, etc, to be set up.
+     */
+    protected void finishInit()
+    {
+        legoListTV = new LegoTreeView();
+        splitLeftAllLegos.getChildren().add(legoListTV.wrapInScrollPane());
+
+        LegoGUIModel.getInstance().initializeLegoListNames(legoListTV.getRoot().getChildren());
+
+        // filteredLegoList.setItems(LegoGUIModel.getInstance().getLegoListNames());
 
         setupMenus();
+        setupSctTree(); // This kicks off a thread that opens the DB connection
         
-        legoList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue)
-            {
-                changeSelectedLego(newValue);
-            }
-        });
-
-        LegoGUI.getMainStage().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>()
+        rootPane.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>()
         {
             @Override
             public void handle(WindowEvent event)
             {
-                BDBDataStoreImpl.getInstance().shutdown();
+                shutdown();
             }
         });
-    
-        legoList.setCellFactory(ContextMenuListCell.<String>forListView(new ContextMenu(menuDeleteLego)));
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>()
+        // legoList.setCellFactory(ContextMenuListCell.<String>forListView(new ContextMenu(menuDeleteLego)));
+        // filteredLegoList.setCellFactory(ContextMenuListCell.<String>forListView(new ContextMenu(menuDeleteLego)));
+
+        //huh, the FXGui editor is broken - I have to set this policy manually.
+        editorTabPane.setTabClosingPolicy(TabClosingPolicy.SELECTED_TAB);
+        editorTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>()
         {
             @Override
             public void changed(ObservableValue<? extends Tab> tab, Tab oldTab, Tab newTab)
             {
-                if (!tabsRenderedSinceSelect.contains(newTab))
+                //TODO find and highlight lego in tree
+            }
+        });
+
+        final ToggleGroup tg = new ToggleGroup();
+        tg.selectedToggleProperty().addListener(new ChangeListener<Toggle>()
+        {
+            double dividerPosition = 0.3;
+
+            public void changed(ObservableValue<? extends Toggle> ov, Toggle toggle, Toggle new_toggle)
+            {
+                if (new_toggle == null)
                 {
-                    updateEditorTab();
-                    updateXMLTab();
+                    dividerPosition = splitPane.getDividerPositions()[0];
+                    splitPane.getItems().remove(splitLeft);
+                }
+                else if (!splitPane.getItems().contains(splitLeft))
+                {
+                    splitPane.getItems().add(0, splitLeft);
+                    splitPane.setDividerPosition(0, dividerPosition);
                 }
             }
         });
 
-    
-    
-      sctTree.setCellFactory(new Callback<TreeView<FxTaxonomyReferenceWithConcept>,
-              TreeCell<FxTaxonomyReferenceWithConcept>>() {
-         @Override
-         public TreeCell<FxTaxonomyReferenceWithConcept> call(TreeView<FxTaxonomyReferenceWithConcept> p) {
-            return new SimTreeCell();
-         }
-      });
-      
-      sctTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-      sctTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-         @Override
-         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            if (newValue instanceof SimTreeItem) {
-               SimTreeItem simTreeItem = (SimTreeItem) newValue;
-//
-//               getConceptService.setConceptUuid(simTreeItem.getValue().getConcept().getPrimordialUuid());
-//               getConceptService.restart();
-            }
-         }
-      });
-      sctTree.setOnDragDetected(new EventHandler<MouseEvent>() {
-        public void handle(MouseEvent event) {
-            /* drag was detected, start a drag-and-drop gesture*/
-            /* allow any transfer mode */
-            Dragboard db = sctTree.startDragAndDrop(TransferMode.ANY);
-
-            /* Put a string on a dragboard */
-            SimTreeItem dragItem = (SimTreeItem)sctTree.getSelectionModel().getSelectedItem();
-    
-            ClipboardContent content = new ClipboardContent();
-            content.putString(dragItem.getValue().getConcept().getPrimordialUuid().toString());
-            db.setContent(content);
-
-            event.consume();
-        }
-    });
-      
-      dragTest.setOnDragOver(new EventHandler<DragEvent>() {
-        public void handle(DragEvent event) {
-            /* data is dragged over the target */
-            /* accept it only if it is not dragged from the same node 
-             * and if it has a string data */
-            if (event.getGestureSource() != dragTest &&
-                    event.getDragboard().hasString()) {
-                /* allow for both copying and moving, whatever user chooses */
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-            }
-
-            event.consume();
-        }
-    });
-
-      dragTest.setOnDragEntered(new EventHandler<DragEvent>() {
-        public void handle(DragEvent event) {
-        /* the drag-and-drop gesture entered the target */
-        /* show to the user that it is an actual gesture target */
-             if (event.getGestureSource() != dragTest &&
-                     event.getDragboard().hasString()) {
-                  DropShadow ds = new DropShadow();
-                 ds.setColor(Color.GREEN);
-
-                 dragTest.setEffect(ds);
-             }
-
-             event.consume();
-        }
-    });
-
-      dragTest.setOnDragExited(new EventHandler<DragEvent>() {
-        public void handle(DragEvent event) {
-            /* mouse moved away, remove the graphical cues */
-                  DropShadow ds = new DropShadow();
-                 ds.setColor(Color.WHITE);
-
-                 dragTest.setEffect(ds);
-
-            event.consume();
-        }
-    });
-
-      dragTest.setOnDragDropped(new EventHandler<DragEvent>() {
-        public void handle(DragEvent event) {
-            /* data dropped */
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasString()) {
-                UUID conId = UUID.fromString(db.getString());
-                FxConcept con;
-                try {
-                    con = TtkRestClient.getRestClient().getFxConcept(conId,
-                              UUID.fromString("d0a05080-b5de-11e1-afa6-0800200c9a66"));
-//                    con = TtkRestClient.getRestClient().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
-//                        conId, VersionPolicy.ACTIVE_VERSIONS,
-//                        RefexPolicy.REFEX_MEMBERS,
-//                        RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS);
-                    dragTest.setText(con.toString());
-                } catch (IOException ex) {
-                    java.util.logging.Logger.getLogger(LegoGUIController.class.getName()).log(Level.SEVERE, null, ex);
+        showAllLegoListBtn.setTooltip(new Tooltip("Show all Lego Lists in the system"));
+        showAllLegoListBtn.setToggleGroup(tg);
+        showAllLegoListBtn.setSelected(true);
+        showAllLegoListBtn.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent e)
+            {
+                if (showAllLegoListBtn.isSelected())
+                {
+                    splitLeftSct.setVisible(false);
+                    splitLeftFilteredLegos.setVisible(false);
+                    leftPaneLabel.setText("All Lego Lists");
+                    splitLeftAllLegos.setVisible(true);
                 }
-               success = true;
             }
-            /* let the source know whether the string was successfully 
-             * transferred and used */
-            event.setDropCompleted(success);
+        });
 
-            event.consume();
-         }
-    });
+        showSearchLegoListBtn.setTooltip(new Tooltip("Show a filtered view of Lego Lists"));
+        showSearchLegoListBtn.setToggleGroup(tg);
+        showSearchLegoListBtn.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent e)
+            {
+                if (showSearchLegoListBtn.isSelected())
+                {
+                    splitLeftSct.setVisible(false);
+                    splitLeftAllLegos.setVisible(false);
+                    splitLeftFilteredLegos.setVisible(true);
+                    leftPaneLabel.setText("Filtered Lego Lists");
+                    // TODO
+                }
+            }
+        });
 
-
-      sctTree.setShowRoot(true);
-
-      FxTaxonomyReferenceWithConcept root       = new FxTaxonomyReferenceWithConcept();
-      SimTreeItem                    rootItem   = new SimTreeItem(root);
-      FxTaxonomyReferenceWithConcept snomedRoot = new FxTaxonomyReferenceWithConcept();
-        try {
-            fxc = TtkRestClient.getRestClient().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
-                    UUID.fromString("d0a05080-b5de-11e1-afa6-0800200c9a66"));
-            fxc = TtkRestClient.getRestClient().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
-                    UUID.fromString("d0a05080-b5de-11e1-afa6-0800200c9a66"), VersionPolicy.ACTIVE_VERSIONS,
-                    RefexPolicy.REFEX_MEMBERS,
-                    RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS);
-        } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(LegoGUIController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-      snomedRoot.setConcept(fxc);
-
-      SimTreeItem item = new SimTreeItem(snomedRoot, Icons.ROOT.getImageView());
-
-      rootItem.getChildren().add(item);
-
-      // item.computeGraphic();
-      item.addChildren();
-
-      // put this event handler on the root
-      item.addEventHandler(TreeItem.branchCollapsedEvent(), new EventHandler() {
-         @Override
-         public void handle(Event t) {
-
-            // remove grandchildren
-            SimTreeItem sourceTreeItem = (SimTreeItem) t.getSource();
-
-            sourceTreeItem.removeGrandchildren();
-         }
-      });
-      item.addEventHandler(TreeItem.branchExpandedEvent(), new EventHandler() {
-         @Override
-         public void handle(Event t) {
-
-            // add grandchildren
-            SimTreeItem       sourceTreeItem = (SimTreeItem) t.getSource();
-            ProgressIndicator p2             = new ProgressIndicator();
-
-            p2.setSkin(new TaxonomyProgressIndicatorSkin(p2));
-            p2.setPrefSize(16, 16);
-            p2.setProgress(-1);
-            sourceTreeItem.setProgressIndicator(p2);
-            sourceTreeItem.addChildrenConceptsAndGrandchildrenItems(p2);
-         }
-      });
-      sctTree.setRoot(rootItem);
-
-    
+        showSnomedBtn.setTooltip(new Tooltip("Show the Snomed Tree"));
+        showSnomedBtn.setToggleGroup(tg);
+        showSnomedBtn.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent e)
+            {
+                if (showSnomedBtn.isSelected())
+                {
+                    splitLeftAllLegos.setVisible(false);
+                    splitLeftFilteredLegos.setVisible(false);
+                    leftPaneLabel.setText("Snomed Browser");
+                    splitLeftSct.setVisible(true);
+                }
+            }
+        });
     }
     
+    private void addSnomedDropTargetInternal(Lego lego, Node node)
+    {
+        String legoId = makeUniqueLegoID(lego);
+        ArrayList<Node> nodes = snomedCodeDropTargets.get(legoId);
+        if (nodes == null)
+        {
+            nodes = new ArrayList<Node>();
+            snomedCodeDropTargets.put(legoId, nodes);
+        }
+        nodes.add(node);
+    }
+    
+    public void addSnomedDropTarget(Lego lego, final DropTargetLabel label)
+    {
+        if (label.getDropContextMenu().getItems().size() == 0)
+        {
+            return;
+        }
+        addSnomedDropTargetInternal(lego, (Node)label);
+
+        setSnomedDropShadows(label);
+        
+        label.setOnDragDropped(new EventHandler<DragEvent>()
+        {
+            public void handle(DragEvent event)
+            {
+                /* data dropped */
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                try
+                {
+                    if (db.hasString())
+                    {
+                        ContextMenu cm =  label.getDropContextMenu();
+                        if (cm != null)
+                        {
+                            label.setDroppedValue(db.getString());
+                            cm.show(label, Side.RIGHT, 0.0, 0.0);
+                        }
+                        success = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.error("Error dropping snomed concept", ex);
+                    LegoGUI.getInstance().showErrorDialog("Unexpected Error",
+                            "There was an unexpected error dropping the snomed concept", ex.toString());
+                }
+                /*
+                 * let the source know whether the string was successfully transferred and used
+                 */
+                event.setDropCompleted(success);
+                event.consume();
+            }
+        });
+
+    }
+
+    public void addSnomedDropTarget(Lego lego, final ComboBox<String> n)
+    {
+        addSnomedDropTargetInternal(lego, ((Node)n));
+
+        setSnomedDropShadows(n);
+
+        n.setOnDragDropped(new EventHandler<DragEvent>()
+        {
+            public void handle(DragEvent event)
+            {
+                /* data dropped */
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                try
+                {
+                    if (db.hasString())
+                    {
+                        n.setValue(db.getString());
+                        success = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.error("Error dropping snomed concept", ex);
+                    LegoGUI.getInstance().showErrorDialog("Unexpected Error",
+                            "There was an unexpected error dropping the snomed concept", ex.toString());
+                }
+                /*
+                 * let the source know whether the string was successfully transferred and used
+                 */
+                event.setDropCompleted(success);
+                event.consume();
+            }
+        });
+    }
+    
+    private void setSnomedDropShadows(final Node n)
+    {
+        n.setOnDragOver(new EventHandler<DragEvent>()
+        {
+            public void handle(DragEvent event)
+            {
+                /*
+                 * data is dragged over the target accept it only if it is not dragged from the same node and if it has
+                 * a string data
+                 */
+                if (event.getGestureSource() != n && event.getDragboard().hasString())
+                {
+                    /* allow for both copying and moving, whatever user chooses */
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                }
+                event.consume();
+            }
+        });
+
+        n.setOnDragEntered(new EventHandler<DragEvent>()
+        {
+            public void handle(DragEvent event)
+            {
+                /* show to the user that it is an actual gesture target */
+                DropShadow ds = new DropShadow();
+                ds.setColor(Color.GREEN);
+                n.setEffect(ds);
+                event.consume();
+            }
+        });
+
+        n.setOnDragExited(new EventHandler<DragEvent>()
+        {
+            public void handle(DragEvent event)
+            {
+                /* mouse moved away, remove the graphical cues */
+                DropShadow ds = new DropShadow();
+                ds.setColor(Color.LIGHTGREEN);
+                n.setEffect(ds);
+                event.consume();
+            }
+        });
+    }
+    
+
+    private void snomedDragStarted()
+    {
+        String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
+        for (Node n : snomedCodeDropTargets.get(legoId))
+        {
+            DropShadow ds = new DropShadow();
+            ds.setColor(Color.LIGHTGREEN);
+            n.setEffect(ds);
+        }
+    }
+
+    private void snomedDragCompleted()
+    {
+        String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
+        for (Node n : snomedCodeDropTargets.get(legoId))
+        {
+            n.setEffect(null);
+        }
+    }
+
+    private void setupSctTree()
+    {
+        // Do the SCT connecting in a background thread - if it is a local DB, it will be slow.
+        Runnable r = new Runnable()
+        {
+            FxConcept fxc;
+
+            @Override
+            public void run()
+            {
+                logger.info("Opening Workbench Database");
+                try
+                {
+                    fxc = WBDataStore.Ts().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
+                            StandardViewCoordinates.getSnomedLatest(), VersionPolicy.ACTIVE_VERSIONS,
+                            RefexPolicy.REFEX_MEMBERS,
+                            RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS);
+                    logger.info("Finished Opening Workbench Database");
+                    
+                    Platform.runLater(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                sctTree = new SimTreeView(fxc, WBDataStore.Ts());
+                                sctTree.setOnDragDetected(new EventHandler<MouseEvent>()
+                                {
+                                    public void handle(MouseEvent event)
+                                    {
+                                        /* drag was detected, start a drag-and-drop gesture */
+                                        /* allow any transfer mode */
+                                        Dragboard db = sctTree.startDragAndDrop(TransferMode.COPY);
+        
+                                        /* Put a string on a dragboard */
+                                        TreeItem<FxTaxonomyReferenceWithConcept> dragItem = sctTree.getSelectionModel()
+                                                .getSelectedItem();
+        
+                                        ClipboardContent content = new ClipboardContent();
+                                        content.putString(dragItem.getValue().getConcept().getPrimordialUuid().toString());
+                                        db.setContent(content);
+                                        snomedDragStarted();
+                                        event.consume();
+                                    }
+                                });
+        
+                                sctTree.setOnDragDone(new EventHandler<DragEvent>()
+                                {
+                                    public void handle(DragEvent event)
+                                    {
+                                        snomedDragCompleted();
+                                    }
+                                });
+        
+                                AnchorPane.setTopAnchor(sctTree, 0.0);
+                                AnchorPane.setBottomAnchor(sctTree, 0.0);
+                                AnchorPane.setLeftAnchor(sctTree, 0.0);
+                                AnchorPane.setRightAnchor(sctTree, 0.0);
+                                splitLeftSct.getChildren().remove(0);
+                                splitLeftSct.getChildren().add(sctTree);
+                            }
+                            catch (Exception e)
+                            {
+                                logger.error("Couldn't open the WB DB - snomed will not be available", e);
+                            }
+                        }
+                    });
+                }
+                catch (Exception e)
+                {
+                    logger.error("Unexpected error connecting to workbench database", e);
+                }
+
+                dbConnectThread = null;
+            }
+        };
+
+        dbConnectThread = new Thread(r, "SCT_DB_Open");
+        dbConnectThread.start();
+    }
+
     private void setupMenus()
     {
-        menuFileImport.setGraphic(new ImageView(new Image(LegoGUI.class.getResourceAsStream("/fugue/16x16/icons/folder-open-table.png"))));
+        menuFileImport.setGraphic(new ImageView(new Image(LegoGUI.class
+                .getResourceAsStream("/fugue/16x16/icons/folder-open-table.png"))));
         menuFileImport.setAccelerator(new KeyCodeCombination(KeyCode.I, KeyCombination.CONTROL_DOWN));
         menuFileImport.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -385,7 +542,7 @@ public class LegoGUIController implements Initializable
                 FileChooser fc = new FileChooser();
                 fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("LEGO xml Files (*.xml)", "*.xml"));
                 fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files (*.*)", "*"));
-                List<File> files = fc.showOpenMultipleDialog(LegoGUI.getMainStage());
+                List<File> files = fc.showOpenMultipleDialog(rootPane.getScene().getWindow());
                 if (files != null && files.size() > 0)
                 {
                     StringBuilder errors = new StringBuilder();
@@ -400,9 +557,10 @@ public class LegoGUIController implements Initializable
                             }
                             catch (Exception ex)
                             {
-                            	logger.info("Error loading file " + f.getName(), ex);
+                                logger.info("Error loading file " + f.getName(), ex);
                                 errors.append("Error loading file " + f.getName() + ": ");
-                                errors.append((ex.getLocalizedMessage() == null ? ex.toString() : ex.getLocalizedMessage()));
+                                errors.append((ex.getLocalizedMessage() == null ? ex.toString() : ex
+                                        .getLocalizedMessage()));
                                 errors.append(System.getProperty("line.separator"));
                                 errors.append(System.getProperty("line.separator"));
                             }
@@ -410,233 +568,201 @@ public class LegoGUIController implements Initializable
                     }
                     if (errors.length() > 0)
                     {
-                        LegoGUI.showErrorDialog("Error Loading LEGOs", "There was an error loading the specified files", errors.toString());
+                        LegoGUI.getInstance().showErrorDialog("Error Loading LEGOs",
+                                "There was an error loading the specified files", errors.toString());
                     }
                 }
             }
         });
 
-        menuFileExit.setGraphic(new ImageView(new Image(LegoGUI.class.getResourceAsStream("/fugue/16x16/icons/cross.png"))));
+        menuFileExit.setGraphic(new ImageView(new Image(LegoGUI.class
+                .getResourceAsStream("/fugue/16x16/icons/cross.png"))));
         menuFileExit.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN));
         menuFileExit.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
             public void handle(ActionEvent t)
             {
-                BDBDataStoreImpl.getInstance().shutdown();
-                System.exit(0);
+                shutdown();
             }
         });
-        
-        menuViewShowAllLL.setSelected(true);
-        //TODO Note this doesn't work:  http://javafx-jira.kenai.com/browse/RT-21192
-        //menuViewShowAllLL.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN));
-        menuViewShowAllLL.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                if (PncsSearchModel.getInstance().isDisplaying()) {
-                    try {
-                        LegoGUIModel.getInstance().replaceLegoList(PncsSearchModel.getInstance().getImportedLegos());
-                    } catch (WriteException ex) {
-                    	logger.error("Unexpected error replacing the lego list", ex);
-                    }
-                    PncsSearchModel.getInstance().setDisplaying(false);
-                }
-                if (menuViewShowAllLL.isSelected())
-                {
-                    if (!splitPane.getItems().contains(splitLeft))
-                    {
-                        splitPane.getItems().add(0, splitLeft);
-                    }
-                    
-                }
-                else
-                {
-                    splitPane.getItems().remove(splitLeft);
-                }
-            }
-        });
-        
-        menuSearchByPNCS.setGraphic(new ImageView(new Image(LegoGUI.class.getResourceAsStream("/fugue/16x16/icons/cross.png"))));
+
+        menuSearchByPNCS.setGraphic(new ImageView(new Image(LegoGUI.class
+                .getResourceAsStream("/fugue/16x16/icons/cross.png"))));
         menuSearchByPNCS.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
         menuSearchByPNCS.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
             public void handle(ActionEvent t)
-            {                    
-                LegoGUI.showPNCSSearchDialog(PncsSearchModel.getInstance().getPncsIdComboList());
-                
-                if (PncsSearchModel.getInstance().isDisplaying()) {
-                    menuViewShowAllLL.setSelected(false);
-                }
+            {
+                LegoGUI.getInstance().showPNCSSearchDialog(PncsSearchModel.getInstance().getPncsIdComboList());
             }
         });
 
-        //Floating Context menus
-        
-        menuDeleteLego = new MenuItem("Delete Lego");
-        menuDeleteLego.setDisable(true);
-        menuDeleteLego.setOnAction(new EventHandler<ActionEvent>()
+        // Floating Context menus
+        menuDeleteLegoList = new MenuItem("Delete LegoList");
+        menuDeleteLegoList.setDisable(true);
+        menuDeleteLegoList.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
             public void handle(ActionEvent event)
             {
-                try
-                {
-                    LegoGUIModel.getInstance().removeLegoList(currentLegoList.getGroupName());
-                    changeSelectedLego(null);
-                    legoList.getSelectionModel().clearSelection();
-                }
-                catch (WriteException ex)
-                {
-                    logger.error("Unexpeted error removing lego", ex);
-                    LegoGUI.showErrorDialog("Error Removing Lego", "There was an removing the specified file", ex.getLocalizedMessage());
-                }
-            }
-        });
-        
-        //TODO note: this doesn't work either http://javafx-jira.kenai.com/browse/RT-24518
-        //menuHideLL.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.CONTROL_DOWN));
-        menuHideLL.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                menuViewShowAllLL.setSelected(false);
-                splitPane.getItems().remove(splitLeft);
+//                try
+//                {
+////                    LegoGUIModel.getInstance().removeLegoList(currentLegoList.getGroupName());
+////                    selectedLegoListChanged(null);
+//                }
+//                catch (WriteException ex)
+//                {
+//                    logger.error("Unexpeted error removing lego", ex);
+//                    LegoGUI.getInstance().showErrorDialog("Error Removing Lego",
+//                            "There was an removing the specified file", ex.getLocalizedMessage());
+//                }
             }
         });
     }
 
-    private void changeSelectedLego(String newLego)
+    public Lego getLegoBeingEdited()
     {
-        tabsRenderedSinceSelect.clear();
-        if (newLego == null)
+        return null;
+    }
+    
+    private String makeUniqueLegoID(Lego lego)
+    {
+        return lego.getLegoUUID() + lego.getStamp().getUuid();
+    }
+
+    public void beginLegoEdit(Lego newLego)
+    {
+        if (newLego != null)
         {
-            currentLegoList = null;
-            menuDeleteLego.setDisable(true);
-            menuDeleteLego.setText("Delete Lego");
-        }
-        else
-        {
-            if (newLego.contains("PNCS:") && newLego.contains("Val:")) {
-                Lego l = LegoGUIModel.getInstance().getLego(newLego);
-                currentLegoList = new LegoList();
-                currentLegoList.getLego().add(l);
-            } else {
-                currentLegoList = LegoGUIModel.getInstance().getLegoList(newLego);
-            }
-            
-            if (currentLegoList == null)
+            String legoId = makeUniqueLegoID(newLego);
+            if (displayedLegos.containsKey(legoId))
             {
-                LegoGUI.showErrorDialog("Error Reading LegoList", "Unexpected error reading LegoList from storage", "The LegoList for '" + newLego + "' could not be found");
-                legoList.getSelectionModel().clearSelection();
+                editorTabPane.getSelectionModel().select(displayedLegos.get(legoId));
             }
             else
             {
-                menuDeleteLego.setText("Delete Lego '" + newLego + "'");
-                menuDeleteLego.setDisable(false);
+                final LegoTab tab = new LegoTab("Lego", legoId);
+                displayedLegos.put(legoId, tab);
+                LegoTreeView legoTree = new LegoTreeView();
+                legoTree.setLego(newLego);
+                
+                BorderPane bp = new BorderPane();
+                bp.setTop(LegoInfoPanel.build(newLego.getPncs().getName(), newLego.getPncs().getValue(), newLego.getPncs().getId() + "",
+                        newLego.getLegoUUID(), newLego.getStamp().getAuthor(), newLego.getStamp().getModule(), 
+                        new Date(TimeConvert.convert(newLego.getStamp().getTime())).toString(), newLego.getStamp().getPath()));
+                bp.setCenter(legoTree.wrapInScrollPane());
+                
+                tab.setContent(bp);
+                tab.setOnClosed(new EventHandler<Event>()
+                {
+                    public void handle(Event arg0) 
+                    {
+                        LegoGUIController.this.legoEditTabClosed(tab);
+                    }
+                });
+                
+                editorTabPane.getTabs().add(tab);
+                editorTabPane.getSelectionModel().select(tab);
+                legoTree.getRoot().getChildren().add(new LegoTreeItem(newLego.getStamp().getStatus(), LegoTreeNodeType.status));
+                for (Assertion a : newLego.getAssertion())
+                {
+                    legoTree.getRoot().getChildren().add(new LegoTreeItem(a));
+                }
+                legoTree.getRoot().getChildren().add(new LegoTreeItem("Add Assertion", LegoTreeNodeType.addAssertionPlaceholder));
+                expandAll(legoTree.getRoot());
             }
         }
-        updateXMLTab();
-        updateEditorTab();
+    }
+    
+    public void legoEditTabClosed(LegoTab tab)
+    {
+        displayedLegos.remove(tab.getDisplayedLegoID());
+        snomedCodeDropTargets.remove(tab.getDisplayedLegoID());
     }
 
-    private TitledPane buildTitledPane(Lego l)
+    private void expandAll(TreeItem<String> ti)
     {
-        TitledPane tp = new TitledPane();
-
-        tp.setText(l.getPncs().getName() + " : " + l.getPncs().getValue());
-
-
-        GridPane gp = new GridPane();
-        int rowIndex = 0;
-
-        gp.add(new Label("LEGO UUID: " + l.getLegoUUID()), 0, rowIndex++);
-
-        for (Assertion a : l.getAssertion())
+        ti.setExpanded(true);
+        for (TreeItem<String> tiChild : ti.getChildren())
         {
-            TextArea ta = new TextArea();
-            ta.setWrapText(true);
-            ta.setEditable(false);
+            expandAll(tiChild);
+        }
+    }
+
+//    public void selectedLegoListChanged(String newLegoList)
+//    {
+//        // TODO Make this filter aware
+//        tabsRenderedSinceSelect.clear();
+//        if (newLegoList == null)
+//        {
+//            currentLegoList = null;
+//            menuDeleteLegoList.setDisable(true);
+//            menuDeleteLegoList.setText("Delete Lego");
+//            // legoList.getSelectionModel().clearSelection();
+//            // filteredLegoList.getSelectionModel().clearSelection();
+//        }
+//        else
+//        {
+//            if (newLegoList.contains("PNCS:") && newLegoList.contains("Val:"))
+//            {
+//                Lego l = LegoGUIModel.getInstance().getLego(newLegoList);
+//                currentLegoList = new LegoList();
+//                currentLegoList.getLego().add(l);
+//            }
+//            else
+//            {
+//                currentLegoList = LegoGUIModel.getInstance().getLegoList(newLegoList);
+//            }
+//
+//            if (currentLegoList == null)
+//            {
+//                LegoGUI.getInstance().showErrorDialog("Error Reading LegoList",
+//                        "Unexpected error reading LegoList from storage",
+//                        "The LegoList for '" + newLegoList + "' could not be found");
+//                // legoList.getSelectionModel().clearSelection();
+//            }
+//            else
+//            {
+//                menuDeleteLegoList.setText("Delete Lego '" + newLegoList + "'");
+//                menuDeleteLegoList.setDisable(false);
+//            }
+//        }
+//        // updateXMLTab();
+//        updateEditorTab();
+//    }
+
+//    private void updateEditorTab()
+//    {
+//        if (tabPane.getSelectionModel().getSelectedItem() == editTab && !tabsRenderedSinceSelect.contains(editTab))
+//        {
+//            legoListTV.setRoot(new LegoTreeItem(currentLegoList));
+//            tabsRenderedSinceSelect.add(editTab);
+//        }
+//    }
+
+    
+
+    private void shutdown()
+    {
+        logger.info("shutdown called");
+        SimTreeView.shutdown();
+        Thread t = dbConnectThread;
+        if (t != null)
+        {
             try
             {
-                ta.setText(LegoXMLUtils.toXML(a).trim());
+                logger.info("Waiting for DB init thread to complete before continuing shutdown");
+                t.join();
             }
-            catch (Exception e)
+            catch (InterruptedException e)
             {
-                ta.setText("Unexpected error displaying assertion: " + e.getLocalizedMessage());
+                // noop
             }
-            ScrollPane sp = new ScrollPane();
-            sp.setContent(ta);
-            sp.setFitToHeight(true);
-            sp.setFitToWidth(true);
-            sp.setPrefHeight(250d);
-            gp.add(sp, 0, rowIndex++);
         }
-
-        ColumnConstraints cc = new ColumnConstraints();
-        cc.setFillWidth(true);
-        cc.setHgrow(Priority.ALWAYS);
-
-        gp.getColumnConstraints().add(cc);
-
-        tp.setContent(gp);
-        return tp;
-    }
-
-    private void updateEditorTab()
-    {
-        if (tabPane.getSelectionModel().getSelectedItem() == editTab && !tabsRenderedSinceSelect.contains(editTab))
-        {
-            if (currentLegoList == null)
-            {
-                legoGroupName.setText("");
-                legoGroupDescription.setText("");
-                legoGroupUUID.setText("");
-                legoAccordion.getPanes().clear();
-            }
-            else
-            {
-
-                legoGroupName.setText(currentLegoList.getGroupName());
-                legoGroupDescription.setText(currentLegoList.getGroupDescription());
-                legoGroupUUID.setText(currentLegoList.getLegoListUUID());
-                legoAccordion.getPanes().clear();
-                for (Lego l : currentLegoList.getLego())
-                {
-                    legoAccordion.getPanes().add(buildTitledPane(l));
-                }
-            }
-            tabsRenderedSinceSelect.add(editTab);
-        }
-    }
-
-    private void updateXMLTab()
-    {
-        //Can't use xmlTab.isSelected because it lags the change listener...
-        if (tabPane.getSelectionModel().getSelectedItem() == xmlTab && !tabsRenderedSinceSelect.contains(xmlTab))
-        {
-            if (currentLegoList == null)
-            {
-                xmlViewer.getEngine().loadContent("");
-            }
-            else
-            {
-                try
-                {
-                    //todo render on click
-                    xmlViewer.getEngine().loadContent(LegoXMLUtils.toHTML(currentLegoList));
-                }
-                catch (Exception e)
-                {
-                    logger.error("There was an error formatting the lego as XML", e);
-                    xmlViewer.getEngine().loadContent("There was an error formatting the lego as XML");
-                }
-            }
-            tabsRenderedSinceSelect.add(xmlTab);
-        }
+        BDBDataStoreImpl.getInstance().shutdown();
+        WBDataStore.shutdown();
+        System.exit(0);
     }
 }

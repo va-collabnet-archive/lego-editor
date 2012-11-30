@@ -69,7 +69,7 @@ public class PncsSearchDialogController
         
         // initialize your logic here: all @FXML variables will have been injected
 
-        LegoGUI.setPNCSSearchDialogController(this);
+       // LegoGUI.getInstance().setPNCSSearchDialogController(this);
                 
         okPncsButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -91,7 +91,7 @@ public class PncsSearchDialogController
                 ObservableList<String> options = FXCollections.observableArrayList(items);
                 
                 if (!isDisplaying()) {
-                    PncsSearchModel.getInstance().setImportedLegos(LegoGUIModel.getInstance().getLegoListNames());
+          //          PncsSearchModel.getInstance().setImportedLegos(LegoGUIModel.getInstance().getLegoListNames());
                 }
                 
                 try {
@@ -101,7 +101,7 @@ public class PncsSearchDialogController
                 }
                 PncsSearchModel.getInstance().setDisplaying(true);
 
-                LegoGUI.getPNCSSearchDialogStage().close();
+ //               LegoGUI.getInstance().getPNCSSearchDialogStage().close();
                 
             }
     
@@ -122,7 +122,7 @@ public class PncsSearchDialogController
             @Override
             public void handle(ActionEvent event)
             {
-                LegoGUI.getPNCSSearchDialogStage().close();
+//                LegoGUI.getInstance().getPNCSSearchDialogStage().close();
             }
         });
     }

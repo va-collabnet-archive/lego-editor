@@ -3,19 +3,16 @@ package gov.va.legoEdit.model.bdbModel;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Concept;
-import gov.va.legoEdit.model.schemaModel.ConceptAndRel;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Rel;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.Relationship;
@@ -71,22 +68,7 @@ public class LegoBDB
         {
             assertions.add(a);
             checkAndUpdateAssertionList(a);
-            
-            //Keith requested this schema change, which results in this ugly API... sigh.
-            Concept discernibleConcept = a.getDiscernible().getConcept();
-            if (discernibleConcept == null)
-            {
-            	discernibleConcept = a.getDiscernible().getConceptAndRel();
-            }
-            indexConcept(discernibleConcept);
-            if (discernibleConcept instanceof ConceptAndRel)
-            {
-	            for (Rel r : ((ConceptAndRel)discernibleConcept).getRel())
-	            {
-	                indexConcept(r.getConcept());
-	                indexConcept(r.getTypeConcept());
-	            }
-            }
+            indexConcept(a.getDiscernible().getConcept());
             indexConcept(a.getQualifier().getConcept());
             if (a.getTiming() != null)
             {
@@ -126,6 +108,17 @@ public class LegoBDB
             if (c.getUuid() != null && c.getUuid().length() > 0)
             {
                 usedSCTIdentifiers.add(c.getUuid());
+            }
+            for (Rel r : c.getRel())
+            {
+                if (r.getType() != null)
+                {
+                    indexConcept(r.getType().getConcept());
+                }
+                if (r.getDestination() != null)
+                {
+                    indexConcept(r.getDestination().getConcept());
+                }
             }
         }
     }
@@ -173,21 +166,7 @@ public class LegoBDB
         	compositeAssertionUUIDs.add(ac.getAssertionUUID());
         }
         
-        Concept discernibleConcept = assertion.getDiscernible().getConcept();
-        if (discernibleConcept == null)
-        {
-        	discernibleConcept = assertion.getDiscernible().getConceptAndRel();
-        }
-        indexConcept(discernibleConcept);
-        if (discernibleConcept instanceof ConceptAndRel)
-        {
-            for (Rel r : ((ConceptAndRel)discernibleConcept).getRel())
-            {
-                indexConcept(r.getConcept());
-                indexConcept(r.getTypeConcept());
-            }
-        }
-
+        indexConcept(assertion.getDiscernible().getConcept());
         indexConcept(assertion.getQualifier().getConcept());
         if (assertion.getTiming() != null)
         {

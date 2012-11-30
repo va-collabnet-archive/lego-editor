@@ -10,7 +10,6 @@ import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.AssertionComponents;
 import gov.va.legoEdit.model.schemaModel.Concept;
-import gov.va.legoEdit.model.schemaModel.ConceptAndRel;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
@@ -18,14 +17,12 @@ import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.storage.util.BDBIterator;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -189,10 +186,10 @@ public class BDBDataStoreTest
         a.setAssertionUUID(UUID.randomUUID().toString());
 
         Discernible d = new Discernible();
-        ConceptAndRel c = new ConceptAndRel();
+        Concept c = new Concept();
         c.setDesc("foo");
         c.setSctid(5l);
-        d.setConceptAndRel(c);
+        d.setConcept(c);
         a.setDiscernible(d);
 
         Value v = new Value();
@@ -305,10 +302,10 @@ public class BDBDataStoreTest
          a.setAssertionUUID(UUID.randomUUID().toString());
 
          Discernible d = new Discernible();
-         ConceptAndRel c = new ConceptAndRel();
+         Concept c = new Concept();
          c.setDesc("foo");
          c.setSctid(5l);
-         d.setConceptAndRel(c);
+         d.setConcept(c);
          a.setDiscernible(d);
 
          Value v = new Value();
@@ -400,10 +397,10 @@ public class BDBDataStoreTest
         String knownAssertionId = a.getAssertionUUID();
 
         Discernible d = new Discernible();
-        ConceptAndRel c = new ConceptAndRel();
+        Concept c = new Concept();
         c.setDesc("foo");
         c.setSctid(5l);
-        d.setConceptAndRel(c);
+        d.setConcept(c);
         a.setDiscernible(d);
 
         Value v = new Value();
@@ -476,10 +473,10 @@ public class BDBDataStoreTest
         a.setAssertionUUID(UUID.randomUUID().toString());
         
         Discernible d = new Discernible();
-        ConceptAndRel c = new ConceptAndRel();
+        Concept c = new Concept();
         c.setDesc("foo");
         c.setSctid(5l);
-        d.setConceptAndRel(c);
+        d.setConcept(c);
         a.setDiscernible(d);
 
         Value v = new Value();

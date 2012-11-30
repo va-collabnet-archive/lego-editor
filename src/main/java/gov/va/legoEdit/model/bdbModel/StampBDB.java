@@ -27,7 +27,11 @@ public class StampBDB
         author = stamp.getAuthor();
         module = stamp.getModule();
         path = stamp.getPath();
-        stampId = UUID.randomUUID().toString();
+        stampId = stamp.getUuid();
+        if (stampId == null || stampId.length() == 0)
+        {
+            stampId = UUID.randomUUID().toString();
+        }
     }
 
     @PrimaryKey
@@ -76,6 +80,7 @@ public class StampBDB
         stamp.setPath(path);
         stamp.setStatus(status);
         stamp.setTime(TimeConvert.convert(time));
+        stamp.setUuid(stampId);
         return stamp;
     }
 }

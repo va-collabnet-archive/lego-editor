@@ -1,19 +1,17 @@
 package gov.va.legoEdit;
 
-import gov.va.legoEdit.search.PNCS.PncsSearchModel;
-import gov.va.legoEdit.guiUtil.AlphanumComparator;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
+import gov.va.legoEdit.gui.util.LLTreeItemComparator;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.search.PNCS.PncsSearchModel;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
+import javafx.scene.control.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,7 @@ public class LegoGUIModel
 {
     Logger logger = LoggerFactory.getLogger(LegoGUIModel.class);
     private static volatile LegoGUIModel instance_;
-    private ObservableList<String> legoNames_ = null;
+    private ObservableList<TreeItem<String>> legoListNames_ = null;
 
     public static LegoGUIModel getInstance()
     {
@@ -56,46 +54,43 @@ public class LegoGUIModel
         return PncsSearchModel.getInstance().getSearchResultLego(legoName);
     }
 
-    public ObservableList<String> getLegoListNames()
+    public void initializeLegoListNames(ObservableList<TreeItem<String>> list)
     {
-        if (legoNames_ == null)
+        legoListNames_ = list;
+        Iterator<LegoList> ll = BDBDataStoreImpl.getInstance().getLegoLists();
+        while (ll.hasNext())
         {
-            ArrayList<String> legoListNames = new ArrayList<>();
-            Iterator<LegoList> ll = BDBDataStoreImpl.getInstance().getLegoLists();
-            while (ll.hasNext())
-            {
-                legoListNames.add(ll.next().getGroupName());
-            }
-            Collections.sort(legoListNames, new AlphanumComparator(true));
-            legoNames_ = FXCollections.observableArrayList(legoListNames);
+            legoListNames_.add(new LegoTreeItem(BDBDataStoreImpl.getInstance().getLegoListByID(ll.next().getLegoListUUID())));
         }
-        return legoNames_;
+        //zzz makes it sort to the end - isn't used in the tree display
+        legoListNames_.add(new LegoTreeItem("zzz", LegoTreeNodeType.addLegoListPlaceholder));
+        FXCollections.sort(legoListNames_, new LLTreeItemComparator(true));
     }
 
     public void importLegoList(LegoList ll) throws WriteException
     {
         BDBDataStoreImpl.getInstance().importLegoList(ll);
-        legoNames_.add(ll.getGroupName());
-        FXCollections.sort(legoNames_, new AlphanumComparator(true));
+        legoListNames_.add(new LegoTreeItem(ll));
+        FXCollections.sort(legoListNames_, new LLTreeItemComparator(true));
     }
 
-    public void removeLegoList(String legoName) throws WriteException
+    public void removeLegoList(String legoListName) throws WriteException
     {
-        LegoList ll = BDBDataStoreImpl.getInstance().getLegoListByName(legoName);
+        LegoList ll = BDBDataStoreImpl.getInstance().getLegoListByName(legoListName);
         if (ll == null)
         {
             return;
         }
         BDBDataStoreImpl.getInstance().deleteLegoList(ll.getLegoListUUID());
-        legoNames_.remove(legoName);
+        legoListNames_.remove(legoListName);
     }
 
     public void replaceLegoList(ObservableList<String> replacements) throws WriteException
     {
-        legoNames_.clear();
-        for (String s : replacements) {
-            legoNames_.add(s);
-        }
-        FXCollections.sort(legoNames_, new AlphanumComparator(true));
+     //   legoListNames_.clear();
+     //   for (String s : replacements) {
+    //        legoNames_.add(s);
+    //    }
+   //     FXCollections.sort(legoNames_, new AlphanumComparator(true));
     }
 }

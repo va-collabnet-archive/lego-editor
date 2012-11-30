@@ -7,91 +7,42 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.web.*?>
+<?scenebuilder-stylesheet ../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.LegoGUIController">
+<AnchorPane id="AnchorPane" fx:id="rootPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.LegoGUIController">
   <children>
-    <SplitPane fx:id="splitPane" dividerPositions="0.25048923679060664, 0.5, 0.6712328767123288" focusTraversable="true" maxWidth="1000.0" prefHeight="375.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+    <AnchorPane fx:id="leftButtons" maxWidth="30.0" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="30.0" styleClass="headerBackground" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+      <children>
+        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" mnemonicParsing="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="10.0" />
+        <ToggleButton id="showLegoList" fx:id="showSearchLegoListBtn" mnemonicParsing="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="50.0" />
+        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" mnemonicParsing="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="90.0" />
+      </children>
+    </AnchorPane>
+    <SplitPane fx:id="splitPane" dividerPositions="0.3004032258064516" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
       <items>
-        <AnchorPane minHeight="0.0" minWidth="25.0" prefHeight="160.0" prefWidth="100.0">
+        <AnchorPane fx:id="splitLeft" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
           <children>
-            <TreeView id="SctTree" fx:id="sctTree" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-          </children>
-        </AnchorPane>
-        <AnchorPane prefHeight="200.0" prefWidth="200.0">
-          <children>
-            <TextField fx:id="dragTest" layoutX="14.0" layoutY="108.0" prefWidth="200.0" promptText="Drag Concept Here" text="Drag Concept Here" />
-          </children>
-        </AnchorPane>
-        <AnchorPane fx:id="splitLeft" maxWidth="350.0" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-          <children>
-            <AnchorPane id="AnchorPane" prefHeight="25.0" prefWidth="236.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <AnchorPane id="AnchorPane" prefHeight="25.0" prefWidth="295.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <children>
-                <Label styleClass="boldLabel" text="All Lego Lists" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
-                <MenuButton graphicTextGap="0.0" minWidth="21.0" mnemonicParsing="false" prefHeight="21.0" prefWidth="21.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="2.0">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="Hide" fx:id="menuHideLL" />
-                  </items>
-                </MenuButton>
+                <Label fx:id="leftPaneLabel" styleClass="boldLabel" text="All Lego Lists" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
               </children>
             </AnchorPane>
-            <ScrollPane id="ScrollPane" fitToHeight="true" fitToWidth="true" prefViewportHeight="373.0" prefViewportWidth="176.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
-              <content>
-                <ListView fx:id="legoList" prefHeight="373.0" prefWidth="176.0" />
-              </content>
-            </ScrollPane>
+            <AnchorPane fx:id="splitLeftSct" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+              <children>
+                <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <center>
+                    <ProgressIndicator maxHeight="100.0" maxWidth="100.0" />
+                  </center>
+                </BorderPane>
+              </children>
+            </AnchorPane>
+            <AnchorPane fx:id="splitLeftAllLegos" prefHeight="160.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
+            <AnchorPane id="splitLeftAllLegos" fx:id="splitLeftFilteredLegos" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
           </children>
         </AnchorPane>
         <AnchorPane fx:id="splitRight" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
           <children>
-            <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <tabs>
-                <Tab fx:id="editTab" closable="false" text="Editor">
-                  <content>
-                    <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                      <children>
-                        <GridPane fx:id="editorGridPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                          <children>
-                            <ScrollPane id="ScrollPane" fitToHeight="true" fitToWidth="true" prefViewportHeight="242.0" prefViewportWidth="408.0" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
-                              <content>
-                                <Accordion fx:id="legoAccordion" />
-                              </content>
-                            </ScrollPane>
-                            <Label text="Lego Group" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                            <Label id="legoGroup" fx:id="legoGroupName" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                            <Label text="Description" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                            <TextField fx:id="legoGroupDescription" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                            <Label text="UUID" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                            <Label fx:id="legoGroupUUID" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                          </children>
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <padding>
-                            <Insets bottom="3.0" left="3.0" right="3.0" />
-                          </padding>
-                          <rowConstraints>
-                            <RowConstraints fillHeight="false" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-                            <RowConstraints fillHeight="false" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-                            <RowConstraints fillHeight="false" minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                        </GridPane>
-                      </children>
-                    </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab fx:id="xmlTab" text="XML">
-                  <content>
-                    <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                      <children>
-                        <WebView fx:id="xmlViewer" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                      </children>
-                    </AnchorPane>
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
+            <TabPane id="tabPane" fx:id="editorTabPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
           </children>
         </AnchorPane>
       </items>
@@ -104,11 +55,7 @@
             <MenuItem mnemonicParsing="false" text="Exit" fx:id="menuFileExit" />
           </items>
         </Menu>
-        <Menu text="_View" fx:id="menuView">
-          <items>
-            <CheckMenuItem mnemonicParsing="false" text="Show All Lego Lists" fx:id="menuViewShowAllLL" />
-          </items>
-        </Menu>
+        <Menu text="_View" fx:id="menuView" />
         <Menu text="_Search" fx:id="menuSearchLegos">
           <items>
             <MenuItem mnemonicParsing="false" text="Search LEGOs by PNCS" fx:id="menuSearchByPNCS" />

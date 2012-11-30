@@ -1,4 +1,4 @@
-package gov.va.legoEdit.guiUtil;
+package gov.va.legoEdit.gui.util;
 
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;

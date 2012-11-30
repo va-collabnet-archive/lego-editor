@@ -43,18 +43,24 @@
 					<units>
 						<concept desc="minutes" sctid="45" />
 					</units>
-					<numericPoint>37.45</numericPoint> <!-- currently defined as a float -->
+					<point>
+						<numericValue>37.45</numericValue> <!-- currently defined as a float -->
+					</point>
 				</measurement>
 			</timing>
 
 			<assertionComponents>
 				<assertionComponent>
 					<assertionUUID>8dd4b1c0-0be2-11e2-892e-0800200c9a66</assertionUUID>
-					<typeConcept sctid="258706009" desc="partOf"/>
+					<type>
+						<concept sctid="258706009" desc="partOf"/>
+					</type>
 				</assertionComponent>
 				<assertionComponent>
 					<assertionUUID>9dd4b1c0-0be2-11e2-892e-0900200c9a66</assertionUUID>
-					<typeConcept uuid="8dd4b1c0-0be2-11e2-892e-0900200c4a66" desc="somethingElse"/>
+					<type>
+						<concept uuid="8dd4b1c0-0be2-11e2-892e-0900200c4a66" desc="somethingElse"/>
+					</type>
 				</assertionComponent>
 			</assertionComponents>
 		</assertion>
@@ -68,35 +74,43 @@
 		<assertion>
 			<assertionUUID>7dd4b1c0-9be2-11e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<conceptAndRel sctid="248661003" desc="Apex beat displaced">
+				<concept sctid="248661003" desc="Apex beat displaced">
 					<rel>
-						<typeConcept sctid="363698007" desc="Finding site" />
+						<type>
+							<concept sctid="363698007" desc="Finding site" />
+						</type>
 						<!-- Each rel must contain a type, and either a concept or a measurement -->
 						<!-- Concepts may be referenced by UUID, instead of sctid -->
-						<concept uuid="8dd4b7c0-0be2-11e2-892e-1100200c9a66" desc="Sixth intercostal space midclavicular line" />
+						<destination>
+							<concept uuid="8dd4b7c0-0be2-11e2-892e-1100200c9a66" desc="Sixth intercostal space midclavicular line" />
+						</destination>
 					</rel>
-				</conceptAndRel>
+				</concept>
 			</discernible>
 			<qualifier>
 				<concept sctid="5880005" desc="Physical examination procedure" />
 			</qualifier>
 			<value>
 				<measurement>
-					<numericPoint>15</numericPoint>
+					<point>
+						<numericValue>15</numericValue>
+					</point>
 				</measurement>
 			</value>
 			<timing>
 				<!-- units are optional -->
 				<measurement>
 					<!-- String values are limited to values from an enumeration -->
-					<stringPoint>NOW</stringPoint>
+					<point>
+						<stringValue>NOW</stringValue>
+					</point>
 				</measurement>
 			</timing>
 		</assertion>
 
 	</lego>
 
-	<!-- real example with two rels -->
+	<!-- real example with two rels and a nested rel -->
 	<lego>
 		<legoUUID>8fd4b1c0-0be7-11e2-891e-0813900c9a66</legoUUID>
 		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
@@ -104,44 +118,64 @@
 		<assertion>
 			<assertionUUID>8fd4b1c0-0ce7-11e2-891e-0813900c9a66</assertionUUID>
 			<discernible>
-				<conceptAndRel sctid="404684003" desc="Clinical finding" >
+				<concept sctid="404684003" desc="Clinical finding" >
 					<rel>
-						<typeConcept sctid="47429007" desc="Associated with" />
-						<concept sctid="410661009" desc="Exacerbated" />
+						<type>
+							<concept sctid="47429007" desc="Associated with" />
+						</type>
+						<destination>
+							<concept sctid="410661009" desc="Exacerbated">
+								<!-- non-sensical example, but shows that rels can be nested -->
+								<rel>
+									<type>
+										<concept sctid="3" desc="Modifier"/>
+									</type>
+									<destination>
+										<concept sctid="5" desc="Extreme"/>
+									</destination>
+								</rel>
+							</concept>
+						</destination>
 					</rel>
 					<rel>
-						<typeConcept sctid="260864003" desc="Frequency" />
-						<measurement>
-							<units>
-								<concept sctid="258706009" desc="month" />
-							</units>
-							<interval>
-								<greaterThan inclusive="true">
-									<numericPoint>5</numericPoint>
-								</greaterThan>
-								<lessThan inclusive="true">
-									<numericPoint>6</numericPoint>
-								</lessThan>
-							</interval>
-						</measurement>
+						<type>
+						    <concept sctid="260864003" desc="Frequency" />
+						</type>
+						<destination>
+							<measurement>
+								<units>
+									<concept sctid="258706009" desc="month" />
+								</units>
+								<interval>
+									<lowerPoint>
+										<numericValue>5</numericValue>
+									</lowerPoint>
+									<upperPoint>
+										<numericValue>6</numericValue>	
+									</upperPoint>
+								</interval>
+							</measurement>
+						</destination>
 					</rel>
-				</conceptAndRel>
+				</concept>
 			</discernible>
 			<qualifier>
 				<concept sctid="108217004" desc="Interview, history AND/OR physical examination" />
 			</qualifier>
 			<value>
 				<measurement>
-					<numericPoint>1</numericPoint>
+					<point>
+						<numericValue>1</numericValue>
+					</point>
 				</measurement>
 			</value>
 			<timing>
 				<!-- And we do ranges - greaterThan, lessThan, or both -->
 				<measurement>
 					<interval>
-						<greaterThan inclusive="true">
-							<numericPoint>5</numericPoint>
-						</greaterThan>
+						<lowerPoint>
+							<numericValue>5</numericValue>
+						</lowerPoint>
 					</interval>
 				</measurement>
 			</timing>
@@ -156,28 +190,36 @@
 		<assertion>
 			<assertionUUID>8dd4b1c0-0be4-41e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<conceptAndRel sctid="67551009" desc="Abnormal third heart sound, S3">
+				<concept sctid="67551009" desc="Abnormal third heart sound, S3">
 					<rel>
-						<typeConcept desc="foo" sctid="5"/>
-						<!-- Numeric ranges can also have a relaxed range bound -->
-						<measurement>
-							<interval>
-								<greaterThan inclusive="true">
-									<pointPair>
-										<greaterThan>5</greaterThan>
-										<lessThan>6</lessThan>
-									</pointPair>
-								</greaterThan>
-								<lessThan inclusive="false">
-									<pointPair>
-										<greaterThan>20</greaterThan>
-										<lessThan>30.5</lessThan>
-									</pointPair>
-								</lessThan>
-							</interval>
-						</measurement>
+						<type>
+						    <concept desc="foo" sctid="5"/>
+						</type>
+						<!-- Numeric ranges can also have two sets of ranges -->
+						<destination>
+							<measurement>
+								<interval>
+									<lowerBound>
+										<lowerPoint inclusive="true">
+											<numericValue>5</numericValue>
+										</lowerPoint>
+										<upperPoint>
+											<numericValue>6</numericValue>
+										</upperPoint>
+									</lowerBound>
+									<upperBound>
+										<lowerPoint>
+											<numericValue>20</numericValue>
+										</lowerPoint>
+										<upperPoint inclusive="true">
+											<numericValue>30.5</numericValue>
+										</upperPoint>
+									</upperBound>
+								</interval>
+							</measurement>
+						</destination>
 					</rel>
-				</conceptAndRel>
+				</concept>
 			</discernible>
 			<qualifier>
 				<concept sctid="5880005" desc="Physical examination procedure" />
@@ -186,12 +228,12 @@
 				<!-- Ranges can also have text strings -->
 				<measurement>
 					<interval>
-						<greaterThan inclusive="true">
-							<stringPoint>DOB</stringPoint>
-						</greaterThan>
-						<lessThan inclusive="false">
-							<stringPoint>end active service</stringPoint>
-						</lessThan>
+						<lowerPoint>
+							<stringValue>DOB</stringValue>
+						</lowerPoint>
+						<upperPoint>
+							<stringValue>end active service</stringValue>
+						</upperPoint>
 					</interval>
 				</measurement>
 			</value>
@@ -199,12 +241,12 @@
 				<!-- measurement range -->
 				<measurement>
 					<interval>
-						<greaterThan inclusive="true">
-							<numericPoint>5</numericPoint>
-						</greaterThan>
-						<lessThan inclusive="false">
-							<numericPoint>25</numericPoint>
-						</lessThan>
+						<lowerPoint inclusive="true">
+							<numericValue>5</numericValue>
+						</lowerPoint>
+						<upperPoint inclusive="true">
+							<numericValue>25</numericValue>
+						</upperPoint>
 					</interval>
 				</measurement>
 			</timing>
