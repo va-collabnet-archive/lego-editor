@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!--I want to switch over to logback at some point, instead of log4j, for better performance and easier config... but its missing from the repo)-->
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
     <appender name="console" class="org.apache.log4j.ConsoleAppender"> 
         <layout class="org.apache.log4j.PatternLayout"> 
@@ -20,6 +21,9 @@
         </layout> 
     </appender>
     <logger name="gov.va">
+        <level value="debug"/> 
+    </logger>
+    <logger name="org.ihtsdo">
         <level value="debug"/> 
     </logger>
     <root> 
