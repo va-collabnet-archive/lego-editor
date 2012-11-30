@@ -8,11 +8,11 @@
 
 package gov.va.legoEdit.model.schemaModel;
 
-import com.sleepycat.persist.model.Persistent;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import com.sleepycat.persist.model.Persistent;
 
 
 /**
@@ -25,7 +25,10 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{}measurement" minOccurs="0"/>
+ *         &lt;choice>
+ *           &lt;element ref="{}concept"/>
+ *           &lt;element ref="{}measurement"/>
+ *         &lt;/choice>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -36,13 +39,39 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "concept",
     "measurement"
 })
-@XmlRootElement(name = "timing")
+@XmlRootElement(name = "destination")
 @Persistent
-public class Timing {
+public class Destination {
 
+    protected Concept concept;
     protected Measurement measurement;
+
+    /**
+     * Gets the value of the concept property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Concept }
+     *     
+     */
+    public Concept getConcept() {
+        return concept;
+    }
+
+    /**
+     * Sets the value of the concept property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Concept }
+     *     
+     */
+    public void setConcept(Concept value) {
+        this.concept = value;
+    }
 
     /**
      * Gets the value of the measurement property.
