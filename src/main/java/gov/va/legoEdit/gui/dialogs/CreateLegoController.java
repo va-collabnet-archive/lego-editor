@@ -24,6 +24,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -111,6 +112,7 @@ public class CreateLegoController
                 //TODO this is ugly, need to find a better way.
                 legoTreeItem.getChildren().clear();
                 legoTreeItem.buildPNCSChildren();
+                expandAll(legoTreeItem);
                 ll = null;
                 legoTreeItem = null;
                 //TODO build lego...kick the right tree for update...
@@ -147,6 +149,15 @@ public class CreateLegoController
         };
         
         okButton.disableProperty().bind(bb.not());
+    }
+    
+    private void expandAll(TreeItem<String> ti)
+    {
+        ti.setExpanded(true);
+        for (TreeItem<String> tiChild : ti.getChildren())
+        {
+            expandAll(tiChild);
+        }
     }
     
     public void init(LegoList ll, LegoTreeItem lti)

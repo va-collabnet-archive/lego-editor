@@ -2,7 +2,7 @@ package gov.va.legoEdit;
 
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
-import gov.va.legoEdit.gui.util.LLTreeItemComparator;
+import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.search.PNCS.PncsSearchModel;
@@ -64,14 +64,14 @@ public class LegoGUIModel
         }
         //zzz makes it sort to the end - isn't used in the tree display
         legoListNames_.add(new LegoTreeItem("zzz", LegoTreeNodeType.addLegoListPlaceholder));
-        FXCollections.sort(legoListNames_, new LLTreeItemComparator(true));
+        FXCollections.sort(legoListNames_, new LegoTreeItemComparator(true));
     }
 
     public void importLegoList(LegoList ll) throws WriteException
     {
         BDBDataStoreImpl.getInstance().importLegoList(ll);
         legoListNames_.add(new LegoTreeItem(ll));
-        FXCollections.sort(legoListNames_, new LLTreeItemComparator(true));
+        FXCollections.sort(legoListNames_, new LegoTreeItemComparator(true));
     }
 
     public void removeLegoList(String legoListName) throws WriteException

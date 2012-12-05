@@ -11,11 +11,11 @@
 
 <AnchorPane id="AnchorPane" fx:id="rootPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.LegoGUIController">
   <children>
-    <AnchorPane fx:id="leftButtons" maxWidth="30.0" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="30.0" styleClass="headerBackground" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+    <AnchorPane fx:id="leftButtons" maxWidth="30.0" minHeight="0.0" minWidth="0.0" prefHeight="743.0" prefWidth="1024.0" styleClass="headerBackground" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0">
       <children>
-        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" mnemonicParsing="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="10.0" />
-        <ToggleButton id="showLegoList" fx:id="showSearchLegoListBtn" mnemonicParsing="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="50.0" />
-        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" mnemonicParsing="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="90.0" />
+        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" mnemonicParsing="false" rotate="-90.0" text="Lego Lists" AnchorPane.leftAnchor="-30.0" AnchorPane.topAnchor="70.0" />
+        <ToggleButton id="showLegoList" fx:id="showSearchLegoListBtn" mnemonicParsing="false" visible="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="50.0" />
+        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" mnemonicParsing="false" rotate="-90.0" text="Snomed" AnchorPane.leftAnchor="-25.0" AnchorPane.topAnchor="170.0" />
       </children>
     </AnchorPane>
     <SplitPane fx:id="splitPane" dividerPositions="0.3004032258064516" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">

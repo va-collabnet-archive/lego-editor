@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
+import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.AssertionComponents;
@@ -1160,8 +1161,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
             v.setConcept(c);
         }
         int pos = 0;
-        //TODO figure out the proper location to add this
         ti.getChildren().add(pos, new LegoTreeItem(v));
+        FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(ti.getChildren().get(pos));
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
@@ -1174,8 +1175,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
         c.setUuid(sctUUID);
         q.setConcept(c);
         int pos = 0;
-        //TODO figure out the proper location to add this
         ti.getChildren().add(pos, new LegoTreeItem(q));
+        FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(ti.getChildren().get(pos));
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
@@ -1188,8 +1189,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
         c.setUuid(sctUUID);
         d.setConcept(c);
         int pos = 0;
-        //TODO figure out the proper location to add this
         ti.getChildren().add(pos, new LegoTreeItem(d));
+        FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(ti.getChildren().get(pos));
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
@@ -1220,8 +1221,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
         
         int pos = 0;
-        //TODO figure out the proper location to add this
         ti.getChildren().add(pos, new LegoTreeItem(t));
+        FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(ti.getChildren().get(pos));
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
@@ -1289,10 +1290,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
         a.setAssertionUUID(UUID.randomUUID().toString());
         ltv.getLego().getAssertion().add(a);
         
-        //insert it into the tree above the add button
-        int pos = ltv.getRoot().getChildren().size() - 1;
         LegoTreeItem lti = new LegoTreeItem(a);
-        ltv.getRoot().getChildren().add(pos, lti);
+        ltv.getRoot().getChildren().add(lti);
+        FXCollections.sort(ltv.getRoot().getChildren(), new LegoTreeItemComparator(true));
         expandAll(lti);
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }

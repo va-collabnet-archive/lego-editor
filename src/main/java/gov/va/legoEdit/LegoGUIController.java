@@ -8,6 +8,7 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTab;
+import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.search.PNCS.PncsSearchModel;
@@ -24,6 +25,8 @@ import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -269,6 +272,7 @@ public class LegoGUIController implements Initializable
                 }
             }
         });
+        showSearchLegoListBtn.setVisible(false);
 
         showSnomedBtn.setTooltip(new Tooltip("Show the Snomed Tree"));
         showSnomedBtn.setToggleGroup(tg);
@@ -598,6 +602,7 @@ public class LegoGUIController implements Initializable
                 LegoGUI.getInstance().showPNCSSearchDialog(PncsSearchModel.getInstance().getPncsIdComboList());
             }
         });
+        menuSearchByPNCS.setDisable(true);
 
         // Floating Context menus
         menuDeleteLegoList = new MenuItem("Delete LegoList");
@@ -671,8 +676,18 @@ public class LegoGUIController implements Initializable
                     legoTree.getRoot().getChildren().add(new LegoTreeItem(a));
                 }
                 legoTree.getRoot().getChildren().add(new LegoTreeItem("Add Assertion", LegoTreeNodeType.addAssertionPlaceholder));
+                recursiveSort(legoTree.getRoot().getChildren());
                 expandAll(legoTree.getRoot());
             }
+        }
+    }
+    
+    private void recursiveSort(ObservableList<TreeItem<String>> items)
+    {
+        FXCollections.sort(items, new LegoTreeItemComparator(true));
+        for (TreeItem<String> item : items)
+        {
+            recursiveSort(item.getChildren());
         }
     }
     

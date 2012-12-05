@@ -1,6 +1,6 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
-import gov.va.legoEdit.gui.util.LLTreeItemComparator;
+import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.AssertionComponents;
@@ -107,10 +107,10 @@ public class LegoTreeItem extends TreeItem<String>
                 }
             }
         }
-        FXCollections.sort(getChildren(), new LLTreeItemComparator(true));
+        FXCollections.sort(getChildren(), new LegoTreeItemComparator(true));
         for (TreeItem<String> item : getChildren())
         {
-            FXCollections.sort(item.getChildren(), new LLTreeItemComparator(true));
+            FXCollections.sort(item.getChildren(), new LegoTreeItemComparator(true));
         }
     }
 
@@ -432,5 +432,14 @@ public class LegoTreeItem extends TreeItem<String>
     protected Object getExtraData()
     {
         return extraData_;
+    }
+    
+    public int getSortOrder()
+    {
+        if (tct_ != null)
+        {
+            return tct_.getSortOrder();
+        }
+        return 0;
     }
 }
