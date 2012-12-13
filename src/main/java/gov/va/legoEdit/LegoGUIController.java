@@ -268,7 +268,7 @@ public class LegoGUIController implements Initializable
                     splitLeftAllLegos.setVisible(false);
                     splitLeftFilteredLegos.setVisible(true);
                     leftPaneLabel.setText("Filtered Lego Lists");
-                    // TODO
+                    // TODO filtered lego list
                 }
             }
         });

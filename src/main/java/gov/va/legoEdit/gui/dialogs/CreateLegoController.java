@@ -115,7 +115,6 @@ public class CreateLegoController
                 expandAll(legoTreeItem);
                 ll = null;
                 legoTreeItem = null;
-                //TODO build lego...kick the right tree for update...
                 ((Stage) rootPane.getScene().getWindow()).close();
             }
         });
