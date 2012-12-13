@@ -1,1 +1,1 @@
-java -jar lego-editor.jar
+java -Xms900M -Xmx1500M -jar lego-editor.jar
