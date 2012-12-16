@@ -8,29 +8,30 @@ import java.util.Observable;
 import java.util.UUID;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 
-
 public class ConceptNode extends Observable
 {
-    HBox hbox_;
+    VBox vbox_;
     ComboBox<String> cb_;
     Label descriptionLabel_;
     Label contentLabel_;
     Concept c_;
-    
+
     public ConceptNode(String label, Concept c, LegoTreeNodeType tct, Lego lego)
     {
         c_ = c;
-        hbox_ = new HBox();
-        hbox_.setSpacing(10.0);
-        hbox_.setAlignment(Pos.CENTER_LEFT);
+        vbox_ = new VBox();
+        vbox_.setSpacing(5.0);
+        vbox_.setAlignment(Pos.CENTER_LEFT);
+        vbox_.setFillWidth(true);
         if (label != null && label.length() > 0)
         {
             contentLabel_ = new Label(label);
@@ -51,17 +52,20 @@ public class ConceptNode extends Observable
             cb_.setValue("");
         }
         cb_.setEditable(true);
-        cb_.setPrefWidth(310.0);
+        cb_.setMaxWidth(Double.MAX_VALUE);
+        cb_.setMinWidth(320.0);
         cb_.setPromptText("Specify or drop a Snomed SCTID or UUID");
+
         // TODO populate dropdown with most common values
-        descriptionLabel_ = new Label(c.getDesc());
-        
+        descriptionLabel_ = new Label((c.getDesc() == null || c.getDesc().length() == 0) ? "Enter a concept ID"
+                : c.getDesc());
+
         cb_.valueProperty().addListener(new ChangeListener<String>()
         {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
             {
-             // TODO this needs to be backgrounded as well... and add a spinner or something.
+                // TODO this needs to be backgrounded as well... and add a spinner or something.
                 try
                 {
                     System.out.println("changed within conceptNode");
@@ -80,22 +84,24 @@ public class ConceptNode extends Observable
                     // TODO more work
                     descriptionLabel_.setText("Couldn't match to a snomed concept!");
                 }
-                
+
             }
         });
-       
+
         LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(lego, cb_);
         if (contentLabel_ != null)
         {
-            hbox_.getChildren().add(contentLabel_);
+            vbox_.getChildren().add(contentLabel_);
+            VBox.setMargin(cb_, new Insets(0, 0, 0, 10));
+            VBox.setMargin(descriptionLabel_, new Insets(0, 0, 0, 15));
         }
-        hbox_.getChildren().add(cb_);
-        hbox_.getChildren().add(descriptionLabel_);
+        vbox_.getChildren().add(cb_);
+        vbox_.getChildren().add(descriptionLabel_);
     }
-    
+
     public Node getNode()
     {
-        return hbox_;
+        return vbox_;
     }
 
     public Concept getConcept()

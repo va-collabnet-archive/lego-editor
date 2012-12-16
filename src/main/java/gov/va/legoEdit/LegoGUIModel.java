@@ -62,8 +62,7 @@ public class LegoGUIModel
         {
             legoListNames_.add(new LegoTreeItem(BDBDataStoreImpl.getInstance().getLegoListByID(ll.next().getLegoListUUID())));
         }
-        //zzz makes it sort to the end - isn't used in the tree display
-        legoListNames_.add(new LegoTreeItem("zzz", LegoTreeNodeType.addLegoListPlaceholder));
+        legoListNames_.add(new LegoTreeItem(LegoTreeNodeType.blankLegoListEndNode));
         FXCollections.sort(legoListNames_, new LegoTreeItemComparator(true));
     }
 

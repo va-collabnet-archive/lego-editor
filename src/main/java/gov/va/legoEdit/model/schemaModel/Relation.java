@@ -10,6 +10,7 @@ package gov.va.legoEdit.model.schemaModel;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import com.sleepycat.persist.model.Persistent;
@@ -25,11 +26,8 @@ import com.sleepycat.persist.model.Persistent;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{}units" minOccurs="0"/>
- *         &lt;choice>
- *           &lt;element name="point" type="{}point"/>
- *           &lt;element ref="{}interval"/>
- *         &lt;/choice>
+ *         &lt;element ref="{}type"/>
+ *         &lt;element ref="{}destination"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -40,88 +38,64 @@ import com.sleepycat.persist.model.Persistent;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "units",
-    "point",
-    "interval"
+    "type",
+    "destination"
 })
-@XmlRootElement(name = "measurement")
+@XmlRootElement(name = "relation")
 @Persistent
-public class Measurement {
+public class Relation {
 
-    protected Units units;
-    protected Point point;
-    protected Interval interval;
+    @XmlElement(required = true)
+    protected Type type;
+    @XmlElement(required = true)
+    protected Destination destination;
 
     /**
-     * Gets the value of the units property.
+     * Gets the value of the type property.
      * 
      * @return
      *     possible object is
-     *     {@link Units }
+     *     {@link Type }
      *     
      */
-    public Units getUnits() {
-        return units;
+    public Type getType() {
+        return type;
     }
 
     /**
-     * Sets the value of the units property.
+     * Sets the value of the type property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Units }
+     *     {@link Type }
      *     
      */
-    public void setUnits(Units value) {
-        this.units = value;
+    public void setType(Type value) {
+        this.type = value;
     }
 
     /**
-     * Gets the value of the point property.
+     * Gets the value of the destination property.
      * 
      * @return
      *     possible object is
-     *     {@link Point }
+     *     {@link Destination }
      *     
      */
-    public Point getPoint() {
-        return point;
+    public Destination getDestination() {
+        return destination;
     }
 
     /**
-     * Sets the value of the point property.
+     * Sets the value of the destination property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Point }
+     *     {@link Destination }
      *     
      */
-    public void setPoint(Point value) {
-        this.point = value;
-    }
-
-    /**
-     * Gets the value of the interval property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Interval }
-     *     
-     */
-    public Interval getInterval() {
-        return interval;
-    }
-
-    /**
-     * Sets the value of the interval property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Interval }
-     *     
-     */
-    public void setInterval(Interval value) {
-        this.interval = value;
+    public void setDestination(Destination value) {
+        this.destination = value;
     }
 
 }

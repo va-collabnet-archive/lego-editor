@@ -8,6 +8,8 @@
 
 package gov.va.legoEdit.model.schemaModel;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -26,7 +28,7 @@ import com.sleepycat.persist.model.Persistent;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{}measurement"/>
+ *         &lt;element ref="{}relation" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -37,37 +39,42 @@ import com.sleepycat.persist.model.Persistent;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "measurement"
+    "relation"
 })
-@XmlRootElement(name = "timing")
+@XmlRootElement(name = "relationGroup")
 @Persistent
-public class Timing {
+public class RelationGroup {
 
     @XmlElement(required = true)
-    protected Measurement measurement;
+    protected List<Relation> relation;
 
     /**
-     * Gets the value of the measurement property.
+     * Gets the value of the relation property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Measurement }
-     *     
-     */
-    public Measurement getMeasurement() {
-        return measurement;
-    }
-
-    /**
-     * Sets the value of the measurement property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the relation property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Measurement }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getRelation().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Relation }
+     * 
+     * 
      */
-    public void setMeasurement(Measurement value) {
-        this.measurement = value;
+    public List<Relation> getRelation() {
+        if (relation == null) {
+            relation = new ArrayList<Relation>();
+        }
+        return this.relation;
     }
 
 }

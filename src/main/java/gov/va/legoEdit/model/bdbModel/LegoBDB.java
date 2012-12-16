@@ -3,9 +3,11 @@ package gov.va.legoEdit.model.bdbModel;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Concept;
+import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Measurement;
-import gov.va.legoEdit.model.schemaModel.Rel;
+import gov.va.legoEdit.model.schemaModel.Relation;
+import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
@@ -68,22 +70,14 @@ public class LegoBDB
         {
             assertions.add(a);
             checkAndUpdateAssertionList(a);
-            indexConcept(a.getDiscernible().getConcept());
-            indexConcept(a.getQualifier().getConcept());
+            indexExpression(a.getDiscernible().getExpression());
+            indexExpression(a.getQualifier().getExpression());
             if (a.getTiming() != null)
             {
-                Measurement m = a.getTiming().getMeasurement();
-                if (m != null && m.getUnits() != null)
-                {
-                    indexConcept(m.getUnits().getConcept());
-                }
+                indexMeasurement(a.getTiming().getMeasurement());
             }
-            indexConcept(a.getValue().getConcept());
-            Measurement m = a.getValue().getMeasurement();
-            if (m != null && m.getUnits() != null)
-            {
-                indexConcept(m.getUnits().getConcept());
-            }
+            indexExpression(a.getValue().getExpression());
+            indexMeasurement(a.getValue().getMeasurement());
             
             if (a.getAssertionComponents() != null)
             {
@@ -109,17 +103,61 @@ public class LegoBDB
             {
                 usedSCTIdentifiers.add(c.getUuid());
             }
-            for (Rel r : c.getRel())
+        }
+    }
+    
+    private void indexExpression(Expression expression)
+    {
+        if (expression != null)
+        {
+            indexConcept(expression.getConcept());
+            
+            if (expression.getExpression() != null)
             {
-                if (r.getType() != null)
+                for (Expression e : expression.getExpression())
                 {
-                    indexConcept(r.getType().getConcept());
-                }
-                if (r.getDestination() != null)
-                {
-                    indexConcept(r.getDestination().getConcept());
+                    indexExpression(e);
                 }
             }
+            
+            if (expression.getRelation() != null)
+            {
+                for (Relation r : expression.getRelation())
+                {
+                    indexRelation(r);
+                }
+            }
+            if (expression.getRelationGroup() != null)
+            {
+                for (RelationGroup rg : expression.getRelationGroup())
+                {
+                    for (Relation r : rg.getRelation())
+                    {
+                        indexRelation(r);
+                    }
+                }
+            }
+        }
+    }
+    
+    private void indexRelation(Relation r)
+    {
+        if (r.getType() != null)
+        {
+            indexConcept(r.getType().getConcept());
+        }
+        if (r.getDestination() != null)
+        {
+            indexExpression(r.getDestination().getExpression());
+            indexMeasurement(r.getDestination().getMeasurement());
+        }
+    }
+    
+    private void indexMeasurement(Measurement m)
+    {
+        if (m != null && m.getUnits() != null)
+        {
+            indexConcept(m.getUnits().getConcept());
         }
     }
 
@@ -166,23 +204,14 @@ public class LegoBDB
         	compositeAssertionUUIDs.add(ac.getAssertionUUID());
         }
         
-        indexConcept(assertion.getDiscernible().getConcept());
-        indexConcept(assertion.getQualifier().getConcept());
+        indexExpression(assertion.getDiscernible().getExpression());
+        indexExpression(assertion.getQualifier().getExpression());
         if (assertion.getTiming() != null)
         {
-            Measurement m = assertion.getTiming().getMeasurement();
-            if (m != null && m.getUnits() != null)
-            {
-                indexConcept(m.getUnits().getConcept());
-            }
-            
+            indexMeasurement(assertion.getTiming().getMeasurement());
         }
-        indexConcept(assertion.getValue().getConcept());
-        Measurement m = assertion.getValue().getMeasurement();
-        if (m != null && m.getUnits() != null)
-        {
-            indexConcept(m.getUnits().getConcept());
-        }
+        indexExpression(assertion.getValue().getExpression());
+        indexMeasurement(assertion.getValue().getMeasurement());
     }
 
     /**

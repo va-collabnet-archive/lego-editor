@@ -9,6 +9,7 @@ import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
+import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.search.PNCS.PncsSearchModel;
@@ -21,8 +22,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -84,7 +89,9 @@ public class LegoGUIController implements Initializable
     private LegoTreeView legoListTV;
     private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
     private HashMap<String, Tab> displayedLegos = new HashMap<>();
+    private HashMap<String, StringProperty> displayedLegosStyleInfo= new HashMap<>();
     private Thread dbConnectThread;
+    Random random = new Random();
 
     // Copypaste from gui tool
     @FXML //  fx:id="rootPane"
@@ -103,6 +110,8 @@ public class LegoGUIController implements Initializable
     private MenuItem menuFileExit; // Value injected by FXMLLoader
     @FXML //  fx:id="menuFileImport"
     private MenuItem menuFileImport; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuFileCreateLego"
+    private MenuItem menuFileCreateLego; // Value injected by FXMLLoader
     @FXML //  fx:id="menuSearchByPNCS"
     private MenuItem menuSearchByPNCS; // Value injected by FXMLLoader
     @FXML //  fx:id="menuSearchLegos"
@@ -294,7 +303,7 @@ public class LegoGUIController implements Initializable
     
     private void addSnomedDropTargetInternal(Lego lego, Node node)
     {
-        String legoId = makeUniqueLegoID(lego);
+        String legoId = ModelUtil.makeUniqueLegoID(lego);
         ArrayList<Node> nodes = snomedCodeDropTargets.get(legoId);
         if (nodes == null)
         {
@@ -433,21 +442,27 @@ public class LegoGUIController implements Initializable
 
     private void snomedDragStarted()
     {
-        String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
-        for (Node n : snomedCodeDropTargets.get(legoId))
+        if (editorTabPane.getSelectionModel().getSelectedItem() != null)
         {
-            DropShadow ds = new DropShadow();
-            ds.setColor(Color.LIGHTGREEN);
-            n.setEffect(ds);
+            String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
+            for (Node n : snomedCodeDropTargets.get(legoId))
+            {
+                DropShadow ds = new DropShadow();
+                ds.setColor(Color.LIGHTGREEN);
+                n.setEffect(ds);
+            }
         }
     }
 
     private void snomedDragCompleted()
     {
-        String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
-        for (Node n : snomedCodeDropTargets.get(legoId))
+        if (editorTabPane.getSelectionModel().getSelectedItem() != null)
         {
-            n.setEffect(null);
+            String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
+            for (Node n : snomedCodeDropTargets.get(legoId))
+            {
+                n.setEffect(null);
+            }
         }
     }
 
@@ -578,6 +593,20 @@ public class LegoGUIController implements Initializable
                 }
             }
         });
+        
+        //TODO find image
+        //menuFileCreateLego.setGraphic(new ImageView(new Image(LegoGUI.class
+        //        .getResourceAsStream("/fugue/16x16/icons/folder-open-table.png"))));
+        menuFileCreateLego.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
+        menuFileCreateLego.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent t)
+            {
+                LegoGUI.getInstance().showLegoListPropertiesDialog("", UUID.randomUUID().toString(),
+                        new SimpleStringProperty(""));
+            }
+        });
 
         menuFileExit.setGraphic(new ImageView(new Image(LegoGUI.class
                 .getResourceAsStream("/fugue/16x16/icons/cross.png"))));
@@ -627,21 +656,16 @@ public class LegoGUIController implements Initializable
         });
     }
 
-    public Lego getLegoBeingEdited()
+    public StringProperty getStyleForLego(Lego lego)
     {
-        return null;
+        return displayedLegosStyleInfo.get(ModelUtil.makeUniqueLegoID(lego));
     }
     
-    private String makeUniqueLegoID(Lego lego)
-    {
-        return lego.getLegoUUID() + lego.getStamp().getUuid();
-    }
-
     public void beginLegoEdit(Lego newLego)
     {
         if (newLego != null)
         {
-            String legoId = makeUniqueLegoID(newLego);
+            String legoId = ModelUtil.makeUniqueLegoID(newLego);
             if (displayedLegos.containsKey(legoId))
             {
                 editorTabPane.getSelectionModel().select(displayedLegos.get(legoId));
@@ -650,7 +674,16 @@ public class LegoGUIController implements Initializable
             {
                 final LegoTab tab = new LegoTab("Lego", legoId);
                 displayedLegos.put(legoId, tab);
+                
+                int hue = random.nextInt(361);
+                int saturation = random.nextInt(20) + 20;  //Saturation between 20% and 40%
+                int brightness = 90;  //%
+                
+                displayedLegosStyleInfo.put(legoId, new SimpleStringProperty("-fx-effect: innershadow(two-pass-box , hsb(" 
+                        + hue + ", " + saturation + "%," + brightness + "%), 15, 0.0 , 0 , 0);"));
+                tab.setStyle(displayedLegosStyleInfo.get(legoId).getValue());
                 LegoTreeView legoTree = new LegoTreeView();
+                legoTree.setEditable(false);
                 legoTree.setLego(newLego);
                 
                 BorderPane bp = new BorderPane();
@@ -675,7 +708,7 @@ public class LegoGUIController implements Initializable
                 {
                     legoTree.getRoot().getChildren().add(new LegoTreeItem(a));
                 }
-                legoTree.getRoot().getChildren().add(new LegoTreeItem("Add Assertion", LegoTreeNodeType.addAssertionPlaceholder));
+                legoTree.getRoot().getChildren().add(new LegoTreeItem(LegoTreeNodeType.blankLegoEndNode));
                 recursiveSort(legoTree.getRoot().getChildren());
                 expandAll(legoTree.getRoot());
             }
@@ -694,6 +727,8 @@ public class LegoGUIController implements Initializable
     public void legoEditTabClosed(LegoTab tab)
     {
         displayedLegos.remove(tab.getDisplayedLegoID());
+        StringProperty style = displayedLegosStyleInfo.remove(tab.getDisplayedLegoID());
+        style.setValue("-fx-effect: innershadow(two-pass-box , white , 0, 0.0 , 0 , 0);");  //Lego tree node is bound to this - auto update when we clear it.
         snomedCodeDropTargets.remove(tab.getDisplayedLegoID());
     }
 

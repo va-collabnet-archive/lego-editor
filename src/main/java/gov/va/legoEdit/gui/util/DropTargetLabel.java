@@ -8,14 +8,12 @@ public class DropTargetLabel extends Label
     private String droppedValue = null;
     private ContextMenu dropContextMenu;
     
-    public DropTargetLabel(String value)
+    public DropTargetLabel(String value, ContextMenu standardContextMenu)
     {
         super(value);
-    }
-    
-    public void setDropContextMenu(ContextMenu cm)
-    {
-        this.dropContextMenu = cm;
+        getStyleClass().add("boldLabel");
+        setContextMenu(standardContextMenu);
+        dropContextMenu = new ContextMenu();
     }
     
     public void setDroppedValue(String droppedValue)

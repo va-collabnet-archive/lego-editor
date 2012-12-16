@@ -11,6 +11,7 @@ import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.AssertionComponents;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Discernible;
+import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Pncs;
@@ -186,25 +187,31 @@ public class BDBDataStoreTest
         a.setAssertionUUID(UUID.randomUUID().toString());
 
         Discernible d = new Discernible();
+        Expression e = new Expression();
         Concept c = new Concept();
         c.setDesc("foo");
         c.setSctid(5l);
-        d.setConcept(c);
+        e.setConcept(c);
+        d.setExpression(e);
         a.setDiscernible(d);
 
         Value v = new Value();
+        Expression e1 = new Expression();
         Concept c1 = new Concept();
         c1.setDesc("bar");
         String knownUUID = UUID.randomUUID().toString();
         c1.setUuid(knownUUID);
-        v.setConcept(c1);
+        e1.setConcept(c1);
+        v.setExpression(e1);
         a.setValue(v);
 
         Qualifier q = new Qualifier();
+        Expression e2 = new Expression();
         Concept c2 = new Concept();
         c2.setDesc("bar");
         c2.setSctid(99l);
-        q.setConcept(c2);
+        e2.setConcept(c2);
+        q.setExpression(e2);
         a.setQualifier(q);
 
         l1.getAssertion().add(a);
@@ -302,24 +309,30 @@ public class BDBDataStoreTest
          a.setAssertionUUID(UUID.randomUUID().toString());
 
          Discernible d = new Discernible();
+         Expression e = new Expression();
          Concept c = new Concept();
          c.setDesc("foo");
          c.setSctid(5l);
-         d.setConcept(c);
+         e.setConcept(c);
+         d.setExpression(e);
          a.setDiscernible(d);
 
          Value v = new Value();
+         Expression e1 = new Expression();
          Concept c1 = new Concept();
          c1.setDesc("bar");
          c1.setUuid(UUID.randomUUID().toString());
-         v.setConcept(c1);
+         e1.setConcept(c1);
+         v.setExpression(e1);
          a.setValue(v);
 
          Qualifier q = new Qualifier();
+         Expression e2 = new Expression();
          Concept c2 = new Concept();
          c2.setDesc("me");
          c2.setSctid(99l);
-         q.setConcept(c2);
+         e2.setConcept(c2);
+         q.setExpression(e2);
          a.setQualifier(q);
          return a;
     }
@@ -397,25 +410,31 @@ public class BDBDataStoreTest
         String knownAssertionId = a.getAssertionUUID();
 
         Discernible d = new Discernible();
+        Expression e = new Expression();
         Concept c = new Concept();
         c.setDesc("foo");
         c.setSctid(5l);
-        d.setConcept(c);
+        e.setConcept(c);
+        d.setExpression(e);
         a.setDiscernible(d);
 
         Value v = new Value();
+        Expression e1 = new Expression();
         Concept c1 = new Concept();
         c1.setDesc("bar");
         String knownUUID = UUID.randomUUID().toString();
         c1.setUuid(knownUUID);
-        v.setConcept(c1);
+        e1.setConcept(c1);
+        v.setExpression(e1);
         a.setValue(v);
 
         Qualifier q = new Qualifier();
+        Expression e2 = new Expression();
         Concept c2 = new Concept();
         c2.setDesc("bar");
         c2.setSctid(99l);
-        q.setConcept(c2);
+        e2.setConcept(c2);
+        q.setExpression(e2);
         a.setQualifier(q);
 
         l1.getAssertion().add(a);
@@ -453,6 +472,8 @@ public class BDBDataStoreTest
         
         //TODO TEST validate correct behavior with STAMPs used by multiple legos (probably via import from XML instead, since that doesn't modify the STAMP)
         //LegoList with multiple legos, each with the same stamp, same uuid.
+        //TODO test ConceptConjunctions - searching them, etc.
+        //TODO test relationGroups - searching them, etc
         
     }
     
@@ -473,25 +494,31 @@ public class BDBDataStoreTest
         a.setAssertionUUID(UUID.randomUUID().toString());
         
         Discernible d = new Discernible();
+        Expression e = new Expression();
         Concept c = new Concept();
         c.setDesc("foo");
         c.setSctid(5l);
-        d.setConcept(c);
+        e.setConcept(c);
+        d.setExpression(e);
         a.setDiscernible(d);
 
         Value v = new Value();
+        Expression e1 = new Expression();
         Concept c1 = new Concept();
         c1.setDesc("bar");
         String knownUUID = UUID.randomUUID().toString();
         c1.setUuid(knownUUID);
-        v.setConcept(c1);
+        e1.setConcept(c1);
+        v.setExpression(e1);
         a.setValue(v);
 
         Qualifier q = new Qualifier();
+        Expression e2 = new Expression();
         Concept c2 = new Concept();
         c2.setDesc("bar");
         c2.setSctid(99l);
-        q.setConcept(c2);
+        e2.setConcept(c2);
+        q.setExpression(e2);
         a.setQualifier(q);
 
         l1.getAssertion().add(a);
@@ -502,7 +529,7 @@ public class BDBDataStoreTest
             BDBDataStoreImpl.getInstance().commitLego(l1, "foo");
             fail("This should have failed");
         }
-        catch (WriteException e)
+        catch (WriteException ex)
         {
             //expected
         }
@@ -520,7 +547,7 @@ public class BDBDataStoreTest
             BDBDataStoreImpl.getInstance().commitLego(l1, legoListBId);
             fail("This should have failed");
         }
-        catch (WriteException e)
+        catch (WriteException ex)
         {
             //expected
         }
@@ -533,7 +560,7 @@ public class BDBDataStoreTest
             BDBDataStoreImpl.getInstance().commitLego(l1, legoListBId);
             fail("This should have failed");
         }
-        catch (WriteException e)
+        catch (WriteException ex)
         {
             //expected
         }

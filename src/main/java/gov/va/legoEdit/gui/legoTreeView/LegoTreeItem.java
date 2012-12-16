@@ -8,13 +8,15 @@ import gov.va.legoEdit.model.schemaModel.Bound;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Destination;
 import gov.va.legoEdit.model.schemaModel.Discernible;
+import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Interval;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Point;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
-import gov.va.legoEdit.model.schemaModel.Rel;
+import gov.va.legoEdit.model.schemaModel.Relation;
+import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Timing;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Value;
@@ -27,7 +29,7 @@ import javafx.scene.control.TreeItem;
 
 public class LegoTreeItem extends TreeItem<String>
 {
-    private LegoTreeNodeType tct_ = null;
+    private LegoTreeNodeType ltnt_ = null;
     private Object extraData_ = null;
     
     public LegoTreeItem()
@@ -40,15 +42,21 @@ public class LegoTreeItem extends TreeItem<String>
 		setValue(value);
 	}
 	
+	public LegoTreeItem(LegoTreeNodeType tct)
+    {
+        this.ltnt_ = tct;
+        setValue(null);
+    }
+	
 	public LegoTreeItem(String value, LegoTreeNodeType tct)
     {
-        this.tct_ = tct;
+        this.ltnt_ = tct;
         setValue(value);
     }
 	
 	public LegoTreeItem(String label, String value, LegoTreeNodeType tct)
 	{
-		this.tct_ = tct;
+		this.ltnt_ = tct;
 		setValue(value);
 		extraData_ = label;
 	}
@@ -57,7 +65,7 @@ public class LegoTreeItem extends TreeItem<String>
     {
         setValue(ll.getGroupName());
         this.extraData_ = ll;
-        this.tct_ = LegoTreeNodeType.legoList;
+        this.ltnt_ = LegoTreeNodeType.legoList;
 
         // Going to reorganize these under the LEGO list by introducing a PNCS NAME / value hierarchy in-between the
         // LegoList and the individual legos.
@@ -118,13 +126,13 @@ public class LegoTreeItem extends TreeItem<String>
     {
         setValue("Lego");
         extraData_ = l;
-        tct_ = LegoTreeNodeType.legoListLego;
+        ltnt_ = LegoTreeNodeType.legoListLego;
     }
 
 	public LegoTreeItem(Assertion a)
 	{
 		setValue("Assertion");
-		tct_ = LegoTreeNodeType.assertion;
+		ltnt_ = LegoTreeNodeType.assertion;
 		extraData_ = a;
 
 	    if (a.getAssertionComponents() != null)
@@ -135,13 +143,28 @@ public class LegoTreeItem extends TreeItem<String>
 	    {
 	        a.setDiscernible(new Discernible());
 	    }
-	    getChildren().add(new LegoTreeItem(a.getDiscernible()));
+
+        Expression de = a.getDiscernible().getExpression();
+        if (de == null)
+        {
+            de = new Expression();
+            a.getDiscernible().setExpression(de);
+        }
+        getChildren().add(new LegoTreeItem(de, LegoTreeNodeType.expressionDiscernible));
 	    
 	    if (a.getQualifier() == null)
 	    {
 	        a.setQualifier(new Qualifier());
 	    }
-	    getChildren().add(new LegoTreeItem(a.getQualifier()));
+
+        Expression qe = a.getQualifier().getExpression();
+	    if (qe == null)
+	    {
+            qe = new Expression();
+            a.getQualifier().setExpression(qe);
+        }
+	    getChildren().add(new LegoTreeItem(qe, LegoTreeNodeType.expressionQualifier));	    
+	    
 		if (a.getTiming() != null)
 		{
 		    getChildren().add(new LegoTreeItem(a.getTiming()));
@@ -153,51 +176,27 @@ public class LegoTreeItem extends TreeItem<String>
 		getChildren().add(new LegoTreeItem(a.getValue()));
 	}
 	
-	public LegoTreeItem(Discernible d)
-	{
-		setValue("Discernibile");
-		tct_ = LegoTreeNodeType.discernible;
-		if (d != null)
-		{
-			Concept c = d.getConcept();
-			if (c == null)
-			{
-			    c = new Concept();
-			    d.setConcept(c);
-			}
-			getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.destinationConcept));
-		}
-	}
-	
-	public LegoTreeItem(Qualifier q)
-	{
-		setValue("Qualifier");
-		tct_ = LegoTreeNodeType.qualifier;
-		if (q != null)
-		{
-		    Concept c = q.getConcept();
-		    if (c == null)
-            {
-                c = new Concept();
-                q.setConcept(c);
-            }
-			getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.destinationConcept));
-		}
-	}
-	
 	public LegoTreeItem(Value value)
 	{
 		setValue("Value");
-		tct_ = LegoTreeNodeType.value;
+		ltnt_ = LegoTreeNodeType.value;
 		extraData_ = value;
 
-		if (value.getConcept() != null)
+		if (value.getExpression() != null)
 		{
-			getChildren().add(new LegoTreeItem(value.getConcept(), LegoTreeNodeType.valueConcept));
+			getChildren().add(new LegoTreeItem(value.getExpression(), LegoTreeNodeType.expressionValue));
 		}
 		else if (value.getMeasurement() != null)
 		{
 			getChildren().add(new LegoTreeItem(value.getMeasurement()));
+		}
+		else if (value.getText() != null)
+		{
+		    new LegoTreeItem("TODO text");  //TODO text
+		}
+		else if (value.isBoolean() != null)
+		{
+		    new LegoTreeItem("TODO booelan");  //TODO boolean
 		}
 	}
 	
@@ -205,7 +204,7 @@ public class LegoTreeItem extends TreeItem<String>
 	{
 		setValue("Timing");
 		extraData_ = t;
-		tct_ = LegoTreeNodeType.timing;
+		ltnt_ = LegoTreeNodeType.timing;
 		if (t.getMeasurement() == null)
 		{
 		    t.setMeasurement(new Measurement());
@@ -216,7 +215,7 @@ public class LegoTreeItem extends TreeItem<String>
 	public LegoTreeItem(Interval i)
 	{
 		setValue("Interval");
-		tct_ = LegoTreeNodeType.interval;
+		ltnt_ = LegoTreeNodeType.interval;
 		if (i != null)
 		{
 		    //lower
@@ -285,19 +284,19 @@ public class LegoTreeItem extends TreeItem<String>
 	public LegoTreeItem(Point p)
 	{
 	    setValue("Point");
-	    tct_ = LegoTreeNodeType.point;
+	    ltnt_ = LegoTreeNodeType.point;
 	    extraData_ = p;
 	}
 	
 	public LegoTreeItem(Measurement measurement)
 	{
 		setValue("Measurement");
-		tct_ = LegoTreeNodeType.measurement;
+		ltnt_ = LegoTreeNodeType.measurement;
 		extraData_ = measurement;
 
 		if (measurement.getUnits() != null && measurement.getUnits().getConcept() != null)
 		{
-			getChildren().add(new LegoTreeItem(measurement.getUnits().getConcept(), LegoTreeNodeType.unitsConcept));
+			getChildren().add(new LegoTreeItem(measurement.getUnits().getConcept(), LegoTreeNodeType.conceptOptional));
 		}
 		if (measurement.getInterval() != null)
 		{
@@ -311,36 +310,10 @@ public class LegoTreeItem extends TreeItem<String>
 
 	}
 	
-//	public LegoTreeItem(Pncs pncs)
-//	{
-//		setValue("PNCS");
-//		tct_ = LegoTreeNodeType.pncs;
-//		if (pncs != null)
-//		{
-//			getChildren().add(new LegoTreeItem("Name", pncs.getName(), LegoTreeNodeType.labeledUneditableString));
-//			getChildren().add(new LegoTreeItem("Value", pncs.getValue(), LegoTreeNodeType.labeledUneditableString));
-//			getChildren().add(new LegoTreeItem("ID", pncs.getId() + "", LegoTreeNodeType.labeledUneditableString));
-//		}
-//	}
-//	
-//	public LegoTreeItem(Stamp stamp)
-//	{
-//		setValue("Stamp");
-//		tct_ = LegoTreeNodeType.stamp;
-//		if (stamp != null)
-//		{
-//			getChildren().add(new LegoTreeItem(stamp.getStatus(), LegoTreeNodeType.status));
-//			getChildren().add(new LegoTreeItem("Author", stamp.getAuthor(), LegoTreeNodeType.labeledUneditableString));
-//			getChildren().add(new LegoTreeItem("Module", stamp.getModule(), LegoTreeNodeType.labeledUneditableString));
-//			getChildren().add(new LegoTreeItem("Path", stamp.getPath(), LegoTreeNodeType.labeledUneditableString));
-//			getChildren().add(new LegoTreeItem("Date", new Date(TimeConvert.convert(stamp.getTime())).toString(), LegoTreeNodeType.labeledUneditableString));
-//		}
-//	}
-	
 	public LegoTreeItem(AssertionComponents acs)
 	{
 		setValue("Assertion Components");
-		tct_ = LegoTreeNodeType.assertionComponents;
+		ltnt_ = LegoTreeNodeType.assertionComponents;
 		if (acs != null)
 		{
 			for (AssertionComponent cac : acs.getAssertionComponent())
@@ -354,7 +327,7 @@ public class LegoTreeItem extends TreeItem<String>
 	public LegoTreeItem(AssertionComponent ac)
 	{
 		setValue("Assertion Component");
-		tct_ = LegoTreeNodeType.assertionComponent;
+		ltnt_ = LegoTreeNodeType.assertionComponent;
 
 		getChildren().add(new LegoTreeItem(ac.getAssertionUUID(), LegoTreeNodeType.assertionUUID));
 
@@ -372,25 +345,86 @@ public class LegoTreeItem extends TreeItem<String>
 	        t.setConcept(c);
 	    }
 	    
-	    getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.assertionTypeConcept));
+	    getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.concept));
 	    extraData_ = ac;
 	}
 	
 	public LegoTreeItem(Concept concept, LegoTreeNodeType tct)
+    {
+        extraData_ = concept;
+        this.ltnt_ = tct;
+    }
+	
+	public LegoTreeItem(Expression expression, LegoTreeNodeType tct)
 	{
-		extraData_ = concept;
-		this.tct_ = tct;
+		extraData_ = expression;
+		this.ltnt_ = tct;
+		setValue("Expression");
 		
-		for (Rel r : concept.getRel())
+		if (expression.getConcept() == null && expression.getExpression().size() == 0)
+        {
+		    Concept c = new Concept();
+            expression.setConcept(c);
+        }
+		
+		if (expression.getConcept() != null)
+		{
+		    getChildren().add(new LegoTreeItem(expression.getConcept(), LegoTreeNodeType.concept));
+		}
+		
+		if (expression.getExpression().size() > 0)
+		{
+		    while (expression.getExpression().size() < 2)
+	        {
+	            expression.getExpression().add(new Expression());
+	        }
+	        
+	        for (Expression e : expression.getExpression())
+	        {
+	            getChildren().add(new LegoTreeItem(e, tct));
+	        }
+		}
+		
+		if (expression.getRelation() != null)
+		{
+    		for (Relation r : expression.getRelation())
+            {
+    		    getChildren().add(new LegoTreeItem(r));
+            }
+		}
+		if (expression.getRelationGroup() != null)
+		{
+		    for (RelationGroup rg : expression.getRelationGroup())
+		    {
+		        LegoTreeItem rgti = new LegoTreeItem(rg);
+		        getChildren().add(rgti);
+		        for (Relation r : rg.getRelation())
+		        {
+		            rgti.getChildren().add(new LegoTreeItem(r));
+		        }
+		    }
+		}
+	}
+	
+	public LegoTreeItem(RelationGroup relationGroup)
+    {
+        extraData_ = relationGroup;
+        ltnt_ = LegoTreeNodeType.relationshipGroup;
+        setValue("Relation Group");
+        if (relationGroup.getRelation().size() == 0)
+        {
+            relationGroup.getRelation().add(new Relation());
+        }
+        for (Relation r: relationGroup.getRelation())
         {
             getChildren().add(new LegoTreeItem(r));
         }
-	}
+    }
 	
-	public LegoTreeItem(Rel r)
+	public LegoTreeItem(Relation r)
 	{
 		setValue("Relation");
-		tct_ = LegoTreeNodeType.relation;
+		ltnt_ = LegoTreeNodeType.relation;
 		extraData_ = r;
 
 		Type t = r.getType();
@@ -405,7 +439,7 @@ public class LegoTreeItem extends TreeItem<String>
 		    c = new Concept();
 		    t.setConcept(c);
 		}
-	    getChildren().add(new LegoTreeItem(r.getType().getConcept(), LegoTreeNodeType.typeConcept));
+	    getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.conceptOptional));
 	    
 	    Destination d = r.getDestination();
 	    if (d == null)
@@ -414,19 +448,27 @@ public class LegoTreeItem extends TreeItem<String>
 	        r.setDestination(d);
 	    }
 	    
-		if (d.getConcept() != null)
+		if (d.getExpression() != null)
 		{
-			getChildren().add(new LegoTreeItem(d.getConcept(), LegoTreeNodeType.destinationConcept));
+			getChildren().add(new LegoTreeItem(d.getExpression(), LegoTreeNodeType.expressionDestination));
 		}
 		else if (d.getMeasurement() != null)
 		{
 			getChildren().add(new LegoTreeItem(d.getMeasurement()));
 		}
+		else if (d.getText() != null)
+        {
+            new LegoTreeItem("TODO text");  //TODO text
+        }
+        else if (d.isBoolean() != null)
+        {
+            new LegoTreeItem("TODO booelan");  //TODO boolean
+        }
 	}
 	
 	protected LegoTreeNodeType getNodeType()
     {
-        return tct_;
+        return ltnt_;
     }
     
     protected Object getExtraData()
@@ -436,9 +478,9 @@ public class LegoTreeItem extends TreeItem<String>
     
     public int getSortOrder()
     {
-        if (tct_ != null)
+        if (ltnt_ != null)
         {
-            return tct_.getSortOrder();
+            return ltnt_.getSortOrder();
         }
         return 0;
     }
