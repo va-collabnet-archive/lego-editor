@@ -6,6 +6,7 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
+import gov.va.legoEdit.gui.searchPanel.SnomedSearchPane;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
@@ -89,7 +90,8 @@ public class LegoGUIController implements Initializable
     private LegoTreeView legoListTV;
     private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
     private HashMap<String, Tab> displayedLegos = new HashMap<>();
-    private HashMap<String, StringProperty> displayedLegosStyleInfo= new HashMap<>();
+    private HashMap<String, StringProperty> displayedLegosStyleInfo = new HashMap<>();
+    private SnomedSearchPane ssp;
     private Thread dbConnectThread;
     Random random = new Random();
 
@@ -124,12 +126,16 @@ public class LegoGUIController implements Initializable
     private ToggleButton showSearchLegoListBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="showSnomedBtn"
     private ToggleButton showSnomedBtn; // Value injected by FXMLLoader
+    @FXML //  fx:id="showSnomedSearchBtn"
+    private ToggleButton showSnomedSearchBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeft"
     private AnchorPane splitLeft; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftAllLegos"
     private AnchorPane splitLeftAllLegos; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftFilteredLegos"
     private AnchorPane splitLeftFilteredLegos; // Value injected by FXMLLoader
+    @FXML //  fx:id="splitLeftSctSearch"
+    private AnchorPane splitLeftSctSearch; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftSct"
     private AnchorPane splitLeftSct; // Value injected by FXMLLoader
     @FXML //  fx:id="splitPane"
@@ -195,6 +201,11 @@ public class LegoGUIController implements Initializable
     {
         legoListTV = new LegoTreeView();
         splitLeftAllLegos.getChildren().add(legoListTV.wrapInScrollPane());
+        
+        ssp = new SnomedSearchPane();
+        splitLeftSctSearch.getChildren().add(ssp.getPane());
+        
+        
 
         LegoGUIModel.getInstance().initializeLegoListNames(legoListTV.getRoot().getChildren());
 
@@ -258,6 +269,7 @@ public class LegoGUIController implements Initializable
                 {
                     splitLeftSct.setVisible(false);
                     splitLeftFilteredLegos.setVisible(false);
+                    splitLeftSctSearch.setVisible(false);
                     leftPaneLabel.setText("All Lego Lists");
                     splitLeftAllLegos.setVisible(true);
                 }
@@ -275,6 +287,7 @@ public class LegoGUIController implements Initializable
                 {
                     splitLeftSct.setVisible(false);
                     splitLeftAllLegos.setVisible(false);
+                    splitLeftSctSearch.setVisible(false);
                     splitLeftFilteredLegos.setVisible(true);
                     leftPaneLabel.setText("Filtered Lego Lists");
                     // TODO filtered lego list
@@ -294,8 +307,27 @@ public class LegoGUIController implements Initializable
                 {
                     splitLeftAllLegos.setVisible(false);
                     splitLeftFilteredLegos.setVisible(false);
+                    splitLeftSctSearch.setVisible(false);
                     leftPaneLabel.setText("Snomed Browser");
                     splitLeftSct.setVisible(true);
+                }
+            }
+        });
+        
+        showSnomedSearchBtn.setTooltip(new Tooltip("Show the Search Panel"));
+        showSnomedSearchBtn.setToggleGroup(tg);
+        showSnomedSearchBtn.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent e)
+            {
+                if (showSnomedSearchBtn.isSelected())
+                {
+                    splitLeftAllLegos.setVisible(false);
+                    splitLeftFilteredLegos.setVisible(false);
+                    splitLeftSct.setVisible(false);
+                    leftPaneLabel.setText("Snomed Search");
+                    splitLeftSctSearch.setVisible(true);
                 }
             }
         });
@@ -440,7 +472,7 @@ public class LegoGUIController implements Initializable
     }
     
 
-    private void snomedDragStarted()
+    public void snomedDragStarted()
     {
         if (editorTabPane.getSelectionModel().getSelectedItem() != null)
         {
@@ -454,7 +486,7 @@ public class LegoGUIController implements Initializable
         }
     }
 
-    private void snomedDragCompleted()
+    public void snomedDragCompleted()
     {
         if (editorTabPane.getSelectionModel().getSelectedItem() != null)
         {

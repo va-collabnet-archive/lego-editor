@@ -3,8 +3,14 @@ package gov.va.legoEdit.storage.wb;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.ihtsdo.bdb.BdbTerminologyStore;
+import org.ihtsdo.cc.termstore.SearchType;
 import org.ihtsdo.tk.Ts;
+import org.ihtsdo.tk.api.ComponentChroncileBI;
 import org.ihtsdo.tk.api.TerminologyStoreDI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.rest.client.TtkRestClient;
@@ -116,5 +122,28 @@ public class WBDataStore
 	public static TerminologyStoreDI Ts()
 	{
 		return WBDataStore.getInstance().dataStore_;
+	}
+	
+	/**
+	 * Returns null if search not available (only works with local DBs) - otherwise, returns the list of descriptions that matched.
+	 */
+	public List<ComponentChroncileBI<?>> descriptionSearch(String query) throws IOException
+	{
+        if (!(dataStore_ instanceof BdbTerminologyStore))
+        {
+            return null;
+        }
+        else
+        {
+            BdbTerminologyStore bts = (BdbTerminologyStore)dataStore_;
+            
+            Collection<Integer> result = bts.searchLucene(query, SearchType.DESCRIPTION);
+            ArrayList<ComponentChroncileBI<?>> resultToReturn = new ArrayList<>(result.size());
+            for (int i : result)
+            {
+                resultToReturn.add(bts.getComponent(i));
+            }
+            return resultToReturn;
+        }
 	}
 }

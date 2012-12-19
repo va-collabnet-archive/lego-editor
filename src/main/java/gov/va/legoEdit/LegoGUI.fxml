@@ -11,13 +11,30 @@
 
 <AnchorPane id="AnchorPane" fx:id="rootPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.LegoGUIController">
   <children>
-    <AnchorPane fx:id="leftButtons" maxWidth="30.0" minHeight="0.0" minWidth="0.0" prefHeight="743.0" prefWidth="1024.0" styleClass="headerBackground" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0">
+    <VBox id="VBox" alignment="TOP_CENTER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" spacing="5.0" styleClass="headerBackground" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0">
       <children>
-        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" mnemonicParsing="false" rotate="-90.0" text="Lego Lists" AnchorPane.leftAnchor="-30.0" AnchorPane.topAnchor="70.0" />
-        <ToggleButton id="showLegoList" fx:id="showSearchLegoListBtn" mnemonicParsing="false" visible="false" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="50.0" />
-        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" mnemonicParsing="false" rotate="-90.0" text="Snomed" AnchorPane.leftAnchor="-25.0" AnchorPane.topAnchor="170.0" />
+        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" minWidth="100.0" mnemonicParsing="false" rotate="-90.0" text="Lego Lists" translateY="70.0">
+          <VBox.margin>
+            <Insets bottom="90.0" />
+          </VBox.margin>
+        </ToggleButton>
+        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" minWidth="140.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Browser" translateY="85.0">
+          <VBox.margin>
+            <Insets bottom="130.0" />
+          </VBox.margin>
+        </ToggleButton>
+        <ToggleButton id="showLegoList" fx:id="showSnomedSearchBtn" minWidth="130.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Search" translateY="75.0">
+          <VBox.margin>
+            <Insets bottom="120.0" />
+          </VBox.margin>
+        </ToggleButton>
+        <ToggleButton id="showLegoList" fx:id="showSearchLegoListBtn" minWidth="50.0" mnemonicParsing="false" rotate="-90.0" visible="false">
+          <VBox.margin>
+            <Insets bottom="40.0" />
+          </VBox.margin>
+        </ToggleButton>
       </children>
-    </AnchorPane>
+    </VBox>
     <SplitPane fx:id="splitPane" dividerPositions="0.3004032258064516" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
       <items>
         <AnchorPane fx:id="splitLeft" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
@@ -38,11 +55,13 @@
             </AnchorPane>
             <AnchorPane fx:id="splitLeftAllLegos" prefHeight="160.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
             <AnchorPane id="splitLeftAllLegos" fx:id="splitLeftFilteredLegos" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
+            <AnchorPane fx:id="splitLeftSctSearch" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
           </children>
         </AnchorPane>
         <AnchorPane fx:id="splitRight" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
           <children>
-            <TabPane id="tabPane" fx:id="editorTabPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <TabPane id="tabPane" fx:id="editorTabPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <ToolBar maxHeight="30.0" minHeight="30.0" prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
           </children>
         </AnchorPane>
       </items>
