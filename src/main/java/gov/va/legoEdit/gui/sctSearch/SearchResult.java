@@ -1,4 +1,4 @@
-package gov.va.legoEdit.gui.searchPanel;
+package gov.va.legoEdit.gui.sctSearch;
 
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import java.util.HashSet;

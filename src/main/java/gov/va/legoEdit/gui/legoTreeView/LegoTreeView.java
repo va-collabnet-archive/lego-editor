@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import javafx.event.Event;
 import javafx.scene.control.ScrollPane;
@@ -8,7 +9,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 
 public class LegoTreeView extends TreeView<String>
@@ -45,18 +45,12 @@ public class LegoTreeView extends TreeView<String>
     	    LegoTreeItem lti = (LegoTreeItem)ti;
     	    if (lti.getNodeType() != null)
     	    {
-        	    if (LegoTreeNodeType.legoListLego == lti.getNodeType())
+        	    if (LegoTreeNodeType.legoReference == lti.getNodeType())
         	    {
-        	        Lego l = (Lego)lti.getExtraData();
-        	        LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(l);
+        	        LegoReference lr = (LegoReference)lti.getExtraData();
+        	        LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(lr);
         	        //When we begin a lego edit, we want to highlight it in the legoListTree.  We need to tell the tree to redraw this tree item.
         	        Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
-        	    }
-        	    else if (lti.getNodeType() == LegoTreeNodeType.legoList)
-        	    {
-// moved this to a right click menu        	        
-//        	        LegoList ll = (LegoList)cti.getExtraData();
-//        	        LegoGUI.getInstance().getLegoGUIController().displayXMLViewWindow(ll);
         	    }
     	    }
     		super.edit(ti);
@@ -69,11 +63,6 @@ public class LegoTreeView extends TreeView<String>
         sp.setContent(this);
         sp.setFitToHeight(true);
         sp.setFitToWidth(true);
-        
-        AnchorPane.setBottomAnchor(sp, 0.0);
-        AnchorPane.setTopAnchor(sp, 0.0);
-        AnchorPane.setLeftAnchor(sp, 0.0);
-        AnchorPane.setRightAnchor(sp, 0.0);
         return sp;
 	}
 	

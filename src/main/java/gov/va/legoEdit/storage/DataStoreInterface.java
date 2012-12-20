@@ -32,6 +32,11 @@ public interface DataStoreInterface
      * Get all LEGO (versions) in the DB with the provided UUID.
      */
     public List<Lego> getLegos(String legoUUID) throws DataStoreException;
+    
+    /**
+     * Get the exact lego that matches the specified ID and Stamp
+     */
+    public Lego getLego(String legoUUID, String stampUUID) throws DataStoreException;
 
     /**
      * Get all LEGOs which contain (define) the assertion with the specified assertion UUID.

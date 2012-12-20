@@ -2,9 +2,9 @@ package gov.va.legoEdit.gui.dialogs;
 
 
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
-import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.util.TimeConvert;
@@ -50,7 +50,7 @@ public class CreateLegoController
     @FXML //  fx:id="rootPane"
     private AnchorPane rootPane; // Value injected by FXMLLoader
 
-    private LegoList ll;
+    private LegoListByReference llbr;
     private DropShadow ds;
     private LegoTreeItem legoTreeItem;
     
@@ -108,13 +108,14 @@ public class CreateLegoController
                 a.setAssertionUUID(UUID.randomUUID().toString());
                 l.getAssertion().add(a);
                 
-                ll.getLego().add(l);
-                //TODO this is ugly, need to find a better way.
-                legoTreeItem.getChildren().clear();
-                legoTreeItem.buildPNCSChildren();
-                expandAll(legoTreeItem);
-                ll = null;
-                legoTreeItem = null;
+                //TODO need to reimplement this - somewhere - I need to track the legos that are new and haven't been saved yet.
+//                llbr.getLego().add(l);
+//                //TODO this is ugly, need to find a better way.
+//                legoTreeItem.getChildren().clear();
+//                legoTreeItem.buildPNCSChildren();
+//                expandAll(legoTreeItem);
+//                llbr = null;
+//                legoTreeItem = null;
                 ((Stage) rootPane.getScene().getWindow()).close();
             }
         });
@@ -159,11 +160,11 @@ public class CreateLegoController
         }
     }
     
-    public void init(LegoList ll, LegoTreeItem lti)
+    public void init(LegoListByReference llbr, LegoTreeItem lti)
     {
-        this.ll = ll;
+        this.llbr = llbr;
         this.legoTreeItem = lti;
-        legoListName.setText(ll.getGroupDescription());
+        legoListName.setText(llbr.getGroupDescription());
         pncsID.setText("");
         pncsName.setText("");
         pncsValue.setText("");

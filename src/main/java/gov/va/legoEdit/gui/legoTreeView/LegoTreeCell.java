@@ -3,6 +3,8 @@ package gov.va.legoEdit.gui.legoTreeView;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
+import gov.va.legoEdit.model.LegoListByReference;
+import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.AssertionComponents;
@@ -24,6 +26,7 @@ import gov.va.legoEdit.model.schemaModel.Timing;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Units;
 import gov.va.legoEdit.model.schemaModel.Value;
+import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.util.TimeConvert;
 import java.util.Observable;
 import java.util.Observer;
@@ -105,10 +108,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
         else
         {
-            if (treeItem.getNodeType() == LegoTreeNodeType.legoList)
+            if (treeItem.getNodeType() == LegoTreeNodeType.legoListByReference)
             {
                 final SimpleStringProperty legoListDescriptionProperty = new SimpleStringProperty(
-                        ((LegoList) treeItem.getExtraData()).getGroupDescription());
+                        ((LegoListByReference) treeItem.getExtraData()).getGroupDescription());
                 Tooltip tp = new Tooltip();
                 tp.textProperty().bind(legoListDescriptionProperty);
                 setTooltip(tp);
@@ -129,8 +132,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     @Override
                     public void handle(ActionEvent arg0)
                     {
-                        LegoList ll = (LegoList) treeItem.getExtraData();
-                        LegoGUI.getInstance().showCreateLegoDialog(ll, treeItem);
+                        LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
+                        LegoGUI.getInstance().showCreateLegoDialog(llbr, treeItem);
                     }
                 });
                 cm.getItems().add(mi);
@@ -141,8 +144,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     @Override
                     public void handle(ActionEvent arg0)
                     {
-                        LegoList ll = (LegoList) treeItem.getExtraData();
-                        LegoGUI.getInstance().showXMLViewWindow(ll);
+                        LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
+                        LegoGUI.getInstance().showXMLViewWindow(BDBDataStoreImpl.getInstance().getLegoListByID(llbr.getLegoListUUID()));
                     }
                 });
                 cm.getItems().add(mi);
@@ -153,21 +156,21 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     @Override
                     public void handle(ActionEvent arg0)
                     {
-                        LegoList ll = (LegoList) treeItem.getExtraData();
-                        LegoGUI.getInstance().showLegoListPropertiesDialog(ll.getGroupName(), ll.getLegoListUUID(),
+                        LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
+                        LegoGUI.getInstance().showLegoListPropertiesDialog(llbr.getGroupName(), llbr.getLegoListUUID(),
                                 legoListDescriptionProperty);
                     }
                 });
                 cm.getItems().add(mi);
             }
-            else if (treeItem.getNodeType() == LegoTreeNodeType.legoListLego)
+            else if (treeItem.getNodeType() == LegoTreeNodeType.legoReference)
             {
-                Lego lego = (Lego)treeItem.getExtraData();
+                LegoReference legoReference = (LegoReference)treeItem.getExtraData();
                 
                 Label l = new Label("Lego");
                 l.getStyleClass().add("boldLabel");
                 setGraphic(l);
-                StringProperty style = LegoGUI.getInstance().getLegoGUIController().getStyleForLego(lego); 
+                StringProperty style = LegoGUI.getInstance().getLegoGUIController().getStyleForLego(legoReference); 
                 if (style != null)
                 {
                     styleProperty().bind(style);
@@ -1043,11 +1046,12 @@ public class LegoTreeCell<T> extends TreeCell<T>
         a.setAssertionUUID(UUID.randomUUID().toString());
         l.getAssertion().add(a);
 
-        ll.getLego().add(l);
-        LegoTreeItem lti = new LegoTreeItem(l);
-        ti.getChildren().add(lti);
-        LegoTreeView ltv = (LegoTreeView) getTreeView();
-        ltv.getSelectionModel().select(lti);
+        //TODO fix create lego option
+//        ll.getLego().add(l);
+//        LegoTreeItem lti = new LegoTreeItem(l);
+//        ti.getChildren().add(lti);
+//        LegoTreeView ltv = (LegoTreeView) getTreeView();
+//        ltv.getSelectionModel().select(lti);
     }
 
     // TODO value menus

@@ -1,4 +1,4 @@
-package gov.va.legoEdit.gui.searchPanel;
+package gov.va.legoEdit.gui.sctSearch;
 
 import java.util.Comparator;
 

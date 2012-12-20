@@ -28,14 +28,9 @@
             <Insets bottom="120.0" />
           </VBox.margin>
         </ToggleButton>
-        <ToggleButton id="showLegoList" fx:id="showSearchLegoListBtn" minWidth="50.0" mnemonicParsing="false" rotate="-90.0" visible="false">
-          <VBox.margin>
-            <Insets bottom="40.0" />
-          </VBox.margin>
-        </ToggleButton>
       </children>
     </VBox>
-    <SplitPane fx:id="splitPane" dividerPositions="0.3004032258064516" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+    <SplitPane fx:id="splitPane" dividerPositions="0.35" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
       <items>
         <AnchorPane fx:id="splitLeft" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
           <children>
@@ -54,7 +49,6 @@
               </children>
             </AnchorPane>
             <AnchorPane fx:id="splitLeftAllLegos" prefHeight="160.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
-            <AnchorPane id="splitLeftAllLegos" fx:id="splitLeftFilteredLegos" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
             <AnchorPane fx:id="splitLeftSctSearch" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
           </children>
         </AnchorPane>
@@ -76,11 +70,6 @@
           </items>
         </Menu>
         <Menu text="_View" fx:id="menuView" />
-        <Menu text="_Search" fx:id="menuSearchLegos">
-          <items>
-            <MenuItem mnemonicParsing="false" text="Search LEGOs by PNCS" fx:id="menuSearchByPNCS" />
-          </items>
-        </Menu>
       </menus>
     </MenuBar>
   </children>

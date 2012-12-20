@@ -67,7 +67,6 @@ public class LegoListPropertiesController implements Initializable
                     ll.setGroupDescription(legoListDescription.getText());
                     ll.setGroupName(legoListName.getText());
                     ll.setLegoListUUID(legoListUUID.getText());
-                    ((Stage) rootPane.getScene().getWindow()).close();
                     try
                     {
                         LegoGUIModel.getInstance().importLegoList(ll);
@@ -77,6 +76,7 @@ public class LegoListPropertiesController implements Initializable
                         LegoGUI.getInstance().showErrorDialog("Unexpected Error", "Error creating Lego List", e.toString());
                     }
                 }
+                ((Stage) rootPane.getScene().getWindow()).close();
             }
         });
     }
@@ -96,6 +96,7 @@ public class LegoListPropertiesController implements Initializable
         legoListName.setText(name);
         legoListUUID.setText(uuid);
         legoListName.setEditable(name.length() == 0);
+        //TODO why isn't desc editable?
         legoListDescription.setEditable(description.get().length() == 0);
     }
 }

@@ -2,8 +2,8 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 public enum LegoTreeNodeType
 {
-	legoList(1),
-	legoListLego(0),
+	legoListByReference(1),
+	legoReference(0),
 	pncsValue(0), 
 	pncsName(0),
 	

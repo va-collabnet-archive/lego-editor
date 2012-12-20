@@ -8,7 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<BorderPane prefHeight="450.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.searchPanel.SnomedSearchPanelController">
+<BorderPane fx:id="borderPane" prefHeight="450.0" prefWidth="300.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.sctSearch.SnomedSearchPaneController">
   <center>
     <StackPane prefHeight="150.0" prefWidth="200.0">
       <children>

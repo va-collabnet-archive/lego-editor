@@ -262,6 +262,50 @@ public class BDBDataStoreImpl implements DataStoreInterface
             }
         }
     }
+    
+    @Override
+    public Lego getLego(String legoUUID, String stampUUID)
+    {
+        EntityCursor<LegoBDB> ec = null;
+        try
+        {
+            //TODO write test for method
+            EntityIndex<String, LegoBDB> ei = legoByUUID.subIndex(legoUUID);
+            ec = ei.entities();
+
+            for (LegoBDB current = ec.first(); current != null; current = ec.nextNoDup())
+            {
+                while (current != null)
+                {
+                    if (current.getStampBDB().getStampId().equals(stampUUID))
+                    {
+                        return current.toSchemaLego();
+                    }
+                    current = ec.nextDup();
+                }
+            }
+            return null;
+        }
+        catch (DatabaseException e)
+        {
+            logger.error("Unexpected error reading data", e);
+            throw new DataStoreException("Data read failure", e);
+        }
+        finally
+        {
+            if (ec != null)
+            {
+                try
+                {
+                    ec.close();
+                }
+                catch (DatabaseException e)
+                {
+                    logger.error("Unexpected error closing cursor", e);
+                }
+            }
+        }
+    }
 
     @Override
     public List<Lego> getLegosContainingAssertion(String assertionUUID)
@@ -574,8 +618,8 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<PncsBDB> pec = null;
         try
         {
+            //TODO write test for method
             // First go to the pncs table to get all of the pncs objects by ID, get a unique list of their unique IDs.
-
             ArrayList<Pncs> results = new ArrayList<>();
             EntityIndex<String, PncsBDB> pei = pncsById.subIndex(id);
             pec = pei.entities();

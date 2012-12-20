@@ -6,9 +6,8 @@ import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
 import gov.va.legoEdit.gui.dialogs.LegoListPropertiesController;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
+import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.LegoList;
-import gov.va.legoEdit.search.PNCS.PncsSearchDialogController;
-import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
@@ -30,12 +29,10 @@ public class LegoGUI extends Application
 	
 	private Stage mainStage_;
 	private Stage errorDialogStage_;
-	private Stage pncsSearchDialogStage_;
 	private Stage legoListPropertiesStage_;
 	private Stage createLegoStage_;
 	
 	private ErrorDialogController edc_;
-	private PncsSearchDialogController psc_;
 	private LegoGUIController lgc_;
 	private LegoListPropertiesController llpc_;
 	private CreateLegoController clc_;
@@ -89,18 +86,6 @@ public class LegoGUI extends Application
 		scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
 		errorDialogStage_.setScene(scene);
 		
-		//init pncs search dialog
-		//TODO fix up this mess
-		pncsSearchDialogStage_ = new Stage();
-		pncsSearchDialogStage_.initModality(Modality.WINDOW_MODAL);
-		pncsSearchDialogStage_.initOwner(mainStage_);
-		pncsSearchDialogStage_.initStyle(StageStyle.UTILITY);
-		
-		Parent pncsSearchDialog = FXMLLoader.load(getClass().getResource(
-                "/gov/va/legoEdit/search/PNCS/PncsSearchDialog.fxml"));
-        pncsSearchDialogStage_.setScene(new Scene(pncsSearchDialog));
-		
-		
 		//init legoPropertiesDialog
 		legoListPropertiesStage_ = new Stage();
 		legoListPropertiesStage_.initModality(Modality.WINDOW_MODAL);
@@ -124,7 +109,6 @@ public class LegoGUI extends Application
         createLegoStage_.setScene(scene);
 	}
 
-	//TODO see if I can get rid of this
 	public LegoGUIController getLegoGUIController()
 	{
 	    return lgc_;
@@ -137,9 +121,9 @@ public class LegoGUI extends Application
 		errorDialogStage_.showAndWait();
 	}
 	
-	public void showCreateLegoDialog(LegoList ll, LegoTreeItem ti)
+	public void showCreateLegoDialog(LegoListByReference llbr, LegoTreeItem ti)
     {
-	    clc_.init(ll, ti);
+	    clc_.init(llbr, ti);
 	    createLegoStage_.show();
     }
 	
@@ -152,13 +136,6 @@ public class LegoGUI extends Application
 	    legoListPropertiesStage_.show();
 	}
 
-	public boolean showPNCSSearchDialog(List<String> pncsIdList)
-	{
-		psc_.setVariables(pncsIdList);
-		pncsSearchDialogStage_.showAndWait();
-		return psc_.isDisplaying();
-	}
-	
 	public void showXMLViewWindow(final LegoList ll)
     {
         final XMLDisplayWindow xdw = new XMLDisplayWindow(mainStage_, ll.getGroupName());

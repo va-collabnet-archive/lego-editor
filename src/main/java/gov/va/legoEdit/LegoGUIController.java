@@ -1,19 +1,20 @@
 package gov.va.legoEdit;
 
 import gov.va.legoEdit.formats.LegoXMLUtils;
+import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
 import gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
+import gov.va.legoEdit.gui.sctSearch.SnomedSearchPaneController;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
-import gov.va.legoEdit.gui.searchPanel.SnomedSearchPane;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
+import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
-import gov.va.legoEdit.search.PNCS.PncsSearchModel;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.util.TimeConvert;
@@ -87,11 +88,11 @@ public class LegoGUIController implements Initializable
   
     private MenuItem menuDeleteLegoList;
     private SimTreeView sctTree;
-    private LegoTreeView legoListTV;
+    private LegoFilterPaneController lfpc;
     private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
     private HashMap<String, Tab> displayedLegos = new HashMap<>();
     private HashMap<String, StringProperty> displayedLegosStyleInfo = new HashMap<>();
-    private SnomedSearchPane ssp;
+    private SnomedSearchPaneController sspc;
     private Thread dbConnectThread;
     Random random = new Random();
 
@@ -114,16 +115,10 @@ public class LegoGUIController implements Initializable
     private MenuItem menuFileImport; // Value injected by FXMLLoader
     @FXML //  fx:id="menuFileCreateLego"
     private MenuItem menuFileCreateLego; // Value injected by FXMLLoader
-    @FXML //  fx:id="menuSearchByPNCS"
-    private MenuItem menuSearchByPNCS; // Value injected by FXMLLoader
-    @FXML //  fx:id="menuSearchLegos"
-    private Menu menuSearchLegos; // Value injected by FXMLLoader
     @FXML //  fx:id="menuView"
     private Menu menuView; // Value injected by FXMLLoader
     @FXML //  fx:id="showAllLegoListBtn"
     private ToggleButton showAllLegoListBtn; // Value injected by FXMLLoader
-    @FXML //  fx:id="showSearchLegoListBtn"
-    private ToggleButton showSearchLegoListBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="showSnomedBtn"
     private ToggleButton showSnomedBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="showSnomedSearchBtn"
@@ -132,8 +127,6 @@ public class LegoGUIController implements Initializable
     private AnchorPane splitLeft; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftAllLegos"
     private AnchorPane splitLeftAllLegos; // Value injected by FXMLLoader
-    @FXML //  fx:id="splitLeftFilteredLegos"
-    private AnchorPane splitLeftFilteredLegos; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftSctSearch"
     private AnchorPane splitLeftSctSearch; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftSct"
@@ -155,15 +148,11 @@ public class LegoGUIController implements Initializable
         assert menuFile != null : "fx:id=\"menuFile\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileExit != null : "fx:id=\"menuFileExit\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileImport != null : "fx:id=\"menuFileImport\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert menuSearchByPNCS != null : "fx:id=\"menuSearchByPNCS\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert menuSearchLegos != null : "fx:id=\"menuSearchLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuView != null : "fx:id=\"menuView\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert showAllLegoListBtn != null : "fx:id=\"showAllLegoListBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert showSearchLegoListBtn != null : "fx:id=\"showSearchLegoListBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert showSnomedBtn != null : "fx:id=\"showSnomedBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitLeft != null : "fx:id=\"splitLeft\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitLeftAllLegos != null : "fx:id=\"splitLeftAllLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert splitLeftFilteredLegos != null : "fx:id=\"splitLeftFilteredLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitLeftSct != null : "fx:id=\"splitLeftSct\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitPane != null : "fx:id=\"splitPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitRight != null : "fx:id=\"splitRight\" was not injected: check your FXML file 'LegoGUI.fxml'.";
@@ -199,15 +188,11 @@ public class LegoGUIController implements Initializable
      */
     protected void finishInit()
     {
-        legoListTV = new LegoTreeView();
-        splitLeftAllLegos.getChildren().add(legoListTV.wrapInScrollPane());
+        lfpc = LegoFilterPaneController.init();
+        splitLeftAllLegos.getChildren().add(lfpc.getBorderPane());
         
-        ssp = new SnomedSearchPane();
-        splitLeftSctSearch.getChildren().add(ssp.getPane());
-        
-        
-
-        LegoGUIModel.getInstance().initializeLegoListNames(legoListTV.getRoot().getChildren());
+        sspc = SnomedSearchPaneController.init();
+        splitLeftSctSearch.getChildren().add(sspc.getBorderPane());
 
         // filteredLegoList.setItems(LegoGUIModel.getInstance().getLegoListNames());
 
@@ -268,33 +253,12 @@ public class LegoGUIController implements Initializable
                 if (showAllLegoListBtn.isSelected())
                 {
                     splitLeftSct.setVisible(false);
-                    splitLeftFilteredLegos.setVisible(false);
                     splitLeftSctSearch.setVisible(false);
                     leftPaneLabel.setText("All Lego Lists");
                     splitLeftAllLegos.setVisible(true);
                 }
             }
         });
-
-        showSearchLegoListBtn.setTooltip(new Tooltip("Show a filtered view of Lego Lists"));
-        showSearchLegoListBtn.setToggleGroup(tg);
-        showSearchLegoListBtn.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent e)
-            {
-                if (showSearchLegoListBtn.isSelected())
-                {
-                    splitLeftSct.setVisible(false);
-                    splitLeftAllLegos.setVisible(false);
-                    splitLeftSctSearch.setVisible(false);
-                    splitLeftFilteredLegos.setVisible(true);
-                    leftPaneLabel.setText("Filtered Lego Lists");
-                    // TODO filtered lego list
-                }
-            }
-        });
-        showSearchLegoListBtn.setVisible(false);
 
         showSnomedBtn.setTooltip(new Tooltip("Show the Snomed Tree"));
         showSnomedBtn.setToggleGroup(tg);
@@ -306,7 +270,6 @@ public class LegoGUIController implements Initializable
                 if (showSnomedBtn.isSelected())
                 {
                     splitLeftAllLegos.setVisible(false);
-                    splitLeftFilteredLegos.setVisible(false);
                     splitLeftSctSearch.setVisible(false);
                     leftPaneLabel.setText("Snomed Browser");
                     splitLeftSct.setVisible(true);
@@ -324,7 +287,6 @@ public class LegoGUIController implements Initializable
                 if (showSnomedSearchBtn.isSelected())
                 {
                     splitLeftAllLegos.setVisible(false);
-                    splitLeftFilteredLegos.setVisible(false);
                     splitLeftSct.setVisible(false);
                     leftPaneLabel.setText("Snomed Search");
                     splitLeftSctSearch.setVisible(true);
@@ -652,19 +614,6 @@ public class LegoGUIController implements Initializable
             }
         });
 
-        menuSearchByPNCS.setGraphic(new ImageView(new Image(LegoGUI.class
-                .getResourceAsStream("/fugue/16x16/icons/cross.png"))));
-        menuSearchByPNCS.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
-        menuSearchByPNCS.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent t)
-            {
-                LegoGUI.getInstance().showPNCSSearchDialog(PncsSearchModel.getInstance().getPncsIdComboList());
-            }
-        });
-        menuSearchByPNCS.setDisable(true);
-
         // Floating Context menus
         menuDeleteLegoList = new MenuItem("Delete LegoList");
         menuDeleteLegoList.setDisable(true);
@@ -688,15 +637,22 @@ public class LegoGUIController implements Initializable
         });
     }
 
-    public StringProperty getStyleForLego(Lego lego)
+    public StringProperty getStyleForLego(LegoReference legoReference)
     {
-        return displayedLegosStyleInfo.get(ModelUtil.makeUniqueLegoID(lego));
+        return displayedLegosStyleInfo.get(legoReference.getUniqueId());
     }
     
-    public void beginLegoEdit(Lego newLego)
+    public void beginLegoEdit(LegoReference legoReference)
     {
-        if (newLego != null)
+        if (legoReference != null)
         {
+            Lego newLego = BDBDataStoreImpl.getInstance().getLego(legoReference.getLegoUUID(), legoReference.getStampUUID());
+            if (newLego == null)
+            {
+                logger.error("Couldn't find a lego that should have existed!");
+                LegoGUI.getInstance().showErrorDialog("Couldn't find Lego", "Couldn't find a Lego which should have existed.", "");
+                return;
+            }
             String legoId = ModelUtil.makeUniqueLegoID(newLego);
             if (displayedLegos.containsKey(legoId))
             {
@@ -823,8 +779,11 @@ public class LegoGUIController implements Initializable
 //            tabsRenderedSinceSelect.add(editTab);
 //        }
 //    }
-
     
+    public LegoFilterPaneController getLegoFilterPaneController()
+    {
+        return lfpc;
+    }
 
     private void shutdown()
     {

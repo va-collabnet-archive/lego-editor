@@ -1,6 +1,8 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
+import gov.va.legoEdit.model.LegoListByReference;
+import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.AssertionComponents;
@@ -10,8 +12,6 @@ import gov.va.legoEdit.model.schemaModel.Destination;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Interval;
-import gov.va.legoEdit.model.schemaModel.Lego;
-import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Point;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
@@ -61,11 +61,11 @@ public class LegoTreeItem extends TreeItem<String>
 		extraData_ = label;
 	}
 
-    public LegoTreeItem(LegoList ll)
+    public LegoTreeItem(LegoListByReference llbr)
     {
-        setValue(ll.getGroupName());
-        this.extraData_ = ll;
-        this.ltnt_ = LegoTreeNodeType.legoList;
+        setValue(llbr.getGroupName());
+        this.extraData_ = llbr;
+        this.ltnt_ = LegoTreeNodeType.legoListByReference;
 
         // Going to reorganize these under the LEGO list by introducing a PNCS NAME / value hierarchy in-between the
         // LegoList and the individual legos.
@@ -75,43 +75,43 @@ public class LegoTreeItem extends TreeItem<String>
     
     public void buildPNCSChildren()
     {
-        if (!(getExtraData() instanceof LegoList))
+        if (!(getExtraData() instanceof LegoListByReference))
         {
             throw new IllegalArgumentException();
         }
-        LegoList ll = (LegoList)getExtraData();
-        Hashtable<String, Hashtable<String, List<Lego>>> pncsHier = new Hashtable<>();
+        LegoListByReference llbr = (LegoListByReference)getExtraData();
+        Hashtable<String, Hashtable<String, List<LegoReference>>> pncsHier = new Hashtable<>();
 
-        for (Lego l : ll.getLego())
+        for (LegoReference lr : llbr.getLegoReference())
         {
-            String pncsName = l.getPncs().getName();
-            Hashtable<String, List<Lego>> pncsValueTable = pncsHier.get(pncsName);
+            String pncsName = lr.getPncs().getName();
+            Hashtable<String, List<LegoReference>> pncsValueTable = pncsHier.get(pncsName);
             if (pncsValueTable == null)
             {
-                pncsValueTable = new Hashtable<String, List<Lego>>();
+                pncsValueTable = new Hashtable<String, List<LegoReference>>();
                 pncsHier.put(pncsName, pncsValueTable);
             }
-            String pncsValue = l.getPncs().getValue();
-            List<Lego> legoList = pncsValueTable.get(pncsValue);
+            String pncsValue = lr.getPncs().getValue();
+            List<LegoReference> legoList = pncsValueTable.get(pncsValue);
             if (legoList == null)
             {
-                legoList = new ArrayList<Lego>();
+                legoList = new ArrayList<LegoReference>();
                 pncsValueTable.put(pncsValue, legoList);
             }
-            legoList.add(l);
+            legoList.add(lr);
         }
 
-        for (Entry<String, Hashtable<String, List<Lego>>> items : pncsHier.entrySet())
+        for (Entry<String, Hashtable<String, List<LegoReference>>> items : pncsHier.entrySet())
         {
             LegoTreeItem pncsNameTI = new LegoTreeItem(items.getKey(), LegoTreeNodeType.pncsName);
             getChildren().add(pncsNameTI);
-            for (Entry<String, List<Lego>> nestedItems : items.getValue().entrySet())
+            for (Entry<String, List<LegoReference>> nestedItems : items.getValue().entrySet())
             {
                 LegoTreeItem pncsValueTI = new LegoTreeItem(nestedItems.getKey(), LegoTreeNodeType.pncsValue);
                 pncsNameTI.getChildren().add(pncsValueTI);
-                for (Lego l : nestedItems.getValue())
+                for (LegoReference lr : nestedItems.getValue())
                 {
-                    pncsValueTI.getChildren().add(new LegoTreeItem(l));
+                    pncsValueTI.getChildren().add(new LegoTreeItem(lr));
                 }
             }
         }
@@ -122,11 +122,11 @@ public class LegoTreeItem extends TreeItem<String>
         }
     }
 
-    public LegoTreeItem(Lego l)
+    public LegoTreeItem(LegoReference lr)
     {
         setValue("Lego");
-        extraData_ = l;
-        ltnt_ = LegoTreeNodeType.legoListLego;
+        extraData_ = lr;
+        ltnt_ = LegoTreeNodeType.legoReference;
     }
 
 	public LegoTreeItem(Assertion a)

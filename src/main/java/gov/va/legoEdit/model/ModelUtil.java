@@ -8,4 +8,9 @@ public class ModelUtil
     {
         return lego.getLegoUUID() + lego.getStamp().getUuid();
     }
+    
+    public static String makeUniqueLegoID(String legoUUID, String stampUUID)
+    {
+        return legoUUID + stampUUID;
+    }
 }

@@ -1,4 +1,4 @@
-package gov.va.legoEdit.gui.searchPanel;
+package gov.va.legoEdit.gui.sctSearch;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.storage.DataStoreException;
@@ -17,6 +17,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -33,6 +34,8 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import org.ihtsdo.tk.api.ComponentChroncileBI;
@@ -41,9 +44,9 @@ import org.ihtsdo.tk.api.description.DescriptionAnalogBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SnomedSearchPanelController implements Initializable
+public class SnomedSearchPaneController implements Initializable
 {
-    Logger logger = LoggerFactory.getLogger(SnomedSearchPanelController.class);
+    Logger logger = LoggerFactory.getLogger(SnomedSearchPaneController.class);
     private boolean cancelSearch = false;
     private BooleanProperty searchRunning = new SimpleBooleanProperty(false);
     
@@ -55,6 +58,22 @@ public class SnomedSearchPanelController implements Initializable
     private TextField searchText; // Value injected by FXMLLoader
     @FXML // fx:id="searchResults"
     private ListView<SearchResult> searchResults; // Value injected by FXMLLoader
+    @FXML // fx:id="borderPane"
+    private BorderPane borderPane; // Value injected by FXMLLoader
+    
+    public static SnomedSearchPaneController init()
+    {
+        try
+        {
+            FXMLLoader loader = new FXMLLoader();
+            loader.load(SnomedSearchPaneController.class.getResourceAsStream("SnomedSearchPane.fxml"));
+            return loader.getController();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Unexpected", e);
+        }
+    }
 
     @Override
     // This method is called by the FXMLLoader when initialization is complete
@@ -64,6 +83,12 @@ public class SnomedSearchPanelController implements Initializable
         assert searchResults != null : "fx:id=\"searchResults\" was not injected: check your FXML file 'SearchPanel.fxml'.";
 
         // initialize your logic here: all @FXML variables will have been injected
+        
+        borderPane.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+        AnchorPane.setBottomAnchor(borderPane, 0.0);
+        AnchorPane.setTopAnchor(borderPane, 0.0);
+        AnchorPane.setLeftAnchor(borderPane, 0.0);
+        AnchorPane.setRightAnchor(borderPane, 0.0);
 
         searchResults.setCellFactory(new Callback<ListView<SearchResult>, ListCell<SearchResult>>()
         {
@@ -115,6 +140,24 @@ public class SnomedSearchPanelController implements Initializable
                                 }
                             });
                             cm.getItems().add(mi);
+                            
+                            mi = new MenuItem("Filter for Legos that use this Concept");
+                            mi.setOnAction(new EventHandler<ActionEvent>()
+                            {
+
+                                @Override
+                                public void handle(ActionEvent event)
+                                {
+                                    if (item.getConcept() != null)
+                                    {
+                                        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController()
+                                            .filterOnConcept(item.getConcept().getUUIDs().get(0).toString());
+                                        //TODO auto-flip the view from search to filter
+                                    }
+                                }
+                            });
+                            cm.getItems().add(mi);
+                            
                             setContextMenu(cm);
                         }
                     }
@@ -306,4 +349,10 @@ public class SnomedSearchPanelController implements Initializable
             }
         }
     }
+    
+    public BorderPane getBorderPane()
+    {
+        return borderPane;
+    }
+    
 }
