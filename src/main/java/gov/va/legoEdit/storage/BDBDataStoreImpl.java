@@ -567,6 +567,50 @@ public class BDBDataStoreImpl implements DataStoreInterface
             throw new DataStoreException("Data read failure", e);
         }
     }
+    
+    @Override
+    public List<Pncs> getPncs(int id) throws DataStoreException
+    {
+        EntityCursor<PncsBDB> pec = null;
+        try
+        {
+            // First go to the pncs table to get all of the pncs objects by ID, get a unique list of their unique IDs.
+
+            ArrayList<Pncs> results = new ArrayList<>();
+            EntityIndex<String, PncsBDB> pei = pncsById.subIndex(id);
+            pec = pei.entities();
+
+            for (PncsBDB current = pec.first(); current != null; current = pec.next())
+            {
+                while (current != null)
+                {
+                    results.add(current.toSchemaPncs());
+                    current = pec.nextDup();
+                }
+            }
+            pec.close();
+            return results;
+        }
+        catch (DatabaseException e)
+        {
+            logger.error("Unexpected error reading data", e);
+            throw new DataStoreException("Data read failure", e);
+        }
+        finally
+        {
+            if (pec != null)
+            {
+                try
+                {
+                    pec.close();
+                }
+                catch (DatabaseException e)
+                {
+                    logger.error("Unexpected error closing cursor", e);
+                }
+            }
+        }
+    }
 
     @Override
     public List<String> getLegoListByLego(String legoUUID)

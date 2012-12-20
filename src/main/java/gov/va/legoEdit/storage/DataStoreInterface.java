@@ -71,9 +71,14 @@ public interface DataStoreInterface
     public List<Lego> getLegosForPncs(int id) throws DataStoreException;
     
     /**
-     * Get all of the PNCS values currently in the system.
+     * Get all of the PNCS objects currently in the system.
      */
     public CloseableIterator<Pncs> getPncs() throws DataStoreException;
+    
+    /**
+     * Get all of the PNCS objects which have a matching id.
+     */
+    public List<Pncs> getPncs(int id) throws DataStoreException;
 
     /**
      * Get the UUID of the legoList(s) which contains the specified LEGO.
