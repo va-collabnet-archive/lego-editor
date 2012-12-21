@@ -1,17 +1,22 @@
 package gov.va.legoEdit.gui.legoFilterPane;
 
+import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
+import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.CloseableIterator;
+import gov.va.legoEdit.storage.wb.Utility;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -21,11 +26,16 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LegoFilterPaneController  implements Initializable {
 
@@ -41,10 +51,16 @@ public class LegoFilterPaneController  implements Initializable {
     private TextField snomedId; // Value injected by FXMLLoader
     @FXML //  fx:id="snomedLabel"
     private Label snomedLabel; // Value injected by FXMLLoader
+    @FXML //  fx:id="clearButton"
+    private Button clearButton; // Value injected by FXMLLoader
     
     private LegoTreeView ltv;
     private volatile AtomicInteger updateDisabled = new AtomicInteger(0);  //Update will only run when this is 0 
+    private DropShadow ds;
+    private Concept concept_;
 
+    Logger logger = LoggerFactory.getLogger(LegoFilterPaneController.class);
+    
     public static LegoFilterPaneController init()
     {
         try
@@ -68,7 +84,10 @@ public class LegoFilterPaneController  implements Initializable {
         assert pncsValue != null : "fx:id=\"pncsValue\" was not injected: check your FXML file 'Untitled 1'.";
 
         // initialize your logic here: all @FXML variables will have been injected
-
+        
+        ds = new DropShadow();
+        ds.setColor(Color.RED);
+        
         ltv = new LegoTreeView();
         borderPane.setCenter(ltv.wrapInScrollPane());
         AnchorPane.setBottomAnchor(borderPane, 0.0);
@@ -154,6 +173,24 @@ public class LegoFilterPaneController  implements Initializable {
             }
         });
         
+        final BooleanProperty snomedIdValid = new SimpleBooleanProperty(true);
+        snomedIdValid.addListener(new ChangeListener<Boolean>()
+        {
+            
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+            {
+                if (snomedIdValid.get())
+                {
+                    snomedId.setEffect(null);
+                }
+                else
+                {
+                    snomedId.setEffect(ds);
+                }
+            }
+        });
+        
         snomedId.textProperty().addListener(new ChangeListener<String>()
         {
             @Override
@@ -162,17 +199,46 @@ public class LegoFilterPaneController  implements Initializable {
                 if (oldValue.length() > 0 && newValue.length() == 0)
                 {
                     snomedLabel.setText("No Snomed concept entered");
+                    snomedIdValid.set(true);
                     updateLegoList();
                 }
                 
                 if (newValue.length() > 0)
                 {
-                    //TODO lookup snomed
-                    //TODO validator
-                    snomedLabel.setText("Description goes here");
-                    //TODO only update if valid
-                    updateLegoList();
+                    concept_ = Utility.lookupSnomedIdentifier(newValue);
+                    if (concept_ != null)
+                    {
+                        if (concept_.getSctid() != null)
+                        {
+                            snomedId.setText(concept_.getSctid() + "");
+                        }
+                        snomedLabel.setText(concept_.getDesc());
+                        snomedIdValid.set(true);
+                        updateLegoList();
+                    }
+                    else
+                    {
+                        concept_ = null;
+                        snomedIdValid.set(false);
+                        snomedLabel.setText("Cannot find Snomed Concept");
+                    }
                 }
+            }
+        });
+        
+        LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(snomedId);
+        
+        clearButton.setOnAction(new EventHandler<ActionEvent>()
+        {
+            
+            @Override
+            public void handle(ActionEvent event)
+            {
+                updateDisabled.incrementAndGet();
+                pncsItem.getSelectionModel().select(0);
+                snomedId.setText("");
+                updateDisabled.decrementAndGet();
+                updateLegoList();
             }
         });
         
@@ -186,7 +252,7 @@ public class LegoFilterPaneController  implements Initializable {
         snomedId.setText(conceptId);
         updateDisabled.decrementAndGet();
         updateLegoList();
-        
+        LegoGUI.getInstance().getLegoGUIController().showLegoLists();
     }
     
     public void updateLegoList()
@@ -196,9 +262,9 @@ public class LegoFilterPaneController  implements Initializable {
             return;
         }
         
+        System.out.println("Update List");
         Integer pncsFilterId = null;
         String pncsFilterValue = null;
-        String conceptFilter = null;
         if (!pncsItem.getSelectionModel().getSelectedItem().getName().equals(PncsItem.ANY))
         {
             pncsFilterId = pncsItem.getSelectionModel().getSelectedItem().getId();
@@ -207,12 +273,8 @@ public class LegoFilterPaneController  implements Initializable {
         {
             pncsFilterValue = pncsValue.getSelectionModel().getSelectedItem();
         }
-        if (snomedId.getText().length() > 0)
-        {
-            conceptFilter = snomedId.getText();
-        }
         
-        LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot().getChildren(), pncsFilterId, pncsFilterValue, conceptFilter);
+        LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot().getChildren(), pncsFilterId, pncsFilterValue, concept_);
     }
     
     public BorderPane getBorderPane()

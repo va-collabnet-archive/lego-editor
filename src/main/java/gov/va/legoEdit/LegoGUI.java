@@ -135,6 +135,11 @@ public class LegoGUI extends Application
 	    llpc_.setVariables(name, uuid, description);
 	    legoListPropertiesStage_.show();
 	}
+	
+	protected Stage getMainStage()
+	{
+	    return mainStage_;
+	}
 
 	public void showXMLViewWindow(final LegoList ll)
     {

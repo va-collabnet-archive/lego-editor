@@ -51,6 +51,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -86,15 +87,18 @@ public class LegoGUIController implements Initializable
 {
     Logger logger = LoggerFactory.getLogger(LegoGUIController.class);
   
-    private MenuItem menuDeleteLegoList;
+//    private MenuItem menuDeleteLegoList;
     private SimTreeView sctTree;
     private LegoFilterPaneController lfpc;
     private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
     private HashMap<String, Tab> displayedLegos = new HashMap<>();
     private HashMap<String, StringProperty> displayedLegosStyleInfo = new HashMap<>();
+    private HashMap<String, Lego> newLegos = new HashMap<String, Lego>();
     private SnomedSearchPaneController sspc;
     private Thread dbConnectThread;
     Random random = new Random();
+    
+    private static String NONE = "NONE";
 
     // Copypaste from gui tool
     @FXML //  fx:id="rootPane"
@@ -115,6 +119,8 @@ public class LegoGUIController implements Initializable
     private MenuItem menuFileImport; // Value injected by FXMLLoader
     @FXML //  fx:id="menuFileCreateLego"
     private MenuItem menuFileCreateLego; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuFileExportLegoLists"
+    private MenuItem menuFileExportLegoLists; // Value injected by FXMLLoader
     @FXML //  fx:id="menuView"
     private Menu menuView; // Value injected by FXMLLoader
     @FXML //  fx:id="showAllLegoListBtn"
@@ -250,13 +256,14 @@ public class LegoGUIController implements Initializable
             @Override
             public void handle(ActionEvent e)
             {
-                if (showAllLegoListBtn.isSelected())
+                if (!showAllLegoListBtn.isSelected())
                 {
-                    splitLeftSct.setVisible(false);
-                    splitLeftSctSearch.setVisible(false);
-                    leftPaneLabel.setText("All Lego Lists");
-                    splitLeftAllLegos.setVisible(true);
+                    showAllLegoListBtn.setSelected(true);
                 }
+                splitLeftSct.setVisible(false);
+                splitLeftSctSearch.setVisible(false);
+                leftPaneLabel.setText("All Lego Lists");
+                splitLeftAllLegos.setVisible(true);
             }
         });
 
@@ -297,7 +304,15 @@ public class LegoGUIController implements Initializable
     
     private void addSnomedDropTargetInternal(Lego lego, Node node)
     {
-        String legoId = ModelUtil.makeUniqueLegoID(lego);
+        String legoId;
+        if (lego == null)
+        {
+            legoId = NONE;
+        }
+        else
+        {
+            legoId = ModelUtil.makeUniqueLegoID(lego);
+        }
         ArrayList<Node> nodes = snomedCodeDropTargets.get(legoId);
         if (nodes == null)
         {
@@ -389,6 +404,42 @@ public class LegoGUIController implements Initializable
         });
     }
     
+    public void addSnomedDropTarget(final TextField n)
+    {
+        addSnomedDropTargetInternal(null, ((Node)n));
+
+        setSnomedDropShadows(n);
+
+        n.setOnDragDropped(new EventHandler<DragEvent>()
+        {
+            public void handle(DragEvent event)
+            {
+                /* data dropped */
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                try
+                {
+                    if (db.hasString())
+                    {
+                        n.setText(db.getString());
+                        success = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.error("Error dropping snomed concept", ex);
+                    LegoGUI.getInstance().showErrorDialog("Unexpected Error",
+                            "There was an unexpected error dropping the snomed concept", ex.toString());
+                }
+                /*
+                 * let the source know whether the string was successfully transferred and used
+                 */
+                event.setDropCompleted(success);
+                event.consume();
+            }
+        });
+    }
+    
     private void setSnomedDropShadows(final Node n)
     {
         n.setOnDragOver(new EventHandler<DragEvent>()
@@ -445,6 +496,12 @@ public class LegoGUIController implements Initializable
                 ds.setColor(Color.LIGHTGREEN);
                 n.setEffect(ds);
             }
+            for (Node n : snomedCodeDropTargets.get(NONE))
+            {
+                DropShadow ds = new DropShadow();
+                ds.setColor(Color.LIGHTGREEN);
+                n.setEffect(ds);
+            }
         }
     }
 
@@ -457,7 +514,16 @@ public class LegoGUIController implements Initializable
             {
                 n.setEffect(null);
             }
+            for (Node n : snomedCodeDropTargets.get(NONE))
+            {
+                n.setEffect(null);
+            }
         }
+    }
+    
+    public void showLegoLists()
+    {
+        showAllLegoListBtn.fireEvent(new ActionEvent());
     }
 
     private void setupSctTree()
@@ -601,6 +667,15 @@ public class LegoGUIController implements Initializable
                         new SimpleStringProperty(""));
             }
         });
+        
+        menuFileExportLegoLists.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                LegoGUIModel.getInstance().exportAllLegoLists();
+            }
+        });
 
         menuFileExit.setGraphic(new ImageView(new Image(LegoGUI.class
                 .getResourceAsStream("/fugue/16x16/icons/cross.png"))));
@@ -615,31 +690,36 @@ public class LegoGUIController implements Initializable
         });
 
         // Floating Context menus
-        menuDeleteLegoList = new MenuItem("Delete LegoList");
-        menuDeleteLegoList.setDisable(true);
-        menuDeleteLegoList.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-//                try
-//                {
-////                    LegoGUIModel.getInstance().removeLegoList(currentLegoList.getGroupName());
-////                    selectedLegoListChanged(null);
-//                }
-//                catch (WriteException ex)
-//                {
-//                    logger.error("Unexpeted error removing lego", ex);
-//                    LegoGUI.getInstance().showErrorDialog("Error Removing Lego",
-//                            "There was an removing the specified file", ex.getLocalizedMessage());
-//                }
-            }
-        });
+//        menuDeleteLegoList = new MenuItem("Delete LegoList");
+//        menuDeleteLegoList.setDisable(true);
+//        menuDeleteLegoList.setOnAction(new EventHandler<ActionEvent>()
+//        {
+//            @Override
+//            public void handle(ActionEvent event)
+//            {
+////                try
+////                {
+//////                    LegoGUIModel.getInstance().removeLegoList(currentLegoList.getGroupName());
+//////                    selectedLegoListChanged(null);
+////                }
+////                catch (WriteException ex)
+////                {
+////                    logger.error("Unexpeted error removing lego", ex);
+////                    LegoGUI.getInstance().showErrorDialog("Error Removing Lego",
+////                            "There was an removing the specified file", ex.getLocalizedMessage());
+////                }
+//            }
+//        });
     }
 
     public StringProperty getStyleForLego(LegoReference legoReference)
     {
         return displayedLegosStyleInfo.get(legoReference.getUniqueId());
+    }
+    
+    public void addNewLego(LegoReference legoReference, Lego lego)
+    {
+        newLegos.put(legoReference.getUniqueId(), lego);
     }
     
     public void beginLegoEdit(LegoReference legoReference)
@@ -649,9 +729,13 @@ public class LegoGUIController implements Initializable
             Lego newLego = BDBDataStoreImpl.getInstance().getLego(legoReference.getLegoUUID(), legoReference.getStampUUID());
             if (newLego == null)
             {
-                logger.error("Couldn't find a lego that should have existed!");
-                LegoGUI.getInstance().showErrorDialog("Couldn't find Lego", "Couldn't find a Lego which should have existed.", "");
-                return;
+                newLego = newLegos.get(legoReference.getUniqueId());
+                if (newLego == null)
+                {
+                    logger.error("Couldn't find a lego that should have existed!");
+                    LegoGUI.getInstance().showErrorDialog("Couldn't find Lego", "Couldn't find a Lego which should have existed.", "");
+                    return;
+                }
             }
             String legoId = ModelUtil.makeUniqueLegoID(newLego);
             if (displayedLegos.containsKey(legoId))
@@ -728,57 +812,6 @@ public class LegoGUIController implements Initializable
             expandAll(tiChild);
         }
     }
-
-//    public void selectedLegoListChanged(String newLegoList)
-//    {
-//        // TODO Make this filter aware
-//        tabsRenderedSinceSelect.clear();
-//        if (newLegoList == null)
-//        {
-//            currentLegoList = null;
-//            menuDeleteLegoList.setDisable(true);
-//            menuDeleteLegoList.setText("Delete Lego");
-//            // legoList.getSelectionModel().clearSelection();
-//            // filteredLegoList.getSelectionModel().clearSelection();
-//        }
-//        else
-//        {
-//            if (newLegoList.contains("PNCS:") && newLegoList.contains("Val:"))
-//            {
-//                Lego l = LegoGUIModel.getInstance().getLego(newLegoList);
-//                currentLegoList = new LegoList();
-//                currentLegoList.getLego().add(l);
-//            }
-//            else
-//            {
-//                currentLegoList = LegoGUIModel.getInstance().getLegoList(newLegoList);
-//            }
-//
-//            if (currentLegoList == null)
-//            {
-//                LegoGUI.getInstance().showErrorDialog("Error Reading LegoList",
-//                        "Unexpected error reading LegoList from storage",
-//                        "The LegoList for '" + newLegoList + "' could not be found");
-//                // legoList.getSelectionModel().clearSelection();
-//            }
-//            else
-//            {
-//                menuDeleteLegoList.setText("Delete Lego '" + newLegoList + "'");
-//                menuDeleteLegoList.setDisable(false);
-//            }
-//        }
-//        // updateXMLTab();
-//        updateEditorTab();
-//    }
-
-//    private void updateEditorTab()
-//    {
-//        if (tabPane.getSelectionModel().getSelectedItem() == editTab && !tabsRenderedSinceSelect.contains(editTab))
-//        {
-//            legoListTV.setRoot(new LegoTreeItem(currentLegoList));
-//            tabsRenderedSinceSelect.add(editTab);
-//        }
-//    }
     
     public LegoFilterPaneController getLegoFilterPaneController()
     {

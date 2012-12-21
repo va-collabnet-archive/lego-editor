@@ -269,7 +269,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoBDB> ec = null;
         try
         {
-            //TODO write test for method
+            //TODO TEST write test for method
             EntityIndex<String, LegoBDB> ei = legoByUUID.subIndex(legoUUID);
             ec = ei.entities();
 
@@ -395,35 +395,28 @@ public class BDBDataStoreImpl implements DataStoreInterface
         }
     }
     
-    
-    @Override
-    public List<Lego> getLegosContainingConcept(int sctId)
-    {
-        return getLegosByConceptIdentifier(sctId + "");
-    }
-
-    @Override
-    public List<Lego> getLegosContainingConcept(String uuid)
-    {
-        return getLegosByConceptIdentifier(uuid);
-    }
-
-    private List<Lego> getLegosByConceptIdentifier(String conceptUuidOrSCTId)
+    public List<Lego> getLegosContainingConceptIdentifiers(String ... conceptUuidOrSCTId)
     {
         EntityCursor<LegoBDB> ec = null;
         try
         {
             HashMap<String, LegoBDB> uniqueLegos = new HashMap<>();
-            EntityIndex<String, LegoBDB> ei = legoBySctIdentifiers.subIndex(conceptUuidOrSCTId);
-            ec = ei.entities();
-
-            for (LegoBDB current = ec.first(); current != null; current = ec.nextNoDup())
+            
+            for (String s : conceptUuidOrSCTId)
             {
-                while (current != null)
+            
+                EntityIndex<String, LegoBDB> ei = legoBySctIdentifiers.subIndex(s);
+                ec = ei.entities();
+    
+                for (LegoBDB current = ec.first(); current != null; current = ec.nextNoDup())
                 {
-                    uniqueLegos.put(current.getUniqueId(), current);
-                    current = ec.nextDup();
+                    while (current != null)
+                    {
+                        uniqueLegos.put(current.getUniqueId(), current);
+                        current = ec.nextDup();
+                    }
                 }
+                ec.close();
             }
 
             ArrayList<Lego> result = new ArrayList<>();
@@ -618,7 +611,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<PncsBDB> pec = null;
         try
         {
-            //TODO write test for method
+            //TODO TEST write test for method
             // First go to the pncs table to get all of the pncs objects by ID, get a unique list of their unique IDs.
             ArrayList<Pncs> results = new ArrayList<>();
             EntityIndex<String, PncsBDB> pei = pncsById.subIndex(id);

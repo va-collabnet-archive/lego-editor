@@ -152,7 +152,6 @@ public class SnomedSearchPaneController implements Initializable
                                     {
                                         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController()
                                             .filterOnConcept(item.getConcept().getUUIDs().get(0).toString());
-                                        //TODO auto-flip the view from search to filter
                                     }
                                 }
                             });

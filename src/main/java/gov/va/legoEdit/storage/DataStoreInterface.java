@@ -53,12 +53,7 @@ public interface DataStoreInterface
     /**
      * Get all LEGOs which contain the specified snomed concept (as any child).
      */
-    public List<Lego> getLegosContainingConcept(int sctId) throws DataStoreException;
-
-    /**
-     * Get all LEGOs which contain the specified snomed concept (as any child).
-     */
-    public List<Lego> getLegosContainingConcept(String uuid) throws DataStoreException;
+    public List<Lego> getLegosContainingConceptIdentifiers(String ... conceptUuidOrSCTId) throws DataStoreException;
 
     /**
      * Get an iterator that traverses all stored LEGO objects.

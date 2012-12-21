@@ -1,8 +1,10 @@
 package gov.va.legoEdit.gui.dialogs;
 
 
+import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.model.LegoListByReference;
+import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Pncs;
@@ -108,14 +110,16 @@ public class CreateLegoController
                 a.setAssertionUUID(UUID.randomUUID().toString());
                 l.getAssertion().add(a);
                 
-                //TODO need to reimplement this - somewhere - I need to track the legos that are new and haven't been saved yet.
-//                llbr.getLego().add(l);
-//                //TODO this is ugly, need to find a better way.
-//                legoTreeItem.getChildren().clear();
-//                legoTreeItem.buildPNCSChildren();
-//                expandAll(legoTreeItem);
-//                llbr = null;
-//                legoTreeItem = null;
+                LegoReference lr = new LegoReference(l);
+                llbr.getLegoReference().add(lr);
+                LegoGUI.getInstance().getLegoGUIController().addNewLego(lr, l);
+                
+                //TODO this is ugly, need to find a better way.
+                legoTreeItem.getChildren().clear();
+                legoTreeItem.buildPNCSChildren();
+                expandAll(legoTreeItem);
+                llbr = null;
+                legoTreeItem = null;
                 ((Stage) rootPane.getScene().getWindow()).close();
             }
         });

@@ -29,12 +29,22 @@
         <Label styleClass="boldLabel" text="Snomed ID" GridPane.columnIndex="0" GridPane.rowIndex="2" />
         <Label fx:id="snomedLabel" text="No Snomed concept entered" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="3" />
         <TextField fx:id="snomedId" maxWidth="1.7976931348623157E308" promptText="-ANY-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.rowIndex="4">
+          <children>
+            <Button fx:id="clearButton" mnemonicParsing="false" text="Clear Filter">
+              <HBox.margin>
+                <Insets right="10.0" />
+              </HBox.margin>
+            </Button>
+          </children>
+        </HBox>
       </children>
       <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="130.0" />
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" />
       </columnConstraints>
       <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />

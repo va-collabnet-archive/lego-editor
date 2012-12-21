@@ -220,17 +220,18 @@ public class BDBDataStoreTest
 
         BDBDataStoreImpl.getInstance().commitLego(l1, aId);
 
-        assertEquals("List not empty", BDBDataStoreImpl.getInstance().getLegosContainingConcept(7).size(), 0);
-        assertEquals("List not empty", BDBDataStoreImpl.getInstance().getLegosContainingConcept(UUID.randomUUID().toString()).size(), 0);
+        assertEquals("List not empty", BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers("7").size(), 0);
+        assertEquals("List not empty", BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(UUID.randomUUID().toString()).size(), 0);
 
         assertEquals("Didn't find lego",
-                BDBDataStoreImpl.getInstance().getLegosContainingConcept(knownUUID).get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+                BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(knownUUID).get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
 
         assertEquals("Didn't find lego",
-                BDBDataStoreImpl.getInstance().getLegosContainingConcept(5).get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+                BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers("5").get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
 
         assertEquals("Didn't find lego",
-                BDBDataStoreImpl.getInstance().getLegosContainingConcept(99).get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+                BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers("99").get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        //TODO TEST add test for multisearch
     }
     
     @Test
@@ -472,8 +473,8 @@ public class BDBDataStoreTest
         
         //TODO TEST validate correct behavior with STAMPs used by multiple legos (probably via import from XML instead, since that doesn't modify the STAMP)
         //LegoList with multiple legos, each with the same stamp, same uuid.
-        //TODO test ConceptConjunctions - searching them, etc.
-        //TODO test relationGroups - searching them, etc
+        //TODO TEST ConceptConjunctions - searching them, etc.
+        //TODO TEST relationGroups - searching them, etc
         
     }
     

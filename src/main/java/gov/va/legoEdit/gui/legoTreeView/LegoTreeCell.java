@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.LegoListByReference;
@@ -27,10 +28,12 @@ import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Units;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.util.TimeConvert;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -159,6 +162,47 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
                         LegoGUI.getInstance().showLegoListPropertiesDialog(llbr.getGroupName(), llbr.getLegoListUUID(),
                                 legoListDescriptionProperty);
+                    }
+                });
+                cm.getItems().add(mi);
+                
+                mi = new MenuItem("Save as XML");
+                mi.setOnAction(new EventHandler<ActionEvent>()
+                {
+                    @Override
+                    public void handle(ActionEvent arg0)
+                    {
+                        final LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
+                        Platform.runLater(new Runnable()
+                        {
+                            
+                            @Override
+                            public void run()
+                            {
+                                LegoGUIModel.getInstance().exportLegoList(llbr);
+                            }
+                        });
+                    }
+                });
+                cm.getItems().add(mi);
+                
+                mi = new MenuItem("Delete Lego List");
+                mi.setOnAction(new EventHandler<ActionEvent>()
+                {
+                    @Override
+                    public void handle(ActionEvent arg0)
+                    {
+                        //TODO add are you sure?
+                        try
+                        {
+                            LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
+                            LegoGUIModel.getInstance().removeLegoList(llbr);
+                        }
+                        catch (WriteException e)
+                        {
+                            logger.error("Error deleting lego list", e);
+                            LegoGUI.getInstance().showErrorDialog("Error Removing Lego List", "Unexpected error removing lego list", e.toString());
+                        }
                     }
                 });
                 cm.getItems().add(mi);
@@ -1013,45 +1057,52 @@ public class LegoTreeCell<T> extends TreeCell<T>
         expandAll(lti);
     }
 
-    private void createNewLego(TreeItem<String> ti)
+    private void createNewLego(LegoTreeItem ti)
     {
-        String pncsValue = ti.getValue();
-        String pncsName = ti.getParent().getValue();
-
-        // ID can be grabbed from any child lego of this treeItem.
-        // Should always be at least one child
-        int pncsId = ((Lego) ((LegoTreeItem) ti.getChildren().get(0)).getExtraData()).getPncs().getId();
-
-        LegoList ll = (LegoList) ((LegoTreeItem) ti.getParent().getParent()).getExtraData();
-
-        Lego l = new Lego();
-        Pncs pncs = new Pncs();
-        pncs.setName(pncsName);
-        pncs.setValue(pncsValue);
-        pncs.setId(pncsId);
-        l.setPncs(pncs);
-
-        Stamp s = new Stamp();
-        s.setAuthor("author"); // TODO get the stamp details
-        s.setModule("module");
-        s.setPath("path");
-        s.setStatus("Active");
-        s.setTime(TimeConvert.convert(System.currentTimeMillis()));
-        s.setUuid(UUID.randomUUID().toString());
-        l.setStamp(s);
-
-        l.setLegoUUID(UUID.randomUUID().toString());
-
-        Assertion a = new Assertion();
-        a.setAssertionUUID(UUID.randomUUID().toString());
-        l.getAssertion().add(a);
-
-        //TODO fix create lego option
-//        ll.getLego().add(l);
-//        LegoTreeItem lti = new LegoTreeItem(l);
-//        ti.getChildren().add(lti);
-//        LegoTreeView ltv = (LegoTreeView) getTreeView();
-//        ltv.getSelectionModel().select(lti);
+        if (ti.getNodeType() == LegoTreeNodeType.pncsValue)
+        {
+            String pncsValue = ti.getValue();
+            String pncsName = ti.getParent().getValue();
+    
+            // ID can be grabbed from any child lego of this treeItem.
+            // Should always be at least one child
+            int pncsId = ((LegoReference) ((LegoTreeItem) ti.getChildren().get(0)).getExtraData()).getPncs().getId();
+            LegoListByReference llbr = (LegoListByReference) ((LegoTreeItem) ti.getParent().getParent()).getExtraData();
+    
+            Lego l = new Lego();
+            Pncs pncs = new Pncs();
+            pncs.setName(pncsName);
+            pncs.setValue(pncsValue);
+            pncs.setId(pncsId);
+            l.setPncs(pncs);
+    
+            Stamp s = new Stamp();
+            s.setAuthor("author"); // TODO get the stamp details
+            s.setModule("module");
+            s.setPath("path");
+            s.setStatus("Active");
+            s.setTime(TimeConvert.convert(System.currentTimeMillis()));
+            s.setUuid(UUID.randomUUID().toString());
+            l.setStamp(s);
+    
+            l.setLegoUUID(UUID.randomUUID().toString());
+    
+            Assertion a = new Assertion();
+            a.setAssertionUUID(UUID.randomUUID().toString());
+            l.getAssertion().add(a);
+    
+            LegoReference lr = new LegoReference(l);
+            llbr.getLegoReference().add(lr);
+            LegoTreeItem lti = new LegoTreeItem(lr);
+            ti.getChildren().add(lti);
+            LegoTreeView ltv = (LegoTreeView) getTreeView();
+            ltv.getSelectionModel().select(lti);
+            LegoGUI.getInstance().getLegoGUIController().addNewLego(lr, l);
+        }
+        else
+        {
+            logger.error("Unhandled create lego request!");
+        }
     }
 
     // TODO value menus

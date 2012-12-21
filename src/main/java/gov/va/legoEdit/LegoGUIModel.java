@@ -1,15 +1,20 @@
 package gov.va.legoEdit;
 
+import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
+import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +23,8 @@ import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,11 +62,12 @@ public class LegoGUIModel
         return BDBDataStoreImpl.getInstance().getLegoListByName(legoName);
     }
 
-    public void initializeLegoListNames(ObservableList<TreeItem<String>> list, Integer pncsFilterId, String pncsFilterValue, String conceptFilter)
+    public void initializeLegoListNames(ObservableList<TreeItem<String>> list, Integer pncsFilterId, String pncsFilterValue, Concept conceptFilter)
     {
         legoLists_ = list;
         legoLists_.clear();
         //TODO need to figure out how to store the lego list name changes - currently they get thrown away...
+        //TODO need to include the legos in the "new" list over in LegoGUIController
         
         ArrayList<Lego> legos = new ArrayList<>();
         HashMap<String, LegoListByReference> legoLists = new HashMap<>();
@@ -80,7 +88,7 @@ public class LegoGUIModel
             }
             else  //use the concept filter
             {
-                legos.addAll(BDBDataStoreImpl.getInstance().getLegosContainingConcept(conceptFilter));
+                legos.addAll(BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(conceptFilter.getSctid() + "", conceptFilter.getUuid()));
             }
         }
         else
@@ -101,7 +109,8 @@ public class LegoGUIModel
             {
                 //Need to remove any legos that don't match the concept filter
                 HashSet<String> conceptLegoKeys = new HashSet<>();
-                List<Lego> conceptLegos = BDBDataStoreImpl.getInstance().getLegosContainingConcept(conceptFilter);
+                List<Lego> conceptLegos = BDBDataStoreImpl.getInstance().
+                            getLegosContainingConceptIdentifiers(conceptFilter.getSctid() + "", conceptFilter.getUuid());
                 for (Lego l : conceptLegos)
                 {
                     conceptLegoKeys.add(ModelUtil.makeUniqueLegoID(l));
@@ -158,17 +167,58 @@ public class LegoGUIModel
 
     public void removeLegoList(LegoListByReference legoListByReference) throws WriteException
     {
-        //TODO call this
         BDBDataStoreImpl.getInstance().deleteLegoList(legoListByReference.getLegoListUUID());
         legoLists_.remove(legoListByReference);
+        //Long way around to get back to the method above... but I need the filter params.
+        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
     }
-
-    public void replaceLegoList(ObservableList<String> replacements) throws WriteException
+    
+    public void exportLegoList(LegoListByReference legoListByReference)
     {
-     //   legoListNames_.clear();
-     //   for (String s : replacements) {
-    //        legoNames_.add(s);
-    //    }
-   //     FXCollections.sort(legoNames_, new AlphanumComparator(true));
+        FileChooser fc = new FileChooser();
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("LEGO xml Files (*.xml)", "*.xml"));
+        try
+        {
+            File f = fc.showSaveDialog(LegoGUI.getInstance().getMainStage().getScene().getWindow());
+            if (f != null)
+            {
+                if (f.getAbsolutePath().indexOf('.') < 0)
+                {
+                    f = new File(f.getAbsolutePath() + ".xml");
+                }
+                
+                String s = LegoXMLUtils.toXML(BDBDataStoreImpl.getInstance().getLegoListByID(legoListByReference.getLegoListUUID()));
+                Files.write(f.toPath(), s.getBytes(), StandardOpenOption.CREATE_NEW);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error exporting XML", e);
+            LegoGUI.getInstance().showErrorDialog("Error Exporting XML", "Couldn't export the XML", e.toString());
+        }
+    }
+    
+    public void exportAllLegoLists()
+    {
+        DirectoryChooser dc = new DirectoryChooser();
+        try
+        {
+            File f = dc.showDialog(LegoGUI.getInstance().getMainStage().getScene().getWindow());
+            if (f != null)
+            {
+                Iterator<LegoList> i = BDBDataStoreImpl.getInstance().getLegoLists();
+                while (i.hasNext())
+                {
+                    LegoList ll = i.next();
+                    String s = LegoXMLUtils.toXML(ll);
+                    Files.write(new File(f, ll.getGroupName()).toPath(), s.getBytes(), StandardOpenOption.CREATE_NEW);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error exporting XML", e);
+            LegoGUI.getInstance().showErrorDialog("Error Exporting XML", "Couldn't export the XML", e.toString());
+        }
     }
 }
