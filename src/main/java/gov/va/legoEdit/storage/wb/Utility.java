@@ -3,7 +3,12 @@ package gov.va.legoEdit.storage.wb;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import java.io.IOException;
 import java.util.UUID;
+import org.ihtsdo.fxmodel.concept.FxConcept;
+import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionChronicle;
+import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
 import org.ihtsdo.tk.api.concept.ConceptChronicleBI;
+import org.ihtsdo.tk.api.description.DescriptionChronicleBI;
+import org.ihtsdo.tk.api.description.DescriptionVersionBI;
 import org.ihtsdo.tk.api.id.IdBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +20,9 @@ public class Utility
     //private static UUID snomedIdType = UUID.fromString("0418a591-f75b-39ad-be2c-3ab849326da9");  //SNOMED integer id
     private static UUID snomedIdType = UUID.fromString("f7495b58-6630-3499-a44e-2052b5fcf06c");  //user
     private static Integer snomedIdTypeNid = null;
+    private static UUID FSN_UUID = UUID.fromString("00791270-77c9-32b6-b34f-d932569bd2bf");
+    private static Integer FSNTypeNid = null;
+    
     
     private static Logger logger = LoggerFactory.getLogger(Utility.class);
     
@@ -42,7 +50,7 @@ public class Utility
         if (result != null && result.getUUIDs().size() > 0)
         {
             c = new Concept();
-            c.setDesc(result.toUserString());
+            c.setDesc(Utility.getFSN(result));
             c.setUuid(result.getUUIDs().get(0).toString());
             try
             {
@@ -81,5 +89,60 @@ public class Utility
         return snomedIdTypeNid;
     }
     
-    //TODO Keiths getText() method on FxConcept returns a random synonym... need to write a utility method to dig out the FSN instead. 
+    private static int getFSNTypeNid()
+    {
+        if (FSNTypeNid == null)
+        {
+            try
+            {
+                FSNTypeNid = WBDataStore.Ts().getNidForUuids(FSN_UUID);
+            }
+            catch (IOException e)
+            {
+                logger.error("Couldn't find nid for FSN UUID", e);
+                FSNTypeNid = -1;
+            }
+        }
+        return FSNTypeNid;
+    }
+    
+    public static String getFSN(ConceptChronicleBI concept)
+    {
+        try
+        {
+            for (DescriptionChronicleBI desc : concept.getDescs())
+            {
+                for (DescriptionVersionBI<?> descVer : desc.getVersions())
+                {
+                    if (descVer.getTypeNid() == getFSNTypeNid())
+                    {
+                        return descVer.getText();
+                    }
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            //noop
+        }
+        return concept.toUserString();
+    }
+    
+    public static String getFSN(FxConcept concept)
+    {
+        //Go hunting for a FSN
+        if (concept.getDescriptions() == null)
+        {
+            return concept.getConceptReference().getText();
+        }
+        for (FxDescriptionChronicle d : concept.getDescriptions())
+        {
+            FxDescriptionVersion dv = d.getVersions().get(d.getVersions().size() - 1);
+            if (dv.getTypeReference().getUuid().equals(FSN_UUID))
+            {
+                return dv.getText();
+            }
+        }
+        return concept.getConceptReference().getText();
+    }
 }

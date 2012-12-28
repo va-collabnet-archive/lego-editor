@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.sctTreeView;
 
 //~--- non-JDK imports --------------------------------------------------------
+import gov.va.legoEdit.storage.wb.Utility;
 import javafx.application.Platform;
 
 import javafx.concurrent.Task;
@@ -241,7 +242,7 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
         }
 
         if (getValue().conceptProperty().get() != null) {
-            return getValue().conceptProperty().get().getConceptReference().getText();
+            return Utility.getFSN(getValue().conceptProperty().get());
         }
 
         return "root";

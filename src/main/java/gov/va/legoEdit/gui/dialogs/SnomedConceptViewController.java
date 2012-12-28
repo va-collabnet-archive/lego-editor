@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.CopyableLabel;
+import gov.va.legoEdit.storage.wb.Utility;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -76,7 +77,7 @@ public class SnomedConceptViewController implements Initializable
         FxConceptAttributesVersion cav = ca.getVersions().get(ca.getVersions().size() - 1); 
         conceptDefined.setText(cav.isDefined() + "");
         conceptStatus.setText(cav.getStatusReference().getText());
-        fsnLabel.setText(concept.getConceptReference().getText());
+        fsnLabel.setText(Utility.getFSN(concept));
         CopyableLabel.addCopyMenu(fsnLabel);
         uuid.setText(concept.getPrimordialUuid().toString());
         CopyableLabel.addCopyMenu(uuid);

@@ -58,6 +58,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
@@ -91,6 +92,7 @@ public class LegoGUIController implements Initializable
     private SimTreeView sctTree;
     private LegoFilterPaneController lfpc;
     private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
+    private HashMap<Node, Effect> existingEffect = new HashMap<Node, Effect>();
     private HashMap<String, Tab> displayedLegos = new HashMap<>();
     private HashMap<String, StringProperty> displayedLegosStyleInfo = new HashMap<>();
     private HashMap<String, Lego> newLegos = new HashMap<String, Lego>();
@@ -387,6 +389,8 @@ public class LegoGUIController implements Initializable
                     {
                         n.setValue(db.getString());
                         success = true;
+                        //It will have updated its effect upon the set - we don't want to restore an old one.
+                        existingEffect.remove(n);
                     }
                 }
                 catch (Exception ex)
@@ -494,6 +498,11 @@ public class LegoGUIController implements Initializable
             {
                 DropShadow ds = new DropShadow();
                 ds.setColor(Color.LIGHTGREEN);
+                Effect existing = n.getEffect();
+                if (existing != null)
+                {
+                    existingEffect.put(n, existing);
+                }
                 n.setEffect(ds);
             }
         }
@@ -501,6 +510,11 @@ public class LegoGUIController implements Initializable
         {
             DropShadow ds = new DropShadow();
             ds.setColor(Color.LIGHTGREEN);
+            Effect existing = n.getEffect();
+            if (existing != null)
+            {
+                existingEffect.put(n, existing);
+            }
             n.setEffect(ds);
         }
     }
@@ -512,12 +526,12 @@ public class LegoGUIController implements Initializable
             String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
             for (Node n : snomedCodeDropTargets.get(legoId))
             {
-                n.setEffect(null);
+                n.setEffect(existingEffect.remove(n));
             }
         }
         for (Node n : snomedCodeDropTargets.get(NONE))
         {
-            n.setEffect(null);
+            n.setEffect(existingEffect.remove(n));
         }
     }
     

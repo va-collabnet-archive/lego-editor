@@ -17,12 +17,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 public class ConceptNode extends Observable
 {
@@ -159,10 +161,13 @@ public class ConceptNode extends Observable
             {
                 cb_.setValue("");
             }
+            cb_.setEffect(null);
         }
         else
         {
-            //TODO highlight invalid
+            DropShadow ds = new DropShadow();
+            ds.setColor(Color.RED);
+            cb_.setEffect(ds);
             descriptionLabel_.setText("Couldn't match to a snomed concept!");
         }
     }

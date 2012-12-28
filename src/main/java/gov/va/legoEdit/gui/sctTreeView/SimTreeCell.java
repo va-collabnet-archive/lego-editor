@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.sctTreeView;
 
 //~--- non-JDK imports --------------------------------------------------------
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.storage.wb.Utility;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -131,7 +132,7 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
                     setGraphic(graphicBorderPane);
                 }
 
-                setText(t.toString());
+                setText(Utility.getFSN(t.getConcept()));
 
                 return;
             }
@@ -160,7 +161,14 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
                 setDisclosureNode(disclosureBorderPane);
             }
 
-            setText(t.toString());
+            if (t.getConcept() == null)
+            {
+                setText(t.toString());
+            }
+            else
+            {
+                setText(Utility.getFSN(t.getConcept()));
+            }
 
             BorderPane graphicBorderPane = new BorderPane();
 
