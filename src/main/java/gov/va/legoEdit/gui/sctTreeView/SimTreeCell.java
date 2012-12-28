@@ -1,10 +1,17 @@
 package gov.va.legoEdit.gui.sctTreeView;
 
 //~--- non-JDK imports --------------------------------------------------------
+import gov.va.legoEdit.LegoGUI;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.ObservableList;
-
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -13,23 +20,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-
+import org.ihtsdo.concurrency.FutureHelper;
 import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipChronicle;
 import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipVersion;
 import org.ihtsdo.tk.api.ContradictionException;
 import org.ihtsdo.tk.api.TerminologyStoreDI;
-
 //~--- JDK imports ------------------------------------------------------------
-
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.ihtsdo.concurrency.FutureHelper;
 
 /**
  *
@@ -41,6 +39,19 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
 
     public SimTreeCell(TerminologyStoreDI ts) {
         setOnMouseClicked(new ClickListener());
+        
+        MenuItem mi = new MenuItem("View Concept");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                LegoGUI.getInstance().showSnomedConceptDialog(SimTreeCell.this.getItem().getConcept());
+            }
+        });
+        
+        setContextMenu(new ContextMenu(mi));
+        
         this.ts = ts;
     }
 

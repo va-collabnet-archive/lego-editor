@@ -48,6 +48,7 @@ public class Utility
             {
                 for (IdBI x : result.getAdditionalIds())
                 {
+                    //TODO this will likely get the wrong value, because the DB is returning multiple authorities all with the same type... something hosed.
                     if (x.getAuthorityNid() == getSnomedIdTypeNid())
                     {
                         c.setSctid(Long.parseLong(x.getDenotation().toString()));
@@ -79,4 +80,6 @@ public class Utility
         }
         return snomedIdTypeNid;
     }
+    
+    //TODO Keiths getText() method on FxConcept returns a random synonym... need to write a utility method to dig out the FSN instead. 
 }

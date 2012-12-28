@@ -4,10 +4,14 @@ import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
 import gov.va.legoEdit.gui.dialogs.LegoListPropertiesController;
+import gov.va.legoEdit.gui.dialogs.SnomedConceptViewController;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.storage.wb.WBDataStore;
+import java.io.IOException;
+import java.util.UUID;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
@@ -18,6 +22,12 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.ihtsdo.fxmodel.concept.FxConcept;
+import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
+import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
+import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
+import org.ihtsdo.tk.api.ContradictionException;
+import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -125,6 +135,43 @@ public class LegoGUI extends Application
     {
 	    clc_.init(llbr, ti);
 	    createLegoStage_.show();
+    }
+	
+	public void showSnomedConceptDialog(UUID conceptUUID)
+    {
+	    try
+        {
+            showSnomedConceptDialog(WBDataStore.Ts().getFxConcept(conceptUUID, StandardViewCoordinates.getSnomedLatest(),  
+                    VersionPolicy.LAST_VERSIONS, RefexPolicy.REFEX_MEMBERS, RelationshipPolicy.ORIGINATING_RELATIONSHIPS));
+        }
+        catch (IOException | ContradictionException e)
+        {
+            logger.error("Unexpected error displaying snomed concept view", e);
+            showErrorDialog("Unexpected Error", "Unexpected Error displaying snomed concept view", e.toString());
+        }
+    }
+    public void showSnomedConceptDialog(FxConcept concept)
+    {
+        try
+        {
+            Stage conceptStage = new Stage();
+            conceptStage.initModality(Modality.NONE);
+            conceptStage.initOwner(mainStage_);
+            conceptStage.initStyle(StageStyle.DECORATED);
+            FXMLLoader loader = new FXMLLoader();
+            Scene scene = new Scene((Parent) loader.load(SnomedConceptViewController.class.getResourceAsStream("SnomedConceptView.fxml")));
+            SnomedConceptViewController controller = loader.getController();
+            scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+            conceptStage.setScene(scene);
+            controller.init(concept);
+            conceptStage.setTitle(controller.getTitle());
+            conceptStage.show();
+        }
+        catch (Exception e)
+        {
+            logger.error("Unexpected error displaying snomed concept view", e);
+            showErrorDialog("Unexpected Error", "Unexpected Error displaying snomed concept view", e.toString());
+        }
     }
 	
 	/**

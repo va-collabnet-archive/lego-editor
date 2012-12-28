@@ -64,8 +64,9 @@
       <menus>
         <Menu text="_File" fx:id="menuFile">
           <items>
-            <MenuItem mnemonicParsing="false" style="" text="Import Lego..." fx:id="menuFileImport" />
+            <MenuItem mnemonicParsing="false" style="" text="Import Lego Lists..." fx:id="menuFileImport" />
             <MenuItem mnemonicParsing="false" style="" text="Create New Lego..." fx:id="menuFileCreateLego" />
+            <MenuItem mnemonicParsing="false" text="Export All Lego Lists..." fx:id="menuFileExportLegoLists" />
             <MenuItem mnemonicParsing="false" text="Exit" fx:id="menuFileExit" />
           </items>
         </Menu>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
+
+<AnchorPane id="AnchorPane" fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.SnomedConceptViewController">
+  <children>
+    <VBox id="VBox" spacing="1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <children>
+        <Label fx:id="fsnLabel" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="FSN">
+          <VBox.margin>
+            <Insets />
+          </VBox.margin>
+        </Label>
+        <HBox maxWidth="1.7976931348623157E308">
+          <children>
+            <Label styleClass="boldLabel" text="UUID" />
+            <Label fx:id="uuid" text="uuid-value">
+              <HBox.margin>
+                <Insets left="10.0" />
+              </HBox.margin>
+            </Label>
+          </children>
+          <VBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </VBox.margin>
+        </HBox>
+        <HBox maxWidth="1.7976931348623157E308" spacing="5.0">
+          <children>
+            <Label styleClass="boldLabel" text="Status" />
+            <Label fx:id="conceptStatus" text="active concept" />
+            <Label styleClass="boldLabel" text="Defined">
+              <HBox.margin>
+                <Insets left="10.0" />
+              </HBox.margin>
+            </Label>
+            <Label fx:id="conceptDefined" text="False" />
+          </children>
+          <VBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </VBox.margin>
+        </HBox>
+        <ScrollPane id="ScrollPane" fitToHeight="true" fitToWidth="true" prefViewportHeight="800.0" prefViewportWidth="400.0" style="-fx-background-color:transparent;&quot;" VBox.vgrow="ALWAYS">
+          <content>
+            <VBox id="VBox" alignment="CENTER" spacing="5.0">
+              <children>
+                <VBox id="VBox" alignment="CENTER" spacing="5.0" styleClass="itemBorder" VBox.vgrow="ALWAYS">
+                  <children>
+                    <Label contentDisplay="CENTER" maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="Descriptions" />
+                    <TableView id="tableView" fx:id="descriptions" maxWidth="1.7976931348623157E308" minHeight="120.0" VBox.vgrow="ALWAYS" />
+                  </children>
+                </VBox>
+                <VBox id="VBox" alignment="CENTER" spacing="5.0" styleClass="itemBorder" VBox.vgrow="ALWAYS">
+                  <children>
+                    <Label contentDisplay="CENTER" maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="IDs" />
+                    <TableView fx:id="IDs" maxWidth="1.7976931348623157E308" minHeight="120.0" VBox.vgrow="ALWAYS" />
+                  </children>
+                </VBox>
+                <VBox id="VBox" alignment="CENTER" spacing="5.0" styleClass="itemBorder" VBox.vgrow="ALWAYS">
+                  <children>
+                    <Label id="sourceRelGridPane" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="Source Relationships" />
+                    <TableView fx:id="sourceRelationships" maxWidth="1.7976931348623157E308" minHeight="120.0" VBox.vgrow="ALWAYS" />
+                  </children>
+                </VBox>
+              </children>
+            </VBox>
+          </content>
+        </ScrollPane>
+      </children>
+    </VBox>
+  </children>
+  <padding>
+    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+  </padding>
+</AnchorPane>

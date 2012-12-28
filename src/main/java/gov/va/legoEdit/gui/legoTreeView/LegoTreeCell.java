@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.gui.util.CopyableLabel;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.LegoListByReference;
@@ -54,8 +55,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import org.slf4j.Logger;
@@ -469,21 +468,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         l.getStyleClass().add("boldLabel");
         hbox.getChildren().add(l);
 
-        Label valueLabel = new Label(value);
-
-        MenuItem mi = new MenuItem("Copy");
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent arg0)
-            {
-                ClipboardContent content = new ClipboardContent();
-                content.putString(value);
-                Clipboard.getSystemClipboard().setContent(content);
-            }
-        });
-
-        valueLabel.setContextMenu(new ContextMenu(mi));
+        Label valueLabel = new CopyableLabel(value);
         hbox.getChildren().add(valueLabel);
 
         return hbox;

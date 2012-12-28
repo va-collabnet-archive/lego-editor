@@ -1,17 +1,12 @@
 package gov.va.legoEdit.gui.legoInfoPanel;
 
 
+import gov.va.legoEdit.gui.util.CopyableLabel;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 
 
 public class LegoInfoPanelController
@@ -68,29 +63,13 @@ public class LegoInfoPanelController
         this.pncsName.setText(pncsName);
         this.pncsValue.setText(pncsValue);
         
-        addCopyMenu(this.legoAuthor);
-        addCopyMenu(this.legoDate);
-        addCopyMenu(this.legoModule);
-        addCopyMenu(this.legoPath);
-        addCopyMenu(this.legoUUID);
-        addCopyMenu(this.pncsID);
-        addCopyMenu(this.pncsName);
-        addCopyMenu(this.pncsValue);
-    }
-    
-    private void addCopyMenu(final Label label)
-    {
-        MenuItem mi = new MenuItem("Copy");
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent arg0)
-            {
-                ClipboardContent content = new ClipboardContent();
-                content.putString(label.getText());
-                Clipboard.getSystemClipboard().setContent(content);
-            }
-        });
-        label.setContextMenu(new ContextMenu(mi));
+        CopyableLabel.addCopyMenu(this.legoAuthor);
+        CopyableLabel.addCopyMenu(this.legoDate);
+        CopyableLabel.addCopyMenu(this.legoModule);
+        CopyableLabel.addCopyMenu(this.legoPath);
+        CopyableLabel.addCopyMenu(this.legoUUID);
+        CopyableLabel.addCopyMenu(this.pncsID);
+        CopyableLabel.addCopyMenu(this.pncsName);
+        CopyableLabel.addCopyMenu(this.pncsValue);
     }
 }

@@ -5,14 +5,18 @@ import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.storage.wb.Utility;
 import java.util.Observable;
+import java.util.UUID;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -115,6 +119,27 @@ public class ConceptNode extends Observable
                 LegoGUI.getInstance().getLegoGUIController().snomedDragCompleted();
             }
         });
+        
+        MenuItem mi = new MenuItem("View Concept");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                Concept c = c_;
+                if (c.getUuid() == null)
+                {
+                    c = Utility.lookupSnomedIdentifier(c_.getSctid() + "");
+                }
+                LegoGUI.getInstance().showSnomedConceptDialog(UUID.fromString(c.getUuid()));
+            }
+        });
+        
+        //Would like to do this, as well, but can't, cause javafx doesn't let you get to this menu (yet - its a bug)
+        //cb_.getEditor().getContextMenu().getItems().add(0, mi);
+        
+        descriptionLabel_.setContextMenu(new ContextMenu(mi));
+        
     }
     
     private void update()

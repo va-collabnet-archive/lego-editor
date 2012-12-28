@@ -496,12 +496,12 @@ public class LegoGUIController implements Initializable
                 ds.setColor(Color.LIGHTGREEN);
                 n.setEffect(ds);
             }
-            for (Node n : snomedCodeDropTargets.get(NONE))
-            {
-                DropShadow ds = new DropShadow();
-                ds.setColor(Color.LIGHTGREEN);
-                n.setEffect(ds);
-            }
+        }
+        for (Node n : snomedCodeDropTargets.get(NONE))
+        {
+            DropShadow ds = new DropShadow();
+            ds.setColor(Color.LIGHTGREEN);
+            n.setEffect(ds);
         }
     }
 
@@ -514,10 +514,10 @@ public class LegoGUIController implements Initializable
             {
                 n.setEffect(null);
             }
-            for (Node n : snomedCodeDropTargets.get(NONE))
-            {
-                n.setEffect(null);
-            }
+        }
+        for (Node n : snomedCodeDropTargets.get(NONE))
+        {
+            n.setEffect(null);
         }
     }
     

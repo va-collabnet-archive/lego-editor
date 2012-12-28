@@ -32,6 +32,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
@@ -105,7 +106,7 @@ public class SnomedSearchPaneController implements Initializable
                         {
                             VBox box = new VBox();
                             box.setFillWidth(true);
-                            ConceptChronicleBI wbConcept = item.getConcept();
+                            final ConceptChronicleBI wbConcept = item.getConcept();
                             String preferredText = (wbConcept != null ? wbConcept.toUserString() : "error - see log");
                             Label concept = new Label(preferredText);
                             concept.getStyleClass().add("boldLabel");
@@ -141,6 +142,17 @@ public class SnomedSearchPaneController implements Initializable
                             });
                             cm.getItems().add(mi);
                             
+                            mi = new MenuItem("View Concept");
+                            mi.setOnAction(new EventHandler<ActionEvent>()
+                            {
+                                @Override
+                                public void handle(ActionEvent event)
+                                {
+                                    LegoGUI.getInstance().showSnomedConceptDialog(item.getConcept().getUUIDs().get(0));
+                                }
+                            });
+                            cm.getItems().add(mi);
+                            
                             mi = new MenuItem("Filter for Legos that use this Concept");
                             mi.setOnAction(new EventHandler<ActionEvent>()
                             {
@@ -158,6 +170,21 @@ public class SnomedSearchPaneController implements Initializable
                             cm.getItems().add(mi);
                             
                             setContextMenu(cm);
+                            
+                            setOnMouseClicked(new EventHandler<MouseEvent>()
+                            {
+                                @Override
+                                public void handle(MouseEvent mouseEvent)
+                                {
+                                    if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
+                                    {
+                                        if (mouseEvent.getClickCount() == 2)
+                                        {
+                                            LegoGUI.getInstance().showSnomedConceptDialog(wbConcept.getUUIDs().get(0));
+                                        }
+                                    }
+                                }
+                            });
                         }
                     }
                 };
