@@ -1,6 +1,7 @@
 package gov.va.legoEdit;
 
 import gov.va.legoEdit.formats.LegoXMLUtils;
+import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
 import gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
@@ -93,7 +94,7 @@ public class LegoGUIController implements Initializable
     private LegoFilterPaneController lfpc;
     private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
     private HashMap<Node, Effect> existingEffect = new HashMap<Node, Effect>();
-    private HashMap<String, Tab> displayedLegos = new HashMap<>();
+    private HashMap<String, LegoTab> displayedLegos = new HashMap<>();
     private HashMap<String, StringProperty> displayedLegosStyleInfo = new HashMap<>();
     private HashMap<String, Lego> newLegos = new HashMap<String, Lego>();
     private SnomedSearchPaneController sspc;
@@ -167,28 +168,6 @@ public class LegoGUIController implements Initializable
 
 
         // initialize your logic here: all @FXML variables will have been injected
-
-       
-
-        // legoList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
-        // {
-        // @Override
-        // public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue)
-        // {
-        // changeSelectedLego(newValue);
-        // }
-        // });
-        //
-        // filteredLegoList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
-        // {
-        // @Override
-        // public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue)
-        // {
-        // changeSelectedLego(newValue);
-        // }
-        // });
-
-
     }
     
     /**
@@ -202,22 +181,27 @@ public class LegoGUIController implements Initializable
         sspc = SnomedSearchPaneController.init();
         splitLeftSctSearch.getChildren().add(sspc.getBorderPane());
 
-        // filteredLegoList.setItems(LegoGUIModel.getInstance().getLegoListNames());
-
         setupMenus();
         setupSctTree(); // This kicks off a thread that opens the DB connection
         
-        rootPane.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>()
+        rootPane.getScene().getWindow().setOnCloseRequest(new EventHandler<WindowEvent>()
         {
             @Override
             public void handle(WindowEvent event)
             {
-                shutdown();
+                //TODO Tis a bit of nastyness here... can't prevent the close on linux.  Won't be fixed till 2.2.6
+                //http://javafx-jira.kenai.com/browse/RT-25528
+                if (System.getProperty("os.name").indexOf("nux") == -1)
+                {
+                    shutdown(true);
+                    event.consume();
+                }
+                else
+                {
+                    shutdown(false);
+                }
             }
         });
-
-        // legoList.setCellFactory(ContextMenuListCell.<String>forListView(new ContextMenu(menuDeleteLego)));
-        // filteredLegoList.setCellFactory(ContextMenuListCell.<String>forListView(new ContextMenu(menuDeleteLego)));
 
         //huh, the FXGui editor is broken - I have to set this policy manually.
         editorTabPane.setTabClosingPolicy(TabClosingPolicy.SELECTED_TAB);
@@ -699,7 +683,7 @@ public class LegoGUIController implements Initializable
             @Override
             public void handle(ActionEvent t)
             {
-                shutdown();
+                shutdown(true);
             }
         });
 
@@ -758,7 +742,7 @@ public class LegoGUIController implements Initializable
             }
             else
             {
-                final LegoTab tab = new LegoTab("Lego", legoId);
+                final LegoTab tab = new LegoTab("Lego", newLego);
                 displayedLegos.put(legoId, tab);
                 
                 int hue = random.nextInt(361);
@@ -832,9 +816,30 @@ public class LegoGUIController implements Initializable
         return lfpc;
     }
 
-    private void shutdown()
+    private void shutdown(boolean prompt)
     {
         logger.info("shutdown called");
+        
+        if (prompt)
+        {
+            for (LegoTab lt : displayedLegos.values())
+            {
+                if (lt.hasUnsavedChanges())
+                {
+                    Answer answer = LegoGUI.getInstance().showYesNoDialog("Unsaved Changes", "One or more Legos has unsaved changes.  Do you want to close anyway?");
+                    if (answer == null || answer == Answer.NO)
+                    {
+                        //don't close
+                        return;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        
         SimTreeView.shutdown();
         Thread t = dbConnectThread;
         if (t != null)
@@ -852,5 +857,6 @@ public class LegoGUIController implements Initializable
         BDBDataStoreImpl.getInstance().shutdown();
         WBDataStore.shutdown();
         System.exit(0);
+        
     }
 }

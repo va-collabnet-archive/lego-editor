@@ -5,6 +5,7 @@ import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
 import gov.va.legoEdit.gui.dialogs.LegoListPropertiesController;
 import gov.va.legoEdit.gui.dialogs.SnomedConceptViewController;
+import gov.va.legoEdit.gui.dialogs.YesNoDialogController;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
 import gov.va.legoEdit.model.LegoListByReference;
@@ -41,11 +42,13 @@ public class LegoGUI extends Application
 	private Stage errorDialogStage_;
 	private Stage legoListPropertiesStage_;
 	private Stage createLegoStage_;
+	private Stage yesNoStage_;
 	
 	private ErrorDialogController edc_;
 	private LegoGUIController lgc_;
 	private LegoListPropertiesController llpc_;
 	private CreateLegoController clc_;
+	private YesNoDialogController yndc_;
 
 	public LegoGUI()
 	{
@@ -117,6 +120,18 @@ public class LegoGUI extends Application
         clc_ = loader.getController();
         scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
         createLegoStage_.setScene(scene);
+        
+        //init yesNoDialog
+        yesNoStage_ = new Stage();
+        yesNoStage_.initModality(Modality.WINDOW_MODAL);
+        yesNoStage_.initOwner(mainStage_);
+        yesNoStage_.initStyle(StageStyle.UTILITY);
+        loader = new FXMLLoader();
+        loader.setLocation(YesNoDialogController.class.getResource("YesNoDialog.fxml"));
+        scene = new Scene((Parent)loader.load(YesNoDialogController.class.getResourceAsStream("YesNoDialog.fxml")));
+        yndc_ = loader.getController();
+        scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+        yesNoStage_.setScene(scene);
 	}
 
 	public LegoGUIController getLegoGUIController()
@@ -135,6 +150,14 @@ public class LegoGUI extends Application
     {
 	    clc_.init(llbr, ti);
 	    createLegoStage_.show();
+    }
+	
+	public YesNoDialogController.Answer showYesNoDialog(String title, String question)
+    {
+        yndc_.init(question);
+        yesNoStage_.setTitle(title);
+        yesNoStage_.showAndWait();
+        return yndc_.getAnswer();
     }
 	
 	public void showSnomedConceptDialog(UUID conceptUUID)

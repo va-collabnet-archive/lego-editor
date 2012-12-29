@@ -1,5 +1,11 @@
 package gov.va.legoEdit.gui.util;
 
+import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
+import gov.va.legoEdit.model.ModelUtil;
+import gov.va.legoEdit.model.SchemaEquals;
+import gov.va.legoEdit.model.schemaModel.Lego;
+import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -14,12 +20,12 @@ import com.sun.javafx.scene.control.skin.TabPaneSkin;
 
 public class LegoTab extends Tab
 {
-    private String displayedLegoID;
+    private Lego displayedLego;
     
-    public LegoTab(String tabName, String displayedLegoID)
+    public LegoTab(String tabName, Lego displayedLego)
     {
         super(tabName);
-        this.displayedLegoID = displayedLegoID;
+        this.displayedLego = displayedLego;
         this.setClosable(false); // Don't show the native close button
         final StackPane closeBtn = new StackPane()
         {
@@ -51,13 +57,17 @@ public class LegoTab extends Tab
             @Override
             public void handle(MouseEvent paramT)
             {
-                // My logic to handle the close event or not.
-                if (true)
+                if (hasUnsavedChanges())
                 {
-                    //TODO write optional close logic
-                    closeEvent.handle(null);
+                    Answer answer = LegoGUI.getInstance().showYesNoDialog("Unsaved Changes", "This Lego has unsaved changes.  Do you want to close anyway?");
+                    if (answer == null || answer == Answer.NO)
+                    {
+                        //don't close
+                        return;
+                    }
                 }
-                //else don't close... 
+                
+                closeEvent.handle(null);
             }
         });
 
@@ -80,8 +90,14 @@ public class LegoTab extends Tab
         });
     }
     
+    public boolean hasUnsavedChanges()
+    {
+        Lego storedLego = BDBDataStoreImpl.getInstance().getLego(LegoTab.this.displayedLego.getLegoUUID(), LegoTab.this.displayedLego.getStamp().getUuid());
+        return !SchemaEquals.equals(storedLego, LegoTab.this.displayedLego);
+    }
+    
     public String getDisplayedLegoID()
     {
-        return this.displayedLegoID;
+        return ModelUtil.makeUniqueLegoID(displayedLego);
     }
 }
