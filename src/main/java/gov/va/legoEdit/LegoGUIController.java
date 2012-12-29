@@ -189,17 +189,11 @@ public class LegoGUIController implements Initializable
             @Override
             public void handle(WindowEvent event)
             {
-                //TODO Tis a bit of nastyness here... can't prevent the close on linux.  Won't be fixed till 2.2.6
+                //Note - this is broke with javafx < 2.2.6 (which isn't released yet - currently beta - with the 1.7.0_12 early access release)
                 //http://javafx-jira.kenai.com/browse/RT-25528
-                if (System.getProperty("os.name").indexOf("nux") == -1)
-                {
-                    shutdown(true);
-                    event.consume();
-                }
-                else
-                {
-                    shutdown(false);
-                }
+                shutdown();
+                event.consume();
+
             }
         });
 
@@ -683,7 +677,7 @@ public class LegoGUIController implements Initializable
             @Override
             public void handle(ActionEvent t)
             {
-                shutdown(true);
+                shutdown();
             }
         });
 
@@ -816,26 +810,23 @@ public class LegoGUIController implements Initializable
         return lfpc;
     }
 
-    private void shutdown(boolean prompt)
+    private void shutdown()
     {
         logger.info("shutdown called");
         
-        if (prompt)
+        for (LegoTab lt : displayedLegos.values())
         {
-            for (LegoTab lt : displayedLegos.values())
+            if (lt.hasUnsavedChanges())
             {
-                if (lt.hasUnsavedChanges())
+                Answer answer = LegoGUI.getInstance().showYesNoDialog("Unsaved Changes", "One or more Legos has unsaved changes.  Do you want to close anyway?");
+                if (answer == null || answer == Answer.NO)
                 {
-                    Answer answer = LegoGUI.getInstance().showYesNoDialog("Unsaved Changes", "One or more Legos has unsaved changes.  Do you want to close anyway?");
-                    if (answer == null || answer == Answer.NO)
-                    {
-                        //don't close
-                        return;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    //don't close
+                    return;
+                }
+                else
+                {
+                    break;
                 }
             }
         }

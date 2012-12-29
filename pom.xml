@@ -18,9 +18,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--javafx.version>2.2.1-ea-b02</javafx.version--> <!-- From java 1.7.0_07 -->
-        <!--javafx.version>2.2.3-b05</javafx.version--> <!-- From java 1.7.0_09 -->
-        <javafx.version>2.2.4-ea-b13</javafx.version> <!-- From java 1.7.0_10-b13 -->
+        <!--javafx.version>2.2.1-ea-b02</javafx.version--> 	<!-- From java 1.7.0_07 -->
+        <!--javafx.version>2.2.3-b05</javafx.version--> 	<!-- From java 1.7.0_09 -->
+        <!--javafx.version>2.2.4-ea-b13</javafx.version>--> <!-- From java 1.7.0_10-b13 -->
+		<!--<javafx.version>2.2.4-b18</javafx.version> --> 	<!-- From java 1.7.0_10 -->
+        <javafx.version>2.2.6-ea-b07</javafx.version> 		<!-- From java 1.7.0_12-b07 -->
         <icons.version>1.0-SNAPSHOT</icons.version>
         <trek.version>3.0.1-SNAPSHOT</trek.version>
         <je.version>5.0.55</je.version>
