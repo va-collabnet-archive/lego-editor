@@ -119,17 +119,7 @@ public class LegoFilterPaneController  implements Initializable {
             }
         });
         
-        CloseableIterator<Pncs> iterator = BDBDataStoreImpl.getInstance().getPncs();
-        HashMap<String, PncsItem> unique = new HashMap<>();
-        while (iterator.hasNext())
-        {
-            Pncs pncs = iterator.next();
-            unique.put(pncs.getName() + pncs.getId(), new PncsItem(pncs, pncsNameOrId.valueProperty()));
-        }
-        pncsItem.getItems().addAll(new PncsItem(PncsItem.ANY, -1, pncsNameOrId.valueProperty()));
-        pncsItem.getItems().addAll(unique.values());
-        FXCollections.sort(pncsItem.getItems(), new PncsItemComparator());
-        pncsItem.getSelectionModel().select(0);
+        loadPncs();
         
         pncsItem.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -261,8 +251,7 @@ public class LegoFilterPaneController  implements Initializable {
         {
             return;
         }
-        
-        System.out.println("Update List");
+
         Integer pncsFilterId = null;
         String pncsFilterValue = null;
         if (!pncsItem.getSelectionModel().getSelectedItem().getName().equals(PncsItem.ANY))
@@ -280,5 +269,29 @@ public class LegoFilterPaneController  implements Initializable {
     public BorderPane getBorderPane()
     {
         return borderPane;
+    }
+    
+    public void reloadOptions()
+    {
+        updateDisabled.incrementAndGet();
+        loadPncs();
+        snomedId.setText("");;
+        updateDisabled.decrementAndGet();
+    }
+    
+    private void loadPncs()
+    {
+        CloseableIterator<Pncs> iterator = BDBDataStoreImpl.getInstance().getPncs();
+        HashMap<String, PncsItem> unique = new HashMap<>();
+        while (iterator.hasNext())
+        {
+            Pncs pncs = iterator.next();
+            unique.put(pncs.getName() + pncs.getId(), new PncsItem(pncs, pncsNameOrId.valueProperty()));
+        }
+        pncsItem.getItems().clear();
+        pncsItem.getItems().addAll(new PncsItem(PncsItem.ANY, -1, pncsNameOrId.valueProperty()));
+        pncsItem.getItems().addAll(unique.values());
+        FXCollections.sort(pncsItem.getItems(), new PncsItemComparator());
+        pncsItem.getSelectionModel().select(0);
     }
 }

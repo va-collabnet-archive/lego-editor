@@ -5,6 +5,7 @@ import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
 import gov.va.legoEdit.gui.dialogs.LegoListPropertiesController;
 import gov.va.legoEdit.gui.dialogs.SnomedConceptViewController;
+import gov.va.legoEdit.gui.dialogs.UserPreferencesController;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
@@ -43,6 +44,7 @@ public class LegoGUI extends Application
 	private Stage legoListPropertiesStage_;
 	private Stage createLegoStage_;
 	private Stage yesNoStage_;
+	private Stage userPrefsStage_;
 	
 	private ErrorDialogController edc_;
 	private LegoGUIController lgc_;
@@ -132,6 +134,16 @@ public class LegoGUI extends Application
         yndc_ = loader.getController();
         scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
         yesNoStage_.setScene(scene);
+        
+        //init userPrefs dialog
+        userPrefsStage_ = new Stage();
+        userPrefsStage_.initModality(Modality.WINDOW_MODAL);
+        userPrefsStage_.initOwner(mainStage_);
+        userPrefsStage_.initStyle(StageStyle.UTILITY);
+        loader = new FXMLLoader();
+        scene = new Scene((Parent)loader.load(UserPreferencesController.class.getResourceAsStream("UserPreferences.fxml")));
+        scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+        userPrefsStage_.setScene(scene);
 	}
 
 	public LegoGUIController getLegoGUIController()
@@ -150,6 +162,11 @@ public class LegoGUI extends Application
     {
 	    clc_.init(llbr, ti);
 	    createLegoStage_.show();
+    }
+	
+	public void showUserPreferences()
+    {
+        userPrefsStage_.show();
     }
 	
 	public YesNoDialogController.Answer showYesNoDialog(String title, String question)

@@ -109,15 +109,20 @@ public interface DataStoreInterface
      * @throws WriteException if the operation fails
      */
     public void deleteLegoList(String legoListUUID) throws WriteException;
+    
+    /**
+     * Delete the exact lego that matches the specified ID and Stamp within the specified LegoList
+     */
+    public void deleteLego(String legoListUUID, String legoUUID, String stampUUID) throws WriteException;
 
     /**
      * This method always adds a new LEGO to the specified legoList - even if a LEGO with the same UUID already exists in the legoList.
      *
      * The new LEGO will be differentiated from other LEGOs with the same UUID by the STAMP value (status, time, author, module, path)
      *
-     * The status field of the STAMP may be set by the caller, prior to sending in the LEGO. All of the other fields will be set automatically during
-     * the commit process. Any values other than status provided by the caller will be ignored. If the STAMP object is missing, or the status field is
-     * not specified by the caller, the default status will be used during the commit process.
+     * The time and UUID fields of the STAMP will be updated by this method - time set to now - UUID set to a new unique value.
+     * 
+     * If status, author, module or path are missing, they will be set to the default values.
      *
      * The updated STAMP will be returned to the caller.
      *

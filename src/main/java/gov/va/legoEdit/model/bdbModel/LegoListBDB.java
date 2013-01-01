@@ -1,19 +1,20 @@
 package gov.va.legoEdit.model.bdbModel;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.Relationship;
-import com.sleepycat.persist.model.SecondaryKey;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
+import com.sleepycat.persist.model.Relationship;
+import com.sleepycat.persist.model.SecondaryKey;
 
 @Entity
 public class LegoListBDB
@@ -27,6 +28,7 @@ public class LegoListBDB
     protected List<String> legoUniqueIds;
     @SecondaryKey(relate = Relationship.ONE_TO_MANY)
     protected Set<String> legoUUIDs;
+    protected HashMap<String, Integer> legoUUIDsUsage;
     
     private transient List<LegoBDB> legoBDBRefs;
 
@@ -43,6 +45,7 @@ public class LegoListBDB
         this.legoListUUID = UUID.nameUUIDFromBytes(groupName.getBytes()).toString();
         this.legoUniqueIds = new ArrayList<>();
         this.legoUUIDs = new HashSet<>();
+        this.legoUUIDsUsage = new HashMap<>();
     }
 
     public LegoListBDB(LegoList ll) throws WriteException
@@ -53,6 +56,7 @@ public class LegoListBDB
         legoUniqueIds = new ArrayList<>();
         legoBDBRefs = new ArrayList<>();
         this.legoUUIDs = new HashSet<>();
+        this.legoUUIDsUsage = new HashMap<>();
         for (Lego l : ll.getLego())
         {
             LegoBDB lBDB = new LegoBDB(l);
@@ -61,6 +65,13 @@ public class LegoListBDB
             legoUniqueIds.add(lBDB.getUniqueId());
             legoBDBRefs.add(lBDB);
             legoUUIDs.add(l.getLegoUUID());
+            Integer temp = legoUUIDsUsage.get(l.getLegoUUID());
+            if (temp == null)
+            {
+                temp = new Integer(0);
+                legoUUIDsUsage.put(l.getLegoUUID(), temp);
+            }
+            temp = temp++;
         }
     }
     
@@ -74,6 +85,29 @@ public class LegoListBDB
         verifyLegoUUID(lego.getLegoUUID());
         legoUniqueIds.add(lego.getUniqueId());
         legoUUIDs.add(lego.getLegoUUID());
+        Integer temp = legoUUIDsUsage.get(lego.getLegoUUID());
+        if (temp == null)
+        {
+            temp = new Integer(0);
+            legoUUIDsUsage.put(lego.getLegoUUID(), temp);
+        }
+        temp = temp++;
+    }
+    
+    public void removeLego(String legoUUID, String legoUniqueId)
+    {
+        legoUniqueIds.remove(legoUniqueId);
+        Integer temp = legoUUIDsUsage.get(legoUUID);
+        if (temp == null)
+        {
+            return;
+        }
+        temp = temp--;
+        if (temp == 0)
+        {
+            legoUUIDs.remove(legoUUID);
+            legoUUIDsUsage.remove(legoUUID);
+        }
     }
     
     private void verifyLegoUUID(String legoUUID) throws WriteException

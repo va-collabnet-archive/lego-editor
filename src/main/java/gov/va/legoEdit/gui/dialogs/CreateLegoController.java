@@ -2,6 +2,8 @@ package gov.va.legoEdit.gui.dialogs;
 
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
@@ -9,6 +11,7 @@ import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.Stamp;
+import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.util.TimeConvert;
 import java.net.URL;
 import java.util.ArrayList;
@@ -34,9 +37,8 @@ import javafx.stage.Stage;
 
 
 
-public class CreateLegoController
-    implements Initializable {
-
+public class CreateLegoController implements Initializable 
+{
     @FXML //  fx:id="cancelButton"
     private Button cancelButton; // Value injected by FXMLLoader
     @FXML //  fx:id="legoListName"
@@ -96,10 +98,11 @@ public class CreateLegoController
                 l.setPncs(pncs);
                 
                 Stamp s = new Stamp();
-                s.setAuthor("author"); //TODO get the stamp details
-                s.setModule("module");
-                s.setPath("path");
-                s.setStatus("Active");
+                UserPreferences up = LegoGUIModel.getInstance().getUserPreferences(); 
+                s.setAuthor(up.getAuthor());
+                s.setModule(up.getModule());
+                s.setPath(up.getPath());
+                s.setStatus(LegoTreeCell.statusChoices_.get(0));
                 s.setTime(TimeConvert.convert(System.currentTimeMillis()));
                 s.setUuid(UUID.randomUUID().toString());
                 l.setStamp(s);
@@ -112,7 +115,7 @@ public class CreateLegoController
                 
                 LegoReference lr = new LegoReference(l);
                 llbr.getLegoReference().add(lr);
-                LegoGUI.getInstance().getLegoGUIController().addNewLego(lr, l);
+                LegoGUI.getInstance().getLegoGUIController().addNewLego(llbr.getLegoListUUID(), l);
                 
                 //TODO this is ugly, need to find a better way.
                 legoTreeItem.getChildren().clear();

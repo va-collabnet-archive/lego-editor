@@ -50,6 +50,14 @@ public class ErrorDialogController implements Initializable
     {
         this.titleError.setText(titleMessage);
         this.errorMessage.setText(errorMessage);
-        this.detailedMessage.setText(detailedErrorMessage);
+        if (detailedErrorMessage == null || detailedErrorMessage.length() == 0)
+        {
+            this.detailedMessage.setVisible(false);
+        }
+        else
+        {
+            this.detailedMessage.setVisible(true);
+            this.detailedMessage.setText(detailedErrorMessage);
+        }
     }
 }

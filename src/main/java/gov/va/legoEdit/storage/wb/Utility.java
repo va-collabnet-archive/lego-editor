@@ -3,6 +3,12 @@ package gov.va.legoEdit.storage.wb;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionChronicle;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
@@ -26,8 +32,41 @@ public class Utility
     
     private static Logger logger = LoggerFactory.getLogger(Utility.class);
     
+    
+    private static BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
+    private static ThreadPoolExecutor tpe = new ThreadPoolExecutor(5, 5, 60, TimeUnit.SECONDS, workQueue, new ThreadFactory()
+    {
+        @Override
+        public Thread newThread(Runnable r)
+        {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            return t;
+        }
+    });
+    
+    
+    public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback)
+    {
+        Runnable r = new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Concept c = lookupSnomedIdentifier(identifier);
+                callback.lookupComplete(c);
+            }
+        };
+        tpe.execute(r);
+    }
+    
+    
     public static Concept lookupSnomedIdentifier(String identifier)
     {
+        if (identifier == null)
+        {
+            return null;
+        }
         Concept c = null;
         ConceptChronicleBI result = null;
         try

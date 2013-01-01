@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.util.CopyableLabel;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
@@ -28,11 +29,11 @@ import gov.va.legoEdit.model.schemaModel.Timing;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Units;
 import gov.va.legoEdit.model.schemaModel.Value;
+import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.util.TimeConvert;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.List;
 import java.util.UUID;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -55,15 +56,23 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LegoTreeCell<T> extends TreeCell<T>
 {
     private static Logger logger = LoggerFactory.getLogger(LegoTreeCell.class);
-    private static ObservableList<String> statusChoices_ = FXCollections.observableArrayList(new String[] { "Active", "Inactive" });
+    public static ObservableList<String> statusChoices_ = FXCollections.observableArrayList(new String[] { "Active", "Inactive" });
+    
+    private static DropShadow invalidDropShadow = new DropShadow();
+    static
+    {
+        invalidDropShadow.setColor(Color.RED);
+    }
 
     @Override
     public void updateItem(T item, boolean empty)
@@ -126,85 +135,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         ((LegoList) treeItem.getExtraData()).setGroupDescription(newValue);
                     }
                 });
-
-                MenuItem mi;
-                mi = new MenuItem("Create New Lego Within Lego List");
-                mi.setOnAction(new EventHandler<ActionEvent>()
-                {
-                    @Override
-                    public void handle(ActionEvent arg0)
-                    {
-                        LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
-                        LegoGUI.getInstance().showCreateLegoDialog(llbr, treeItem);
-                    }
-                });
-                cm.getItems().add(mi);
-
-                mi = new MenuItem("Show XML View");
-                mi.setOnAction(new EventHandler<ActionEvent>()
-                {
-                    @Override
-                    public void handle(ActionEvent arg0)
-                    {
-                        LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
-                        LegoGUI.getInstance().showXMLViewWindow(BDBDataStoreImpl.getInstance().getLegoListByID(llbr.getLegoListUUID()));
-                    }
-                });
-                cm.getItems().add(mi);
                 
-                mi = new MenuItem("Properties");
-                mi.setOnAction(new EventHandler<ActionEvent>()
-                {
-                    @Override
-                    public void handle(ActionEvent arg0)
-                    {
-                        LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
-                        LegoGUI.getInstance().showLegoListPropertiesDialog(llbr.getGroupName(), llbr.getLegoListUUID(),
-                                legoListDescriptionProperty);
-                    }
-                });
-                cm.getItems().add(mi);
-                
-                mi = new MenuItem("Save as XML");
-                mi.setOnAction(new EventHandler<ActionEvent>()
-                {
-                    @Override
-                    public void handle(ActionEvent arg0)
-                    {
-                        final LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
-                        Platform.runLater(new Runnable()
-                        {
-                            
-                            @Override
-                            public void run()
-                            {
-                                LegoGUIModel.getInstance().exportLegoList(llbr);
-                            }
-                        });
-                    }
-                });
-                cm.getItems().add(mi);
-                
-                mi = new MenuItem("Delete Lego List");
-                mi.setOnAction(new EventHandler<ActionEvent>()
-                {
-                    @Override
-                    public void handle(ActionEvent arg0)
-                    {
-                        //TODO add are you sure?
-                        try
-                        {
-                            LegoListByReference llbr = (LegoListByReference) treeItem.getExtraData();
-                            LegoGUIModel.getInstance().removeLegoList(llbr);
-                        }
-                        catch (WriteException e)
-                        {
-                            logger.error("Error deleting lego list", e);
-                            LegoGUI.getInstance().showErrorDialog("Error Removing Lego List", "Unexpected error removing lego list", e.toString());
-                        }
-                    }
-                });
-                cm.getItems().add(mi);
+                addMenus((LegoListByReference) treeItem.getExtraData(), treeItem, legoListDescriptionProperty, cm);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.legoReference)
             {
@@ -219,10 +151,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     styleProperty().bind(style);
                 }
                 setEditable(true);
+                addMenus(legoReference, treeItem, cm);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.status)
             {
-                // TODO tie status back to in-memory lego
                 HBox hbox = new HBox();
                 hbox.setSpacing(10.0);
                 hbox.setAlignment(Pos.CENTER_LEFT);
@@ -232,10 +164,20 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 hbox.getChildren().add(status);
 
                 ChoiceBox<String> cb = new ChoiceBox<>(statusChoices_);
-                String currentStatus = treeItem.getValue();
+                final Stamp stamp = (Stamp)treeItem.getExtraData();
+                String currentStatus = stamp.getStatus();
                 cb.getSelectionModel().select(currentStatus);
                 hbox.getChildren().add(cb);
                 setGraphic(hbox);
+                
+                cb.valueProperty().addListener(new ChangeListener<String>()
+                {
+                    @Override
+                    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+                    {
+                        stamp.setStatus(newValue);
+                    }
+                });
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.pncsValue)
             {
@@ -283,6 +225,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 final AssertionComponent ac = (AssertionComponent) ((LegoTreeItem) treeItem.getParent()).getExtraData();
                 final TextField tf = new TextField();
                 tf.setText(value == null ? "" : value);
+                if (tf.getText().length() == 0)
+                {
+                    tf.setEffect(invalidDropShadow);
+                }
                 tf.setPromptText("UUID of another Assertion");
                 tf.textProperty().addListener(new ChangeListener<String>()
                 {
@@ -290,11 +236,19 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
                     {
                         ac.setAssertionUUID(newValue);
-                        System.out.println("assertionUUID changed");
-                        // TODO validate
+                        try
+                        {
+                            UUID.fromString(newValue);
+                            tf.setEffect(null);
+                        }
+                        catch (Exception e)
+                        {
+                            tf.setEffect(invalidDropShadow);
+                        }
                     }
                 });
                 setGraphic(prependLabel("Assertion UUID", tf));
+                addMenus(LegoTreeNodeType.assertionUUID, ac, cm);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.measurement)
             {
@@ -351,15 +305,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
 
                 ConceptNode cn = new ConceptNode(label, c, treeItem.getNodeType(), ((LegoTreeView) getTreeView()).getLego());
-                cn.addObserver(new Observer()
-                {
-                    @Override
-                    public void update(Observable o, Object arg)
-                    {
-                        System.out.println("Concept updated");
-                        // concept is already tied to the lego, shouldn't have to do anything. But could if we wanted.
-                    }
-                });
                 setGraphic(cn.getNode());
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.relation)
@@ -407,6 +352,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                             p.setStringConstant(null);
                             p.setNumericValue(f);
                             p.setInclusive(true);  // This point impl only handles single points, so always inclusive
+                            cb.setEffect(null);
                         }
                         catch (NumberFormatException e)
                         {
@@ -416,11 +362,14 @@ public class LegoTreeCell<T> extends TreeCell<T>
                                 p.setNumericValue(null);
                                 p.setStringConstant(ms);
                                 p.setInclusive(true);  // This point impl only handles single points, so always inclusive
+                                cb.setEffect(null);
                             }
                             catch (IllegalArgumentException ex)
                             {
-                                // TODO highlight invalid
-                                System.out.println("INVALID");
+                                cb.setEffect(invalidDropShadow);
+                                p.setNumericValue(null);
+                                p.setStringConstant(null);
+                                p.setInclusive(true); 
                             }
                         }
                     }
@@ -1062,10 +1011,11 @@ public class LegoTreeCell<T> extends TreeCell<T>
             l.setPncs(pncs);
     
             Stamp s = new Stamp();
-            s.setAuthor("author"); // TODO get the stamp details
-            s.setModule("module");
-            s.setPath("path");
-            s.setStatus("Active");
+            UserPreferences up = LegoGUIModel.getInstance().getUserPreferences(); 
+            s.setAuthor(up.getAuthor());
+            s.setModule(up.getModule());
+            s.setPath(up.getPath());
+            s.setStatus(statusChoices_.get(0));
             s.setTime(TimeConvert.convert(System.currentTimeMillis()));
             s.setUuid(UUID.randomUUID().toString());
             l.setStamp(s);
@@ -1082,15 +1032,172 @@ public class LegoTreeCell<T> extends TreeCell<T>
             ti.getChildren().add(lti);
             LegoTreeView ltv = (LegoTreeView) getTreeView();
             ltv.getSelectionModel().select(lti);
-            LegoGUI.getInstance().getLegoGUIController().addNewLego(lr, l);
+            LegoGUI.getInstance().getLegoGUIController().addNewLego(llbr.getLegoListUUID(), l);
         }
         else
         {
             logger.error("Unhandled create lego request!");
         }
     }
+    
+    private void addMenus(final LegoListByReference llbr, final LegoTreeItem treeItem, final StringProperty legoListDescriptionProperty, ContextMenu cm)
+    {
+        MenuItem mi;
+        mi = new MenuItem("Create New Lego Within Lego List");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                LegoGUI.getInstance().showCreateLegoDialog(llbr, treeItem);
+            }
+        });
+        cm.getItems().add(mi);
 
-    // TODO value menus
+        mi = new MenuItem("Show XML View");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                LegoGUI.getInstance().showXMLViewWindow(BDBDataStoreImpl.getInstance().getLegoListByID(llbr.getLegoListUUID()));
+            }
+        });
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Properties");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                LegoGUI.getInstance().showLegoListPropertiesDialog(llbr.getGroupName(), llbr.getLegoListUUID(),
+                        legoListDescriptionProperty);
+            }
+        });
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Save as XML");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                Platform.runLater(new Runnable()
+                {
+                    
+                    @Override
+                    public void run()
+                    {
+                        LegoGUIModel.getInstance().exportLegoList(llbr);
+                    }
+                });
+            }
+        });
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Delete Lego List");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                Answer a = LegoGUI.getInstance().showYesNoDialog("Really delete Lego List?", "Are you sure that you want to delete the Lego List?  "
+                        + "This will delete all contained Legos.");
+                if (a == Answer.YES)
+                {
+                    try
+                    {
+                        LegoGUIModel.getInstance().removeLegoList(llbr);
+                    }
+                    catch (WriteException e)
+                    {
+                        logger.error("Error deleting lego list", e);
+                        LegoGUI.getInstance().showErrorDialog("Error Removing Lego List", "Unexpected error removing lego list", e.toString());
+                    }
+                }
+            }
+        });
+        cm.getItems().add(mi);
+    }
+    
+    private void addMenus(final LegoReference legoReference, final LegoTreeItem lti, ContextMenu cm)
+    {
+        MenuItem mi;
+        mi = new MenuItem("Delete Lego");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                Answer a = LegoGUI.getInstance().showYesNoDialog("Really delete Lego?", "Are you sure that you want to delete the Lego?");
+                if (a == Answer.YES)
+                {
+                    //From legoReference treeItem, go up past pncsName and pncs value to get the LegoListReference
+                    try
+                    {
+                        LegoGUIModel.getInstance().removeLego(
+                                (LegoListByReference)((LegoTreeItem)lti.getParent().getParent().getParent()).getExtraData(), legoReference);
+                    }
+                    catch (WriteException e)
+                    {
+                        logger.error("Error deleting lego", e);
+                        LegoGUI.getInstance().showErrorDialog("Error Removing Lego", "Unexpected error removing lego", e.toString());
+                    }
+                }
+                
+            }
+        });
+        cm.getItems().add(mi);
+    }
+    
+    private void addMenus(LegoTreeNodeType type, final AssertionComponent ac, ContextMenu cm)
+    {
+        MenuItem mi;
+        if (type == LegoTreeNodeType.assertionUUID)
+        {
+            mi = new MenuItem("View the defining Lego");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    String uuid = ac.getAssertionUUID();
+                    try
+                    {
+                        UUID.fromString(uuid);
+                        List<Lego> result = BDBDataStoreImpl.getInstance().getLegosContainingAssertion(uuid);
+                        if (result.size() == 0)
+                        {
+                            LegoGUI.getInstance().showErrorDialog("UUID Not Found", "No Lego could be found which contains the specified ID", "");
+                        }
+                        else
+                        {
+                            Lego newest = result.get(0);
+                            for (int i = 1; i < result.size(); i++)
+                            {
+                                if (result.get(i).getStamp().getTime().toGregorianCalendar().getTimeInMillis() > 
+                                    newest.getStamp().getTime().toGregorianCalendar().getTimeInMillis())
+                                {
+                                    newest = result.get(i);
+                                }
+                            }
+                            LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(new LegoReference(newest), null);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        LegoGUI.getInstance().showErrorDialog("Invalid UUID", "The Lego Assertion UUID must be a valid UUID", "");
+                    }
+                }
+            });
+            cm.getItems().add(mi);
+        }
+        else
+        {
+            throw new RuntimeException("oops");
+        }
+    }
     
     private void addMenus(final Assertion a, final LegoTreeItem treeItem, ContextMenu cm, final DropTargetLabel label)
     {

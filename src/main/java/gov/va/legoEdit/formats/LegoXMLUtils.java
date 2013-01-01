@@ -104,8 +104,6 @@ public class LegoXMLUtils
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         StreamResult result = new StreamResult(baos);
         xmlToHTMLTransformer.transform(new StreamSource(new ByteArrayInputStream(asXML.getBytes())), result);
-        
         return baos.toString();
-        
     }
 }

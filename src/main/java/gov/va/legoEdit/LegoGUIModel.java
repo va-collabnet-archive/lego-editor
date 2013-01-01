@@ -1,6 +1,7 @@
 package gov.va.legoEdit;
 
 import gov.va.legoEdit.formats.LegoXMLUtils;
+import gov.va.legoEdit.formats.UserPrefsXMLUtils;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
@@ -10,8 +11,10 @@ import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
+import gov.va.legoEdit.util.UnsavedLegos;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -37,6 +40,7 @@ public class LegoGUIModel
     Logger logger = LoggerFactory.getLogger(LegoGUIModel.class);
     private static volatile LegoGUIModel instance_;
     private ObservableList<TreeItem<String>> legoLists_ = null;
+    private UserPreferences userPreferences_;
 
     public static LegoGUIModel getInstance()
     {
@@ -55,11 +59,59 @@ public class LegoGUIModel
 
     private LegoGUIModel()
     {
+        try
+        {
+            userPreferences_ = UserPrefsXMLUtils.readUserPreferences();
+        }
+        catch (Exception e)
+        {
+            userPreferences_ =  new UserPreferences();
+            userPreferences_.setAuthor(System.getProperty("user.name"));
+            userPreferences_.setModule("default module");
+            userPreferences_.setPath("default path");
+        }
+    }
+    
+    public UserPreferences getUserPreferences()
+    {
+        return userPreferences_;
     }
 
     public LegoList getLegoList(String legoName)
     {
         return BDBDataStoreImpl.getInstance().getLegoListByName(legoName);
+    }
+    
+    protected LegoTreeItem findTreeItem(String legoUniqueId)
+    {
+        return findTreeItem(legoLists_, legoUniqueId);
+    }
+    
+    private LegoTreeItem findTreeItem(List<TreeItem<String>> items, String legoUniqueId)
+    {
+        for (TreeItem<String> item : items)
+        {
+            if (item instanceof LegoTreeItem)
+            {
+                LegoTreeItem lti = (LegoTreeItem)item;
+                if (lti.getNodeType() == LegoTreeNodeType.legoReference)
+                {
+                    if (legoUniqueId.equals(((LegoReference)lti.getExtraData()).getUniqueId()))
+                    {
+                        return lti;
+                    }
+                }
+            }
+        }
+        for (TreeItem<String> item : items)
+        {
+            LegoTreeItem result = findTreeItem(item.getChildren(), legoUniqueId);
+            if (result != null)
+            {
+                return result;
+            }
+        }
+        return null;
     }
 
     public void initializeLegoListNames(ObservableList<TreeItem<String>> list, Integer pncsFilterId, String pncsFilterValue, Concept conceptFilter)
@@ -67,7 +119,6 @@ public class LegoGUIModel
         legoLists_ = list;
         legoLists_.clear();
         //TODO need to figure out how to store the lego list name changes - currently they get thrown away...
-        //TODO need to include the legos in the "new" list over in LegoGUIController
         
         ArrayList<Lego> legos = new ArrayList<>();
         HashMap<String, LegoListByReference> legoLists = new HashMap<>();
@@ -126,6 +177,11 @@ public class LegoGUIModel
             }
         }
         
+        //Don't filter unsaved legos - always include them.
+        UnsavedLegos unsavedLegos = LegoGUI.getInstance().getLegoGUIController().getUnsavedLegos();
+        legos.addAll(unsavedLegos.getLegos());
+        
+        
         if (legos.size() > 0)
         {
             //Need to work backwards from the legos now, and get the legoRefs - and wire them back together.
@@ -135,6 +191,14 @@ public class LegoGUIModel
             {
                 //Could be more than one, usually only one in practice, however
                 List<String> legoListIds = BDBDataStoreImpl.getInstance().getLegoListByLego(l.getLegoUUID());
+                
+                //Might also be from the new list...
+                String id = unsavedLegos.getLegoListIdForLego(ModelUtil.makeUniqueLegoID(l));
+                if (id != null)
+                {
+                    legoListIds.add(id);
+                }
+                
                 for (String legoListId : legoListIds)
                 {
                     LegoListByReference llbr = legoLists.get(legoListId);
@@ -159,16 +223,28 @@ public class LegoGUIModel
 
     public void importLegoList(LegoList ll) throws WriteException
     {
-        //TODO need to update the filter pncs lists...
         BDBDataStoreImpl.getInstance().importLegoList(ll);
         //Long way around to get back to the method above... but I need the filter params.
+        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
     }
 
     public void removeLegoList(LegoListByReference legoListByReference) throws WriteException
     {
+        //TODO close open tabs?
         BDBDataStoreImpl.getInstance().deleteLegoList(legoListByReference.getLegoListUUID());
-        legoLists_.remove(legoListByReference);
+        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
+        //Long way around to get back to the method above... but I need the filter params.
+        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
+        
+    }
+    
+    public void removeLego(LegoListByReference legoListReference, LegoReference legoReference) throws WriteException
+    {
+        //TODO close open tabs?
+        BDBDataStoreImpl.getInstance().deleteLego(legoListReference.getLegoListUUID(), legoReference.getLegoUUID(), legoReference.getStampUUID());
+        LegoGUI.getInstance().getLegoGUIController().removeNewLego(legoReference.getUniqueId());
+        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
         //Long way around to get back to the method above... but I need the filter params.
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
     }

@@ -3,7 +3,6 @@ package gov.va.legoEdit.gui.legoTreeView;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Lego;
-import javafx.event.Event;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
@@ -48,9 +47,7 @@ public class LegoTreeView extends TreeView<String>
         	    if (LegoTreeNodeType.legoReference == lti.getNodeType())
         	    {
         	        LegoReference lr = (LegoReference)lti.getExtraData();
-        	        LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(lr);
-        	        //When we begin a lego edit, we want to highlight it in the legoListTree.  We need to tell the tree to redraw this tree item.
-        	        Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+        	        LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(lr, lti);
         	    }
     	    }
     		super.edit(ti);

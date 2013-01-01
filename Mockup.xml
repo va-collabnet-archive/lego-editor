@@ -12,13 +12,19 @@
 		<assertion>
 			<assertionUUID>8dd4b1c0-0be4-11e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<concept sctid="67551009" desc="Abnormal third heart sound, S3"/>
+				<expression>
+					<concept sctid="67551009" desc="Abnormal third heart sound, S3"/>
+				</expression>
 			</discernible>
 			<qualifier>
-				<concept sctid="5880005" desc="Physical examination procedure" />
+				<expression>
+					<concept sctid="5880005" desc="Physical examination procedure" />
+				</expression>
 			</qualifier>
 			<value>
-				<concept sctid="52101004" desc="Present" />
+				<expression>
+					<concept sctid="52101004" desc="Present" />
+				</expression>
 			</value>
 			<!-- timing is optional -->
 			<!-- subAssertions are optional -->
@@ -29,13 +35,19 @@
 		<assertion>
 			<assertionUUID>7dd4b1c0-0be2-11e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<concept sctid="86484008" desc="Abnormal fourth heart sound, S&gt;4&lt;"/>
+				<expression>
+					<concept sctid="86484008" desc="Abnormal fourth heart sound, S&gt;4&lt;"/>
+				</expression>
 			</discernible>
 			<qualifier>
-				<concept sctid="5880005" desc="Physical examination procedure" />
+				<expression>
+					<concept sctid="5880005" desc="Physical examination procedure" />
+				</expression>
 			</qualifier>
 			<value>
-				<concept sctid="52101004" desc="Present" />
+				<expression>
+					<concept sctid="52101004" desc="Present" />
+				</expression>
 			</value>
 
 			<timing>  
@@ -66,7 +78,7 @@
 		</assertion>
 	</lego>
 
-	<!-- discernible can have rel's -->
+	<!-- discernible can have relation's -->
 	<lego>
 		<legoUUID>8cd4b1c0-0be7-11e2-891e-0813900c9a66</legoUUID>
 		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
@@ -74,21 +86,26 @@
 		<assertion>
 			<assertionUUID>7dd4b1c0-9be2-11e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<concept sctid="248661003" desc="Apex beat displaced">
-					<rel>
+				<expression>
+					<concept sctid="248661003" desc="Apex beat displaced"/>
+					<relation>
 						<type>
 							<concept sctid="363698007" desc="Finding site" />
 						</type>
-						<!-- Each rel must contain a type, and either a concept or a measurement -->
+						<!-- Each relation must contain a type, and either a concept or a measurement -->
 						<!-- Concepts may be referenced by UUID, instead of sctid -->
 						<destination>
-							<concept uuid="8dd4b7c0-0be2-11e2-892e-1100200c9a66" desc="Sixth intercostal space midclavicular line" />
+							<expression>
+								<concept uuid="8dd4b7c0-0be2-11e2-892e-1100200c9a66" desc="Sixth intercostal space midclavicular line" />
+							</expression>
 						</destination>
-					</rel>
-				</concept>
+					</relation>
+				</expression>
 			</discernible>
 			<qualifier>
-				<concept sctid="5880005" desc="Physical examination procedure" />
+				<expression>
+					<concept sctid="5880005" desc="Physical examination procedure" />
+				</expression>
 			</qualifier>
 			<value>
 				<measurement>
@@ -102,7 +119,7 @@
 				<measurement>
 					<!-- String values are limited to values from an enumeration -->
 					<point>
-						<stringValue>NOW</stringValue>
+						<stringConstant>NOW</stringConstant>
 					</point>
 				</measurement>
 			</timing>
@@ -110,7 +127,7 @@
 
 	</lego>
 
-	<!-- real example with two rels and a nested rel -->
+	<!-- real example with two relations and a nested relation -->
 	<lego>
 		<legoUUID>8fd4b1c0-0be7-11e2-891e-0813900c9a66</legoUUID>
 		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
@@ -118,26 +135,30 @@
 		<assertion>
 			<assertionUUID>8fd4b1c0-0ce7-11e2-891e-0813900c9a66</assertionUUID>
 			<discernible>
-				<concept sctid="404684003" desc="Clinical finding" >
-					<rel>
+				<expression>
+					<concept sctid="404684003" desc="Clinical finding" />
+					<relation>
 						<type>
 							<concept sctid="47429007" desc="Associated with" />
 						</type>
 						<destination>
-							<concept sctid="410661009" desc="Exacerbated">
-								<!-- non-sensical example, but shows that rels can be nested -->
-								<rel>
+							<expression>
+								<concept sctid="410661009" desc="Exacerbated"/>
+								<!-- non-sensical example, but shows that relations can be nested -->
+								<relation>
 									<type>
 										<concept sctid="3" desc="Modifier"/>
 									</type>
 									<destination>
-										<concept sctid="5" desc="Extreme"/>
+										<expression>
+											<concept sctid="5" desc="Extreme"/>
+										</expression>
 									</destination>
-								</rel>
-							</concept>
+								</relation>
+							</expression>
 						</destination>
-					</rel>
-					<rel>
+					</relation>
+					<relation>
 						<type>
 						    <concept sctid="260864003" desc="Frequency" />
 						</type>
@@ -156,11 +177,13 @@
 								</interval>
 							</measurement>
 						</destination>
-					</rel>
-				</concept>
+					</relation>
+				</expression>
 			</discernible>
 			<qualifier>
-				<concept sctid="108217004" desc="Interview, history AND/OR physical examination" />
+				<expression>
+					<concept sctid="108217004" desc="Interview, history AND/OR physical examination" />
+				</expression>
 			</qualifier>
 			<value>
 				<measurement>
@@ -190,8 +213,9 @@
 		<assertion>
 			<assertionUUID>8dd4b1c0-0be4-41e2-892e-0800200c9a66</assertionUUID>
 			<discernible>
-				<concept sctid="67551009" desc="Abnormal third heart sound, S3">
-					<rel>
+				<expression>
+					<concept sctid="67551009" desc="Abnormal third heart sound, S3"/>
+					<relation>
 						<type>
 						    <concept desc="foo" sctid="5"/>
 						</type>
@@ -218,21 +242,23 @@
 								</interval>
 							</measurement>
 						</destination>
-					</rel>
-				</concept>
+					</relation>
+				</expression>
 			</discernible>
 			<qualifier>
-				<concept sctid="5880005" desc="Physical examination procedure" />
+				<expression>
+					<concept sctid="5880005" desc="Physical examination procedure" />
+				</expression>
 			</qualifier>
 			<value>
 				<!-- Ranges can also have text strings -->
 				<measurement>
 					<interval>
 						<lowerPoint>
-							<stringValue>DOB</stringValue>
+							<stringConstant>DOB</stringConstant>
 						</lowerPoint>
 						<upperPoint>
-							<stringValue>end active service</stringValue>
+							<stringConstant>end active service</stringConstant>
 						</upperPoint>
 					</interval>
 				</measurement>
@@ -252,4 +278,106 @@
 			</timing>
 		</assertion>
 	</lego>
+	
+	<lego>
+		<legoUUID>8cd4b1c0-0be7-11e2-891e-0813200c9a66</legoUUID>
+		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
+
+		<pncs value="Yes" name="PHYSICAL EXAM_CARDIO_Standard_Cardiac_Exam_Abnormal_Heart_Sounds_S3" id="24261" />
+		<assertion>
+			<assertionUUID>8dd4b1c0-0be4-11e2-892e-0800200c9a66</assertionUUID>
+			<discernible>
+				<expression>
+				<!-- Conjunction example -->
+					<expression>
+						<concept sctid="67551009" desc="Abnormal third heart sound, S3"/>
+					</expression>
+					<expression>
+						<concept sctid="67551010" desc="Abnormal third heart sound, S4"/>
+					</expression>
+					<expression>
+						<concept sctid="67551011" desc="Abnormal third heart sound, S5"/>
+						<relation>
+							<type>
+								<concept desc="foo"></concept>
+							</type>
+							<destination>
+								<boolean>true</boolean>
+							</destination>
+						</relation>
+						<relation>
+							<type>
+								<concept desc="bar"></concept>
+							</type>
+							<destination>
+								<boolean>false</boolean>
+							</destination>
+						</relation>
+						<relationGroup>
+							<relation>
+								<type>
+									<concept desc="foo"></concept>
+								</type>
+								<destination>
+									<text>Arbitrary Text</text>
+								</destination>
+							</relation>
+							<relation>
+								<type>
+									<concept desc="bar"></concept>
+								</type>
+								<destination>
+									<text>Other arbitrary text</text>
+								</destination>
+							</relation>
+						</relationGroup>
+					</expression>
+				</expression>
+			</discernible>
+			<qualifier>
+				<expression>
+					<expression>
+						<concept sctid="5880005" desc="Physical examination procedure" />
+					</expression>
+					<expression>
+						<concept sctid="5880005" desc="Physical examination procedure" />
+					</expression>
+					<relation>
+						<type>
+							<concept desc="foo"/>
+						</type>
+						<destination>
+							<boolean>true</boolean>
+						</destination>
+					</relation>
+					<relation>
+						<type>
+							<concept desc="bar"/>
+						</type>
+						<destination>
+							<boolean>false</boolean>
+						</destination>
+					</relation>
+					<relationGroup>
+						<relation>
+							<type>
+								<concept desc="me too"/>
+							</type>
+							<destination>
+								<text>fred</text>
+							</destination>
+						</relation>
+					</relationGroup>
+				</expression>
+			</qualifier>
+			<value>
+				<measurement>
+					<point>
+						<numericValue>5</numericValue>
+					</point>
+				</measurement>
+			</value>
+		</assertion>
+	</lego>
+	
 </legoList>

@@ -71,8 +71,6 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
      *                                                                         *
      **************************************************************************/
 
-
-
     private static final ObservableList<String> paths;
     static {
         paths = FXCollections.<String>observableArrayList();
@@ -221,6 +219,7 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
         Arc arcShape;
         Arc arcProgress;
 
+        @SuppressWarnings("deprecation")
         public DeterminateIndicator(ProgressIndicator control, TaxonomyProgressIndicatorSkin s) {
             this.control = control;
             this.skin = s;
@@ -277,6 +276,7 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
             requestLayout();
         }
 
+        @SuppressWarnings("deprecation")
         @Override protected void layoutChildren() {
             // Position and size the circular background
             /*
@@ -335,14 +335,12 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
 
     static class IndeterminateSpinner extends Region {
 
-        private ProgressIndicator control;
         private TaxonomyProgressIndicatorSkin skin;
         private Group childrenG;
         Scale scaleTransform;
         Rotate rotateTransform;
 
         public IndeterminateSpinner(ProgressIndicator control, TaxonomyProgressIndicatorSkin s) {
-            this.control = control;
             this.skin = s;
 
             getStyleClass().setAll("spinner");
@@ -492,7 +490,7 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
         }
 
         @Override
-        public StyleableProperty getStyleableProperty() {
+        public StyleableProperty<TaxonomyProgressIndicatorSkin, Paint> getStyleableProperty() {
             return StyleableProperties.PROGRESS_COLOR;
         }
     };
@@ -521,8 +519,10 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
             }
         };
 
+        @SuppressWarnings("all")
         public static final List<StyleableProperty> STYLEABLES;
         static {
+            @SuppressWarnings("rawtypes")
             final List<StyleableProperty> styleables = 
                 new ArrayList<>(SkinBase.impl_CSS_STYLEABLES());
             Collections.addAll(styleables,
@@ -535,6 +535,7 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
      * @treatAsPrivate implementation detail
      * @deprecated This is an internal API that is not intended for use and will be removed in the next version
      */
+    @SuppressWarnings("rawtypes")
     @Deprecated
     public static List<StyleableProperty> impl_CSS_STYLEABLES() {
         return StyleableProperties.STYLEABLES;
@@ -545,6 +546,7 @@ public class TaxonomyProgressIndicatorSkin extends SkinBase<ProgressIndicator, P
      * @treatAsPrivate implementation detail
      * @deprecated This is an experimental API that is not intended for general use and is subject to change in future versions
      */
+    @SuppressWarnings("rawtypes")
     @Deprecated
     @Override
     public List<StyleableProperty> impl_getStyleableProperties() {

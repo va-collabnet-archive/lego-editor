@@ -1,17 +1,8 @@
 package gov.va.legoEdit.storage;
 
-import com.sleepycat.je.CursorConfig;
-import com.sleepycat.je.DatabaseException;
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.je.LockMode;
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-import com.sleepycat.persist.EntityIndex;
-import com.sleepycat.persist.EntityStore;
-import com.sleepycat.persist.PrimaryIndex;
-import com.sleepycat.persist.SecondaryIndex;
-import com.sleepycat.persist.StoreConfig;
+import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
+import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.bdbModel.LegoBDB;
 import gov.va.legoEdit.model.bdbModel.LegoListBDB;
 import gov.va.legoEdit.model.bdbModel.PncsBDB;
@@ -30,10 +21,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.sleepycat.je.CursorConfig;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.EnvironmentConfig;
+import com.sleepycat.je.LockMode;
+import com.sleepycat.je.Transaction;
+import com.sleepycat.persist.EntityCursor;
+import com.sleepycat.persist.EntityIndex;
+import com.sleepycat.persist.EntityStore;
+import com.sleepycat.persist.PrimaryIndex;
+import com.sleepycat.persist.SecondaryIndex;
+import com.sleepycat.persist.StoreConfig;
 
 /**
  *
@@ -764,6 +768,88 @@ public class BDBDataStoreImpl implements DataStoreInterface
             throw new WriteException("Unexpected error - LegoList was not stored", e);
         }
     }
+    
+    
+
+    @Override
+    public void deleteLego(String legoListUUID, String legoUUID, String stampUUID) throws WriteException
+    {
+        // TODO TEST test this method
+        Transaction txn = null;
+        try
+        {
+            LegoListBDB legoListBDB = legoListByUUID.get(legoListUUID);
+            if (legoListBDB != null)
+            {
+                txn = myEnv.beginTransaction(null, null);
+                
+                String legoUniqueIdToDelete = ModelUtil.makeUniqueLegoID(legoUUID, stampUUID);
+
+                LegoBDB legoBDBToDelete = legoByUniqueId.get(txn, legoUniqueIdToDelete, LockMode.READ_UNCOMMITTED);
+
+                //Lego doesn't store stamp, or pncs so delete them seperately
+                if (legoBDBToDelete != null)
+                {
+                    stampByUniqueId.delete(txn, legoBDBToDelete.getStampId());
+                    
+                    //pncs IDs might be in use by others.  Only delete if not.
+                    boolean inUse = false;
+                    EntityCursor<LegoBDB> ec = null;
+                    try
+                    {
+                        EntityIndex<String, LegoBDB> ei = legoByPncsId.subIndex(legoBDBToDelete.getPncsId());
+                        ec = ei.entities(txn, CursorConfig.READ_UNCOMMITTED);
+                        for (LegoBDB current = ec.first(); current != null; current = ec.nextNoDup())
+                        {
+                            if (!current.getUniqueId().equals(legoUniqueIdToDelete))
+                            {
+                                inUse = true;
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        ec.close();
+                    }
+
+                    if (!inUse)
+                    {
+                        pncsByUniqueId.delete(txn, legoBDBToDelete.getPncsId());
+                    }
+                }
+
+                
+                //Remove the Lego (reference) from the LegoList
+                legoListBDB.removeLego(legoUUID, legoUniqueIdToDelete);
+                
+                //Re-store the LegoList (minus the Lego ref)
+                legoListByUUID.put(txn, legoListBDB);
+
+                //one could check to see if the assertions from this LegoList are being used within another LegoList - but delete really isn't 
+                //intended to be used much in practice, so user beware.
+                //Delete the Lego 
+                legoByUniqueId.delete(txn, legoUniqueIdToDelete);
+            }
+            txn.commit();
+        }
+        catch (DatabaseException e)
+        {
+            logger.error("Unexpected error storing data", e);
+            if (txn != null)
+            {
+                try
+                {
+                    txn.abort();
+                }
+                catch (DatabaseException ex)
+                {
+                    logger.error("Unxpected error during abort", ex);
+                }
+            }
+            throw new WriteException("Unexpected error during delete - Delete was not completed.", e);
+        }       
+    }
 
     @Override
     public void deleteLegoList(String legoListUUID) throws WriteException
@@ -819,7 +905,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
                     legoByUniqueId.delete(txn, legoUniqueIdToDelete);
                 }
 
-                //Finally, delete from the legoList
+                //Finally, delete the legoList
                 legoListByUUID.delete(txn, legoListUUID);
                 txn.commit();
             }
@@ -861,14 +947,22 @@ public class BDBDataStoreImpl implements DataStoreInterface
             if (s == null)
             {
                 s = new Stamp();
-                s.setStatus("Active");
-                //TODO STAMP figure out what we will actually use for status values.  
+                s.setStatus(LegoTreeCell.statusChoices_.get(0));
             }
-            //TODO STAMP set stamp attributes
-            s.setAuthor("nobody");
-            s.setModule("module foo");
-            s.setPath("path foo");
+            if (s.getAuthor() == null || s.getAuthor().length() == 0)
+            {
+                s.setAuthor(LegoGUIModel.getInstance().getUserPreferences().getAuthor());
+            }
+            if (s.getModule() == null || s.getModule().length() == 0)
+            {
+                s.setModule(LegoGUIModel.getInstance().getUserPreferences().getModule());
+            }
+            if (s.getPath() == null || s.getPath().length() == 0)
+            {
+                s.setPath(LegoGUIModel.getInstance().getUserPreferences().getPath());
+            }
             s.setTime(TimeConvert.convert(System.currentTimeMillis()));
+            s.setUuid(UUID.randomUUID().toString());
             lego.setStamp(s);
 
             LegoBDB legoBDB = new LegoBDB(lego);

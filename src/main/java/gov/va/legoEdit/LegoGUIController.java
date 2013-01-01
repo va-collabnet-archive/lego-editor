@@ -19,6 +19,7 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.util.TimeConvert;
+import gov.va.legoEdit.util.UnsavedLegos;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class LegoGUIController implements Initializable
     private HashMap<Node, Effect> existingEffect = new HashMap<Node, Effect>();
     private HashMap<String, LegoTab> displayedLegos = new HashMap<>();
     private HashMap<String, StringProperty> displayedLegosStyleInfo = new HashMap<>();
-    private HashMap<String, Lego> newLegos = new HashMap<String, Lego>();
+    private UnsavedLegos newLegos = new UnsavedLegos();
     private SnomedSearchPaneController sspc;
     private Thread dbConnectThread;
     Random random = new Random();
@@ -124,8 +125,10 @@ public class LegoGUIController implements Initializable
     private MenuItem menuFileCreateLego; // Value injected by FXMLLoader
     @FXML //  fx:id="menuFileExportLegoLists"
     private MenuItem menuFileExportLegoLists; // Value injected by FXMLLoader
-    @FXML //  fx:id="menuView"
-    private Menu menuView; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuEdit"
+    private Menu menuEdit; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuEditPreferences"
+    private MenuItem menuEditPreferences; // Value injected by FXMLLoader
     @FXML //  fx:id="showAllLegoListBtn"
     private ToggleButton showAllLegoListBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="showSnomedBtn"
@@ -157,7 +160,7 @@ public class LegoGUIController implements Initializable
         assert menuFile != null : "fx:id=\"menuFile\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileExit != null : "fx:id=\"menuFileExit\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert menuFileImport != null : "fx:id=\"menuFileImport\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-        assert menuView != null : "fx:id=\"menuView\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+        assert menuEdit != null : "fx:id=\"menuView\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert showAllLegoListBtn != null : "fx:id=\"showAllLegoListBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert showSnomedBtn != null : "fx:id=\"showSnomedBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitLeft != null : "fx:id=\"splitLeft\" was not injected: check your FXML file 'LegoGUI.fxml'.";
@@ -204,7 +207,10 @@ public class LegoGUIController implements Initializable
             @Override
             public void changed(ObservableValue<? extends Tab> tab, Tab oldTab, Tab newTab)
             {
-                //TODO find and highlight lego in tree
+                if (newTab != null)
+                {
+                    showTreeItem(null, ((LegoTab)newTab).getDisplayedLegoID());
+                }
             }
         });
 
@@ -680,28 +686,16 @@ public class LegoGUIController implements Initializable
                 shutdown();
             }
         });
-
-        // Floating Context menus
-//        menuDeleteLegoList = new MenuItem("Delete LegoList");
-//        menuDeleteLegoList.setDisable(true);
-//        menuDeleteLegoList.setOnAction(new EventHandler<ActionEvent>()
-//        {
-//            @Override
-//            public void handle(ActionEvent event)
-//            {
-////                try
-////                {
-//////                    LegoGUIModel.getInstance().removeLegoList(currentLegoList.getGroupName());
-//////                    selectedLegoListChanged(null);
-////                }
-////                catch (WriteException ex)
-////                {
-////                    logger.error("Unexpeted error removing lego", ex);
-////                    LegoGUI.getInstance().showErrorDialog("Error Removing Lego",
-////                            "There was an removing the specified file", ex.getLocalizedMessage());
-////                }
-//            }
-//        });
+        
+        menuEditPreferences.setOnAction(new EventHandler<ActionEvent>()
+        {
+            
+            @Override
+            public void handle(ActionEvent event)
+            {
+                LegoGUI.getInstance().showUserPreferences();
+            }
+        });
     }
 
     public StringProperty getStyleForLego(LegoReference legoReference)
@@ -709,19 +703,32 @@ public class LegoGUIController implements Initializable
         return displayedLegosStyleInfo.get(legoReference.getUniqueId());
     }
     
-    public void addNewLego(LegoReference legoReference, Lego lego)
+    public void addNewLego(String legoListUUID, Lego lego)
     {
-        newLegos.put(legoReference.getUniqueId(), lego);
+        newLegos.addLego(lego, legoListUUID);
     }
     
-    public void beginLegoEdit(LegoReference legoReference)
+    public UnsavedLegos getUnsavedLegos()
+    {
+        return newLegos;
+    }
+    
+    /**
+     * This is only for deleting a lego that hasn't yet been committed.
+     */
+    public void removeNewLego(String legoUniqueId)
+    {
+        newLegos.removeLego(legoUniqueId);
+    }
+    
+    public void beginLegoEdit(LegoReference legoReference, LegoTreeItem lti)
     {
         if (legoReference != null)
         {
             Lego newLego = BDBDataStoreImpl.getInstance().getLego(legoReference.getLegoUUID(), legoReference.getStampUUID());
             if (newLego == null)
             {
-                newLego = newLegos.get(legoReference.getUniqueId());
+                newLego = newLegos.getLego(legoReference.getUniqueId());
                 if (newLego == null)
                 {
                     logger.error("Couldn't find a lego that should have existed!");
@@ -767,7 +774,7 @@ public class LegoGUIController implements Initializable
                 
                 editorTabPane.getTabs().add(tab);
                 editorTabPane.getSelectionModel().select(tab);
-                legoTree.getRoot().getChildren().add(new LegoTreeItem(newLego.getStamp().getStatus(), LegoTreeNodeType.status));
+                legoTree.getRoot().getChildren().add(new LegoTreeItem(newLego.getStamp(), LegoTreeNodeType.status));
                 for (Assertion a : newLego.getAssertion())
                 {
                     legoTree.getRoot().getChildren().add(new LegoTreeItem(a));
@@ -776,8 +783,34 @@ public class LegoGUIController implements Initializable
                 recursiveSort(legoTree.getRoot().getChildren());
                 expandAll(legoTree.getRoot());
             }
+            
+            showTreeItem(lti, legoReference.getUniqueId());
         }
     }
+    
+    private void showTreeItem(TreeItem<String> ti, String legoUniqueId)
+    {
+        if (ti == null)
+        {
+            ti = LegoGUIModel.getInstance().findTreeItem(legoUniqueId);
+        }
+        if (ti != null)
+        {
+            expandParents(ti);
+            Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+        }
+    }
+    
+    private void expandParents(TreeItem<String> ti)
+    {
+        TreeItem<String> parent = ti.getParent();
+        if (parent != null)
+        {
+            ti.getParent().setExpanded(true);
+            expandParents(parent);
+        }
+    }
+    
     
     private void recursiveSort(ObservableList<TreeItem<String>> items)
     {

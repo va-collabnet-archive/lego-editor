@@ -2,31 +2,7 @@ package gov.va.legoEdit.gui.sctTreeView;
 
 //~--- non-JDK imports --------------------------------------------------------
 import gov.va.legoEdit.storage.wb.Utility;
-import javafx.application.Platform;
-
-import javafx.concurrent.Task;
-
-import javafx.event.Event;
-import javafx.event.EventDispatchChain;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
-
-import javafx.scene.Node;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TreeItem;
-
-import org.ihtsdo.concurrency.FutureHelper;
-import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipChronicle;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipVersion;
-import org.ihtsdo.helper.thread.NamedThreadFactory;
-import org.ihtsdo.tk.api.ContradictionException;
-import org.ihtsdo.tk.api.TerminologyStoreDI;
-
-//~--- JDK imports ------------------------------------------------------------
-
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,9 +10,25 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.event.Event;
+import javafx.event.EventDispatchChain;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
+import javafx.scene.Node;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TreeItem;
+import org.ihtsdo.concurrency.FutureHelper;
+import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
+import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipChronicle;
+import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipVersion;
+import org.ihtsdo.helper.thread.NamedThreadFactory;
+import org.ihtsdo.tk.api.ContradictionException;
+import org.ihtsdo.tk.api.TerminologyStoreDI;
+//~--- JDK imports ------------------------------------------------------------
 
 /**
  *

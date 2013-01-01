@@ -70,7 +70,11 @@
             <MenuItem mnemonicParsing="false" text="Exit" fx:id="menuFileExit" />
           </items>
         </Menu>
-        <Menu text="_View" fx:id="menuView" />
+        <Menu id="menuEdit" text="_Edit" fx:id="menuEdit">
+          <items>
+            <MenuItem mnemonicParsing="false" text="Preferences..." fx:id="menuEditPreferences" />
+          </items>
+        </Menu>
       </menus>
     </MenuBar>
   </children>

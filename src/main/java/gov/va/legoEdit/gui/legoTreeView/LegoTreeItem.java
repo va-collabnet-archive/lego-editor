@@ -17,6 +17,7 @@ import gov.va.legoEdit.model.schemaModel.Point;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
+import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.model.schemaModel.Timing;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Value;
@@ -52,6 +53,13 @@ public class LegoTreeItem extends TreeItem<String>
     {
         this.ltnt_ = tct;
         setValue(value);
+    }
+	
+	public LegoTreeItem(Stamp value, LegoTreeNodeType tct)
+    {
+        this.ltnt_ = tct;
+        extraData_ = value;
+        setValue(null);
     }
 	
 	public LegoTreeItem(String label, String value, LegoTreeNodeType tct)
@@ -466,12 +474,12 @@ public class LegoTreeItem extends TreeItem<String>
         }
 	}
 	
-	protected LegoTreeNodeType getNodeType()
+	public LegoTreeNodeType getNodeType()
     {
         return ltnt_;
     }
     
-    protected Object getExtraData()
+    public Object getExtraData()
     {
         return extraData_;
     }
