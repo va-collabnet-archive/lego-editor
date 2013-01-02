@@ -41,6 +41,8 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
     public SimTreeCell(TerminologyStoreDI ts) {
         setOnMouseClicked(new ClickListener());
         
+        ContextMenu cm = new ContextMenu();
+        
         MenuItem mi = new MenuItem("View Concept");
         mi.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -50,8 +52,21 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
                 LegoGUI.getInstance().showSnomedConceptDialog(SimTreeCell.this.getItem().getConcept());
             }
         });
+        cm.getItems().add(mi);
         
-        setContextMenu(new ContextMenu(mi));
+        mi = new MenuItem("Filter for Legos that use this Concept");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController()
+                        .filterOnConcept(SimTreeCell.this.getItem().getConcept().getPrimordialUuid().toString());
+            }
+        });
+        cm.getItems().add(mi);
+        
+        setContextMenu(cm);
         
         this.ts = ts;
     }

@@ -190,6 +190,7 @@ public class LegoFilterPaneController  implements Initializable {
                 {
                     snomedLabel.setText("No Snomed concept entered");
                     snomedIdValid.set(true);
+                    concept_ = null;
                     updateLegoList();
                 }
                 

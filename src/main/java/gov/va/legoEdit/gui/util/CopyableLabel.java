@@ -1,5 +1,6 @@
 package gov.va.legoEdit.gui.util;
 
+import gov.va.legoEdit.LegoGUI;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -45,6 +46,7 @@ public class CopyableLabel extends Label
                 ClipboardContent content = new ClipboardContent();
                 content.putString(l.getText());
                 Clipboard.getSystemClipboard().setContent(content);
+                LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(l.getText());
             }
         });
         l.setContextMenu(new ContextMenu(mi));

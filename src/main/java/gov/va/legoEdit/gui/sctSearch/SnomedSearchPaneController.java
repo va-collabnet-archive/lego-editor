@@ -138,6 +138,7 @@ public class SnomedSearchPaneController implements Initializable
                                     {
                                         cc.putString(item.getConcept().getUUIDs().get(0).toString());
                                         Clipboard.getSystemClipboard().setContent(cc);
+                                        LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(cc.getString());
                                     }
                                 }
                             });

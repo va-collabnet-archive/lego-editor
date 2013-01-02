@@ -36,7 +36,7 @@
           <children>
             <AnchorPane id="AnchorPane" prefHeight="25.0" prefWidth="295.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <children>
-                <Label fx:id="leftPaneLabel" styleClass="boldLabel" text="All Lego Lists" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                <Label fx:id="leftPaneLabel" styleClass="boldLabel" text="Lego Lists" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
               </children>
             </AnchorPane>
             <AnchorPane fx:id="splitLeftSct" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
@@ -55,7 +55,13 @@
         <AnchorPane fx:id="splitRight" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
           <children>
             <TabPane id="tabPane" fx:id="editorTabPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            <ToolBar maxHeight="30.0" minHeight="30.0" prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+            <ToolBar maxHeight="30.0" minHeight="30.0" prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+              <items>
+                <MenuButton fx:id="menuRecentSctCodes" mnemonicParsing="false" text="Recent Snomed Codes" />
+                <Region prefHeight="200.0" prefWidth="200.0"  HBox.hgrow="ALWAYS"/>
+                <Button id="save" fx:id="buttonSaveLego" mnemonicParsing="false" text="Save" />
+              </items>
+            </ToolBar>
           </children>
         </AnchorPane>
       </items>

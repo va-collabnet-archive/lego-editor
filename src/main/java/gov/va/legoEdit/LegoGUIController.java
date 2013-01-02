@@ -15,9 +15,11 @@ import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.wb.WBDataStore;
+import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.TimeConvert;
 import gov.va.legoEdit.util.UnsavedLegos;
 import java.io.File;
@@ -43,11 +45,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -106,6 +110,8 @@ public class LegoGUIController implements Initializable
     // Copypaste from gui tool
     @FXML //  fx:id="rootPane"
     private AnchorPane rootPane; // Value injected by FXMLLoader
+    @FXML //  fx:id="buttonSaveLego"
+    private Button buttonSaveLego; // Value injected by FXMLLoader
     @FXML //  fx:id="editorTabPane"
     private TabPane editorTabPane; // Value injected by FXMLLoader
     @FXML //  fx:id="leftButtons"
@@ -128,6 +134,8 @@ public class LegoGUIController implements Initializable
     private Menu menuEdit; // Value injected by FXMLLoader
     @FXML //  fx:id="menuEditPreferences"
     private MenuItem menuEditPreferences; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuRecentSctCodes"
+    private MenuButton menuRecentSctCodes; // Value injected by FXMLLoader
     @FXML //  fx:id="showAllLegoListBtn"
     private ToggleButton showAllLegoListBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="showSnomedBtn"
@@ -241,14 +249,13 @@ public class LegoGUIController implements Initializable
             @Override
             public void handle(ActionEvent e)
             {
-                if (!showAllLegoListBtn.isSelected())
+                if (showAllLegoListBtn.isSelected())
                 {
-                    showAllLegoListBtn.setSelected(true);
+                    splitLeftSct.setVisible(false);
+                    splitLeftSctSearch.setVisible(false);
+                    leftPaneLabel.setText("Lego Lists");
+                    splitLeftAllLegos.setVisible(true);
                 }
-                splitLeftSct.setVisible(false);
-                splitLeftSctSearch.setVisible(false);
-                leftPaneLabel.setText("All Lego Lists");
-                splitLeftAllLegos.setVisible(true);
             }
         });
 
@@ -332,6 +339,7 @@ public class LegoGUIController implements Initializable
                         if (cm != null)
                         {
                             label.setDroppedValue(db.getString());
+                            updateRecentCodes(db.getString());
                             cm.show(label, Side.RIGHT, 0.0, 0.0);
                         }
                         success = true;
@@ -371,6 +379,7 @@ public class LegoGUIController implements Initializable
                     if (db.hasString())
                     {
                         n.setValue(db.getString());
+                        updateRecentCodes(db.getString());
                         success = true;
                         //It will have updated its effect upon the set - we don't want to restore an old one.
                         existingEffect.remove(n);
@@ -409,6 +418,7 @@ public class LegoGUIController implements Initializable
                     if (db.hasString())
                     {
                         n.setText(db.getString());
+                        updateRecentCodes(db.getString());
                         success = true;
                     }
                 }
@@ -425,6 +435,66 @@ public class LegoGUIController implements Initializable
                 event.consume();
             }
         });
+    }
+    
+    public void updateRecentCodes(String newCode)
+    {
+        ObservableList<MenuItem> items =  menuRecentSctCodes.getItems();
+        MenuItem temp = null;
+        for (MenuItem mi: items)
+        {
+            if (mi.getUserData().equals(newCode))
+            {
+                temp = mi;
+                break;
+            }
+        }
+        if (temp != null)
+        {
+            //Move it to the top
+            items.remove(temp);
+            items.add(0, temp);
+        }
+        else
+        {
+            Concept c = WBUtility.lookupSnomedIdentifier(newCode);
+            final Label l = new Label(c == null ? newCode : c.getDesc());
+            final MenuItem mi = new MenuItem(null, l);
+            mi.setUserData(newCode);
+            
+            l.setOnDragDetected(new EventHandler<MouseEvent>()
+            {
+                public void handle(MouseEvent event)
+                {
+                    /* drag was detected, start a drag-and-drop gesture */
+                    /* allow any transfer mode */
+
+                    Dragboard db = l.startDragAndDrop(TransferMode.COPY);
+
+                    /* Put a string on a dragboard */
+                    ClipboardContent content = new ClipboardContent();
+                    content.putString(mi.getUserData().toString());
+                    db.setContent(content);
+                    LegoGUI.getInstance().getLegoGUIController().snomedDragStarted();
+                    event.consume();
+                }
+            });
+
+            l.setOnDragDone(new EventHandler<DragEvent>()
+            {
+                public void handle(DragEvent event)
+                {
+                    LegoGUI.getInstance().getLegoGUIController().snomedDragCompleted();
+                    menuRecentSctCodes.hide();
+                }
+            });
+            
+            items.add(0, mi);
+        }
+        if (items.size() > 7)
+        {
+            items.remove(items.size() - 1);
+        }
     }
     
     private void setSnomedDropShadows(final Node n)
@@ -520,6 +590,7 @@ public class LegoGUIController implements Initializable
     
     public void showLegoLists()
     {
+        showAllLegoListBtn.selectedProperty().set(true);
         showAllLegoListBtn.fireEvent(new ActionEvent());
     }
 
