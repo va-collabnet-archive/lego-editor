@@ -2,8 +2,8 @@ package gov.va.legoEdit.gui.sctSearch;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.storage.DataStoreException;
-import gov.va.legoEdit.storage.wb.Utility;
 import gov.va.legoEdit.storage.wb.WBDataStore;
+import gov.va.legoEdit.storage.wb.WBUtility;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -108,7 +108,7 @@ public class SnomedSearchPaneController implements Initializable
                             VBox box = new VBox();
                             box.setFillWidth(true);
                             final ConceptChronicleBI wbConcept = item.getConcept();
-                            String preferredText = (wbConcept != null ? Utility.getFSN(wbConcept) : "error - see log");
+                            String preferredText = (wbConcept != null ? WBUtility.getFSN(wbConcept) : "error - see log");
                             Label concept = new Label(preferredText);
                             concept.getStyleClass().add("boldLabel");
                             box.getChildren().add(concept);

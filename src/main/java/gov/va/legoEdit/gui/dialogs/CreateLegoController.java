@@ -117,7 +117,7 @@ public class CreateLegoController implements Initializable
                 llbr.getLegoReference().add(lr);
                 LegoGUI.getInstance().getLegoGUIController().addNewLego(llbr.getLegoListUUID(), l);
                 
-                //TODO this is ugly, need to find a better way.
+                //TODO UGLY HACK, need to find a better way.
                 legoTreeItem.getChildren().clear();
                 legoTreeItem.buildPNCSChildren();
                 expandAll(legoTreeItem);

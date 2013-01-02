@@ -8,7 +8,7 @@ import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.CloseableIterator;
-import gov.va.legoEdit.storage.wb.Utility;
+import gov.va.legoEdit.storage.wb.WBUtility;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -107,7 +107,7 @@ public class LegoFilterPaneController  implements Initializable {
             public void handle(ActionEvent event)
             {
                 updateDisabled.incrementAndGet();
-                //TODO ugly hack cause I can't figure out how to tell it to redo the items...
+                //TODO UGLY HACK cause I can't figure out how to tell it to redo the items...
                 PncsItem selected = pncsItem.getSelectionModel().getSelectedItem();
                 ObservableList<PncsItem> items = FXCollections.observableArrayList();
                 items.addAll(pncsItem.getItems());
@@ -195,7 +195,7 @@ public class LegoFilterPaneController  implements Initializable {
                 
                 if (newValue.length() > 0)
                 {
-                    concept_ = Utility.lookupSnomedIdentifier(newValue);
+                    concept_ = WBUtility.lookupSnomedIdentifier(newValue);
                     if (concept_ != null)
                     {
                         if (concept_.getSctid() != null)

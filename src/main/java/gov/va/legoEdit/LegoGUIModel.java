@@ -118,7 +118,6 @@ public class LegoGUIModel
     {
         legoLists_ = list;
         legoLists_.clear();
-        //TODO need to figure out how to store the lego list name changes - currently they get thrown away...
         
         ArrayList<Lego> legos = new ArrayList<>();
         HashMap<String, LegoListByReference> legoLists = new HashMap<>();
@@ -231,7 +230,12 @@ public class LegoGUIModel
 
     public void removeLegoList(LegoListByReference legoListByReference) throws WriteException
     {
-        //TODO close open tabs?
+        for (LegoReference lr : legoListByReference.getLegoReference())
+        {
+            LegoGUI.getInstance().getLegoGUIController().closeTabIfOpen(lr);
+            // clear the new list too.
+            LegoGUI.getInstance().getLegoGUIController().removeNewLego(lr.getUniqueId());
+        }
         BDBDataStoreImpl.getInstance().deleteLegoList(legoListByReference.getLegoListUUID());
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
         //Long way around to get back to the method above... but I need the filter params.
@@ -241,7 +245,7 @@ public class LegoGUIModel
     
     public void removeLego(LegoListByReference legoListReference, LegoReference legoReference) throws WriteException
     {
-        //TODO close open tabs?
+        LegoGUI.getInstance().getLegoGUIController().closeTabIfOpen(legoReference);
         BDBDataStoreImpl.getInstance().deleteLego(legoListReference.getLegoListUUID(), legoReference.getLegoUUID(), legoReference.getStampUUID());
         LegoGUI.getInstance().getLegoGUIController().removeNewLego(legoReference.getUniqueId());
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();

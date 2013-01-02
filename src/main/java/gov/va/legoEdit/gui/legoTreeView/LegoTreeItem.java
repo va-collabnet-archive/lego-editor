@@ -270,7 +270,7 @@ public class LegoTreeItem extends TreeItem<String>
 			setValue("greater Than");
 		}
 		
-		//TODO redo this mess
+		//TODO bound mess
 		
 		//b.isInclusive();
 //		getChildren().add(new LTreeItem("Inclusive"));

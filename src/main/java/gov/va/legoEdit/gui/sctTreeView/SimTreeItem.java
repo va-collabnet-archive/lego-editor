@@ -1,7 +1,7 @@
 package gov.va.legoEdit.gui.sctTreeView;
 
 //~--- non-JDK imports --------------------------------------------------------
-import gov.va.legoEdit.storage.wb.Utility;
+import gov.va.legoEdit.storage.wb.WBUtility;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -234,7 +234,7 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
         }
 
         if (getValue().conceptProperty().get() != null) {
-            return Utility.getFSN(getValue().conceptProperty().get());
+            return WBUtility.getFSN(getValue().conceptProperty().get());
         }
 
         return "root";

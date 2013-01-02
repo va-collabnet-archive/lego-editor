@@ -1,6 +1,7 @@
 package gov.va.legoEdit.storage.wb;
 
 import gov.va.legoEdit.model.schemaModel.Concept;
+import gov.va.legoEdit.util.Utility;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -19,10 +20,9 @@ import org.ihtsdo.tk.api.id.IdBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Utility
+public class WBUtility
 {
-    //Should be the first, but isn't... not sure why.
-    //TODO file bug
+    //TODO WB BUG - fix after https://csfe.aceworkspace.net/sf/go/artf227370
     //private static UUID snomedIdType = UUID.fromString("0418a591-f75b-39ad-be2c-3ab849326da9");  //SNOMED integer id
     private static UUID snomedIdType = UUID.fromString("f7495b58-6630-3499-a44e-2052b5fcf06c");  //user
     private static Integer snomedIdTypeNid = null;
@@ -89,14 +89,13 @@ public class Utility
         if (result != null && result.getUUIDs().size() > 0)
         {
             c = new Concept();
-            c.setDesc(Utility.getFSN(result));
+            c.setDesc(getFSN(result));
             c.setUuid(result.getUUIDs().get(0).toString());
             try
             {
                 for (IdBI x : result.getAdditionalIds())
                 {
-                    //TODO this will likely get the wrong value, because the DB is returning multiple authorities all with the same type... something hosed.
-                    if (x.getAuthorityNid() == getSnomedIdTypeNid())
+                    if (x.getAuthorityNid() == getSnomedIdTypeNid() && Utility.isLong(x.getDenotation().toString()))
                     {
                         c.setSctid(Long.parseLong(x.getDenotation().toString()));
                         break;

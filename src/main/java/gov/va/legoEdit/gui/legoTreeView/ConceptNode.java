@@ -4,7 +4,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.storage.wb.ConceptLookupCallback;
-import gov.va.legoEdit.storage.wb.Utility;
+import gov.va.legoEdit.storage.wb.WBUtility;
 import java.util.UUID;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -213,7 +213,7 @@ public class ConceptNode implements ConceptLookupCallback
                 
         waitForLookupToComplete();
         lookupInProgress.set(true);
-        Utility.lookupSnomedIdentifier(cb_.getValue(), this);
+        WBUtility.lookupSnomedIdentifier(cb_.getValue(), this);
     }
     
     private void waitForLookupToComplete()

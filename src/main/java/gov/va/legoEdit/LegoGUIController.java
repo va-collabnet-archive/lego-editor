@@ -90,7 +90,6 @@ public class LegoGUIController implements Initializable
 {
     Logger logger = LoggerFactory.getLogger(LegoGUIController.class);
   
-//    private MenuItem menuDeleteLegoList;
     private SimTreeView sctTree;
     private LegoFilterPaneController lfpc;
     private HashMap<String, ArrayList<Node>> snomedCodeDropTargets = new HashMap<>();
@@ -827,6 +826,16 @@ public class LegoGUIController implements Initializable
         StringProperty style = displayedLegosStyleInfo.remove(tab.getDisplayedLegoID());
         style.setValue("-fx-effect: innershadow(two-pass-box , white , 0, 0.0 , 0 , 0);");  //Lego tree node is bound to this - auto update when we clear it.
         snomedCodeDropTargets.remove(tab.getDisplayedLegoID());
+    }
+    
+    public void closeTabIfOpen(LegoReference lr)
+    {
+        LegoTab lt = displayedLegos.get(lr.getUniqueId());
+        if (lt != null)
+        {
+            editorTabPane.getTabs().remove(lt);
+            legoEditTabClosed(lt);
+        }
     }
 
     private void expandAll(TreeItem<String> ti)
