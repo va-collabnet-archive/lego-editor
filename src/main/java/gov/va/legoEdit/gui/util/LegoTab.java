@@ -21,13 +21,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TreeItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import com.sun.javafx.scene.control.skin.LabelSkin;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 
 public class LegoTab extends Tab
@@ -35,22 +37,24 @@ public class LegoTab extends Tab
     private Lego displayedLego;
     private LegoInfoPanel lip;
     private BooleanBinding legoNeedsSaving;
+    private ImageView open = Images.LEGO.createImageView();
+    private ImageView openEdited = Images.LEGO_EDIT.createImageView();
     
     public LegoTab(String tabName, Lego displayedLego)
     {
-        super(tabName);
+        super();
         this.displayedLego = displayedLego;
         this.setClosable(false); // Don't show the native close button
-        final StackPane closeBtn = new StackPane()
-        {
-            @Override
-            protected void layoutChildren()
-            {
-                super.layoutChildren();
-                // Setting the orientation of graphic(button) to the right side.
-                ((Label) ((LabelSkin) getParent()).getSkinnable()).setStyle("-fx-content-display:right;");
-            }
-        };
+        HBox hbox = new HBox();
+        final Label titleLabel = new Label(tabName);
+        titleLabel.setAlignment(Pos.CENTER_LEFT);
+        titleLabel.setGraphic(open);
+        titleLabel.getStyleClass().clear();
+        titleLabel.getStyleClass().add("tab-label");
+        titleLabel.setMaxHeight(Double.MAX_VALUE);
+        hbox.getChildren().add(titleLabel);
+        
+        final StackPane closeBtn = new StackPane();
         closeBtn.getStyleClass().setAll(new String[] { "tab-close-button" });
         closeBtn.setStyle("-fx-cursor:hand;");
         closeBtn.setPadding(new Insets(0, 7, 0, 7));
@@ -84,25 +88,10 @@ public class LegoTab extends Tab
                 closeEvent.handle(null);
             }
         });
-
-        // Showing the close button if the tab is selected.
-        this.selectedProperty().addListener(new ChangeListener<Boolean>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> paramObservableValue, Boolean paramT1,
-                    Boolean isSelected)
-            {
-                if (isSelected)
-                {
-                    LegoTab.this.setGraphic(closeBtn);
-                }
-                else
-                {
-                    LegoTab.this.setGraphic(null);
-                }
-            }
-        });
         
+        hbox.getChildren().add(closeBtn);
+        setGraphic(hbox);
+       
         legoNeedsSaving = new BooleanBinding()
         {
             {
@@ -115,6 +104,23 @@ public class LegoTab extends Tab
                 return !SchemaEquals.equals(storedLego, LegoTab.this.displayedLego);
             }
         };
+        
+        legoNeedsSaving.addListener(new ChangeListener<Boolean>()
+        {
+            
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+            {
+                if (newValue)
+                {
+                    titleLabel.setGraphic(openEdited);
+                }
+                else
+                {
+                    titleLabel.setGraphic(open);
+                }
+            }
+        });
         
         lip = new LegoInfoPanel(displayedLego.getPncs().getName(), displayedLego.getPncs().getValue(), displayedLego.getPncs().getId() + "",
                 displayedLego.getLegoUUID(), displayedLego.getStamp().getAuthor(), displayedLego.getStamp().getModule(), 

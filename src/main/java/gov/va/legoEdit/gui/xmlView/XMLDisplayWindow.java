@@ -1,5 +1,6 @@
 package gov.va.legoEdit.gui.xmlView;
 
+import gov.va.legoEdit.gui.util.Images;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -27,6 +28,8 @@ public class XMLDisplayWindow extends Stage
         setWidth(800);
         setHeight(600);
         setTitle(title);
+        getIcons().add(Images.XML_VIEW_16.getImage());
+        getIcons().add(Images.XML_VIEW_32.getImage());
 
         BorderPane bp = new BorderPane();
         bp.setCursor(Cursor.WAIT);

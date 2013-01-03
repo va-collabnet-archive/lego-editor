@@ -22,8 +22,6 @@ public class ErrorDialogController implements Initializable
     private Label errorMessage; // Value injected by FXMLLoader
     @FXML // fx:id="okButton"
     private Button okButton; // Value injected by FXMLLoader
-    @FXML// fx:id="titleError"
-    private Label titleError; // Value injected by FXMLLoader
 
     @Override
     // This method is called by the FXMLLoader when initialization is complete
@@ -46,17 +44,19 @@ public class ErrorDialogController implements Initializable
         });
     }
 
-    public void setVariables(String titleMessage, String errorMessage, String detailedErrorMessage)
+    public void setVariables(String errorMessage, String detailedErrorMessage)
     {
-        this.titleError.setText(titleMessage);
         this.errorMessage.setText(errorMessage);
         if (detailedErrorMessage == null || detailedErrorMessage.length() == 0)
         {
-            this.detailedMessage.setVisible(false);
+            rootPane.getChildren().remove(this.detailedMessage);
         }
         else
         {
-            this.detailedMessage.setVisible(true);
+            if (!rootPane.getChildren().contains(this.detailedMessage))
+            {
+                rootPane.getChildren().add(this.detailedMessage);
+            }
             this.detailedMessage.setText(detailedErrorMessage);
         }
     }

@@ -1,5 +1,6 @@
 package gov.va.legoEdit.gui.sctTreeView;
 
+import gov.va.legoEdit.gui.util.Images;
 import javafx.event.EventHandler;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
@@ -58,7 +59,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 		FxTaxonomyReferenceWithConcept visibleRootConcept = new FxTaxonomyReferenceWithConcept();
 		visibleRootConcept.setConcept(rootFxConcept);
 
-		SimTreeItem visibleRootItem = new SimTreeItem(visibleRootConcept, SimTreeIcons.ROOT.getImageView(), ts_);
+		SimTreeItem visibleRootItem = new SimTreeItem(visibleRootConcept, Images.ROOT.createImageView(), ts_);
 
 		hiddenRootItem.getChildren().add(visibleRootItem);
 		visibleRootItem.addChildren();

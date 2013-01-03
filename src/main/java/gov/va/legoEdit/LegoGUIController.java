@@ -7,6 +7,7 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchPaneController;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
+import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
@@ -64,8 +65,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -241,6 +240,7 @@ public class LegoGUIController implements Initializable
             }
         });
 
+        showAllLegoListBtn.setGraphic(Images.LEGO_LIST_VIEW.createImageView());
         showAllLegoListBtn.setTooltip(new Tooltip("Show all Lego Lists in the system"));
         showAllLegoListBtn.setToggleGroup(tg);
         showAllLegoListBtn.setSelected(true);
@@ -259,6 +259,7 @@ public class LegoGUIController implements Initializable
             }
         });
 
+        showSnomedBtn.setGraphic(Images.ROOT.createImageView());
         showSnomedBtn.setTooltip(new Tooltip("Show the Snomed Tree"));
         showSnomedBtn.setToggleGroup(tg);
         showSnomedBtn.setOnAction(new EventHandler<ActionEvent>()
@@ -276,6 +277,7 @@ public class LegoGUIController implements Initializable
             }
         });
         
+        showSnomedSearchBtn.setGraphic(Images.LEGO_SEARCH.createImageView());
         showSnomedSearchBtn.setTooltip(new Tooltip("Show the Search Panel"));
         showSnomedSearchBtn.setToggleGroup(tg);
         showSnomedSearchBtn.setOnAction(new EventHandler<ActionEvent>()
@@ -307,8 +309,10 @@ public class LegoGUIController implements Initializable
             }
         };
         enableSaveButton.invalidate();
-        buttonSaveLego.disableProperty().bind(enableSaveButton.not());
         
+        
+        buttonSaveLego.setGraphic(Images.SAVE.createImageView());
+        buttonSaveLego.disableProperty().bind(enableSaveButton.not());
         buttonSaveLego.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
@@ -756,8 +760,7 @@ public class LegoGUIController implements Initializable
 
     private void setupMenus()
     {
-        menuFileImport.setGraphic(new ImageView(new Image(LegoGUI.class
-                .getResourceAsStream("/fugue/16x16/icons/folder-open-table.png"))));
+        menuFileImport.setGraphic(Images.LEGO_IMPORT.createImageView());
         menuFileImport.setAccelerator(new KeyCodeCombination(KeyCode.I, KeyCombination.CONTROL_DOWN));
         menuFileImport.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -800,9 +803,7 @@ public class LegoGUIController implements Initializable
             }
         });
         
-        //TODO find image
-        //menuFileCreateLego.setGraphic(new ImageView(new Image(LegoGUI.class
-        //        .getResourceAsStream("/fugue/16x16/icons/folder-open-table.png"))));
+        menuFileCreateLego.setGraphic(Images.LEGO_ADD.createImageView());
         menuFileCreateLego.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN));
         menuFileCreateLego.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -814,6 +815,7 @@ public class LegoGUIController implements Initializable
             }
         });
         
+        menuFileExportLegoLists.setGraphic(Images.LEGO_EXPORT_ALL.createImageView());
         menuFileExportLegoLists.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
@@ -823,8 +825,7 @@ public class LegoGUIController implements Initializable
             }
         });
 
-        menuFileExit.setGraphic(new ImageView(new Image(LegoGUI.class
-                .getResourceAsStream("/fugue/16x16/icons/cross.png"))));
+        menuFileExit.setGraphic(Images.EXIT.createImageView());
         menuFileExit.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN));
         menuFileExit.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -835,6 +836,7 @@ public class LegoGUIController implements Initializable
             }
         });
         
+        menuEditPreferences.setGraphic(Images.PREFERENCES.createImageView());
         menuEditPreferences.setOnAction(new EventHandler<ActionEvent>()
         {
             

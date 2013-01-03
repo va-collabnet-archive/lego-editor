@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.sctTreeView;
 
 //~--- non-JDK imports --------------------------------------------------------
+import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -160,26 +161,26 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
     public Node computeGraphic() {
         FxTaxonomyReferenceWithConcept ref = getValue();
         if (ref != null && ref.getRelationshipVersion() == null) {
-            return SimTreeIcons.ROOT.getImageView();
+            return Images.ROOT.createImageView();
         } else if (ref != null && ref.getConcept() != null && ref.getConcept().getOriginRelationships().isEmpty()) {
-            return SimTreeIcons.ROOT.getImageView();
+            return Images.ROOT.createImageView();
         } else if (isDefined() && (isMultiParent() || multiParentDepth > 0)) {
             
             if (isSecondaryParentOpened()) {
-                return SimTreeIcons.DEFINED_MULTI_PARENT_OPEN.getImageView();
+                return Images.DEFINED_MULTI_PARENT_OPEN.createImageView();
             } else {
-                return SimTreeIcons.DEFINED_MULTI_PARENT_CLOSED.getImageView();
+                return Images.DEFINED_MULTI_PARENT_CLOSED.createImageView();
             }
         } else if (!isDefined() && (isMultiParent() || multiParentDepth > 0)) {
             if (isSecondaryParentOpened()) {
-                return SimTreeIcons.PRIMITIVE_MULTI_PARENT_OPEN.getImageView();
+                return Images.PRIMITIVE_MULTI_PARENT_OPEN.createImageView();
             } else {
-                return SimTreeIcons.PRIMITIVE_MULTI_PARENT_CLOSED.getImageView();
+                return Images.PRIMITIVE_MULTI_PARENT_CLOSED.createImageView();
             }
         } else if (isDefined() && !isMultiParent()) {
-            return SimTreeIcons.DEFINED_SINGLE_PARENT.getImageView();
+            return Images.DEFINED_SINGLE_PARENT.createImageView();
         }
-        return SimTreeIcons.PRIMITIVE_SINGLE_PARENT.getImageView();
+        return Images.PRIMITIVE_SINGLE_PARENT.createImageView();
     }
  
     @Override

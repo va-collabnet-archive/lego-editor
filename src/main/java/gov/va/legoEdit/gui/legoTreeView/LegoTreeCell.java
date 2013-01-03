@@ -5,6 +5,7 @@ import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.util.CopyableLabel;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
+import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
@@ -149,15 +150,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
             else if (treeItem.getNodeType() == LegoTreeNodeType.legoReference)
             {
                 LegoReference legoReference = (LegoReference)treeItem.getExtraData();
-                
-                HBox hbox = new HBox();
-                hbox.setSpacing(5.0);
-                Label l = new Label("Lego");
-                l.getStyleClass().add("boldLabel");
-                Label l2 = new Label(TimeConvert.format(legoReference.getStampTime()));
-                hbox.getChildren().add(l);
-                hbox.getChildren().add(l2);
-                setGraphic(hbox);
+                Label l = new Label(TimeConvert.format(legoReference.getStampTime()));
+                l.setGraphic(Images.LEGO.createImageView());
+                setGraphic(l);
                 StringProperty style = LegoGUI.getInstance().getLegoGUIController().getStyleForLego(legoReference); 
                 if (style != null)
                 {
@@ -204,6 +199,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         createNewLego(treeItem);
                     }
                 });
+                mi.setGraphic(Images.LEGO_ADD.createImageView());
                 cm.getItems().add(mi);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.labeledUneditableString)
@@ -1094,6 +1090,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 LegoGUI.getInstance().showCreateLegoDialog(llbr, treeItem);
             }
         });
+        mi.setGraphic(Images.LEGO_ADD.createImageView());
         cm.getItems().add(mi);
 
         mi = new MenuItem("Show XML View");
@@ -1105,6 +1102,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 LegoGUI.getInstance().showXMLViewWindow(BDBDataStoreImpl.getInstance().getLegoListByID(llbr.getLegoListUUID()));
             }
         });
+        mi.setGraphic(Images.XML_VIEW_16.createImageView());
         cm.getItems().add(mi);
         
         mi = new MenuItem("Properties");
@@ -1117,9 +1115,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         legoListDescriptionProperty);
             }
         });
+        mi.setGraphic(Images.PROPERTIES.createImageView());
         cm.getItems().add(mi);
         
-        mi = new MenuItem("Save as XML");
+        mi = new MenuItem("Export as XML");
         mi.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
@@ -1136,6 +1135,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 });
             }
         });
+        mi.setGraphic(Images.LEGO_EXPORT.createImageView());
         cm.getItems().add(mi);
         
         mi = new MenuItem("Delete Lego List");
@@ -1160,6 +1160,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             }
         });
+        mi.setGraphic(Images.LEGO_DELETE.createImageView());
         cm.getItems().add(mi);
     }
     
@@ -1190,6 +1191,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 
             }
         });
+        mi.setGraphic(Images.LEGO_DELETE.createImageView());
         cm.getItems().add(mi);
     }
     

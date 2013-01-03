@@ -13,7 +13,7 @@
   <children>
     <ImageView fx:id="icon" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
       <image>
-        <Image url="@../../../../../icons/question.png" preserveRatio="false" smooth="false" />
+        <Image url="@../../../../../icons/fugue/32x32/icons-shadowless/question.png" preserveRatio="false" smooth="false" />
       </image>
     </ImageView>
     <Label fx:id="question" alignment="TOP_LEFT" text="The Question goes here" wrapText="true" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="15.0" />

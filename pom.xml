@@ -23,7 +23,6 @@
         <!--javafx.version>2.2.4-ea-b13</javafx.version>--> <!-- From java 1.7.0_10-b13 -->
 		<!--<javafx.version>2.2.4-b18</javafx.version> --> 	<!-- From java 1.7.0_10 -->
         <javafx.version>2.2.6-ea-b07</javafx.version> 		<!-- From java 1.7.0_12-b07 -->
-        <icons.version>1.0-SNAPSHOT</icons.version>
         <trek.version>3.0.1-SNAPSHOT</trek.version>
         <je.version>5.0.55</je.version>
     </properties>
@@ -40,26 +39,6 @@
             <artifactId>jfxrt</artifactId>
             <version>${javafx.version}</version>
             <scope>compile</scope>
-        </dependency>
-         <dependency>
-            <groupId>org.ihtsdo</groupId>
-            <artifactId>flag-icons</artifactId>
-            <version>${icons.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ihtsdo</groupId>
-            <artifactId>fugue-icons</artifactId>
-            <version>${icons.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ihtsdo</groupId>
-            <artifactId>silk-icons</artifactId>
-            <version>${icons.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ihtsdo</groupId>
-            <artifactId>diagona-icons</artifactId>
-            <version>${icons.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sleepycat</groupId>
@@ -97,11 +76,6 @@
             <version>${trek.version}</version>
             <scope>compile</scope>
         </dependency>
-    	<!--dependency>
-            <groupId>gov.va</groupId>
-            <artifactId>sim-fx-ria</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency-->
     </dependencies>
     <build>
         <plugins>

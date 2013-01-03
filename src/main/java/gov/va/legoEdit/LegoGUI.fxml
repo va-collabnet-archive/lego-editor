@@ -13,17 +13,17 @@
   <children>
     <VBox id="VBox" alignment="TOP_CENTER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" spacing="5.0" styleClass="headerBackground" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0">
       <children>
-        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" minWidth="100.0" mnemonicParsing="false" rotate="-90.0" text="Lego Lists" translateY="70.0">
+        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" minWidth="120.0" mnemonicParsing="false" rotate="-90.0" text="Lego Lists" translateY="70.0">
           <VBox.margin>
             <Insets bottom="90.0" />
           </VBox.margin>
         </ToggleButton>
-        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" minWidth="140.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Browser" translateY="85.0">
+        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" minWidth="160.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Browser" translateY="105.0">
           <VBox.margin>
             <Insets bottom="130.0" />
           </VBox.margin>
         </ToggleButton>
-        <ToggleButton id="showLegoList" fx:id="showSnomedSearchBtn" minWidth="130.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Search" translateY="75.0">
+        <ToggleButton id="showLegoList" fx:id="showSnomedSearchBtn" minWidth="150.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Search" translateY="115.0">
           <VBox.margin>
             <Insets bottom="120.0" />
           </VBox.margin>

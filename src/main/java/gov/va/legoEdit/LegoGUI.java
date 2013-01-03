@@ -8,6 +8,7 @@ import gov.va.legoEdit.gui.dialogs.SnomedConceptViewController;
 import gov.va.legoEdit.gui.dialogs.UserPreferencesController;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.LegoList;
@@ -20,7 +21,6 @@ import javafx.beans.property.StringProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -84,7 +84,7 @@ public class LegoGUI extends Application
 		scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
 		mainStage_.setScene(scene);
 		lgc_ = loader.getController();
-		mainStage_.getIcons().add(new Image(LegoGUI.class.getResourceAsStream("/fugue/16x16/icons/application-block.png")));
+		mainStage_.getIcons().add(Images.APPLICATION.getImage());
 		mainStage_.setTitle("Lego Editor");
 		lgc_.finishInit();
 		mainStage_.show();
@@ -94,8 +94,8 @@ public class LegoGUI extends Application
 		errorDialogStage_.initModality(Modality.WINDOW_MODAL);
 		errorDialogStage_.initOwner(mainStage_);
 		errorDialogStage_.initStyle(StageStyle.UTILITY);
-		
 		loader = new FXMLLoader();
+		loader.setLocation(ErrorDialogController.class.getResource("ErrorDialog.fxml"));
 		scene = new Scene((Parent)loader.load(ErrorDialogController.class.getResourceAsStream("ErrorDialog.fxml")));
 		edc_ = loader.getController();
 		scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
@@ -153,7 +153,7 @@ public class LegoGUI extends Application
 	
 	public void showErrorDialog(String title, String errorMessage, String detailedErrorMessage)
 	{
-		edc_.setVariables(title, errorMessage, detailedErrorMessage);
+		edc_.setVariables(errorMessage, detailedErrorMessage);
 		errorDialogStage_.setTitle(title);
 		errorDialogStage_.showAndWait();
 	}
