@@ -2,7 +2,6 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.model.schemaModel.Concept;
-import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.storage.wb.ConceptLookupCallback;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import java.util.UUID;
@@ -39,19 +38,21 @@ public class ConceptNode implements ConceptLookupCallback
         invalidDropShadow.setColor(Color.RED);
     }
     
-    VBox vbox_;
-    ComboBox<String> cb_;
-    Label descriptionLabel_;
-    Label contentLabel_;
-    ProgressIndicator pi_;
-    Concept c_;
+    private VBox vbox_;
+    private ComboBox<String> cb_;
+    private Label descriptionLabel_;
+    private Label contentLabel_;
+    private ProgressIndicator pi_;
+    private Concept c_;
+    private LegoTreeView legoTreeView_;
     
-    BooleanProperty isValid = new SimpleBooleanProperty(true);
-    BooleanProperty lookupInProgress = new SimpleBooleanProperty(false);
+    private BooleanProperty isValid = new SimpleBooleanProperty(true);
+    private BooleanProperty lookupInProgress = new SimpleBooleanProperty(false);
 
-    public ConceptNode(String label, Concept c, LegoTreeNodeType tct, Lego lego)
+    public ConceptNode(String label, Concept c, LegoTreeNodeType tct, LegoTreeView legoTreeView)
     {
         c_ = c;
+        legoTreeView_ = legoTreeView;
         vbox_ = new VBox();
         vbox_.setSpacing(5.0);
         vbox_.setAlignment(Pos.CENTER_LEFT);
@@ -84,7 +85,7 @@ public class ConceptNode implements ConceptLookupCallback
             }
         });
 
-        LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(lego, cb_);
+        LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(legoTreeView_.getLego(), cb_);
         
         AnchorPane ap = new AnchorPane();
         pi_ = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -279,6 +280,7 @@ public class ConceptNode implements ConceptLookupCallback
                     c_.setDesc(cb_.getValue().length() > 0 ? "Invalid Concept" : "");
                     isValid.set(false);
                 }
+                legoTreeView_.contentChanged();
                 updateGUI();
             }
         });

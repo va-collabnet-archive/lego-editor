@@ -1,5 +1,8 @@
 package gov.va.legoEdit.util;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -10,11 +13,13 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class TimeConvert
 {
-    private static DatatypeFactory df;
-    static {
+    private static DatatypeFactory datatypeFactory_;
+    private static DateFormat dateFormat_ = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    static 
+    {
         try
         {
-            df = DatatypeFactory.newInstance();
+            datatypeFactory_ = DatatypeFactory.newInstance();
         }
         catch (Exception e)
         {
@@ -26,11 +31,21 @@ public class TimeConvert
     {
         GregorianCalendar gc = new GregorianCalendar();
         gc.setTimeInMillis(time);
-        return df.newXMLGregorianCalendar(gc);
+        return datatypeFactory_.newXMLGregorianCalendar(gc);
     }
     
     public static long convert(XMLGregorianCalendar gc)
     {
         return gc.toGregorianCalendar().getTimeInMillis();
+    }
+    
+    public static String format(XMLGregorianCalendar gc)
+    {
+        return format(gc.toGregorianCalendar().getTimeInMillis());
+    }
+    
+    public static String format(long time)
+    {
+        return dateFormat_.format(new Date(time));
     }
 }

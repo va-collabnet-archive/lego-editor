@@ -218,6 +218,7 @@ public class LegoGUIModel
 
         legoLists_.add(new LegoTreeItem(LegoTreeNodeType.blankLegoListEndNode));
         FXCollections.sort(legoLists_, new LegoTreeItemComparator(true));
+        LegoGUI.getInstance().getLegoGUIController().showLegosForAllOpenTabs();
     }
 
     public void importLegoList(LegoList ll) throws WriteException

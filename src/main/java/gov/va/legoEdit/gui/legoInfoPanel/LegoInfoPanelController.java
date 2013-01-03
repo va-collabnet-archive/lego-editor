@@ -9,30 +9,22 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 
 
-public class LegoInfoPanelController
-    implements Initializable {
+public class LegoInfoPanelController implements Initializable {
 
     @FXML //  fx:id="legoAuthor"
     private Label legoAuthor; // Value injected by FXMLLoader
-
     @FXML //  fx:id="legoDate"
     private Label legoDate; // Value injected by FXMLLoader
-
     @FXML //  fx:id="legoModule"
     private Label legoModule; // Value injected by FXMLLoader
-
     @FXML //  fx:id="legoPath"
     private Label legoPath; // Value injected by FXMLLoader
-
     @FXML //  fx:id="legoUUID"
     private Label legoUUID; // Value injected by FXMLLoader
-
     @FXML //  fx:id="pncsID"
     private Label pncsID; // Value injected by FXMLLoader
-
     @FXML //  fx:id="pncsName"
     private Label pncsName; // Value injected by FXMLLoader
-
     @FXML //  fx:id="pncsValue"
     private Label pncsValue; // Value injected by FXMLLoader
 
@@ -49,7 +41,6 @@ public class LegoInfoPanelController
         assert pncsName != null : "fx:id=\"pncsName\" was not injected: check your FXML file 'LegoInfoPanel.fxml'.";
         assert pncsValue != null : "fx:id=\"pncsValue\" was not injected: check your FXML file 'LegoInfoPanel.fxml'.";
         // initialize your logic here: all @FXML variables will have been injected
-
     }
     
     protected void finishInit(String pncsName, String pncsValue, String pncsID, final String legoUUID, String author, String module, String date, String path)
@@ -71,5 +62,13 @@ public class LegoInfoPanelController
         CopyableLabel.addCopyMenu(this.pncsID);
         CopyableLabel.addCopyMenu(this.pncsName);
         CopyableLabel.addCopyMenu(this.pncsValue);
+    }
+    
+    protected void update(String author, String module, String date, String path)
+    {
+        this.legoAuthor.setText(author);
+        this.legoDate.setText(date);
+        this.legoModule.setText(module);
+        this.legoPath.setText(path);
     }
 }

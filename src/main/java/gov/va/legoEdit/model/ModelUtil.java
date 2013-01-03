@@ -6,11 +6,11 @@ public class ModelUtil
 {
     public static String makeUniqueLegoID(Lego lego)
     {
-        return lego.getLegoUUID() + lego.getStamp().getUuid();
+        return makeUniqueLegoID(lego.getLegoUUID(), lego.getStamp().getUuid());
     }
     
     public static String makeUniqueLegoID(String legoUUID, String stampUUID)
     {
-        return legoUUID + stampUUID;
+        return legoUUID + ":" + stampUUID;
     }
 }

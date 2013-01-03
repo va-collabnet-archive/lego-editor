@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import javafx.scene.control.ScrollPane;
@@ -12,7 +13,7 @@ import javafx.util.Callback;
 
 public class LegoTreeView extends TreeView<String>
 {
-    private Lego lego_;
+    private LegoTab legoTab_;
     
 	public LegoTreeView()
 	{
@@ -22,7 +23,7 @@ public class LegoTreeView extends TreeView<String>
 			@Override
 			public TreeCell<String> call(TreeView<String> arg0)
 			{
-				return new LegoTreeCell<String>();
+				return new LegoTreeCell<String>(LegoTreeView.this);
 			}
 		});
 		setEditable(true);
@@ -31,9 +32,9 @@ public class LegoTreeView extends TreeView<String>
         setRoot(treeRoot);
 	}
 	
-	public void setLego(Lego lego)
+	public void setLegoTab(LegoTab legoTab)
 	{
-	    lego_ = lego;
+	    legoTab_ = legoTab;
 	}
 
 	@Override
@@ -65,6 +66,18 @@ public class LegoTreeView extends TreeView<String>
 	
 	protected Lego getLego()
 	{
-	    return lego_;
+	    if (legoTab_ != null)
+	    {
+	        return legoTab_.getLego();
+	    }
+	    return null;
+	}
+	
+	protected void contentChanged()
+	{
+	    if (legoTab_ != null)
+	    {
+	        legoTab_.hasUnsavedChangesProperty().invalidate();
+	    }
 	}
 }

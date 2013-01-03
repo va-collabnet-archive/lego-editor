@@ -1,5 +1,6 @@
 package gov.va.legoEdit.model;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 
@@ -7,12 +8,14 @@ public class LegoReference
 {
     private String legoUUID;
     private String stampUUID;
+    private XMLGregorianCalendar stampTime;
     private Pncs pncs;
     
     public LegoReference(Lego lego)
     {
         this.legoUUID = lego.getLegoUUID();
         this.stampUUID = lego.getStamp().getUuid();
+        this.stampTime = lego.getStamp().getTime();
         this.pncs = lego.getPncs();
     }
 
@@ -31,6 +34,10 @@ public class LegoReference
         return pncs;
     }
     
+    public XMLGregorianCalendar getStampTime()
+    {
+        return stampTime;
+    }
     
     public String getUniqueId()
     {

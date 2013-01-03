@@ -73,7 +73,15 @@ public class LegoTreeCell<T> extends TreeCell<T>
     {
         invalidDropShadow.setColor(Color.RED);
     }
-
+    
+    private LegoTreeView treeView;
+    
+    public LegoTreeCell(LegoTreeView ltv)
+    {
+        //For reasons I don't understand, the getTreeView() method is unreliable, sometimes returning null.  Either a bug in javafx, or really poorly documented...
+        this.treeView = ltv;
+    }
+    
     @Override
     public void updateItem(T item, boolean empty)
     {
@@ -87,7 +95,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             setText(null);
             setGraphic(null);
             
-            if (((LegoTreeView) getTreeView()).getLego() != null
+            if (treeView.getLego() != null
                     || (!empty && treeItem.getNodeType() == LegoTreeNodeType.blankLegoEndNode))
             {
                 MenuItem mi = new MenuItem("Add Assertion");
@@ -101,7 +109,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 });
                 cm.getItems().add(mi);
             }
-            else if (((LegoTreeView) getTreeView()).getLego() == null
+            else if (treeView.getLego() == null
                     || (!empty && treeItem.getNodeType() == LegoTreeNodeType.blankLegoListEndNode))
             {
                 MenuItem mi = new MenuItem("Create Lego List");
@@ -142,9 +150,14 @@ public class LegoTreeCell<T> extends TreeCell<T>
             {
                 LegoReference legoReference = (LegoReference)treeItem.getExtraData();
                 
+                HBox hbox = new HBox();
+                hbox.setSpacing(5.0);
                 Label l = new Label("Lego");
                 l.getStyleClass().add("boldLabel");
-                setGraphic(l);
+                Label l2 = new Label(TimeConvert.format(legoReference.getStampTime()));
+                hbox.getChildren().add(l);
+                hbox.getChildren().add(l2);
+                setGraphic(hbox);
                 StringProperty style = LegoGUI.getInstance().getLegoGUIController().getStyleForLego(legoReference); 
                 if (style != null)
                 {
@@ -176,6 +189,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
                     {
                         stamp.setStatus(newValue);
+                        treeView.contentChanged();
                     }
                 });
             }
@@ -209,7 +223,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
                 addMenus(a, treeItem, cm, assertionLabel);
                 setGraphic(hbox);
-                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(((LegoTreeView) getTreeView()).getLego(), assertionLabel);
+                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), assertionLabel);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.assertionComponents)
             {
@@ -245,6 +259,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         {
                             tf.setEffect(invalidDropShadow);
                         }
+                        treeView.contentChanged();
                     }
                 });
                 setGraphic(prependLabel("Assertion UUID", tf));
@@ -285,7 +300,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 addMenus(e, treeItem, cm, label, descriptionAddition);
                 
                 setGraphic(label);
-                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(((LegoTreeView) getTreeView()).getLego(), label);
+                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), label);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.concept
                     || treeItem.getNodeType() == LegoTreeNodeType.conceptOptional)
@@ -304,7 +319,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label = "Units";
                 }
 
-                ConceptNode cn = new ConceptNode(label, c, treeItem.getNodeType(), ((LegoTreeView) getTreeView()).getLego());
+                ConceptNode cn = new ConceptNode(label, c, treeItem.getNodeType(), treeView);
                 setGraphic(cn.getNode());
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.relation)
@@ -312,7 +327,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 DropTargetLabel relLabel = new DropTargetLabel(treeItem.getValue(), cm);                
                 addMenus((Relation) treeItem.getExtraData(), treeItem, cm, relLabel);
                 setGraphic(relLabel);
-                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(((LegoTreeView) getTreeView()).getLego(), relLabel);
+                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), relLabel);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.relationshipGroup)
             {
@@ -372,6 +387,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                                 p.setInclusive(true); 
                             }
                         }
+                        treeView.contentChanged();
                     }
                 });
 
@@ -388,7 +404,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 DropTargetLabel valueLabel = new DropTargetLabel(treeItem.getValue(), cm);
                 addMenus((Value) treeItem.getExtraData(), treeItem, cm, valueLabel);
                 setGraphic(valueLabel);
-                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(((LegoTreeView) getTreeView()).getLego(), valueLabel);
+                LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), valueLabel);
             }
         }
         // done with massive if/else
@@ -443,6 +459,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Event.fireEvent(ti.getParent(),
                 new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void removeMeasurement(Measurement m, TreeItem<String> ti)
@@ -470,6 +487,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Event.fireEvent(ti.getParent(),
                 new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void addUnits(Measurement m, TreeItem<String> ti)
@@ -480,6 +498,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         m.setUnits(u);
         ti.getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.conceptOptional));
         expandAll(ti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -489,6 +508,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         m.setInterval(i);
         ti.getChildren().add(new LegoTreeItem(i));
         expandAll(ti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -499,6 +519,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Event.fireEvent(ti.getParent(),
                 new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void removePoint(Point p, TreeItem<String> ti)
@@ -516,6 +537,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         {
             logger.error("unhandled point remove call");
         }
+        treeView.contentChanged();
     }
 
     private void addPoint(Measurement m, TreeItem<String> ti)
@@ -524,6 +546,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         m.setPoint(p);
         ti.getChildren().add(new LegoTreeItem(p));
         expandAll(ti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -563,6 +586,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
         ti.getChildren().add(new LegoTreeItem(m));
         expandAll(ti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -573,7 +597,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
         Expression expression;
         boolean addExpression = false;
-        ;
+
         LegoTreeNodeType type = ((LegoTreeItem) ti).getNodeType();
 
         if (object instanceof Value)
@@ -681,6 +705,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
         FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         ti.setExpanded(true);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -703,6 +728,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Event.fireEvent(ti.getParent(),
                 new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void removeExpression(Expression e, TreeItem<String> ti)
@@ -748,6 +774,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Event.fireEvent(ti.getParent(),
                 new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void addTimingMeasurement(Timing t, boolean withPoint, boolean withInterval, TreeItem<String> ti)
@@ -764,6 +791,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
         ti.getChildren().add(new LegoTreeItem(m));
         expandAll(ti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -784,6 +812,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         ti.getChildren().add(lti);
         expandAll(lti);
         ti.setExpanded(true);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -795,6 +824,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         ti.getChildren().add(lti);
         expandAll(lti);
         ti.setExpanded(true);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -816,6 +846,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
         // No need to fire a parent event here - the options on Expression don't change with add/remove of a rel.
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void removeRelationGroup(TreeItem<String> ti)
@@ -825,6 +856,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
         // No need to fire a parent event here - the options on Expression don't change with add/remove of a rel.
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void addRelationshipGroup(Expression e, TreeItem<String> ti)
@@ -833,6 +865,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         e.getRelationGroup().add(rg);
         ti.getChildren().add(new LegoTreeItem(rg));
         expandAll(ti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -852,6 +885,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         ti.getChildren().add(lti);
         FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(lti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -868,6 +902,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         ti.getChildren().add(lti);
         FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(lti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -884,6 +919,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         ti.getChildren().add(lti);
         FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(lti);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -917,6 +953,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(lti);
         ti.setExpanded(true);
+        treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
@@ -924,7 +961,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
     {
         AssertionComponent ac = new AssertionComponent();
         acs.getAssertionComponent().add(ac);
-
+        treeView.contentChanged();
         LegoTreeItem lti = new LegoTreeItem(ac);
         ti.getChildren().add(lti);
         expandAll(lti);
@@ -938,6 +975,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         // No need to fire a parent event here - the options on AssertionComponents don't change with add/remove of a
         // component.
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void addAssertionComponents(Assertion a, TreeItem<String> ti)
@@ -950,6 +988,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         acs.getAssertionComponent().add(ac);
 
         ti.getChildren().add(0, new LegoTreeItem(acs));
+        treeView.contentChanged();
         expandAll(ti.getChildren().get(0));
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
@@ -961,6 +1000,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Event.fireEvent(ti.getParent(),
                 new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
         ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
     }
 
     private void removeAssertion(Assertion a, TreeItem<String> ti)
@@ -975,6 +1015,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             }
         }
         ltv.getRoot().getChildren().remove(ti);
+        treeView.contentChanged();
         // No need to fire event here, there is no parent to notify
     }
 
@@ -984,6 +1025,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Assertion a = new Assertion();
         a.setAssertionUUID(UUID.randomUUID().toString());
         ltv.getLego().getAssertion().add(a);
+        treeView.contentChanged();
 
         LegoTreeItem lti = new LegoTreeItem(a);
         ltv.getRoot().getChildren().add(lti);

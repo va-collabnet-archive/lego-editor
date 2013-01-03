@@ -3,40 +3,39 @@ package gov.va.legoEdit;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
-import gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
-import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
-import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchPaneController;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.LegoTab;
-import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
-import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
+import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.storage.DataStoreException;
+import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
-import gov.va.legoEdit.util.TimeConvert;
 import gov.va.legoEdit.util.UnsavedLegos;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -76,7 +75,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
@@ -104,6 +102,8 @@ public class LegoGUIController implements Initializable
     private SnomedSearchPaneController sspc;
     private Thread dbConnectThread;
     Random random = new Random();
+    
+    private BooleanBinding enableSaveButton;
     
     private static String NONE = "NONE";
 
@@ -176,7 +176,6 @@ public class LegoGUIController implements Initializable
         assert splitPane != null : "fx:id=\"splitPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
         assert splitRight != null : "fx:id=\"splitRight\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 
-
         // initialize your logic here: all @FXML variables will have been injected
     }
     
@@ -218,6 +217,7 @@ public class LegoGUIController implements Initializable
                 {
                     showTreeItem(null, ((LegoTab)newTab).getDisplayedLegoID());
                 }
+                enableSaveButton.invalidate();
             }
         });
 
@@ -289,6 +289,84 @@ public class LegoGUIController implements Initializable
                     splitLeftSct.setVisible(false);
                     leftPaneLabel.setText("Snomed Search");
                     splitLeftSctSearch.setVisible(true);
+                }
+            }
+        });
+        
+        enableSaveButton = new BooleanBinding()
+        {
+            @Override
+            protected boolean computeValue()
+            {
+                Tab t = editorTabPane.getSelectionModel().getSelectedItem();
+                if (t != null)
+                {
+                    return ((LegoTab)t).hasUnsavedChangesProperty().get();
+                }
+                return false;
+            }
+        };
+        enableSaveButton.invalidate();
+        buttonSaveLego.disableProperty().bind(enableSaveButton.not());
+        
+        buttonSaveLego.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                LegoTab lt = (LegoTab)editorTabPane.getSelectionModel().getSelectedItem();
+                Lego lego = lt.getLego();
+                String oldId = ModelUtil.makeUniqueLegoID(lego);
+                displayedLegos.remove(oldId);
+                StringProperty style = displayedLegosStyleInfo.remove(oldId);
+                ArrayList<Node> dropTargets = snomedCodeDropTargets.get(oldId);
+                
+                
+                String legoListUUIDtoUse = null;
+                for (String legoListId : BDBDataStoreImpl.getInstance().getLegoListByLego(lego.getLegoUUID()))
+                {
+                    //We may get more than one legoList - need to look through each of them - find the one that has the matching stamp.
+                    LegoList ll = BDBDataStoreImpl.getInstance().getLegoListByID(legoListId);
+                    for (Lego tempLego : ll.getLego()) 
+                    {
+                        if (oldId.equals(ModelUtil.makeUniqueLegoID(tempLego)))
+                        {
+                            if (legoListUUIDtoUse != null)
+                            {
+                               logger.error("Found more than one lego list with the same lego / stamp combination.  Only saving the new lego to the first");
+                            }
+                            else
+                            {
+                                legoListUUIDtoUse = legoListId;
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                if (legoListUUIDtoUse == null)
+                {
+                    logger.error("Couldn't find the right legoList to store the new Lego to!");
+                    LegoGUI.getInstance().showErrorDialog("Error Saving Changes", "Couldn't find the right Lego List to store the Lego to.", null);
+                    return;
+                }
+                
+                try
+                {
+                    Stamp updatedStamp = BDBDataStoreImpl.getInstance().commitLego(lego, legoListUUIDtoUse);
+                    lego.setStamp(updatedStamp);
+                    String newId = ModelUtil.makeUniqueLegoID(lego);
+                    displayedLegos.put(newId, lt);
+                    displayedLegosStyleInfo.put(newId, style);
+                    snomedCodeDropTargets.put(newId, dropTargets);
+                    getLegoFilterPaneController().updateLegoList();
+                    lt.hasUnsavedChangesProperty().invalidate();
+                    lt.updateInfoPanel(updatedStamp);
+                }
+                catch (DataStoreException | WriteException e)
+                {
+                    logger.error("Unexpected error saving Lego", e);
+                    LegoGUI.getInstance().showErrorDialog("Error Saving Changes", "Unexpected error storing lego", e.toString());
                 }
             }
         });
@@ -814,6 +892,14 @@ public class LegoGUIController implements Initializable
             else
             {
                 final LegoTab tab = new LegoTab("Lego", newLego);
+                tab.hasUnsavedChangesProperty().addListener(new InvalidationListener()
+                {
+                    @Override
+                    public void invalidated(Observable observable)
+                    {
+                        enableSaveButton.invalidate();
+                    }
+                });
                 displayedLegos.put(legoId, tab);
                 
                 int hue = random.nextInt(361);
@@ -823,17 +909,6 @@ public class LegoGUIController implements Initializable
                 displayedLegosStyleInfo.put(legoId, new SimpleStringProperty("-fx-effect: innershadow(two-pass-box , hsb(" 
                         + hue + ", " + saturation + "%," + brightness + "%), 15, 0.0 , 0 , 0);"));
                 tab.setStyle(displayedLegosStyleInfo.get(legoId).getValue());
-                LegoTreeView legoTree = new LegoTreeView();
-                legoTree.setEditable(false);
-                legoTree.setLego(newLego);
-                
-                BorderPane bp = new BorderPane();
-                bp.setTop(LegoInfoPanel.build(newLego.getPncs().getName(), newLego.getPncs().getValue(), newLego.getPncs().getId() + "",
-                        newLego.getLegoUUID(), newLego.getStamp().getAuthor(), newLego.getStamp().getModule(), 
-                        new Date(TimeConvert.convert(newLego.getStamp().getTime())).toString(), newLego.getStamp().getPath()));
-                bp.setCenter(legoTree.wrapInScrollPane());
-                
-                tab.setContent(bp);
                 tab.setOnClosed(new EventHandler<Event>()
                 {
                     public void handle(Event arg0) 
@@ -844,20 +919,16 @@ public class LegoGUIController implements Initializable
                 
                 editorTabPane.getTabs().add(tab);
                 editorTabPane.getSelectionModel().select(tab);
-                legoTree.getRoot().getChildren().add(new LegoTreeItem(newLego.getStamp(), LegoTreeNodeType.status));
-                for (Assertion a : newLego.getAssertion())
-                {
-                    legoTree.getRoot().getChildren().add(new LegoTreeItem(a));
-                }
-                legoTree.getRoot().getChildren().add(new LegoTreeItem(LegoTreeNodeType.blankLegoEndNode));
-                recursiveSort(legoTree.getRoot().getChildren());
-                expandAll(legoTree.getRoot());
             }
             
             showTreeItem(lti, legoReference.getUniqueId());
         }
     }
     
+    /**
+     * @param ti - optional - it will try to find it based on the legoUniqueId if not provided.
+     * @param legoUniqueId - optional - only used if ti is not provided
+     */
     private void showTreeItem(TreeItem<String> ti, String legoUniqueId)
     {
         if (ti == null)
@@ -871,6 +942,14 @@ public class LegoGUIController implements Initializable
         }
     }
     
+    protected void showLegosForAllOpenTabs()
+    {
+        for (String legoId : displayedLegos.keySet())
+        {
+            showTreeItem(null, legoId);
+        }
+    }
+    
     private void expandParents(TreeItem<String> ti)
     {
         TreeItem<String> parent = ti.getParent();
@@ -881,21 +960,14 @@ public class LegoGUIController implements Initializable
         }
     }
     
-    
-    private void recursiveSort(ObservableList<TreeItem<String>> items)
-    {
-        FXCollections.sort(items, new LegoTreeItemComparator(true));
-        for (TreeItem<String> item : items)
-        {
-            recursiveSort(item.getChildren());
-        }
-    }
-    
     public void legoEditTabClosed(LegoTab tab)
     {
         displayedLegos.remove(tab.getDisplayedLegoID());
         StringProperty style = displayedLegosStyleInfo.remove(tab.getDisplayedLegoID());
-        style.setValue("-fx-effect: innershadow(two-pass-box , white , 0, 0.0 , 0 , 0);");  //Lego tree node is bound to this - auto update when we clear it.
+        if (style != null)
+        {
+            style.setValue("-fx-effect: innershadow(two-pass-box , white , 0, 0.0 , 0 , 0);");  //Lego tree node is bound to this - auto update when we clear it.
+        }
         snomedCodeDropTargets.remove(tab.getDisplayedLegoID());
     }
     
@@ -906,15 +978,6 @@ public class LegoGUIController implements Initializable
         {
             editorTabPane.getTabs().remove(lt);
             legoEditTabClosed(lt);
-        }
-    }
-
-    private void expandAll(TreeItem<String> ti)
-    {
-        ti.setExpanded(true);
-        for (TreeItem<String> tiChild : ti.getChildren())
-        {
-            expandAll(tiChild);
         }
     }
     
@@ -929,7 +992,7 @@ public class LegoGUIController implements Initializable
         
         for (LegoTab lt : displayedLegos.values())
         {
-            if (lt.hasUnsavedChanges())
+            if (lt.hasUnsavedChangesProperty().get())
             {
                 Answer answer = LegoGUI.getInstance().showYesNoDialog("Unsaved Changes", "One or more Legos has unsaved changes.  Do you want to close anyway?");
                 if (answer == null || answer == Answer.NO)

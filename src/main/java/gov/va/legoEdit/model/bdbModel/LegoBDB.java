@@ -1,5 +1,6 @@
 package gov.va.legoEdit.model.bdbModel;
 
+import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Concept;
@@ -88,7 +89,7 @@ public class LegoBDB
             }
         }
 
-        this.uniqueId = legoUUID + ":" + stampId;
+        this.uniqueId = ModelUtil.makeUniqueLegoID(legoUUID, stampId);
     }
 
     private void indexConcept(Concept c)

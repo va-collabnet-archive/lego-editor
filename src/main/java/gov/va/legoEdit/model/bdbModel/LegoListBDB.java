@@ -69,9 +69,12 @@ public class LegoListBDB
             if (temp == null)
             {
                 temp = new Integer(0);
-                legoUUIDsUsage.put(l.getLegoUUID(), temp);
             }
-            temp = temp++;
+            else
+            {
+                temp = new Integer(1 + temp.intValue());
+            }
+            legoUUIDsUsage.put(l.getLegoUUID(), temp);
         }
     }
     
@@ -89,21 +92,24 @@ public class LegoListBDB
         if (temp == null)
         {
             temp = new Integer(0);
-            legoUUIDsUsage.put(lego.getLegoUUID(), temp);
         }
-        temp = temp++;
+        else
+        {
+            temp = new Integer(1 + temp.intValue());
+        }
+        legoUUIDsUsage.put(lego.getLegoUUID(), temp);
     }
     
     public void removeLego(String legoUUID, String legoUniqueId)
     {
         legoUniqueIds.remove(legoUniqueId);
         Integer temp = legoUUIDsUsage.get(legoUUID);
-        if (temp == null)
+        if (temp != null)
         {
-            return;
+            temp = new Integer(temp.intValue() - 1);
+            legoUUIDsUsage.put(legoUUID, temp);
         }
-        temp = temp--;
-        if (temp == 0)
+        if (temp == null || temp.intValue() == 0)
         {
             legoUUIDs.remove(legoUUID);
             legoUUIDsUsage.remove(legoUUID);

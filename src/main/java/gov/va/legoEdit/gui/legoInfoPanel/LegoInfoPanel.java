@@ -7,10 +7,13 @@ import javafx.scene.layout.AnchorPane;
 
 public class LegoInfoPanel
 {
-    public static AnchorPane build(String pncsName, String pncsValue, String pncsID, String legoUUID, String author, String module, String date, String path)
+    AnchorPane ap;
+    LegoInfoPanelController lipc;
+    
+    public LegoInfoPanel(String pncsName, String pncsValue, String pncsID, String legoUUID, String author, String module, String date, String path)
     {
         FXMLLoader loader = new FXMLLoader();
-        AnchorPane ap;
+        
         try
         {
             ap = (AnchorPane)loader.load(LegoInfoPanel.class.getResourceAsStream("LegoInfoPanel.fxml"));
@@ -19,11 +22,19 @@ public class LegoInfoPanel
         {
             throw new RuntimeException("unexpected", e);
         }
-        LegoInfoPanelController lipc = loader.getController();
+        lipc = loader.getController();
         ap.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
         
         lipc.finishInit(pncsName, pncsValue, pncsID, legoUUID, author, module, date, path);
-        
+    }
+    
+    public void update(String author, String module, String date, String path)
+    {
+        lipc.update(author, module, date, path);
+    }
+    
+    public AnchorPane getPane()
+    {
         return ap;
     }
 }
