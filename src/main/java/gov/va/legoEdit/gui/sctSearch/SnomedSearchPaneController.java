@@ -41,7 +41,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import org.ihtsdo.tk.api.ComponentChroncileBI;
-import org.ihtsdo.tk.api.concept.ConceptChronicleBI;
+import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.description.DescriptionAnalogBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +107,7 @@ public class SnomedSearchPaneController implements Initializable
                         {
                             VBox box = new VBox();
                             box.setFillWidth(true);
-                            final ConceptChronicleBI wbConcept = item.getConcept();
+                            final ConceptVersionBI wbConcept = item.getConcept();
                             String preferredText = (wbConcept != null ? WBUtility.getFSN(wbConcept) : "error - see log");
                             Label concept = new Label(preferredText);
                             concept.getStyleClass().add("boldLabel");

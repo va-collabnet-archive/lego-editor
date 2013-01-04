@@ -4,7 +4,8 @@ import gov.va.legoEdit.storage.wb.WBDataStore;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.ihtsdo.tk.api.concept.ConceptChronicleBI;
+import org.ihtsdo.tk.api.concept.ConceptVersionBI;
+import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ public class SearchResult
     private int conceptNid;
     private HashSet<String> matchingStrings = new HashSet<>();
     private int sortOrder;
-    private ConceptChronicleBI concept;
+    private ConceptVersionBI concept;
     
     public SearchResult(int conceptNid)
     {
@@ -26,7 +27,7 @@ public class SearchResult
         {
             //I tried using the FXConcept API here, but the performance was dreadful
 //            concept = WBDataStore.Ts().getFxConcept(WBDataStore.Ts().getUuidPrimordialForNid(conceptNid), StandardViewCoordinates.getSnomedLatest());
-            concept = WBDataStore.Ts().getConcept(conceptNid);
+            concept = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), conceptNid);
         }
         catch (Exception e)
         {
@@ -54,7 +55,7 @@ public class SearchResult
         return matchingStrings;
     }
     
-    public ConceptChronicleBI getConcept()
+    public ConceptVersionBI getConcept()
     {
         return concept;
     }

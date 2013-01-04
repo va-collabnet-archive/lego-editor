@@ -81,6 +81,7 @@ public class SnomedConceptViewController implements Initializable
         CopyableLabel.addCopyMenu(fsnLabel);
         uuid.setText(concept.getPrimordialUuid().toString());
         CopyableLabel.addCopyMenu(uuid);
+        LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(concept.getPrimordialUuid().toString());
         
         
         uuid.setOnDragDetected(new EventHandler<MouseEvent>()
@@ -208,11 +209,12 @@ public class SnomedConceptViewController implements Initializable
     {
         for (int i = 0; i < columns.length; i++)
         {
+            float colWidth = 1.0f /  (float)columns.length;
             TableColumn<StringWithRefList, StringWithRef> tc = new TableColumn<StringWithRefList, StringWithRef>(columns[i]);
             tc.setId(i + "");
             tc.setCellValueFactory(cellValueFactory);
             tc.setCellFactory(cellFactory);
-            tc.prefWidthProperty().bind(tableView.widthProperty().multiply(.33).subtract(5.0));
+            tc.prefWidthProperty().bind(tableView.widthProperty().multiply(colWidth).subtract(5.0));
             tableView.getColumns().add(tc);
         }
         tableView.setPrefHeight(tableView.getMinHeight() + (20.0 * tableView.getItems().size()));

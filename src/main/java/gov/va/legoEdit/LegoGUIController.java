@@ -354,6 +354,12 @@ public class LegoGUIController implements Initializable
                 
                 if (legoListUUIDtoUse == null)
                 {
+                    //try to get it from the newLegos list
+                    legoListUUIDtoUse = getUnsavedLegos().getLegoListIdForLego(oldId);
+                }
+                
+                if (legoListUUIDtoUse == null)
+                {
                     logger.error("Couldn't find the right legoList to store the new Lego to!");
                     LegoGUI.getInstance().showErrorDialog("Error Saving Changes", "Couldn't find the right Lego List to store the Lego to.", null);
                     return;
@@ -364,12 +370,14 @@ public class LegoGUIController implements Initializable
                     Stamp updatedStamp = BDBDataStoreImpl.getInstance().commitLego(lego, legoListUUIDtoUse);
                     lego.setStamp(updatedStamp);
                     String newId = ModelUtil.makeUniqueLegoID(lego);
+                    removeNewLego(oldId);
                     displayedLegos.put(newId, lt);
                     displayedLegosStyleInfo.put(newId, style);
                     snomedCodeDropTargets.put(newId, dropTargets);
                     getLegoFilterPaneController().updateLegoList();
                     lt.hasUnsavedChangesProperty().invalidate();
                     lt.updateInfoPanel(updatedStamp);
+                    cut.legoCommitted(lego);
                 }
                 catch (DataStoreException | WriteException e)
                 {
@@ -860,6 +868,7 @@ public class LegoGUIController implements Initializable
     public void addNewLego(String legoListUUID, Lego lego)
     {
         newLegos.addLego(lego, legoListUUID);
+        beginLegoEdit(lego, null);
     }
     
     public UnsavedLegos getUnsavedLegos()
@@ -890,14 +899,22 @@ public class LegoGUIController implements Initializable
                     return;
                 }
             }
-            String legoId = ModelUtil.makeUniqueLegoID(newLego);
+            beginLegoEdit(newLego, lti);
+        }
+    }
+    
+    private void beginLegoEdit(Lego lego, LegoTreeItem lti)
+    {
+        if (lego != null)
+        {
+            String legoId = ModelUtil.makeUniqueLegoID(lego);
             if (displayedLegos.containsKey(legoId))
             {
                 editorTabPane.getSelectionModel().select(displayedLegos.get(legoId));
             }
             else
             {
-                final LegoTab tab = new LegoTab("Lego", newLego);
+                final LegoTab tab = new LegoTab("Lego", lego);
                 tab.hasUnsavedChangesProperty().addListener(new InvalidationListener()
                 {
                     @Override
@@ -927,7 +944,7 @@ public class LegoGUIController implements Initializable
                 editorTabPane.getSelectionModel().select(tab);
             }
             
-            showTreeItem(lti, legoReference.getUniqueId());
+            showTreeItem(lti, ModelUtil.makeUniqueLegoID(lego));
         }
     }
     

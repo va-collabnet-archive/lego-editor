@@ -119,7 +119,7 @@ public class LegoGUIModel
         legoLists_ = list;
         legoLists_.clear();
         
-        ArrayList<Lego> legos = new ArrayList<>();
+        ArrayList<LegoReference> legos = new ArrayList<>();
         HashMap<String, LegoListByReference> legoLists = new HashMap<>();
         
         if (pncsFilterId == null)
@@ -138,7 +138,7 @@ public class LegoGUIModel
             }
             else  //use the concept filter
             {
-                legos.addAll(BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(conceptFilter.getSctid() + "", conceptFilter.getUuid()));
+                legos.addAll(LegoReference.convert(BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(conceptFilter.getSctid() + "", conceptFilter.getUuid())));
             }
         }
         else
@@ -147,12 +147,12 @@ public class LegoGUIModel
             if (pncsFilterValue == null)
             {
                 //id filter, no value
-                legos.addAll(BDBDataStoreImpl.getInstance().getLegosForPncs(pncsFilterId));
+                legos.addAll(LegoReference.convert(BDBDataStoreImpl.getInstance().getLegosForPncs(pncsFilterId)));
             }
             else
             {
                 //id filter and value
-                legos.addAll(BDBDataStoreImpl.getInstance().getLegosForPncs(pncsFilterId, pncsFilterValue));
+                legos.addAll(LegoReference.convert(BDBDataStoreImpl.getInstance().getLegosForPncs(pncsFilterId, pncsFilterValue)));
             }
             
             if (conceptFilter != null)
@@ -165,10 +165,10 @@ public class LegoGUIModel
                 {
                     conceptLegoKeys.add(ModelUtil.makeUniqueLegoID(l));
                 }
-                Iterator<Lego> iterator = legos.iterator();
+                Iterator<LegoReference> iterator = legos.iterator();
                 while (iterator.hasNext())
                 {
-                    if (!conceptLegoKeys.contains(ModelUtil.makeUniqueLegoID(iterator.next())))
+                    if (!conceptLegoKeys.contains(iterator.next().getUniqueId()))
                     {
                         iterator.remove();
                     }
@@ -178,21 +178,21 @@ public class LegoGUIModel
         
         //Don't filter unsaved legos - always include them.
         UnsavedLegos unsavedLegos = LegoGUI.getInstance().getLegoGUIController().getUnsavedLegos();
-        legos.addAll(unsavedLegos.getLegos());
+        legos.addAll(LegoReference.convert(unsavedLegos.getLegos(), true));
         
         
         if (legos.size() > 0)
         {
-            //Need to work backwards from the legos now, and get the legoRefs - and wire them back together.
+            //Need to work backwards from the legos now, and get the legoListRefs - and wire them back together.
             assert legoLists.size() == 0;
             
-            for (Lego l : legos)
+            for (LegoReference lr : legos)
             {
                 //Could be more than one, usually only one in practice, however
-                List<String> legoListIds = BDBDataStoreImpl.getInstance().getLegoListByLego(l.getLegoUUID());
+                List<String> legoListIds = BDBDataStoreImpl.getInstance().getLegoListByLego(lr.getLegoUUID());
                 
                 //Might also be from the new list...
-                String id = unsavedLegos.getLegoListIdForLego(ModelUtil.makeUniqueLegoID(l));
+                String id = unsavedLegos.getLegoListIdForLego(lr.getUniqueId());
                 if (id != null)
                 {
                     legoListIds.add(id);
@@ -206,7 +206,7 @@ public class LegoGUIModel
                         llbr = new LegoListByReference(BDBDataStoreImpl.getInstance().getLegoListByID(legoListId), true);
                         legoLists.put(legoListId, llbr);
                     }
-                    llbr.getLegoReference().add(new LegoReference(l));
+                    llbr.getLegoReference().add(lr);
                 }
             }
         }

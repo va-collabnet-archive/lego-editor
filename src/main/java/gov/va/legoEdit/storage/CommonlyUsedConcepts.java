@@ -9,7 +9,6 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
-import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,45 +51,13 @@ public class CommonlyUsedConcepts
                 Iterator<Lego> iter = BDBDataStoreImpl.getInstance().getLegos();
                 while (iter.hasNext())
                 {
-                    Lego lego = iter.next();
-                    for (Assertion a : lego.getAssertion())
-                    {
-                        if (a.getDiscernible() != null)
-                        {
-                            process(a.getDiscernible().getExpression(), ConceptUsageType.DISCERNIBLE);
-                        }
-                        if (a.getQualifier() != null)
-                        {
-                            process(a.getQualifier().getExpression(), ConceptUsageType.QUALIFIER);
-                        }
-                        if (a.getValue() != null)
-                        {
-                            process(a.getValue().getExpression(), ConceptUsageType.VALUE);
-                            process(a.getValue().getMeasurement());
-                        }
-                    }
+                    processLego(iter.next());
                 }
 
                 // Ok, should have the top concepts used for each category at this point. Create the topLists.
                 for (final ConceptUsageType cut : usageCounts_.keySet())
                 {
-                    HashMap<String, Count> countToValueMap = usageCounts_.get(cut);
-                    TreeSet<Count> sortedCounts = new TreeSet<>(countToValueMap.values());
-                    final ArrayList<ComboBoxConcept> temp = new ArrayList<>();
-
-                    for (Count count : sortedCounts)
-                    {
-                        if (temp.size() >= 5)
-                        {
-                            break;
-                        }
-                        Concept c = WBUtility.lookupSnomedIdentifier(count.getItem());
-
-                        if (c != null)
-                        {
-                            temp.add(new ComboBoxConcept(c.getDesc(), c.getUuid()));
-                        }
-                    }
+                    final ArrayList<ComboBoxConcept> temp = getTop(cut, null);
                     Platform.runLater(new Runnable()
                     {
                         @Override
@@ -102,7 +69,10 @@ public class CommonlyUsedConcepts
                 }
 
                 // clear the stats gathered from the DB - just track stats from the session going forward.
-                usageCounts_.clear();
+                for (HashMap<String, Count> items : usageCounts_.values())
+                {
+                    items.clear();
+                }
 
                 logger.debug("Stats gathering finished");
             }
@@ -112,11 +82,82 @@ public class CommonlyUsedConcepts
         t.setDaemon(true);
         t.start();
     }
+    
+    private void processLego(Lego lego)
+    {
+        for (Assertion a : lego.getAssertion())
+        {
+            if (a.getDiscernible() != null)
+            {
+                process(a.getDiscernible().getExpression(), ConceptUsageType.DISCERNIBLE);
+            }
+            if (a.getQualifier() != null)
+            {
+                process(a.getQualifier().getExpression(), ConceptUsageType.QUALIFIER);
+            }
+            if (a.getValue() != null)
+            {
+                process(a.getValue().getExpression(), ConceptUsageType.VALUE);
+                process(a.getValue().getMeasurement());
+            }
+        }
+    }
+    
+    private ArrayList<ComboBoxConcept> getTop(ConceptUsageType cut, ObservableList<ComboBoxConcept> dupeCheck)
+    {
+        HashMap<String, Count> countToValueMap = usageCounts_.get(cut);
+        TreeSet<Count> sortedCounts = new TreeSet<>(countToValueMap.values());
+        ArrayList<ComboBoxConcept> temp = new ArrayList<>();
 
-    // TODO track session stats, update as appropriate
+        for (Count count : sortedCounts)
+        {
+            if (temp.size() >= 5)
+            {
+                break;
+            }
+            ComboBoxConcept cbc = new ComboBoxConcept(count.getDescription(), count.getId());
+            if (dupeCheck != null && dupeCheck.contains(cbc))
+            {
+                continue;
+            }
+            else
+            {
+                temp.add(cbc);
+            }
+        }
+        return temp;
+    }
+
     public ObservableList<ComboBoxConcept> getSuggestions(ConceptUsageType cut)
     {
         return topLists_.get(cut);
+    }
+    
+    public void legoCommitted(Lego lego)
+    {
+        processLego(lego);
+        
+        for (final ConceptUsageType cut : usageCounts_.keySet())
+        {
+            //This now will return just the top 5 from the committed legos in this session
+            final ArrayList<ComboBoxConcept> temp = getTop(cut, topLists_.get(cut));
+            Platform.runLater(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    ObservableList<ComboBoxConcept> list = topLists_.get(cut);
+                    //Remove until the list is size 5 (only things from the DB)
+                    while (list.size() > 5)
+                    {
+                        list.remove(0);
+                    }
+                    //Add the new top 5 (from the committed legos)
+                    list.addAll(0, temp);
+                }
+            });
+            
+        }
     }
 
     private void process(Expression e, ConceptUsageType defaultType)
@@ -187,7 +228,7 @@ public class CommonlyUsedConcepts
             Count count = countMap.get(c.getUuid());
             if (count == null)
             {
-                count = new Count(c.getUuid());
+                count = new Count(c.getUuid(), c.getDesc());
                 countMap.put(c.getUuid(), count);
             }
             count.increment();
@@ -197,7 +238,14 @@ public class CommonlyUsedConcepts
     private class Count implements Comparable<Count>
     {
         int count = 0;
-        String item;
+        String id;
+        String description;
+        
+        public Count(String id, String description)
+        {
+            this.id = id;
+            this.description = description;
+        }
 
         @Override
         public int compareTo(Count other)
@@ -206,14 +254,9 @@ public class CommonlyUsedConcepts
             int i = other.getCount() - getCount();
             if (i == 0)
             {
-                return item.compareTo(other.item);
+                return id.compareTo(other.id);
             }
             return i;
-        }
-
-        public Count(String item)
-        {
-            this.item = item;
         }
 
         public void increment()
@@ -226,9 +269,14 @@ public class CommonlyUsedConcepts
             return count;
         }
 
-        public String getItem()
+        public String getId()
         {
-            return item;
+            return id;
+        }
+        
+        public String getDescription()
+        {
+            return description;
         }
     }
 }

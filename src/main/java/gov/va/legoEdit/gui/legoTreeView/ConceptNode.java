@@ -289,6 +289,7 @@ public class ConceptNode implements ConceptLookupCallback
                     c_.setDesc(concept.getDesc());
                     c_.setSctid(concept.getSctid());
                     c_.setUuid(concept.getUuid());
+                    LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(concept.getUuid());
                     isValid.set(true);
                 }
                 else

@@ -114,6 +114,7 @@ public class CreateLegoController implements Initializable
                 l.getAssertion().add(a);
                 
                 LegoReference lr = new LegoReference(l);
+                lr.setIsNew(true);
                 llbr.getLegoReference().add(lr);
                 LegoGUI.getInstance().getLegoGUIController().addNewLego(llbr.getLegoListUUID(), l);
                 

@@ -151,7 +151,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             {
                 LegoReference legoReference = (LegoReference)treeItem.getExtraData();
                 Label l = new Label(TimeConvert.format(legoReference.getStampTime()));
-                l.setGraphic(Images.LEGO.createImageView());
+                l.setGraphic(legoReference.isNew() ? Images.LEGO_EDIT.createImageView() : Images.LEGO.createImageView());
                 setGraphic(l);
                 StringProperty style = LegoGUI.getInstance().getLegoGUIController().getStyleForLego(legoReference); 
                 if (style != null)
@@ -1067,6 +1067,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             l.getAssertion().add(a);
     
             LegoReference lr = new LegoReference(l);
+            lr.setIsNew(true);
             llbr.getLegoReference().add(lr);
             LegoTreeItem lti = new LegoTreeItem(lr);
             ti.getChildren().add(lti);

@@ -13,7 +13,8 @@ import java.util.concurrent.TimeUnit;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionChronicle;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
-import org.ihtsdo.tk.api.concept.ConceptChronicleBI;
+import org.ihtsdo.tk.api.concept.ConceptVersionBI;
+import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.api.description.DescriptionChronicleBI;
 import org.ihtsdo.tk.api.description.DescriptionVersionBI;
 import org.ihtsdo.tk.api.id.IdBI;
@@ -28,6 +29,8 @@ public class WBUtility
     private static Integer snomedIdTypeNid = null;
     private static UUID FSN_UUID = UUID.fromString("00791270-77c9-32b6-b34f-d932569bd2bf");
     private static Integer FSNTypeNid = null;
+    private static UUID ACTIVE_VALUE_UUID = UUID.fromString("d12702ee-c37f-385f-a070-61d56d4d0f1f");
+    private static Integer ActiveValueTypeNid = null;
     
     
     private static Logger logger = LoggerFactory.getLogger(Utility.class);
@@ -68,18 +71,18 @@ public class WBUtility
             return null;
         }
         Concept c = null;
-        ConceptChronicleBI result = null;
+        ConceptVersionBI result = null;
         try
         {
             UUID uuid = UUID.fromString(identifier);
-            result = WBDataStore.Ts().getConcept(uuid);
+            result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid);
         }
         catch (IllegalArgumentException | IOException e)
         {
             //try looking up by ID 
             try
             {
-                result = WBDataStore.Ts().getConceptFromAlternateId(snomedIdType, identifier);
+                result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier);
             }
             catch (IOException e1)
             {
@@ -144,26 +147,54 @@ public class WBUtility
         return FSNTypeNid;
     }
     
-    public static String getFSN(ConceptChronicleBI concept)
+    private static int getActiveValueTypeNid()
     {
+        if (ActiveValueTypeNid == null)
+        {
+            try
+            {
+                ActiveValueTypeNid = WBDataStore.Ts().getNidForUuids(ACTIVE_VALUE_UUID);
+            }
+            catch (IOException e)
+            {
+                logger.error("Couldn't find nid for Active Value UUID", e);
+                ActiveValueTypeNid = -1;
+            }
+        }
+        return ActiveValueTypeNid;
+    }
+    
+    /**
+     * Note, this method isn't smart enough to work with multiple versions properly....
+     * assumes you only pass in a concept with current values
+     */
+    public static String getFSN(ConceptVersionBI concept)
+    {
+        String bestFound = null;
         try
         {
             for (DescriptionChronicleBI desc : concept.getDescs())
             {
-                for (DescriptionVersionBI<?> descVer : desc.getVersions())
+                DescriptionVersionBI<?> descVer = desc.getVersions().toArray(new DescriptionVersionBI[desc.getVersions().size()])[desc.getVersions().size() - 1];
+                
+                if (descVer.getTypeNid() == getFSNTypeNid())
                 {
-                    if (descVer.getTypeNid() == getFSNTypeNid())
+                    if (descVer.getStatusNid() == getActiveValueTypeNid())
                     {
                         return descVer.getText();
+                    }
+                    else
+                    {
+                        bestFound = descVer.getText();
                     }
                 }
             }
         }
-        catch (IOException e)
+        catch (IOException  e)
         {
             //noop
         }
-        return concept.toUserString();
+        return (bestFound == null ? concept.toUserString() : bestFound);
     }
     
     public static String getFSN(FxConcept concept)
@@ -173,14 +204,22 @@ public class WBUtility
         {
             return concept.getConceptReference().getText();
         }
+        String bestFound = null;
         for (FxDescriptionChronicle d : concept.getDescriptions())
         {
             FxDescriptionVersion dv = d.getVersions().get(d.getVersions().size() - 1);
             if (dv.getTypeReference().getUuid().equals(FSN_UUID))
             {
-                return dv.getText();
+                if (dv.getStatusReference().getUuid().equals(ACTIVE_VALUE_UUID))
+                {
+                    return dv.getText();
+                }
+                else
+                {
+                    bestFound = dv.getText();
+                }
             }
         }
-        return concept.getConceptReference().getText();
+        return (bestFound == null ? concept.getConceptReference().getText() : bestFound);
     }
 }

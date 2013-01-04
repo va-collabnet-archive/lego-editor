@@ -48,7 +48,6 @@ public class LegoTab extends Tab
         HBox hbox = new HBox();
         final Label titleLabel = new Label(tabName);
         titleLabel.setAlignment(Pos.CENTER_LEFT);
-        titleLabel.setGraphic(open);
         titleLabel.getStyleClass().clear();
         titleLabel.getStyleClass().add("tab-label");
         titleLabel.setMaxHeight(Double.MAX_VALUE);
@@ -121,6 +120,8 @@ public class LegoTab extends Tab
                 }
             }
         });
+        
+        titleLabel.setGraphic(legoNeedsSaving.get() ? openEdited : open);
         
         lip = new LegoInfoPanel(displayedLego.getPncs().getName(), displayedLego.getPncs().getValue(), displayedLego.getPncs().getId() + "",
                 displayedLego.getLegoUUID(), displayedLego.getStamp().getAuthor(), displayedLego.getStamp().getModule(), 

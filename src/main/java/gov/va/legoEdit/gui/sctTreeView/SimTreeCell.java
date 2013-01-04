@@ -50,7 +50,7 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
             @Override
             public void handle(ActionEvent event)
             {
-                LegoGUI.getInstance().showSnomedConceptDialog(SimTreeCell.this.getItem().getConcept());
+                LegoGUI.getInstance().showSnomedConceptDialog(SimTreeCell.this.getItem().getConcept().getPrimordialUuid());
             }
         });
         cm.getItems().add(mi);

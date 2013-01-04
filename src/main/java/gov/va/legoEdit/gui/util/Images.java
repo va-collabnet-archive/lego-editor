@@ -37,6 +37,7 @@ public enum Images
     PROPERTIES(setupImage("/icons/document-properties-icon.png")),
     PREFERENCES(setupImage("/icons/fugue/16x16/icons-shadowless/application-task.png")),
     APPLICATION(setupImage("/icons/fugue/16x16/icons-shadowless/application-block.png")),
+    CONCEPT_VIEW(setupImage("/icons/fugue/16x16/icons-shadowless/gear.png")),
     SAVE(setupImage("/icons/fugue/16x16/icons-shadowless/disk-black.png")),
     EXIT(setupImage("/icons/fugue/16x16/icons-shadowless/cross.png"));
     

@@ -205,6 +205,7 @@ public class LegoGUI extends Application
             conceptStage.setScene(scene);
             controller.init(concept);
             conceptStage.setTitle(controller.getTitle());
+            conceptStage.getIcons().add(Images.CONCEPT_VIEW.getImage());
             conceptStage.show();
         }
         catch (Exception e)
