@@ -3,6 +3,7 @@ package gov.va.legoEdit;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
+import gov.va.legoEdit.gui.legoTreeView.ComboBoxConcept;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchPaneController;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
@@ -16,6 +17,7 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.storage.CommonlyUsedConcepts;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.storage.wb.WBDataStore;
@@ -100,7 +102,8 @@ public class LegoGUIController implements Initializable
     private UnsavedLegos newLegos = new UnsavedLegos();
     private SnomedSearchPaneController sspc;
     private Thread dbConnectThread;
-    Random random = new Random();
+    private Random random = new Random();
+    private CommonlyUsedConcepts cut;
     
     private BooleanBinding enableSaveButton;
     
@@ -191,6 +194,7 @@ public class LegoGUIController implements Initializable
 
         setupMenus();
         setupSctTree(); // This kicks off a thread that opens the DB connection
+        cut = new CommonlyUsedConcepts();
         
         rootPane.getScene().getWindow().setOnCloseRequest(new EventHandler<WindowEvent>()
         {
@@ -443,7 +447,7 @@ public class LegoGUIController implements Initializable
 
     }
 
-    public void addSnomedDropTarget(Lego lego, final ComboBox<String> n)
+    public void addSnomedDropTarget(Lego lego, final ComboBox<ComboBoxConcept> n)
     {
         addSnomedDropTargetInternal(lego, ((Node)n));
 
@@ -460,7 +464,7 @@ public class LegoGUIController implements Initializable
                 {
                     if (db.hasString())
                     {
-                        n.setValue(db.getString());
+                        n.setValue(new ComboBoxConcept(db.getString()));
                         updateRecentCodes(db.getString());
                         success = true;
                         //It will have updated its effect upon the set - we don't want to restore an old one.
@@ -1026,6 +1030,10 @@ public class LegoGUIController implements Initializable
         BDBDataStoreImpl.getInstance().shutdown();
         WBDataStore.shutdown();
         System.exit(0);
-        
+    }
+    
+    public CommonlyUsedConcepts getCommonlyUsedConcept()
+    {
+        return cut;
     }
 }

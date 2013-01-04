@@ -29,6 +29,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.util.StringConverter;
 
 public class ConceptNode implements ConceptLookupCallback
 {
@@ -39,7 +40,7 @@ public class ConceptNode implements ConceptLookupCallback
     }
     
     private VBox vbox_;
-    private ComboBox<String> cb_;
+    private ComboBox<ComboBoxConcept> cb_;
     private Label descriptionLabel_;
     private Label contentLabel_;
     private ProgressIndicator pi_;
@@ -49,7 +50,7 @@ public class ConceptNode implements ConceptLookupCallback
     private BooleanProperty isValid = new SimpleBooleanProperty(true);
     private BooleanProperty lookupInProgress = new SimpleBooleanProperty(false);
 
-    public ConceptNode(String label, Concept c, LegoTreeNodeType tct, LegoTreeView legoTreeView)
+    public ConceptNode(String label, Concept c, ConceptUsageType cut, LegoTreeNodeType tct, LegoTreeView legoTreeView)
     {
         c_ = c;
         legoTreeView_ = legoTreeView;
@@ -63,23 +64,38 @@ public class ConceptNode implements ConceptLookupCallback
             contentLabel_.getStyleClass().add("boldLabel");
         }
         cb_ = new ComboBox<>();
-        
+        cb_.setConverter(new StringConverter<ComboBoxConcept>()
+        {
+            @Override
+            public String toString(ComboBoxConcept object)
+            {
+                return object.getDescription();
+            }
+            
+            @Override
+            public ComboBoxConcept fromString(String string)
+            {
+                return new ComboBoxConcept(string, string);
+            }
+        });
         cb_.setEditable(true);
         cb_.setMaxWidth(Double.MAX_VALUE);
-        cb_.setMinWidth(320.0);
+        cb_.setMinWidth(200.0);
+        cb_.setPrefWidth(200.0);
         cb_.setPromptText("Specify or drop a Snomed SCTID or UUID");
+        cb_.setItems(LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().getSuggestions(cut));
+        cb_.setVisibleRowCount(11);
         
-        // TODO populate dropdown with most common values
         descriptionLabel_ = new Label();
         descriptionLabel_.visibleProperty().bind(lookupInProgress.not());
 
         updateGUI();
         lookup();
         
-        cb_.valueProperty().addListener(new ChangeListener<String>()
+        cb_.valueProperty().addListener(new ChangeListener<ComboBoxConcept>()
         {
             @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+            public void changed(ObservableValue<? extends ComboBoxConcept> observable, ComboBoxConcept oldValue, ComboBoxConcept newValue)
             {
                 lookup();
             }
@@ -186,17 +202,20 @@ public class ConceptNode implements ConceptLookupCallback
     
     private void updateGUI()
     {
+        //Bad design by dan.  In the drop down, I want to show description.  However, in the combo field, I want to show id.
+        //So my hack fix is to put the ID in both fields, when the update comes back from the lookup.  When there is a value change, we only
+        //read the ID.
         if (c_.getSctid() != null)
         {
-            cb_.setValue(c_.getSctid() + "");
+            cb_.setValue(new ComboBoxConcept(c_.getSctid() + "", c_.getSctid() + ""));
         }
         else if (c_.getUuid() != null)
         {
-            cb_.setValue(c_.getUuid());
+            cb_.setValue(new ComboBoxConcept(c_.getUuid(), c_.getUuid()));
         }
         else
         {
-            cb_.setValue("");
+            cb_.setValue(new ComboBoxConcept("", ""));
         }
         descriptionLabel_.setText(c_.getDesc() == null ? "" : c_.getDesc());
     }
@@ -207,14 +226,14 @@ public class ConceptNode implements ConceptLookupCallback
         //don't bother doing the lookup (conceptNodes are created whenever a tree expand/collapse takes place - most of the time
         //the value hasn't changed....
         if (c_ != null && c_.getDesc() != null && c_.getUuid() != null && c_.getSctid() != null 
-                && c_.getDesc().length() > 0 && c_.getUuid().length() > 0 && cb_.getValue().equals(c_.getSctid() + ""))
+                && c_.getDesc().length() > 0 && c_.getUuid().length() > 0 && cb_.getValue().getId().equals(c_.getSctid() + ""))
         {
             return;
         }
                 
         waitForLookupToComplete();
         lookupInProgress.set(true);
-        WBUtility.lookupSnomedIdentifier(cb_.getValue(), this);
+        WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this);
     }
     
     private void waitForLookupToComplete()
@@ -257,7 +276,6 @@ public class ConceptNode implements ConceptLookupCallback
     {
         Platform.runLater(new Runnable()
         {
-            
             @Override
             public void run()
             {
@@ -276,8 +294,8 @@ public class ConceptNode implements ConceptLookupCallback
                 else
                 {
                     c_.setSctid(null);
-                    c_.setUuid(cb_.getValue());
-                    c_.setDesc(cb_.getValue().length() > 0 ? "Invalid Concept" : "");
+                    c_.setUuid(cb_.getValue().getId());
+                    c_.setDesc(cb_.getValue().getId().length() > 0 ? "Invalid Concept" : "");
                     isValid.set(false);
                 }
                 legoTreeView_.contentChanged();

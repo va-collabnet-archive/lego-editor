@@ -23,4 +23,17 @@ public class Utility
         }
         return false;
     }
+    
+    public static boolean isEqual(String a, String b)
+    {
+        if (a == null)
+        {
+            return (b == null ? true : false);
+        }
+        if (b == null)
+        {
+            return (a == null ? true : false);
+        }
+        return a.equals(b);
+    }
 }

@@ -304,18 +304,19 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 Concept c = (Concept) treeItem.getExtraData();
                 addMenus(c, treeItem, cm);
 
+                
                 String label = "";
-                if (((LegoTreeItem) treeItem.getParent()).getExtraData() instanceof Relation
-                        || ((LegoTreeItem) treeItem.getParent()).getExtraData() instanceof AssertionComponent)
+                ConceptUsageType cut = findType(treeItem);
+                if (ConceptUsageType.TYPE == cut)
                 {
                     label = "Type";
                 }
-                else if (((LegoTreeItem) treeItem.getParent()).getExtraData() instanceof Measurement)
+                else if (ConceptUsageType.UNITS == cut)
                 {
                     label = "Units";
                 }
 
-                ConceptNode cn = new ConceptNode(label, c, treeItem.getNodeType(), treeView);
+                ConceptNode cn = new ConceptNode(label, c, cut, treeItem.getNodeType(), treeView);
                 setGraphic(cn.getNode());
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.relation)
@@ -341,7 +342,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 cb.setPromptText("Enter a numeric value, or select from the list");
                 cb.setVisibleRowCount(MeasurementConstant.values().length + 1);
                 cb.setMaxWidth(Double.MAX_VALUE);
-                cb.setMinWidth(320.0);
+                cb.setMinWidth(200.0);
+                cb.setPrefWidth(200.0);
 
                 if (p.getStringConstant() != null)
                 {
@@ -1815,5 +1817,48 @@ public class LegoTreeCell<T> extends TreeCell<T>
         {
             expandAll(tiChild);
         }
+    }
+    
+    private ConceptUsageType findType(LegoTreeItem lti)
+    {
+        if (LegoTreeNodeType.expressionDestination == lti.getNodeType())
+        {
+            return ConceptUsageType.REL_DESTINATION;
+        }
+        Object data = lti.getExtraData();
+        if (data != null)
+        {
+            if (data instanceof Relation || data instanceof AssertionComponent)
+            {
+                return ConceptUsageType.TYPE;
+            }
+            else if (data instanceof Measurement)
+            {
+                return ConceptUsageType.UNITS;
+            }
+            else if (data instanceof Expression)
+            {
+                if (LegoTreeNodeType.expressionDiscernible == lti.getNodeType())
+                {
+                    return ConceptUsageType.DISCERNIBLE;
+                }
+                else if (LegoTreeNodeType.expressionQualifier == lti.getNodeType())
+                {
+                    return ConceptUsageType.QUALIFIER;
+                }
+            }
+            else if (data instanceof Value)
+            {
+                return ConceptUsageType.VALUE;
+            }
+        }
+        
+        //Didn't find it... recurse...
+        Object parent = lti.getParent();
+        if (parent != null && parent instanceof LegoTreeItem)
+        {
+            return findType((LegoTreeItem)parent);
+        }
+        return null;
     }
 }
