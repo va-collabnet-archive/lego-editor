@@ -43,7 +43,7 @@ public class BDBDataStoreTest
         BDBDataStoreImpl.dbFolderPath = new File("testDB");
         FileUtils.deleteDirectory(BDBDataStoreImpl.dbFolderPath);
     }
-
+//TODO test comment storage
     @AfterClass
     public static void oneTimeTearDown() throws Exception
     {

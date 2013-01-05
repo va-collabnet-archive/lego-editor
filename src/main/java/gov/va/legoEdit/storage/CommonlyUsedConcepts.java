@@ -218,18 +218,24 @@ public class CommonlyUsedConcepts
 
     private void index(Concept c, ConceptUsageType type)
     {
-        if (c == null || Utility.isEmpty(c.getUuid()))
+        if (c == null || (Utility.isEmpty(c.getUuid()) && c.getSctid() == null))
         {
             return;
         }
         else
         {
             HashMap<String, Count> countMap = usageCounts_.get(type);
-            Count count = countMap.get(c.getUuid());
+            String id = c.getUuid();
+            if (Utility.isEmpty(id) && c.getSctid() != null)
+            {
+                id = c.getSctid() + " ";  //Dan hack - purposely put a space after the ID.  The lookup later will trim it off, but this 
+                //will prevent the .equals checks in the combo box drop downs from selecting this item, and doing odd things with it.
+            }
+            Count count = countMap.get(id);
             if (count == null)
             {
-                count = new Count(c.getUuid(), c.getDesc());
-                countMap.put(c.getUuid(), count);
+                count = new Count(id, c.getDesc());
+                countMap.put(id, count);
             }
             count.increment();
         }

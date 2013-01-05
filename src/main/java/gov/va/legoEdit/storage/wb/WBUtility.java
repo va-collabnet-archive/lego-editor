@@ -74,7 +74,7 @@ public class WBUtility
         ConceptVersionBI result = null;
         try
         {
-            UUID uuid = UUID.fromString(identifier);
+            UUID uuid = UUID.fromString(identifier.trim());
             result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid);
         }
         catch (IllegalArgumentException | IOException e)
@@ -82,7 +82,7 @@ public class WBUtility
             //try looking up by ID 
             try
             {
-                result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier);
+                result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
             }
             catch (IOException e1)
             {

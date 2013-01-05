@@ -34,6 +34,7 @@ public class LegoBDB
     @SecondaryKey(relate = Relationship.MANY_TO_ONE)
     protected String legoUUID;
     protected String stampId;
+    protected String comment;
     @SecondaryKey(relate = Relationship.MANY_TO_ONE)
     protected String pncsId;
     protected List<Assertion> assertions;
@@ -61,6 +62,7 @@ public class LegoBDB
         legoUUID = lego.getLegoUUID();
         pncsBDBRef = new PncsBDB(lego.getPncs());
         pncsId = pncsBDBRef.getUniqueId();
+        comment = lego.getComment();
         stampBDBRef = new StampBDB(lego.getStamp());
         stampId = stampBDBRef.getStampId();
         assertions = new ArrayList<>();
@@ -166,6 +168,11 @@ public class LegoBDB
     {
         return legoUUID;
     }
+    
+    public String getComment()
+    {
+        return comment;
+    }
 
     public String getStampId()
     {
@@ -241,6 +248,7 @@ public class LegoBDB
     {
         Lego l = new Lego();
         l.setLegoUUID(legoUUID);
+        l.setComment(comment);
         l.setStamp(getStampBDB().toSchemaStamp());
         l.setPncs(((BDBDataStoreImpl) BDBDataStoreImpl.getInstance()).getPncsByUniqueId(pncsId));
         if (l.getPncs() == null)

@@ -25,6 +25,7 @@ public class LegoListBDB
     @PrimaryKey
     protected String legoListUUID;
     protected String groupDescription;
+    protected String comment;
     protected List<String> legoUniqueIds;
     @SecondaryKey(relate = Relationship.ONE_TO_MANY)
     protected Set<String> legoUUIDs;
@@ -53,6 +54,7 @@ public class LegoListBDB
         groupDescription = ll.getGroupDescription();
         groupName = ll.getGroupName();
         legoListUUID = ll.getLegoListUUID();
+        comment = ll.getComment();
         legoUniqueIds = new ArrayList<>();
         legoBDBRefs = new ArrayList<>();
         this.legoUUIDs = new HashSet<>();
@@ -140,6 +142,11 @@ public class LegoListBDB
         return groupDescription;
     }
     
+    public String getComment()
+    {
+        return comment;
+    }
+    
     public String getLegoListUUID()
     {
         return legoListUUID;
@@ -164,6 +171,7 @@ public class LegoListBDB
         ll.setGroupDescription(groupDescription);
         ll.setGroupName(groupName);
         ll.setLegoListUUID(legoListUUID);
+        ll.setComment(comment);
         List<Lego> legos = ll.getLego();
 
         for (String lui : legoUniqueIds)
