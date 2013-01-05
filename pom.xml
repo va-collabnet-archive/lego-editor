@@ -115,6 +115,14 @@
             </plugin>
             <plugin>
 	            <artifactId>maven-assembly-plugin</artifactId>
+	            <executions>
+	            	<execution>
+	            		<goals>
+	            			<goal>attached</goal>
+	            		</goals>
+	            		<phase>package</phase>
+	            	</execution>
+	            </executions>
 	            <configuration>
 	                <archive>
 	                    <manifest>
