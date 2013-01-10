@@ -63,32 +63,10 @@ public class WBUtility
         tpe.execute(r);
     }
     
-    
     public static Concept lookupSnomedIdentifier(String identifier)
     {
-        if (identifier == null)
-        {
-            return null;
-        }
         Concept c = null;
-        ConceptVersionBI result = null;
-        try
-        {
-            UUID uuid = UUID.fromString(identifier.trim());
-            result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid);
-        }
-        catch (IllegalArgumentException | IOException e)
-        {
-            //try looking up by ID 
-            try
-            {
-                result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
-            }
-            catch (IOException e1)
-            {
-                // noop
-            }
-        }
+        ConceptVersionBI result = lookupSnomedIdentifierAsCV(identifier);
         if (result != null && result.getUUIDs().size() > 0)
         {
             c = new Concept();
@@ -111,6 +89,46 @@ public class WBUtility
             }
         }
         return c;
+    }
+   
+    public static ConceptVersionBI lookupSnomedIdentifierAsCV(String identifier)
+    {
+        if (identifier == null)
+        {
+            return null;
+        }
+        
+        ConceptVersionBI result = null;
+        try
+        {
+            UUID uuid = UUID.fromString(identifier.trim());
+            result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid);
+            if (result.getUUIDs().size() == 0)
+            {
+                //This is garbage that the moronic WB API invented.  Nothing like an undocumented getter which, rather than returning null when the thing
+                //you are asking for doesn't exist - it goes off and returns essentially a new, empty, useless node.  Sigh.
+                throw new IllegalArgumentException();
+            }
+        }
+        catch (IllegalArgumentException | IOException e)
+        {
+            //try looking up by ID 
+            try
+            {
+                result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
+                if (result.getUUIDs().size() == 0)
+                {
+                    //This is garbage that the moronic WB API invented.  Nothing like an undocumented getter which, rather than returning null when the thing
+                    //you are asking for doesn't exist - it goes off and returns essentially a new, empty, useless node.  Sigh.
+                    result = null;
+                }
+            }
+            catch (IOException e1)
+            {
+                // noop
+            }
+        }
+        return result;
     }
     
     private static int getSnomedIdTypeNid()

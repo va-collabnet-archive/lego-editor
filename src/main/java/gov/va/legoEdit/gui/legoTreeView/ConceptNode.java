@@ -296,7 +296,25 @@ public class ConceptNode implements ConceptLookupCallback
                 {
                     c_.setSctid(null);
                     c_.setUuid(cb_.getValue().getId());
-                    c_.setDesc(cb_.getValue().getId().length() > 0 ? "Invalid Concept" : "");
+                    
+                    String description = "";
+                    if (cb_.getValue().getId().length() > 0)
+                    {
+                        //If we have an id but didn't get a concept, the lookup failed, and was an invalid concept.
+                        //label it as such.
+                        //TODO put this marker in as a different label, or perhaps, an icon
+                        description = c_.getDesc();
+                        if (!description.startsWith("[Invalid Concept] "))
+                        {
+                            description = "[Invalid Concept] " + description;
+                        }
+                    }
+                    else
+                    {
+                        //Just blank, no code yet entered.
+                        description = "";
+                    }
+                    c_.setDesc(description);
                     isValid.set(false);
                 }
                 legoTreeView_.contentChanged();
