@@ -13,7 +13,7 @@ public enum LegoTreeNodeType
 	expressionQualifier(1),
 	timing(2),
 	value(3),
-	assertionComponents(4),
+	assertionComponent(4),
 	
 	expressionValue(0), expressionDestination(0), expressionOptional(0), 
 	relation(1),
@@ -21,7 +21,7 @@ public enum LegoTreeNodeType
 	
 	concept(0), conceptOptional(0),
 	
-	labeledUneditableString(0),assertionComponent(0),
+	labeledUneditableString(0),
 	measurement(0),  interval(0), 
 	upper(0), lower(0), assertionUUID(0),  point(0),
     

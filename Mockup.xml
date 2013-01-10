@@ -3,10 +3,11 @@
 	<groupName>Mockup</groupName>
 	<legoListUUID>8db4b1c0-0be2-11e2-892e-0800200c9a66</legoListUUID>
 	<groupDescription>Mockup XML showing valid entries</groupDescription>
+	<comment> WEE!</comment>
 	<lego>
 		<legoUUID>8cd4b1c0-0be7-11e2-891e-0813200c9a66</legoUUID>
 		<stamp status="" author="" time="2012-05-30T09:00:00" module="" path="" />
-
+	
 		<!-- pncs is required, and all 3 attributes are required -->
 		<pncs value="Yes" name="PHYSICAL EXAM_CARDIO_Standard_Cardiac_Exam_Abnormal_Heart_Sounds_S3" id="24261" />
 		<assertion>
@@ -61,21 +62,20 @@
 				</measurement>
 			</timing>
 
-			<assertionComponents>
-				<assertionComponent>
-					<assertionUUID>8dd4b1c0-0be2-11e2-892e-0800200c9a66</assertionUUID>
-					<type>
-						<concept sctid="258706009" desc="partOf"/>
-					</type>
-				</assertionComponent>
-				<assertionComponent>
-					<assertionUUID>9dd4b1c0-0be2-11e2-892e-0900200c9a66</assertionUUID>
-					<type>
-						<concept uuid="8dd4b1c0-0be2-11e2-892e-0900200c4a66" desc="somethingElse"/>
-					</type>
-				</assertionComponent>
-			</assertionComponents>
+			<assertionComponent>
+				<assertionUUID>8dd4b1c0-0be2-11e2-892e-0800200c9a66</assertionUUID>
+				<type>
+					<concept sctid="258706009" desc="partOf"/>
+				</type>
+			</assertionComponent>
+			<assertionComponent>
+				<assertionUUID>9dd4b1c0-0be2-11e2-892e-0900200c9a66</assertionUUID>
+				<type>
+					<concept uuid="8dd4b1c0-0be2-11e2-892e-0900200c4a66" desc="somethingElse"/>
+				</type>
+			</assertionComponent>
 		</assertion>
+		<comment>test!</comment>
 	</lego>
 
 	<!-- discernible can have relation's -->
@@ -167,14 +167,14 @@
 								<units>
 									<concept sctid="258706009" desc="month" />
 								</units>
-								<interval>
+								<bound lowerPointInclusive="true" upperPointInclusive="true">
 									<lowerPoint>
 										<numericValue>5</numericValue>
 									</lowerPoint>
 									<upperPoint>
 										<numericValue>6</numericValue>	
 									</upperPoint>
-								</interval>
+								</bound>
 							</measurement>
 						</destination>
 					</relation>
@@ -195,11 +195,11 @@
 			<timing>
 				<!-- And we do ranges - greaterThan, lessThan, or both -->
 				<measurement>
-					<interval>
+					<bound>
 						<lowerPoint>
 							<numericValue>5</numericValue>
 						</lowerPoint>
-					</interval>
+					</bound>
 				</measurement>
 			</timing>
 		</assertion>
@@ -223,19 +223,19 @@
 						<destination>
 							<measurement>
 								<interval>
-									<lowerBound>
-										<lowerPoint inclusive="true">
+									<lowerBound lowerPointInclusive="true" upperPointInclusive="false">
+										<lowerPoint>
 											<numericValue>5</numericValue>
 										</lowerPoint>
 										<upperPoint>
 											<numericValue>6</numericValue>
 										</upperPoint>
 									</lowerBound>
-									<upperBound>
+									<upperBound lowerPointInclusive="false" upperPointInclusive="true">
 										<lowerPoint>
 											<numericValue>20</numericValue>
 										</lowerPoint>
-										<upperPoint inclusive="true">
+										<upperPoint>
 											<numericValue>30.5</numericValue>
 										</upperPoint>
 									</upperBound>
@@ -253,27 +253,27 @@
 			<value>
 				<!-- Ranges can also have text strings -->
 				<measurement>
-					<interval>
+					<bound>
 						<lowerPoint>
 							<stringConstant>DOB</stringConstant>
 						</lowerPoint>
 						<upperPoint>
 							<stringConstant>end active service</stringConstant>
 						</upperPoint>
-					</interval>
+					</bound>
 				</measurement>
 			</value>
 			<timing>
 				<!-- measurement range -->
 				<measurement>
-					<interval>
-						<lowerPoint inclusive="true">
+					<bound lowerPointInclusive="true" upperPointInclusive="true">
+						<lowerPoint>
 							<numericValue>5</numericValue>
 						</lowerPoint>
-						<upperPoint inclusive="true">
+						<upperPoint>
 							<numericValue>25</numericValue>
 						</upperPoint>
-					</interval>
+					</bound>
 				</measurement>
 			</timing>
 		</assertion>

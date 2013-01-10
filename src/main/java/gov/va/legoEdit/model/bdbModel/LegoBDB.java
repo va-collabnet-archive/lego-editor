@@ -81,13 +81,10 @@ public class LegoBDB
             }
             indexExpression(a.getValue().getExpression());
             indexMeasurement(a.getValue().getMeasurement());
-            
-            if (a.getAssertionComponents() != null)
+
+            for (AssertionComponent ac : a.getAssertionComponent())
             {
-	            for (AssertionComponent ac : a.getAssertionComponents().getAssertionComponent())
-	            {
-	            	compositeAssertionUUIDs.add(ac.getAssertionUUID());
-	            }
+            	compositeAssertionUUIDs.add(ac.getAssertionUUID());
             }
         }
 
@@ -207,7 +204,7 @@ public class LegoBDB
         assertions.add(assertion);
         checkAndUpdateAssertionList(assertion);
         
-        for (AssertionComponent ac : assertion.getAssertionComponents().getAssertionComponent())
+        for (AssertionComponent ac : assertion.getAssertionComponent())
         {
         	compositeAssertionUUIDs.add(ac.getAssertionUUID());
         }

@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 import gov.va.legoEdit.model.bdbModel.PncsBDB;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
-import gov.va.legoEdit.model.schemaModel.AssertionComponents;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
@@ -243,11 +242,9 @@ public class BDBDataStoreTest
 
         Assertion a = createAssertion();
         String knownAssertionId = a.getAssertionUUID();
-        AssertionComponents ac = new AssertionComponents();
-        a.setAssertionComponents(ac);
-        ac.getAssertionComponent().add(makeAssertionComponent("fred"));
-        ac.getAssertionComponent().add(makeAssertionComponent("jane"));
-        ac.getAssertionComponent().add(makeAssertionComponent("mary"));
+        a.getAssertionComponent().add(makeAssertionComponent("fred"));
+        a.getAssertionComponent().add(makeAssertionComponent("jane"));
+        a.getAssertionComponent().add(makeAssertionComponent("mary"));
 
         l1.getAssertion().add(a);
         
@@ -258,11 +255,9 @@ public class BDBDataStoreTest
         l2.setPncs(makeRandomPncs());
 
         a = createAssertion();
-        ac = new AssertionComponents();
-        a.setAssertionComponents(ac);
-        ac.getAssertionComponent().add(makeAssertionComponent("fred"));
-        ac.getAssertionComponent().add(makeAssertionComponent("joy"));
-        ac.getAssertionComponent().add(makeAssertionComponent("james"));
+        a.getAssertionComponent().add(makeAssertionComponent("fred"));
+        a.getAssertionComponent().add(makeAssertionComponent("joy"));
+        a.getAssertionComponent().add(makeAssertionComponent("james"));
 
         l2.getAssertion().add(a);
         

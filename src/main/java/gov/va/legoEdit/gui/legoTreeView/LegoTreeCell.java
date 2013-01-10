@@ -11,7 +11,6 @@ import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
-import gov.va.legoEdit.model.schemaModel.AssertionComponents;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
@@ -221,10 +220,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 setGraphic(hbox);
                 LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), assertionLabel);
             }
-            else if (treeItem.getNodeType() == LegoTreeNodeType.assertionComponents)
-            {
-                addMenus((AssertionComponents) treeItem.getExtraData(), treeItem, cm);
-            }
             else if (treeItem.getNodeType() == LegoTreeNodeType.assertionComponent)
             {
                 addMenus((AssertionComponent) treeItem.getExtraData(), treeItem, cm);
@@ -364,7 +359,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                             float f = Float.parseFloat(newValue);
                             p.setStringConstant(null);
                             p.setNumericValue(f);
-                            p.setInclusive(true);  // This point impl only handles single points, so always inclusive
                             cb.setEffect(null);
                         }
                         catch (NumberFormatException e)
@@ -374,7 +368,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                                 MeasurementConstant ms = MeasurementConstant.fromValue(newValue);
                                 p.setNumericValue(null);
                                 p.setStringConstant(ms);
-                                p.setInclusive(true);  // This point impl only handles single points, so always inclusive
                                 cb.setEffect(null);
                             }
                             catch (IllegalArgumentException ex)
@@ -382,7 +375,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                                 cb.setEffect(invalidDropShadow);
                                 p.setNumericValue(null);
                                 p.setStringConstant(null);
-                                p.setInclusive(true); 
                             }
                         }
                         treeView.contentChanged();
@@ -955,10 +947,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
     }
 
-    private void addAssertionComponent(AssertionComponents acs, TreeItem<String> ti)
+    private void addAssertionComponent(Assertion a, TreeItem<String> ti)
     {
         AssertionComponent ac = new AssertionComponent();
-        acs.getAssertionComponent().add(ac);
+        a.getAssertionComponent().add(ac);
         treeView.contentChanged();
         LegoTreeItem lti = new LegoTreeItem(ac);
         ti.getChildren().add(lti);
@@ -968,35 +960,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
     private void removeAssertionComponent(AssertionComponent ac, TreeItem<String> ti)
     {
-        AssertionComponents acs = (AssertionComponents) ((LegoTreeItem) ti.getParent()).getExtraData();
-        acs.getAssertionComponent().remove(ac);
+        Assertion a = (Assertion) ((LegoTreeItem) ti.getParent()).getExtraData();
+        a.getAssertionComponent().remove(ac);
         // No need to fire a parent event here - the options on AssertionComponents don't change with add/remove of a
         // component.
-        ti.getParent().getChildren().remove(ti);
-        treeView.contentChanged();
-    }
-
-    private void addAssertionComponents(Assertion a, TreeItem<String> ti)
-    {
-        AssertionComponents acs = new AssertionComponents();
-        a.setAssertionComponents(acs);
-
-        // go ahead and add the nested assertionComponent as well
-        AssertionComponent ac = new AssertionComponent();
-        acs.getAssertionComponent().add(ac);
-
-        ti.getChildren().add(0, new LegoTreeItem(acs));
-        treeView.contentChanged();
-        expandAll(ti.getChildren().get(0));
-        Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
-    }
-
-    private void removeAssertionComponents(TreeItem<String> ti)
-    {
-        Assertion a = (Assertion) ((LegoTreeItem) ti.getParent()).getExtraData();
-        a.setAssertionComponents(null);
-        Event.fireEvent(ti.getParent(),
-                new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
         ti.getParent().getChildren().remove(ti);
         treeView.contentChanged();
     }
@@ -1369,19 +1336,17 @@ public class LegoTreeCell<T> extends TreeCell<T>
             label.getDropContextMenu().getItems().add(mi);
         }
 
-        if (a.getAssertionComponents() == null)
+
+        mi = new MenuItem("Add an Assertion Component");
+        mi.setOnAction(new EventHandler<ActionEvent>()
         {
-            mi = new MenuItem("Add an Assertion Component");
-            mi.setOnAction(new EventHandler<ActionEvent>()
+            @Override
+            public void handle(ActionEvent arg0)
             {
-                @Override
-                public void handle(ActionEvent arg0)
-                {
-                    addAssertionComponents(a, treeItem);
-                }
-            });
-            cm.getItems().add(mi);
-        }
+                addAssertionComponent(a, treeItem);
+            }
+        });
+        cm.getItems().add(mi);
 
         mi = new MenuItem("Delete Assertion");
         mi.setOnAction(new EventHandler<ActionEvent>()
@@ -1390,31 +1355,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
             public void handle(ActionEvent arg0)
             {
                 removeAssertion(a, treeItem);
-            }
-        });
-        cm.getItems().add(mi);
-    }
-    
-    private void addMenus(final AssertionComponents acs, final LegoTreeItem treeItem, ContextMenu cm)
-    {
-        MenuItem mi = new MenuItem("Add Assertion Component");
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent arg0)
-            {
-                addAssertionComponent(acs, treeItem);
-            }
-        });
-        cm.getItems().add(mi);
-
-        mi = new MenuItem("Remove Assertion Components");
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent arg0)
-            {
-                removeAssertionComponents(treeItem);
             }
         });
         cm.getItems().add(mi);

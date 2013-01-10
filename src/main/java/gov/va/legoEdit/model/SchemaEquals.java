@@ -2,7 +2,6 @@ package gov.va.legoEdit.model;
 
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
-import gov.va.legoEdit.model.schemaModel.AssertionComponents;
 import gov.va.legoEdit.model.schemaModel.Bound;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Destination;
@@ -91,23 +90,8 @@ public class SchemaEquals
             return a.getAssertionUUID().equals(b.getAssertionUUID()) && equals(a.getDiscernible(), b.getDiscernible())
                     && equals(a.getQualifier(), b.getQualifier()) && equals(a.getTiming(), b.getTiming())
                     && equals(a.getValue(), b.getValue())
-                    && equals(a.getAssertionComponents(), b.getAssertionComponents());
+                    && equals(a.getAssertionComponent(), b.getAssertionComponent());
         }
-    }
-
-    public static boolean equals(AssertionComponents a, AssertionComponents b)
-    {
-
-        if (a == null && b == null)
-        {
-            return true;
-        }
-        else if ((a == null && b != null) || (a != null && b == null))
-        {
-            return false;
-        }
-
-        return equals(a.getAssertionComponent(), b.getAssertionComponent());
     }
 
     public static boolean equals(Type a, Type b)
@@ -234,7 +218,7 @@ public class SchemaEquals
             return false;
         }
 
-        return equals(a.isInclusive(), b.isInclusive()) && equals(a.getNumericValue(), b.getNumericValue())
+        return equals(a.getNumericValue(), b.getNumericValue())
                 && equals(a.getStringConstant(), b.getStringConstant());
     }
 
@@ -276,8 +260,7 @@ public class SchemaEquals
             return false;
         }
 
-        return equals(a.getLowerPoint(), b.getLowerPoint()) && equals(a.getUpperPoint(), b.getUpperPoint())
-                && equals(a.getLowerBound(), b.getLowerBound()) && equals(a.getUpperBound(), b.getUpperBound());
+        return equals(a.getLowerBound(), b.getLowerBound()) && equals(a.getUpperBound(), b.getUpperBound());
     }
 
     public static boolean equals(Bound a, Bound b)
@@ -290,7 +273,10 @@ public class SchemaEquals
         {
             return false;
         }
-        return equals(a.getLowerPoint(), b.getLowerPoint()) && equals(a.getUpperPoint(), b.getUpperPoint());
+        return equals(a.isLowerPointInclusive(), b.isLowerPointInclusive()) &&
+                equals(a.isUpperPointInclusive(), b.isUpperPointInclusive()) &&
+                equals(a.getLowerPoint(), b.getLowerPoint()) && 
+                equals(a.getUpperPoint(), b.getUpperPoint());
     }
 
     public static boolean equals(AssertionComponent a, AssertionComponent b)

@@ -5,7 +5,6 @@ import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
-import gov.va.legoEdit.model.schemaModel.AssertionComponents;
 import gov.va.legoEdit.model.schemaModel.Bound;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Destination;
@@ -143,9 +142,9 @@ public class LegoTreeItem extends TreeItem<String>
 		ltnt_ = LegoTreeNodeType.assertion;
 		extraData_ = a;
 
-	    if (a.getAssertionComponents() != null)
+	    for (AssertionComponent ac : a.getAssertionComponent())
 	    {
-	        getChildren().add(new LegoTreeItem(a.getAssertionComponents()));
+	        getChildren().add(new LegoTreeItem(ac));
 	    }
 	    if (a.getDiscernible() == null)
 	    {
@@ -226,21 +225,12 @@ public class LegoTreeItem extends TreeItem<String>
 		ltnt_ = LegoTreeNodeType.interval;
 		if (i != null)
 		{
-		    //lower
-		    if (i.getLowerPoint() != null)
-		    {
-		        getChildren().add(new LegoTreeItem(i.getLowerPoint(), LegoTreeNodeType.lower));
-		    }
-		    else if (i.getLowerBound() != null)
+		    if (i.getLowerBound() != null)
 		    {
 		        getChildren().add(new LegoTreeItem(i.getLowerBound(), LegoTreeNodeType.lower));
 		    }
 		    
-		    if (i.getUpperPoint() != null)
-		    {
-		        getChildren().add(new LegoTreeItem(i.getUpperPoint(), LegoTreeNodeType.upper));
-		    }
-		    else if (i.getUpperBound() != null)
+		    if (i.getUpperBound() != null)
 			{
 				getChildren().add(new LegoTreeItem(i.getUpperBound(), LegoTreeNodeType.upper));
 			}
@@ -316,20 +306,6 @@ public class LegoTreeItem extends TreeItem<String>
 		    getChildren().add(new LegoTreeItem(p));
 		}
 
-	}
-	
-	public LegoTreeItem(AssertionComponents acs)
-	{
-		setValue("Assertion Components");
-		ltnt_ = LegoTreeNodeType.assertionComponents;
-		if (acs != null)
-		{
-			for (AssertionComponent cac : acs.getAssertionComponent())
-			{
-				getChildren().add(new LegoTreeItem(cac));
-			}
-		}
-		extraData_ = acs;
 	}
 	
 	public LegoTreeItem(AssertionComponent ac)
