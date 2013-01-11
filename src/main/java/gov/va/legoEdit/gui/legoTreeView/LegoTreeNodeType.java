@@ -11,7 +11,7 @@ public enum LegoTreeNodeType
 	assertion(1),
 	expressionDiscernible(0),
 	expressionQualifier(1),
-	timing(2),
+	timingMeasurement(2),
 	value(3),
 	assertionComponent(4),
 	

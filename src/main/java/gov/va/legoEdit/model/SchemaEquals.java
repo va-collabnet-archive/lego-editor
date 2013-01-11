@@ -17,7 +17,6 @@ import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Stamp;
-import gov.va.legoEdit.model.schemaModel.Timing;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Units;
 import gov.va.legoEdit.model.schemaModel.Value;
@@ -176,20 +175,6 @@ public class SchemaEquals
 
         return equals(a.getConcept(), b.getConcept()) && equals(a.getExpression(), b.getExpression())
                 && equals(a.getRelation(), b.getRelation()) && equals(a.getRelationGroup(), b.getRelationGroup());
-    }
-
-    public static boolean equals(Timing a, Timing b)
-    {
-        if (a == null && b == null)
-        {
-            return true;
-        }
-        else if ((a == null && b != null) || (a != null && b == null))
-        {
-            return false;
-        }
-
-        return equals(a.getMeasurement(), b.getMeasurement());
     }
 
     public static boolean equals(Measurement a, Measurement b)

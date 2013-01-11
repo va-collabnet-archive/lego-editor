@@ -17,7 +17,6 @@ import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Stamp;
-import gov.va.legoEdit.model.schemaModel.Timing;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Value;
 import java.util.ArrayList;
@@ -174,7 +173,7 @@ public class LegoTreeItem extends TreeItem<String>
 	    
 		if (a.getTiming() != null)
 		{
-		    getChildren().add(new LegoTreeItem(a.getTiming()));
+		    getChildren().add(new LegoTreeItem(a.getTiming(), LegoTreeNodeType.timingMeasurement));
 		}
 		if (a.getValue() == null)
 		{
@@ -195,7 +194,7 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		else if (value.getMeasurement() != null)
 		{
-			getChildren().add(new LegoTreeItem(value.getMeasurement()));
+			getChildren().add(new LegoTreeItem(value.getMeasurement(), LegoTreeNodeType.measurement));
 		}
 		else if (value.getText() != null)
 		{
@@ -205,18 +204,6 @@ public class LegoTreeItem extends TreeItem<String>
 		{
 		    new LegoTreeItem("TODO booelan");  //TODO boolean
 		}
-	}
-	
-	public LegoTreeItem(Timing t)
-	{
-		setValue("Timing");
-		extraData_ = t;
-		ltnt_ = LegoTreeNodeType.timing;
-		if (t.getMeasurement() == null)
-		{
-		    t.setMeasurement(new Measurement());
-		}
-		getChildren().add(new LegoTreeItem(t.getMeasurement()));
 	}
 	
 	public LegoTreeItem(Interval i)
@@ -286,10 +273,10 @@ public class LegoTreeItem extends TreeItem<String>
 	    extraData_ = p;
 	}
 	
-	public LegoTreeItem(Measurement measurement)
+	public LegoTreeItem(Measurement measurement, LegoTreeNodeType type)
 	{
-		setValue("Measurement");
-		ltnt_ = LegoTreeNodeType.measurement;
+		setValue(type == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement");
+		ltnt_ = type;
 		extraData_ = measurement;
 
 		if (measurement.getUnits() != null && measurement.getUnits().getConcept() != null)
@@ -438,7 +425,7 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		else if (d.getMeasurement() != null)
 		{
-			getChildren().add(new LegoTreeItem(d.getMeasurement()));
+			getChildren().add(new LegoTreeItem(d.getMeasurement(), LegoTreeNodeType.measurement));
 		}
 		else if (d.getText() != null)
         {

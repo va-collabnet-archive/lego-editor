@@ -65,16 +65,21 @@ public class WBUtility
     
     public static Concept lookupSnomedIdentifier(String identifier)
     {
-        Concept c = null;
         ConceptVersionBI result = lookupSnomedIdentifierAsCV(identifier);
-        if (result != null && result.getUUIDs().size() > 0)
+        return convertConcept(result);
+    }
+    
+    public static Concept convertConcept(ConceptVersionBI concept)
+    {
+        Concept c = null;
+        if (concept != null && concept.getUUIDs() != null && concept.getUUIDs().size() > 0)
         {
             c = new Concept();
-            c.setDesc(getFSN(result));
-            c.setUuid(result.getUUIDs().get(0).toString());
+            c.setDesc(getFSN(concept));
+            c.setUuid(concept.getUUIDs().get(0).toString());
             try
             {
-                for (IdBI x : result.getAdditionalIds())
+                for (IdBI x : concept.getAdditionalIds())
                 {
                     if (x.getAuthorityNid() == getSnomedIdTypeNid() && Utility.isLong(x.getDenotation().toString()))
                     {

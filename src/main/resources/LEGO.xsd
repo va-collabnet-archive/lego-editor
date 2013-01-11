@@ -5,6 +5,7 @@
 <!-- 
 	Changelog:
 	1/10    - Reorganized Bound and Interval under measurement to better align with the sim-api.  No changes to what is representable.
+				Got rid of timing node, which served no purpose (moved measurement up a level under the assertion)
 	1/8     - Getting rid of the unnecessary assertionComponents field.  Allowed the assertionComponent in assertion to be an unbounded
 				list instead of a single reference instead.
 	1/4     - Added (optional) comment fields to the Lego and the Lego List.
@@ -55,7 +56,7 @@
 				<xs:element ref="discernible" />
 				<xs:element ref="qualifier" />
 				<xs:element ref="value" />
-				<xs:element ref="timing" minOccurs="0" />
+				<xs:element name="timing" type="measurement" minOccurs="0" />
 				<xs:element ref="assertionComponent" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
@@ -136,7 +137,7 @@
 					<xs:element ref="expression"/>
 					<xs:element ref="text" />
 					<xs:element ref="boolean" />
-					<xs:element ref="measurement" />
+					<xs:element name="measurement" type="measurement" />
 				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
@@ -166,16 +167,8 @@
 					<xs:element ref="expression"/>
 					<xs:element ref="text" />
 					<xs:element ref="boolean" />
-					<xs:element ref="measurement" />
+					<xs:element name="measurement" type="measurement"/>
 				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-
-	<xs:element name="timing">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="measurement" />
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -196,18 +189,16 @@
 
     <xs:element name="boolean" type="xs:boolean"/>
     
-	<xs:element name="measurement">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="units" minOccurs="0" maxOccurs="1" />
-				<xs:choice>
-					<xs:element name="point" type="point"/>
-					<xs:element name="bound" type="bound" />
-					<xs:element ref="interval" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
+	<xs:complexType name="measurement">
+		<xs:sequence>
+			<xs:element ref="units" minOccurs="0" maxOccurs="1" />
+			<xs:choice>
+				<xs:element name="point" type="point"/>
+				<xs:element name="bound" type="bound" />
+				<xs:element ref="interval" />
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
 
 	<xs:complexType name="bound">
 		<xs:sequence>

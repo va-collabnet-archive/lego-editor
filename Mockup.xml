@@ -52,14 +52,12 @@
 			</value>
 
 			<timing>  
-				<measurement>
-					<units>
-						<concept desc="minutes" sctid="45" />
-					</units>
-					<point>
-						<numericValue>37.45</numericValue> <!-- currently defined as a float -->
-					</point>
-				</measurement>
+				<units>
+					<concept desc="minutes" sctid="45" />
+				</units>
+				<point>
+					<numericValue>37.45</numericValue> <!-- currently defined as a float -->
+				</point>
 			</timing>
 
 			<assertionComponent>
@@ -116,12 +114,10 @@
 			</value>
 			<timing>
 				<!-- units are optional -->
-				<measurement>
-					<!-- String values are limited to values from an enumeration -->
-					<point>
-						<stringConstant>NOW</stringConstant>
-					</point>
-				</measurement>
+				<!-- String values are limited to values from an enumeration -->
+				<point>
+					<stringConstant>NOW</stringConstant>
+				</point>
 			</timing>
 		</assertion>
 
@@ -194,13 +190,11 @@
 			</value>
 			<timing>
 				<!-- And we do ranges - greaterThan, lessThan, or both -->
-				<measurement>
-					<bound>
-						<lowerPoint>
-							<numericValue>5</numericValue>
-						</lowerPoint>
-					</bound>
-				</measurement>
+				<bound>
+					<lowerPoint>
+						<numericValue>5</numericValue>
+					</lowerPoint>
+				</bound>
 			</timing>
 		</assertion>
 	</lego>
@@ -265,16 +259,14 @@
 			</value>
 			<timing>
 				<!-- measurement range -->
-				<measurement>
-					<bound lowerPointInclusive="true" upperPointInclusive="true">
-						<lowerPoint>
-							<numericValue>5</numericValue>
-						</lowerPoint>
-						<upperPoint>
-							<numericValue>25</numericValue>
-						</upperPoint>
-					</bound>
-				</measurement>
+				<bound lowerPointInclusive="true" upperPointInclusive="true">
+					<lowerPoint>
+						<numericValue>5</numericValue>
+					</lowerPoint>
+					<upperPoint>
+						<numericValue>25</numericValue>
+					</upperPoint>
+				</bound>
 			</timing>
 		</assertion>
 	</lego>

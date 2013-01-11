@@ -75,10 +75,7 @@ public class LegoBDB
             checkAndUpdateAssertionList(a);
             indexExpression(a.getDiscernible().getExpression());
             indexExpression(a.getQualifier().getExpression());
-            if (a.getTiming() != null)
-            {
-                indexMeasurement(a.getTiming().getMeasurement());
-            }
+            indexMeasurement(a.getTiming());
             indexExpression(a.getValue().getExpression());
             indexMeasurement(a.getValue().getMeasurement());
 
@@ -211,10 +208,7 @@ public class LegoBDB
         
         indexExpression(assertion.getDiscernible().getExpression());
         indexExpression(assertion.getQualifier().getExpression());
-        if (assertion.getTiming() != null)
-        {
-            indexMeasurement(assertion.getTiming().getMeasurement());
-        }
+        indexMeasurement(assertion.getTiming());
         indexExpression(assertion.getValue().getExpression());
         indexMeasurement(assertion.getValue().getMeasurement());
     }

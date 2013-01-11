@@ -25,7 +25,6 @@ import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Stamp;
-import gov.va.legoEdit.model.schemaModel.Timing;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Units;
 import gov.va.legoEdit.model.schemaModel.Value;
@@ -256,13 +255,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 setGraphic(prependLabel("Assertion UUID", tf));
                 addMenus(LegoTreeNodeType.assertionUUID, ac, cm);
             }
-            else if (treeItem.getNodeType() == LegoTreeNodeType.measurement)
+            else if (treeItem.getNodeType() == LegoTreeNodeType.measurement || treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement)
             {
                 addMenus((Measurement) treeItem.getExtraData(), treeItem, cm);
-            }
-            else if (treeItem.getNodeType() == LegoTreeNodeType.timing)
-            {
-                 addMenus((Timing) treeItem.getExtraData(), treeItem, cm);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.expressionValue
                     || treeItem.getNodeType() == LegoTreeNodeType.expressionDestination
@@ -442,16 +437,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
         return hbox;
     }
 
-    private void removeTiming(Timing t, TreeItem<String> ti)
-    {
-        Assertion a = (Assertion) ((LegoTreeItem) ti.getParent()).getExtraData();
-        a.setTiming(null);
-        Event.fireEvent(ti.getParent(),
-                new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
-        ti.getParent().getChildren().remove(ti);
-        treeView.contentChanged();
-    }
-
     private void removeMeasurement(Measurement m, TreeItem<String> ti)
     {
         Object parent = ((LegoTreeItem) ti.getParent()).getExtraData();
@@ -463,11 +448,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
         {
             ((Relation) parent).getDestination().setMeasurement(null);
         }
-        else if (parent instanceof Timing)
+        else if (parent instanceof Assertion)
         {
-            // Don't allow removal here - they should remove the entire timing.
-            logger.error("Dan messed up - this measurement removal shouldn't be called");
-            return;
+            ((Assertion) parent).setTiming(null);
         }
         else
         {
@@ -544,6 +527,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             TreeItem<String> ti)
     {
         Measurement m = new Measurement();
+        LegoTreeNodeType type = LegoTreeNodeType.measurement;
         if (parent instanceof Relation)
         {
             ((Relation) parent).getDestination().setMeasurement(m);
@@ -551,6 +535,11 @@ public class LegoTreeCell<T> extends TreeCell<T>
         else if (parent instanceof Value)
         {
             ((Value) parent).setMeasurement(m);
+        }
+        else if (parent instanceof Assertion)
+        {
+            ((Assertion) parent).setTiming(m);
+            type = LegoTreeNodeType.timingMeasurement;
         }
         else
         {
@@ -574,7 +563,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             u.setConcept(c);
             m.setUnits(u);
         }
-        ti.getChildren().add(new LegoTreeItem(m));
+        ti.getChildren().add(new LegoTreeItem(m, type));
         expandAll(ti);
         treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
@@ -767,24 +756,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
         treeView.contentChanged();
     }
 
-    private void addTimingMeasurement(Timing t, boolean withPoint, boolean withInterval, TreeItem<String> ti)
-    {
-        Measurement m = new Measurement();
-        t.setMeasurement(m);
-        if (withPoint)
-        {
-            m.setPoint(new Point());
-        }
-        if (withInterval)
-        {
-            m.setInterval(new Interval());
-        }
-        ti.getChildren().add(new LegoTreeItem(m));
-        expandAll(ti);
-        treeView.contentChanged();
-        Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
-    }
-
     private void addRelation(Expression e, String sctUUID, TreeItem<String> ti)
     {
         Relation r = new Relation();
@@ -915,9 +886,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
     private void addTiming(Assertion a, boolean withPoint, boolean withInterval, String sctUUID, TreeItem<String> ti)
     {
-        Timing t = new Timing();
-        a.setTiming(t);
-
         Measurement m = new Measurement();
         if (sctUUID != null)
         {
@@ -927,7 +895,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             u.setConcept(c);
             m.setUnits(u);
         }
-        t.setMeasurement(m);
+        a.setTiming(m);
 
         if (withPoint)
         {
@@ -938,7 +906,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             m.setInterval(new Interval());
         }
 
-        LegoTreeItem lti = new LegoTreeItem(t);
+        LegoTreeItem lti = new LegoTreeItem(m, LegoTreeNodeType.timingMeasurement);
         ti.getChildren().add(lti);
         FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
         expandAll(lti);
@@ -1415,56 +1383,13 @@ public class LegoTreeCell<T> extends TreeCell<T>
             cm.getItems().add(mi);
         }
 
-        if (!(((LegoTreeItem) treeItem.getParent()).getExtraData() instanceof Timing))
-        {
-            mi = new MenuItem("Remove Measurement");
-            mi.setOnAction(new EventHandler<ActionEvent>()
-            {
-                @Override
-                public void handle(ActionEvent arg0)
-                {
-                    removeMeasurement(m, treeItem);
-                }
-            });
-            cm.getItems().add(mi);
-        }
-    }
-    
-    private void addMenus(final Timing t, final LegoTreeItem treeItem, ContextMenu cm)
-    {
-        MenuItem mi;
-        if (t.getMeasurement() == null)
-        {
-            mi = new MenuItem("Add a Point Measurement");
-            mi.setOnAction(new EventHandler<ActionEvent>()
-            {
-                @Override
-                public void handle(ActionEvent arg0)
-                {
-                    addTimingMeasurement(t, true, false, treeItem);
-                }
-            });
-            cm.getItems().add(mi);
-
-            mi = new MenuItem("Add an Interval Measurement");
-            mi.setOnAction(new EventHandler<ActionEvent>()
-            {
-                @Override
-                public void handle(ActionEvent arg0)
-                {
-                    addTimingMeasurement(t, false, true, treeItem);
-                }
-            });
-            cm.getItems().add(mi);
-        }
-
-        mi = new MenuItem("Remove Timing");
+        mi = new MenuItem("Remove " + (treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement"));
         mi.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
             public void handle(ActionEvent arg0)
             {
-                removeTiming(t, treeItem);
+                removeMeasurement(m, treeItem);
             }
         });
         cm.getItems().add(mi);
