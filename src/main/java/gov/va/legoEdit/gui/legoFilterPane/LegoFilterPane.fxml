@@ -23,8 +23,8 @@
             </ComboBox>
           </children>
         </HBox>
-        <ComboBox fx:id="pncsItem" maxWidth="1.7976931348623157E308" visibleRowCount="20" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        <ComboBox fx:id="pncsValue" maxWidth="1.7976931348623157E308" visibleRowCount="20" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <ComboBox fx:id="pncsItem" maxWidth="1.7976931348623157E308" visibleRowCount="20" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="0" />
+        <ComboBox fx:id="pncsValue" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="100.0" visibleRowCount="20" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
         <Label styleClass="boldLabel" text="PNCS Value" GridPane.columnIndex="0" GridPane.rowIndex="1" />
         <Label styleClass="boldLabel" text="Snomed ID" GridPane.columnIndex="0" GridPane.rowIndex="2" />
         <Label fx:id="snomedLabel" text="No Snomed concept entered" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.margin="$x1" GridPane.rowIndex="3" />
