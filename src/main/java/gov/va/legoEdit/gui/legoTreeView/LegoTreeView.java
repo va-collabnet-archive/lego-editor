@@ -1,13 +1,9 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
-import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.LegoTab;
-import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Lego;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.util.Callback;
 
@@ -15,7 +11,7 @@ public class LegoTreeView extends TreeView<String>
 {
     private LegoTab legoTab_;
     
-	public LegoTreeView()
+	public LegoTreeView(boolean editable)
 	{
 		getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		setCellFactory(new Callback<TreeView<String>, TreeCell<String>>()
@@ -26,7 +22,7 @@ public class LegoTreeView extends TreeView<String>
 				return new LegoTreeCell<String>(LegoTreeView.this);
 			}
 		});
-		setEditable(true);
+		setEditable(editable);
 		LegoTreeItem treeRoot = new LegoTreeItem();
         setShowRoot(false);
         setRoot(treeRoot);
@@ -37,32 +33,6 @@ public class LegoTreeView extends TreeView<String>
 	    legoTab_ = legoTab;
 	}
 
-	@Override
-	public void edit(TreeItem<String> ti)
-	{
-	    if (ti != null)
-	    {
-    	    LegoTreeItem lti = (LegoTreeItem)ti;
-    	    if (lti.getNodeType() != null)
-    	    {
-        	    if (LegoTreeNodeType.legoReference == lti.getNodeType())
-        	    {
-        	        LegoReference lr = (LegoReference)lti.getExtraData();
-        	        LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(lr, lti);
-        	    }
-    	    }
-    		super.edit(ti);
-	    }
-	}
-	
-	public ScrollPane wrapInScrollPane()
-	{
-	    ScrollPane sp = new ScrollPane();
-        sp.setContent(this);
-        sp.setFitToHeight(true);
-        sp.setFitToWidth(true);
-        return sp;
-	}
 	
 	protected Lego getLego()
 	{

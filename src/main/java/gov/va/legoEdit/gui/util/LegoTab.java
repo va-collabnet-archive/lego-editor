@@ -127,13 +127,12 @@ public class LegoTab extends Tab
                 displayedLego.getLegoUUID(), displayedLego.getStamp().getAuthor(), displayedLego.getStamp().getModule(), 
                 TimeConvert.format(displayedLego.getStamp().getTime()), displayedLego.getStamp().getPath());
         
-        LegoTreeView legoTree = new LegoTreeView();
-        legoTree.setEditable(false);
+        LegoTreeView legoTree = new LegoTreeView(false);
         legoTree.setLegoTab(this);
         
         BorderPane bp = new BorderPane();
         bp.setTop(lip.getPane());
-        bp.setCenter(legoTree.wrapInScrollPane());
+        bp.setCenter(legoTree);
         this.setContent(bp);
         
         legoTree.getRoot().getChildren().add(new LegoTreeItem(displayedLego.getStamp(), LegoTreeNodeType.status));

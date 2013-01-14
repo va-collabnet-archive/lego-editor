@@ -88,8 +88,8 @@ public class LegoFilterPaneController  implements Initializable {
         ds = new DropShadow();
         ds.setColor(Color.RED);
         
-        ltv = new LegoTreeView();
-        borderPane.setCenter(ltv.wrapInScrollPane());
+        ltv = new LegoTreeView(true);
+        borderPane.setCenter(ltv);
         AnchorPane.setBottomAnchor(borderPane, 0.0);
         AnchorPane.setTopAnchor(borderPane, 0.0);
         AnchorPane.setLeftAnchor(borderPane, 0.0);

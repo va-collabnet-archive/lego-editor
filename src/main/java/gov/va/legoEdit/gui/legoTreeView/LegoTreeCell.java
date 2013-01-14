@@ -82,18 +82,58 @@ public class LegoTreeCell<T> extends TreeCell<T>
     }
     
     @Override
+    public void cancelEdit()
+    {
+        super.cancelEdit();
+    }
+
+    @Override
+    public void commitEdit(T newValue)
+    {
+        super.commitEdit(newValue);
+    }
+
+    @Override
+    public void startEdit()
+    {
+        super.startEdit();
+
+        final LegoTreeItem treeItem = (LegoTreeItem) getTreeItem();
+        if (treeItem.getNodeType() != null)
+        {
+            if (LegoTreeNodeType.legoReference == treeItem.getNodeType())
+            {
+                LegoReference lr = (LegoReference) treeItem.getExtraData();
+                LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(lr, treeItem);
+            }
+        }
+        //We don't need the edit to continue past this point, so cancel.  Might change this in the future.
+        cancelEdit();
+    }
+
+
+    @Override
     public void updateItem(T item, boolean empty)
     {
         super.updateItem(item, empty);
         final LegoTreeItem treeItem = (LegoTreeItem) getTreeItem();
         ContextMenu cm = new ContextMenu();
+        //This is the first time I really don't understand the JavaFX API.  It appears to reuse the item values, when scrolling up and down... 
+        //So if the item type changes from one position to another, and you don't unset (or reset) all of the same properties that were set previously, 
+        //Things go wonky when you scroll.  I think its a  bug... have to find time to dig into it more later...
+        //see http://javafx-jira.kenai.com/browse/RT-19629
+        setEditable(false);
+        setText(null);
+        setGraphic(null);
+        getStyleClass().remove("boldLabel");
+        styleProperty().unbind();
+        //Clear the drop shadow and bold - workaround for non-clearing styles
+        setStyle("-fx-effect: innershadow(two-pass-box , white , 0, 0.0 , 0 , 0);"); 
+        setTooltip(null);
         
         if (empty || treeItem.getNodeType() == LegoTreeNodeType.blankLegoEndNode
                 || treeItem.getNodeType() == LegoTreeNodeType.blankLegoListEndNode)
         {
-            setText(null);
-            setGraphic(null);
-            
             if (treeView.getLego() != null
                     || (!empty && treeItem.getNodeType() == LegoTreeNodeType.blankLegoEndNode))
             {
@@ -156,7 +196,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 {
                     styleProperty().bind(style);
                 }
-                setEditable(true);
+                //setEditable(true);  //don't actually need this?
                 addMenus(legoReference, treeItem, cm);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.status)
