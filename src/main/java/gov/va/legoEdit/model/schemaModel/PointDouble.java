@@ -10,25 +10,23 @@ package gov.va.legoEdit.model.schemaModel;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import com.sleepycat.persist.model.Persistent;
 
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>Java class for pointDouble complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType>
+ * &lt;complexType name="pointDouble">
  *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *     &lt;extension base="{}point">
  *       &lt;sequence>
- *         &lt;element ref="{}concept"/>
+ *         &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *       &lt;/sequence>
- *     &lt;/restriction>
+ *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -36,38 +34,30 @@ import com.sleepycat.persist.model.Persistent;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "concept"
+@XmlType(name = "pointDouble", propOrder = {
+    "value"
 })
-@XmlRootElement(name = "type")
 @Persistent
-public class Type {
+public class PointDouble
+    extends Point
+{
 
-    @XmlElement(required = true)
-    protected Concept concept;
+    protected double value;
 
     /**
-     * Gets the value of the concept property.
+     * Gets the value of the value property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Concept }
-     *     
      */
-    public Concept getConcept() {
-        return concept;
+    public double getValue() {
+        return value;
     }
 
     /**
-     * Sets the value of the concept property.
+     * Sets the value of the value property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Concept }
-     *     
      */
-    public void setConcept(Concept value) {
-        this.concept = value;
+    public void setValue(double value) {
+        this.value = value;
     }
 
 }

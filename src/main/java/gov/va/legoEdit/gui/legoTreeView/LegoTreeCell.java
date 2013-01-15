@@ -20,7 +20,9 @@ import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.MeasurementConstant;
 import gov.va.legoEdit.model.schemaModel.Pncs;
-import gov.va.legoEdit.model.schemaModel.Point;
+import gov.va.legoEdit.model.schemaModel.PointDouble;
+import gov.va.legoEdit.model.schemaModel.PointLong;
+import gov.va.legoEdit.model.schemaModel.PointMeasurementConstant;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
@@ -362,7 +364,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.point)
             {
-                final Point p = (Point) treeItem.getExtraData();
+                //odd, yes - on the point, we pass in the measurement.
+                final Measurement m = (Measurement) treeItem.getExtraData();
                 final ComboBox<String> cb = new ComboBox<>();
                 cb.setEditable(true);
                 for (MeasurementConstant s : MeasurementConstant.values())
@@ -375,13 +378,17 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 cb.setMinWidth(200.0);
                 cb.setPrefWidth(200.0);
 
-                if (p.getStringConstant() != null)
+                if (m.getPoint() instanceof PointMeasurementConstant)
                 {
-                    cb.getSelectionModel().select(p.getStringConstant().value());
+                    cb.getSelectionModel().select(((PointMeasurementConstant)m.getPoint()).getValue().value());
                 }
-                else if (p.getNumericValue() != null)
+                else if (m.getPoint() instanceof PointDouble)
                 {
-                    cb.setValue(p.getNumericValue().toString());
+                    cb.setValue(((PointDouble)m.getPoint()).getValue() + "");
+                }
+                else if (m.getPoint() instanceof PointLong)
+                {
+                    cb.setValue(((PointLong)m.getPoint()).getValue() + "");
                 }
 
                 cb.valueProperty().addListener(new ChangeListener<String>()
@@ -391,9 +398,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     {
                         try
                         {
-                            float f = Float.parseFloat(newValue);
-                            p.setStringConstant(null);
-                            p.setNumericValue(f);
+                            if (newValue.contains("."))
+                            {
+                                PointDouble p = new PointDouble();
+                                p.setValue(Double.parseDouble(newValue));
+                                m.setPoint(p);
+                            }
+                            else
+                            {
+                                PointLong p = new PointLong();
+                                p.setValue(Long.parseLong(newValue));
+                                m.setPoint(p);
+                            }
                             cb.setEffect(null);
                         }
                         catch (NumberFormatException e)
@@ -401,22 +417,22 @@ public class LegoTreeCell<T> extends TreeCell<T>
                             try
                             {
                                 MeasurementConstant ms = MeasurementConstant.fromValue(newValue);
-                                p.setNumericValue(null);
-                                p.setStringConstant(ms);
+                                PointMeasurementConstant p = new PointMeasurementConstant();
+                                p.setValue(ms);
+                                m.setPoint(p);
                                 cb.setEffect(null);
                             }
                             catch (IllegalArgumentException ex)
                             {
                                 cb.setEffect(invalidDropShadow);
-                                p.setNumericValue(null);
-                                p.setStringConstant(null);
+                                m.setPoint(null);
                             }
                         }
                         treeView.contentChanged();
                     }
                 });
 
-                addMenus(p, treeItem, cm);
+                addMenus(m, treeItem, cm);
                 setGraphic(cb);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.interval)
@@ -535,29 +551,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
         treeView.contentChanged();
     }
 
-    private void removePoint(Point p, TreeItem<String> ti)
+    private void removePoint(Measurement m, TreeItem<String> ti)
     {
-        Object parent = ((LegoTreeItem) ti.getParent()).getExtraData();
-        if (parent instanceof Measurement)
-        {
-            Measurement m = (Measurement) parent;
-            m.setPoint(null);
-            Event.fireEvent(ti.getParent(),
-                    new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
-            ti.getParent().getChildren().remove(ti);
-        }
-        else
-        {
-            logger.error("unhandled point remove call");
-        }
+        m.setPoint(null);
+        Event.fireEvent(ti.getParent(),
+                new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
+        ti.getParent().getChildren().remove(ti);
         treeView.contentChanged();
     }
 
     private void addPoint(Measurement m, TreeItem<String> ti)
     {
-        Point p = new Point();
-        m.setPoint(p);
-        ti.getChildren().add(new LegoTreeItem(p));
+        ti.getChildren().add(new LegoTreeItem(m, LegoTreeNodeType.point));
         expandAll(ti);
         treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
@@ -589,7 +594,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
         if (withPoint)
         {
-            m.setPoint(new Point());
+            m.setPoint(new PointDouble());
         }
         if (withInterval)
         {
@@ -939,7 +944,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
         if (withPoint)
         {
-            m.setPoint(new Point());
+            m.setPoint(new PointDouble());
         }
         else if (withInterval)
         {
@@ -1385,54 +1390,70 @@ public class LegoTreeCell<T> extends TreeCell<T>
     private void addMenus(final Measurement m, final LegoTreeItem treeItem, ContextMenu cm)
     {
         MenuItem mi;
-        if (m.getUnits() == null || m.getUnits().getConcept() == null)
+        if (treeItem.getNodeType() == LegoTreeNodeType.point)
         {
-            mi = new MenuItem("Add Units");
+            mi = new MenuItem("Remove Point");
             mi.setOnAction(new EventHandler<ActionEvent>()
             {
                 @Override
                 public void handle(ActionEvent arg0)
                 {
-                    addUnits(m, treeItem);
+                    removePoint(m, treeItem);
                 }
             });
             cm.getItems().add(mi);
         }
-        if (m.getInterval() == null && m.getPoint() == null)
+        else  //Assume measurement, for now.
         {
-            mi = new MenuItem("Add Point");
-            mi.setOnAction(new EventHandler<ActionEvent>()
+            if (m.getUnits() == null || m.getUnits().getConcept() == null)
             {
-                @Override
-                public void handle(ActionEvent arg0)
+                mi = new MenuItem("Add Units");
+                mi.setOnAction(new EventHandler<ActionEvent>()
                 {
-                    addPoint(m, treeItem);
-                }
-            });
-            cm.getItems().add(mi);
-
-            mi = new MenuItem("Add Interval");
-            mi.setOnAction(new EventHandler<ActionEvent>()
-            {
-                @Override
-                public void handle(ActionEvent arg0)
-                {
-                    addInterval(m, treeItem);
-                }
-            });
-            cm.getItems().add(mi);
-        }
-
-        mi = new MenuItem("Remove " + (treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement"));
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent arg0)
-            {
-                removeMeasurement(m, treeItem);
+                    @Override
+                    public void handle(ActionEvent arg0)
+                    {
+                        addUnits(m, treeItem);
+                    }
+                });
+                cm.getItems().add(mi);
             }
-        });
-        cm.getItems().add(mi);
+            if (m.getInterval() == null && m.getPoint() == null)
+            {
+                mi = new MenuItem("Add Point");
+                mi.setOnAction(new EventHandler<ActionEvent>()
+                {
+                    @Override
+                    public void handle(ActionEvent arg0)
+                    {
+                        addPoint(m, treeItem);
+                    }
+                });
+                cm.getItems().add(mi);
+    
+                mi = new MenuItem("Add Interval");
+                mi.setOnAction(new EventHandler<ActionEvent>()
+                {
+                    @Override
+                    public void handle(ActionEvent arg0)
+                    {
+                        addInterval(m, treeItem);
+                    }
+                });
+                cm.getItems().add(mi);
+            }
+    
+            mi = new MenuItem("Remove " + (treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement"));
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    removeMeasurement(m, treeItem);
+                }
+            });
+            cm.getItems().add(mi);
+        }
     }
     
     private void addMenus(final Expression e, final LegoTreeItem treeItem, ContextMenu cm, final DropTargetLabel label, String descriptionAddition)
@@ -1618,20 +1639,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
             public void handle(ActionEvent arg0)
             {
                 removeRelationGroup(treeItem);
-            }
-        });
-        cm.getItems().add(mi);
-    }
-    
-    private void addMenus(final Point p, final LegoTreeItem treeItem, ContextMenu cm)
-    {
-        MenuItem mi = new MenuItem("Remove Point");
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent arg0)
-            {
-                removePoint(p, treeItem);
             }
         });
         cm.getItems().add(mi);

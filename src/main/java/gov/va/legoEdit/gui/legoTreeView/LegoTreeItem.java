@@ -266,33 +266,38 @@ public class LegoTreeItem extends TreeItem<String>
 //		}
 	}
 	
-	public LegoTreeItem(Point p)
-	{
-	    setValue("Point");
-	    ltnt_ = LegoTreeNodeType.point;
-	    extraData_ = p;
-	}
-	
 	public LegoTreeItem(Measurement measurement, LegoTreeNodeType type)
 	{
-		setValue(type == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement");
-		ltnt_ = type;
-		extraData_ = measurement;
-
-		if (measurement.getUnits() != null && measurement.getUnits().getConcept() != null)
-		{
-			getChildren().add(new LegoTreeItem(measurement.getUnits().getConcept(), LegoTreeNodeType.conceptOptional));
-		}
-		if (measurement.getInterval() != null)
-		{
-			getChildren().add(new LegoTreeItem(measurement.getInterval()));
-		}
-		else if (measurement.getPoint() != null)
-		{
-		    Point p = measurement.getPoint();
-		    getChildren().add(new LegoTreeItem(p));
-		}
-
+	    if (type == LegoTreeNodeType.point)
+	    {
+	        setValue("Point");
+	        ltnt_ = LegoTreeNodeType.point;
+	        extraData_ = measurement;
+	    }
+	    else
+	    {
+    		setValue(type == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement");
+    		ltnt_ = type;
+    		extraData_ = measurement;
+    
+    		if (measurement.getUnits() != null && measurement.getUnits().getConcept() != null)
+    		{
+    			getChildren().add(new LegoTreeItem(measurement.getUnits().getConcept(), LegoTreeNodeType.conceptOptional));
+    		}
+    		if (measurement.getInterval() != null)
+    		{
+    			getChildren().add(new LegoTreeItem(measurement.getInterval()));
+    		}
+    		else if (measurement.getPoint() != null)
+    		{
+    		    getChildren().add(new LegoTreeItem(measurement, LegoTreeNodeType.point));
+    		}
+//    		else if (measurement.getBound() != null)
+//            {
+//    		    //TODO
+//                getChildren().add(new LegoTreeItem(measurement.getBound()));
+//            }
+	    }
 	}
 	
 	public LegoTreeItem(AssertionComponent ac)

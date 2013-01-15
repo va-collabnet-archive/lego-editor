@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<legoList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LEGO.xsd">
+<legoList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../main/resources/LEGO.xsd">
     <groupName>Testing Mockup</groupName>
     <legoListUUID>a63c16b1-2307-4101-a5cb-daeeed450720</legoListUUID>
     <groupDescription>Legos for automated testing</groupDescription>
@@ -61,8 +61,8 @@
                     <units>
                         <concept sctid="12565001" uuid="c9a2b01c-357a-3980-9083-cf10c965a41e" desc="Extreme (qualifier value)"/>
                     </units>
-                    <point>
-                        <stringConstant>NOW</stringConstant>
+                    <point xsi:type="pointMeasurementConstant">
+                        <value>NOW</value>
                     </point>
                 </measurement>
             </value>
@@ -70,8 +70,8 @@
                 <units>
                     <concept sctid="258696006" uuid="3c6598d9-ca2f-3802-a8e6-0a89b5ca0913" desc="International System of Units (SI) unit of time (qualifier value)"/>
                 </units>
-                <point>
-                    <numericValue>89.0</numericValue>
+                <point xsi:type="pointDouble">
+                    <value>89.1</value>
                 </point>
             </timing>
             <assertionComponent>
@@ -95,8 +95,8 @@
             </qualifier>
             <value>
                 <measurement>
-                    <point>
-                        <numericValue>27.0</numericValue>
+                    <point xsi:type="pointLong">
+                        <value>27</value>
                     </point>
                 </measurement>
             </value>

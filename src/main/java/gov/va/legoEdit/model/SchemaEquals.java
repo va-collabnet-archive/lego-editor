@@ -14,6 +14,9 @@ import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.MeasurementConstant;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.Point;
+import gov.va.legoEdit.model.schemaModel.PointDouble;
+import gov.va.legoEdit.model.schemaModel.PointLong;
+import gov.va.legoEdit.model.schemaModel.PointMeasurementConstant;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
@@ -217,9 +220,21 @@ public class SchemaEquals
         {
             return false;
         }
-
-        return equals(a.getNumericValue(), b.getNumericValue())
-                && equals(a.getStringConstant(), b.getStringConstant());
+        
+        if (a instanceof PointDouble && b instanceof PointDouble)
+        {
+            return ((PointDouble)a).getValue() == ((PointDouble)b).getValue();
+        }
+        else if (a instanceof PointLong && b instanceof PointLong)
+        {
+            return ((PointLong)a).getValue() == ((PointLong)b).getValue();
+        }
+        else if (a instanceof PointMeasurementConstant && b instanceof PointMeasurementConstant)
+        {
+            return ((PointMeasurementConstant)a).getValue().equals(((PointMeasurementConstant)b).getValue());
+        }
+        //different types, or an unsupported type
+        return false;
     }
 
     public static boolean equals(MeasurementConstant a, MeasurementConstant b)
