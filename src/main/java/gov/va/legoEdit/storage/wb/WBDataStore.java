@@ -22,6 +22,7 @@ public class WBDataStore
 {
 	private static volatile WBDataStore instance_;
 	private static Logger logger = LoggerFactory.getLogger(WBDataStore.class);
+	public static File bdbFolderPath = new File("wb-berkeley-db");
 
 	private boolean useLocal = true;
 
@@ -53,15 +54,14 @@ public class WBDataStore
 			logger.info("Opening a connection to a local WB Data Store");
 			try
 			{
-				String directory = "wb-berkeley-db";
 
-				if (new File(directory).exists())
+				if (bdbFolderPath.exists())
 				{
-					Ts.setup(Ts.EMBEDDED_BERKELEY_DB_IMPL_CLASS, directory);
+					Ts.setup(Ts.EMBEDDED_BERKELEY_DB_IMPL_CLASS, bdbFolderPath.getAbsolutePath());
 				}
 				else
 				{
-					throw new DataStoreException("Couldn't find the database");
+					throw new DataStoreException("Couldn't find the database - had: " + bdbFolderPath.getAbsolutePath());
 					// Ts.setup(Ts.EMBEDDED_BERKELEY_DB_IMPL_CLASS, directory);
 					// System.out.println("Start load of eConcept.jbin");
 					//

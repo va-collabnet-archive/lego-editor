@@ -4,7 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import gov.va.legoEdit.formats.LegoXMLUtils;
+import gov.va.legoEdit.model.SchemaEquals;
 import gov.va.legoEdit.model.bdbModel.PncsBDB;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
@@ -18,11 +21,13 @@ import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.storage.util.BDBIterator;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import javax.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -626,4 +631,18 @@ public class BDBDataStoreTest
         }
         assertEquals("Should have been 3!", count, 3);
    }
+    
+    @Test
+    public void testStoreRetreive() throws WriteException, FileNotFoundException, JAXBException
+    {
+        LegoList initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("badDay.xml").getFile()));
+        BDBDataStoreImpl.getInstance().importLegoList(initial);
+
+        //reread, just incase
+        initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("badDay.xml").getFile()));
+        LegoList readBack = BDBDataStoreImpl.getInstance().getLegoListByID(initial.getLegoListUUID());
+        
+        assertTrue(SchemaEquals.equals(initial, readBack));
+    }
+    
 }

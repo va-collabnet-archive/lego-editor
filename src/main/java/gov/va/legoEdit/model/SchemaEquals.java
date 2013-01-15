@@ -9,6 +9,7 @@ import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Interval;
 import gov.va.legoEdit.model.schemaModel.Lego;
+import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.MeasurementConstant;
 import gov.va.legoEdit.model.schemaModel.Pncs;
@@ -25,6 +26,20 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 public class SchemaEquals
 {
+    public static boolean equals(LegoList a, LegoList b)
+    {
+        if (a == null && b == null)
+        {
+            return true;
+        }
+        else if ((a == null && b != null) || (a != null && b == null))
+        {
+            return false;
+        }
+        return (equals(a.getComment(), b.getComment()) && equals(a.getGroupDescription(), b.getGroupDescription()) && equals(a.getGroupName(), b.getGroupName())
+                && equals(a.getLegoListUUID(), b.getLegoListUUID()) && equals(a.getLego(), b.getLego()));
+    }
+    
     public static boolean equals(Lego a, Lego b)
     {
         if (a == null && b == null)
@@ -371,6 +386,10 @@ public class SchemaEquals
         else if (a instanceof RelationGroup)
         {
             return equals((RelationGroup) a, (RelationGroup) b);
+        }
+        else if (a instanceof Lego)
+        {
+            return equals((Lego) a, (Lego) b);
         }
 
         throw new RuntimeException("Unhandled equal type");

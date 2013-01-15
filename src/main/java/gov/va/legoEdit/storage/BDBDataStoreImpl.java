@@ -47,7 +47,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
 {
     private static volatile BDBDataStoreImpl instance_;
     
-    protected static File dbFolderPath = new File("data.db");
+    public static File dbFolderPath = new File("data.db");
     
     private Environment myEnv;
     private EntityStore store;

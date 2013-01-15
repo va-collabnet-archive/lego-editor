@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<legoList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="LEGO.xsd">
+    <groupName>Testing Mockup</groupName>
+    <legoListUUID>a63c16b1-2307-4101-a5cb-daeeed450720</legoListUUID>
+    <groupDescription>Legos for automated testing</groupDescription>
+    <lego>
+        <legoUUID>28adbf11-9915-4054-8c85-8f6342d9c14f</legoUUID>
+        <stamp status="Active" time="2013-01-14T15:21:20.152-06:00" author="darmbrust" module="tweedle" path="p" uuid="08aa4aea-2536-4d76-a904-aec09038a580"/>
+        <pncs id="123" name="A bad day" value="Yes"/>
+        <assertion>
+            <assertionUUID>3992dec0-f2b1-44d1-9571-aa4e8207304b</assertionUUID>
+            <discernible>
+                <expression>
+                    <expression>
+                        <concept sctid="218058005" uuid="b08a8db2-8fc6-3d93-a5ca-58f5da64592f" desc="Accident caused by glass edge (event)"/>
+                        <relation>
+                            <type>
+<concept sctid="279301006" uuid="f504de5b-b460-341d-8f7b-c35842389214" desc="Entire extreme capsule (body structure)"/>
+                            </type>
+                            <destination>
+<expression>
+    <concept sctid="84946008" uuid="f81d636f-7b9c-3bfb-b2f2-fa61e3bef1f3" desc="Extreme exhaustion (finding)"/>
+</expression>
+                            </destination>
+                        </relation>
+                    </expression>
+                    <expression>
+                        <concept sctid="15929008" uuid="845a814d-8edf-312b-9d29-d1c2d716255c" desc="Multiple extreme injuries of abdominal organs without open wound into cavity (disorder)"/>
+                    </expression>
+                    <relation>
+                        <type>
+                            <concept sctid="221176008" uuid="ef078704-7648-3f63-bbf4-7803b1406561" desc="[X]Exposure to electrical current, radiation and extreme ambient air temperature and pressure (event)"/>
+                        </type>
+                        <destination>
+                            <expression>
+<concept sctid="316167003" uuid="bca3fbbb-66da-3953-b91e-394f13c599d6" desc="[V]Occupational exposure to extreme temperature (situation)"/>
+                            </expression>
+                        </destination>
+                    </relation>
+                </expression>
+            </discernible>
+            <qualifier>
+                <expression>
+                    <concept sctid="11403006" uuid="06cfa538-4ecb-3190-977a-bb752788421d" desc="Financially poor (finding)"/>
+                    <relationGroup>
+                        <relation>
+                            <type>
+<concept sctid="102404009" uuid="718b89db-4d62-3680-b619-b6f26b12e57c" desc="Temperature extreme (physical force)"/>
+                            </type>
+                            <destination>
+<expression>
+    <concept sctid="422481005" uuid="6ef2449c-fd44-3c11-9852-c1c2389cb8cd" desc="Extreme drug resistant tuberculosis (disorder)"/>
+</expression>
+                            </destination>
+                        </relation>
+                    </relationGroup>
+                </expression>
+            </qualifier>
+            <value>
+                <measurement>
+                    <units>
+                        <concept sctid="12565001" uuid="c9a2b01c-357a-3980-9083-cf10c965a41e" desc="Extreme (qualifier value)"/>
+                    </units>
+                    <point>
+                        <stringConstant>NOW</stringConstant>
+                    </point>
+                </measurement>
+            </value>
+            <timing>
+                <units>
+                    <concept sctid="258696006" uuid="3c6598d9-ca2f-3802-a8e6-0a89b5ca0913" desc="International System of Units (SI) unit of time (qualifier value)"/>
+                </units>
+                <point>
+                    <numericValue>89.0</numericValue>
+                </point>
+            </timing>
+            <assertionComponent>
+                <assertionUUID>3992dec0-f2b1-44d1-9571-aa4e8207304c</assertionUUID>
+                <type>
+                    <concept sctid="417436002" uuid="ee210bec-5705-3d27-acc8-5740c31084c6" desc="Time of health condition onset (observable entity)"/>
+                </type>
+            </assertionComponent>
+        </assertion>
+        <assertion>
+            <assertionUUID>994b4de7-23db-456d-9597-2cdd030175e4</assertionUUID>
+            <discernible>
+                <expression>
+                    <concept sctid="217066003" uuid="be9411d8-f7bf-3397-9217-ea59804b6471" desc="Shock therapy as the cause of abnormal reaction of patient, or of later complication, without mention of misadventure at the time of procedure (event)"/>
+                </expression>
+            </discernible>
+            <qualifier>
+                <expression>
+                    <concept sctid="223312001" uuid="b4ef2a45-1014-38c6-8f90-64f49840c038" desc="[X]Unspecified medical procedure as the cause of abnormal reaction of the patient, or of later complication, without mention of misadventure at the time of the procedure (finding)"/>
+                </expression>
+            </qualifier>
+            <value>
+                <measurement>
+                    <point>
+                        <numericValue>27.0</numericValue>
+                    </point>
+                </measurement>
+            </value>
+        </assertion>
+    </lego>
+</legoList>
