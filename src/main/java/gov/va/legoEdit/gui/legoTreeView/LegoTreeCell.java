@@ -751,13 +751,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
     private void removeConcept(TreeItem<String> ti)
     {
         Object parent = ((LegoTreeItem) ti.getParent()).getExtraData();
-        if (parent instanceof Units)
+        if (parent instanceof Measurement)
         {
-            ((Units) parent).setConcept(null);
-        }
-        else if (parent instanceof Type)
-        {
-            ((Type) parent).setConcept(null);
+            ((Measurement) parent).setUnits(null);
         }
         else
         {

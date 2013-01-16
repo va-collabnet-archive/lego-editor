@@ -423,7 +423,7 @@ public class LegoTreeItem extends TreeItem<String>
 		    c = new Concept();
 		    t.setConcept(c);
 		}
-	    getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.conceptOptional));
+	    getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.concept));
 	    
 	    Destination d = r.getDestination();
 	    if (d == null)
