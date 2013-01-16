@@ -39,10 +39,11 @@ public class LegoListBDB
         //required by BDB
     }
 
-    public LegoListBDB(String groupName, String groupDescription)
+    public LegoListBDB(String groupName, String groupDescription, String comment)
     {
         this.groupName = groupName;
         this.groupDescription = groupDescription;
+        this.comment = comment;
         this.legoListUUID = UUID.nameUUIDFromBytes(groupName.getBytes()).toString();
         this.legoUniqueIds = new ArrayList<>();
         this.legoUUIDs = new HashSet<>();
@@ -140,6 +141,16 @@ public class LegoListBDB
     public String getGroupDescription()
     {
         return groupDescription;
+    }
+    
+    public void setGroupDescription(String description)
+    {
+       this.groupDescription = description;
+    }
+    
+    public void setComment(String comment)
+    {
+        this.comment = comment;
     }
     
     public String getComment()

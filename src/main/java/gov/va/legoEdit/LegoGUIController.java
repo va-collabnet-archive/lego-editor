@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
-import java.util.UUID;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -825,8 +824,7 @@ public class LegoGUIController implements Initializable
             @Override
             public void handle(ActionEvent t)
             {
-                LegoGUI.getInstance().showLegoListPropertiesDialog("", UUID.randomUUID().toString(),
-                        new SimpleStringProperty(""));
+                LegoGUI.getInstance().showLegoListPropertiesDialog(null, null);
             }
         });
         

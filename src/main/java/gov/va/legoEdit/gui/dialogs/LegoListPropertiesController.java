@@ -2,15 +2,16 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -18,7 +19,9 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -38,9 +41,11 @@ public class LegoListPropertiesController implements Initializable
     private TextField legoListUUID; // Value injected by FXMLLoader
     @FXML //  fx:id="okButton"
     private Button okButton; // Value injected by FXMLLoader
+    @FXML //  fx:id="legoListComments"
+    private TextArea legoListComments; // Value injected by FXMLLoader
     
-    StringProperty description_;
-    boolean creatingNew_ = false;
+    private TreeItem<String> ti_;
+    LegoListByReference llbr_ = null;
     
     BooleanProperty nameValid = new SimpleBooleanProperty(false);
     BooleanProperty descValid = new SimpleBooleanProperty(false);
@@ -69,7 +74,8 @@ public class LegoListPropertiesController implements Initializable
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
             {
-                if (!creatingNew_ || (newValue.length() > 0 && BDBDataStoreImpl.getInstance().getLegoListByName(newValue) == null))
+                //not editable when not new, so always valid
+                if (llbr_ != null || (newValue.length() > 0 && BDBDataStoreImpl.getInstance().getLegoListByName(newValue) == null))
                 {
                     nameValid.set(true);
                     legoListName.setEffect(null);
@@ -84,7 +90,6 @@ public class LegoListPropertiesController implements Initializable
         
         legoListDescription.textProperty().addListener(new ChangeListener<String>()
         {
-            
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
             {
@@ -128,13 +133,13 @@ public class LegoListPropertiesController implements Initializable
             @Override
             public void handle(ActionEvent event)
             {
-                description_.setValue(legoListDescription.getText());
-                if (creatingNew_)
+                if (llbr_ == null)
                 {
                     LegoList ll = new LegoList();
                     ll.setGroupDescription(legoListDescription.getText());
                     ll.setGroupName(legoListName.getText());
                     ll.setLegoListUUID(legoListUUID.getText());
+                    ll.setComment(legoListComments.getText());
                     try
                     {
                         LegoGUIModel.getInstance().importLegoList(ll);
@@ -144,6 +149,17 @@ public class LegoListPropertiesController implements Initializable
                         LegoGUI.getInstance().showErrorDialog("Unexpected Error", "Error creating Lego List", e.toString());
                     }
                 }
+                else
+                {
+                    try
+                    {
+                        LegoGUIModel.getInstance().updateLegoList(llbr_, ti_, legoListDescription.getText(), legoListComments.getText());
+                    }
+                    catch (WriteException e)
+                    {
+                        LegoGUI.getInstance().showErrorDialog("Unexpected Error", "Error updating Lego List", e.toString());
+                    }
+                }
                 ((Stage) rootPane.getScene().getWindow()).close();
             }
         });
@@ -151,22 +167,14 @@ public class LegoListPropertiesController implements Initializable
         okButton.disableProperty().bind(formValid.not());
     }
     
-    public void setVariables(String name, String uuid, StringProperty description)
+    public void setVariables(LegoListByReference llbr, TreeItem<String> ti)
     {
-        if (name == null || name.length() == 0)
-        {
-            creatingNew_ = true;
-        }
-        else
-        {
-            creatingNew_ = false;
-        }
-        description_ = description;
-        legoListDescription.setText(description.getValue());
-        legoListName.setText(name);
-        legoListUUID.setText(uuid);
-        legoListName.setEditable(creatingNew_);
-        //TODO allow description to be editable after we get a way to save it.
-        legoListDescription.setEditable(description.get().length() == 0);
+        ti_ = ti;
+        llbr_ = llbr;
+        legoListDescription.setText(llbr == null ? "" : llbr.getGroupDescription());
+        legoListName.setText(llbr == null ? "" : llbr.getGroupName());
+        legoListName.setEditable(llbr == null);
+        legoListUUID.setText(llbr == null ? UUID.randomUUID().toString() : llbr.getLegoListUUID());
+        legoListComments.setText(llbr == null ? "" : llbr.getComments());
     }
 }

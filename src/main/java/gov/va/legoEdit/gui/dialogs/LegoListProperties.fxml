@@ -9,14 +9,14 @@
 <?import javafx.scene.text.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="194.0" prefWidth="570.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.LegoListPropertiesController">
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="570.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.LegoListPropertiesController">
   <children>
     <Label alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Lego List Properties" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
       <font>
         <Font size="16.0" />
       </font>
     </Label>
-    <GridPane styleClass="itemBorder" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+    <GridPane styleClass="itemBorder" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
       <children>
         <Label styleClass="boldLabel" text="Lego List Name" GridPane.columnIndex="0" GridPane.rowIndex="0" />
         <Label styleClass="boldLabel" text="Lego List Description" GridPane.columnIndex="0" GridPane.rowIndex="1" />
@@ -24,6 +24,12 @@
         <TextField fx:id="legoListName" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="0" />
         <TextField fx:id="legoListDescription" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
         <TextField fx:id="legoListUUID" editable="false" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label styleClass="boldLabel" text="Comments" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.valignment="TOP">
+          <GridPane.margin>
+            <Insets top="5.0" />
+          </GridPane.margin>
+        </Label>
+        <TextArea fx:id="legoListComments" prefWidth="200.0" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
       </children>
       <columnConstraints>
         <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="160.0" minWidth="160.0" prefWidth="160.0" />
@@ -33,6 +39,7 @@
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="NEVER" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
       </rowConstraints>
     </GridPane>
     <GridPane alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

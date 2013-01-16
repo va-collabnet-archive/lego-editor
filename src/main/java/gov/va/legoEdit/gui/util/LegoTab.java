@@ -136,6 +136,7 @@ public class LegoTab extends Tab
         this.setContent(bp);
         
         legoTree.getRoot().getChildren().add(new LegoTreeItem(displayedLego.getStamp(), LegoTreeNodeType.status));
+        legoTree.getRoot().getChildren().add(new LegoTreeItem(displayedLego, LegoTreeNodeType.comment));
         for (Assertion a : displayedLego.getAssertion())
         {
             legoTree.getRoot().getChildren().add(new LegoTreeItem(a));

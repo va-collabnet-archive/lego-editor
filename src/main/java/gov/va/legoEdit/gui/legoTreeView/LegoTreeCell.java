@@ -159,8 +159,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     @Override
                     public void handle(ActionEvent arg0)
                     {
-                        LegoGUI.getInstance().showLegoListPropertiesDialog("", UUID.randomUUID().toString(),
-                                new SimpleStringProperty(""));
+                        LegoGUI.getInstance().showLegoListPropertiesDialog(null, null);
                     }
                 });
                 cm.getItems().add(mi);
@@ -264,6 +263,22 @@ public class LegoTreeCell<T> extends TreeCell<T>
             else if (treeItem.getNodeType() == LegoTreeNodeType.assertionComponent)
             {
                 addMenus((AssertionComponent) treeItem.getExtraData(), treeItem, cm);
+            }
+            else if (treeItem.getNodeType() == LegoTreeNodeType.comment)
+            {
+                final Lego lego = (Lego)treeItem.getExtraData();
+                final TextField tf = new TextField();
+                tf.setText(lego.getComment() == null ? "" : lego.getComment());
+                tf.textProperty().addListener(new ChangeListener<String>()
+                {
+                    @Override
+                    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+                    {
+                        lego.setComment(newValue.length() == 0 ? null : newValue);
+                        treeView.contentChanged();
+                    }
+                });
+                setGraphic(prependLabel("Comment", tf));
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.assertionUUID)
             {
@@ -1094,8 +1109,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             @Override
             public void handle(ActionEvent arg0)
             {
-                LegoGUI.getInstance().showLegoListPropertiesDialog(llbr.getGroupName(), llbr.getLegoListUUID(),
-                        legoListDescriptionProperty);
+                LegoGUI.getInstance().showLegoListPropertiesDialog(llbr, treeItem);
             }
         });
         mi.setGraphic(Images.PROPERTIES.createImageView());

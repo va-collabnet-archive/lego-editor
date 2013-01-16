@@ -17,10 +17,10 @@ import java.io.IOException;
 import java.util.UUID;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TreeItem;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -215,12 +215,9 @@ public class LegoGUI extends Application
         }
     }
 	
-	/**
-	 * Returns true if they made changes to the properties, false otherwise
-	 */
-	public void showLegoListPropertiesDialog(String name, String uuid, StringProperty description)
+	public void showLegoListPropertiesDialog(LegoListByReference llbr, TreeItem<String> ti)
 	{
-	    llpc_.setVariables(name, uuid, description);
+	    llpc_.setVariables(llbr, ti);
 	    legoListPropertiesStage_.show();
 	}
 	

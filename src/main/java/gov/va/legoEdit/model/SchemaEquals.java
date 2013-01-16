@@ -54,7 +54,7 @@ public class SchemaEquals
             return false;
         }
 
-        return equals(a.getPncs(), b.getPncs()) && equals(a.getStamp(), b.getStamp())
+        return equals(a.getPncs(), b.getPncs()) && equals(a.getStamp(), b.getStamp()) && equals(a.getComment(), b.getComment())
                 && equals(a.getLegoUUID(), b.getLegoUUID()) && equals(a.getAssertion(), b.getAssertion());
     }
 

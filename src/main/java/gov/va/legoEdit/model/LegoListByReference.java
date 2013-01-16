@@ -17,6 +17,7 @@ public class LegoListByReference
     private String groupName;
     private String legoListUUID;
     private String groupDescription;
+    private String comments;
     private List<LegoReference> lego;
 
     public LegoListByReference(LegoList legoList, boolean skipLegoRefs)
@@ -24,6 +25,7 @@ public class LegoListByReference
         this.groupName = legoList.getGroupName();
         this.groupDescription = legoList.getGroupDescription();
         this.legoListUUID = legoList.getLegoListUUID();
+        this.comments = legoList.getComment();
         if (!skipLegoRefs)
         {
             for (Lego l : legoList.getLego())
@@ -46,6 +48,21 @@ public class LegoListByReference
     public String getGroupDescription()
     {
         return groupDescription;
+    }
+    
+    public String getComments()
+    {
+        return comments;
+    }
+    
+    public void setComments(String comments)
+    {
+        this.comments = comments;
+    }
+    
+    public void setDescription(String description)
+    {
+        this.groupDescription = description;
     }
 
     public List<LegoReference> getLegoReference()

@@ -13,6 +13,7 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.util.UnsavedLegos;
 import java.io.File;
@@ -25,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.scene.control.TreeItem;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -227,6 +229,17 @@ public class LegoGUIModel
         //Long way around to get back to the method above... but I need the filter params.
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
+    }
+    
+    public void updateLegoList(LegoListByReference llbr, TreeItem<String> ti, String description, String comments) throws DataStoreException, WriteException
+    {
+        BDBDataStoreImpl.getInstance().updateLegoListMetadata(llbr.getLegoListUUID(), description, comments);
+        llbr.setComments(comments);
+        llbr.setDescription(description);
+        if (ti != null)
+        {
+            Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+        }
     }
 
     public void removeLegoList(LegoListByReference legoListByReference) throws WriteException

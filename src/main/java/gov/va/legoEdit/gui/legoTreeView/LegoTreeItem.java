@@ -11,6 +11,7 @@ import gov.va.legoEdit.model.schemaModel.Destination;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Interval;
+import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Point;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
@@ -133,6 +134,13 @@ public class LegoTreeItem extends TreeItem<String>
         setValue("Lego");
         extraData_ = lr;
         ltnt_ = LegoTreeNodeType.legoReference;
+    }
+    
+    public LegoTreeItem(Lego l, LegoTreeNodeType ltnt)
+    {
+        setValue("Comment");
+        extraData_ = l;
+        ltnt_ = ltnt;
     }
 
 	public LegoTreeItem(Assertion a)
