@@ -71,7 +71,7 @@ public class LegoListBDB
             Integer temp = legoUUIDsUsage.get(l.getLegoUUID());
             if (temp == null)
             {
-                temp = new Integer(0);
+                temp = new Integer(1);
             }
             else
             {
@@ -94,7 +94,7 @@ public class LegoListBDB
         Integer temp = legoUUIDsUsage.get(lego.getLegoUUID());
         if (temp == null)
         {
-            temp = new Integer(0);
+            temp = new Integer(1);
         }
         else
         {

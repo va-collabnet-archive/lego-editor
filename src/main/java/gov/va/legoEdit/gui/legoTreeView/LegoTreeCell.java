@@ -7,11 +7,14 @@ import gov.va.legoEdit.gui.util.CopyableLabel;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
+import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
+import gov.va.legoEdit.model.SchemaSummary;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Concept;
+import gov.va.legoEdit.model.schemaModel.Destination;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Interval;
@@ -47,7 +50,6 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -59,7 +61,6 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,9 @@ import org.slf4j.LoggerFactory;
 public class LegoTreeCell<T> extends TreeCell<T>
 {
     private static Logger logger = LoggerFactory.getLogger(LegoTreeCell.class);
+    private static String rgtArrow = " \u21d2 "; 
     public static ObservableList<String> statusChoices_ = FXCollections.observableArrayList(new String[] { "Active", "Inactive" });
+    public static ObservableList<String> booleanChoices_ = FXCollections.observableArrayList(new String[] { "True", "False" });
     
     private static DropShadow invalidDropShadow = new DropShadow();
     static
@@ -207,7 +210,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 hbox.setAlignment(Pos.CENTER_LEFT);
 
                 Label status = new Label("Status");
-                status.getStyleClass().add("boldLabel");
                 hbox.getChildren().add(status);
 
                 ChoiceBox<String> cb = new ChoiceBox<>(statusChoices_);
@@ -241,10 +243,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 mi.setGraphic(Images.LEGO_ADD.createImageView());
                 cm.getItems().add(mi);
             }
-            else if (treeItem.getNodeType() == LegoTreeNodeType.labeledUneditableString)
-            {
-                setGraphic(makeLabeledString(treeItem.getExtraData().toString(), item.toString()));
-            }
             else if (treeItem.getNodeType() == LegoTreeNodeType.assertion)
             {
                 DropTargetLabel assertionLabel = new DropTargetLabel("Assertion", cm);
@@ -254,7 +252,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 hbox.setSpacing(10.0);
                 hbox.setAlignment(Pos.CENTER_LEFT);
                 hbox.getChildren().add(assertionLabel);
-                hbox.getChildren().add(makeLabeledString("UUID", a.getAssertionUUID()));
+                hbox.getChildren().add(new CopyableLabel(a.getAssertionUUID()));
 
                 addMenus(a, treeItem, cm, assertionLabel);
                 setGraphic(hbox);
@@ -278,7 +276,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         treeView.contentChanged();
                     }
                 });
-                setGraphic(prependLabel("Comment", tf));
+                setGraphic(Utility.prependLabel("Comment", tf));
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.assertionUUID)
             {
@@ -309,11 +307,19 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         treeView.contentChanged();
                     }
                 });
-                setGraphic(prependLabel("Assertion UUID", tf));
-                addMenus(LegoTreeNodeType.assertionUUID, ac, cm);
+                setGraphic(Utility.prependLabel("Assertion UUID", tf));
+                addMenus(LegoTreeNodeType.assertionUUID, ac, cm, treeItem);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.measurement || treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement)
             {
+                if (!treeItem.isExpanded())
+                {
+                    setGraphic(new Label(treeItem.getValue() + rgtArrow + SchemaSummary.summary((Measurement)treeItem.getExtraData())));
+                }
+                else
+                {
+                    setGraphic(new Label(treeItem.getValue()));
+                }
                 addMenus((Measurement) treeItem.getExtraData(), treeItem, cm);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.expressionValue
@@ -342,16 +348,22 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
                 addMenus(e, treeItem, cm, label, descriptionAddition);
                 
-                setGraphic(label);
+                HBox hbox = new HBox();
+                hbox.getChildren().add(label);
+                
+                if (!treeItem.isExpanded())
+                {
+                    hbox.getChildren().add(new Label(rgtArrow + SchemaSummary.summary((Expression)treeItem.getExtraData())));
+                }
+                
+                setGraphic(hbox);
                 LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), label);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.concept
                     || treeItem.getNodeType() == LegoTreeNodeType.conceptOptional)
             {
                 Concept c = (Concept) treeItem.getExtraData();
-                addMenus(c, treeItem, cm);
-
-                
+               
                 String label = "";
                 ConceptUsageType cut = findType(treeItem);
                 if (ConceptUsageType.TYPE == cut)
@@ -364,17 +376,32 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
 
                 ConceptNode cn = new ConceptNode(label, c, cut, treeItem.getNodeType(), treeView);
+                addMenus(c, cn, treeItem, cm);
                 setGraphic(cn.getNode());
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.relation)
             {
                 DropTargetLabel relLabel = new DropTargetLabel(treeItem.getValue(), cm);                
                 addMenus((Relation) treeItem.getExtraData(), treeItem, cm, relLabel);
-                setGraphic(relLabel);
+                
+                HBox hbox = new HBox();
+                hbox.getChildren().add(relLabel);
+                if (!treeItem.isExpanded())
+                {
+                    hbox.getChildren().add(new Label(rgtArrow + SchemaSummary.summary((Relation)treeItem.getExtraData())));
+                }
+                setGraphic(hbox);
                 LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), relLabel);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.relationshipGroup)
             {
+                HBox hbox = new HBox();
+                hbox.getChildren().add(new Label(treeItem.getValue()));
+                if (!treeItem.isExpanded())
+                {
+                    hbox.getChildren().add(new Label(rgtArrow + SchemaSummary.summary((RelationGroup)treeItem.getExtraData())));
+                }
+                setGraphic(hbox);
                 addMenus((RelationGroup) treeItem.getExtraData(), treeItem, cm);
             }
             else if (treeItem.getNodeType() == LegoTreeNodeType.point)
@@ -459,8 +486,117 @@ public class LegoTreeCell<T> extends TreeCell<T>
             {
                 DropTargetLabel valueLabel = new DropTargetLabel(treeItem.getValue(), cm);
                 addMenus((Value) treeItem.getExtraData(), treeItem, cm, valueLabel);
-                setGraphic(valueLabel);
+                
+                HBox hbox = new HBox();
+                hbox.getChildren().add(valueLabel);
+                
+                if (!treeItem.isExpanded())
+                {
+                    hbox.getChildren().add(new Label(rgtArrow + SchemaSummary.summary((Value)treeItem.getExtraData())));
+                }
+                setGraphic(hbox);
                 LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), valueLabel);
+            }
+            else if (treeItem.getNodeType() == LegoTreeNodeType.text)
+            {
+                //The object passed in might be a Destination or a value for the text field.
+                String text = "";
+                String prefixLabel = "";
+                final Object parent = treeItem.getExtraData();
+                if (parent instanceof Value)
+                {
+                    text = ((Value)parent).getText();
+                }
+                else if (parent instanceof Destination)
+                {
+                    text = ((Destination)parent).getText();
+                    prefixLabel = "Dest";
+                }
+                else
+                {
+                    logger.error("Unexpected tree constrution");
+                }
+                final TextField tf = new TextField();
+                tf.setText(text);
+                if (tf.getText().length() == 0)
+                {
+                    tf.setEffect(invalidDropShadow);
+                }
+                tf.setPromptText("Any Text");
+                tf.textProperty().addListener(new ChangeListener<String>()
+                {
+                    @Override
+                    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+                    {
+                        if (parent instanceof Value)
+                        {
+                            ((Value)parent).setText(newValue);
+                        }
+                        else if (parent instanceof Destination)
+                        {
+                            ((Destination)parent).setText(newValue);
+                        }
+                        
+                        if (newValue.length() > 0)
+                        {
+                            tf.setEffect(null);
+                        }
+                        else
+                        {
+                            tf.setEffect(invalidDropShadow);
+                        }
+                        treeView.contentChanged();
+                    }
+                });
+                setGraphic((prefixLabel.length() > 0 ? Utility.prependLabel(prefixLabel, tf) : tf));
+                addMenus(treeItem.getNodeType(), parent, cm, treeItem);
+            }
+            else if (treeItem.getNodeType() == LegoTreeNodeType.bool)
+            {
+                //The object passed in might be a Destination or a value for the text field.
+                Boolean bool = null;
+                String prefixLabel = "";
+                final Object parent = treeItem.getExtraData();
+                if (parent instanceof Value)
+                {
+                    bool = ((Value)parent).isBoolean();
+                }
+                else if (parent instanceof Destination)
+                {
+                    bool = ((Destination)parent).isBoolean();
+                    prefixLabel = "Dest";
+                }
+                else
+                {
+                    logger.error("Unexpected tree constrution");
+                }
+                ChoiceBox<String> cb = new ChoiceBox<>(booleanChoices_);
+                if (bool)
+                {
+                    cb.getSelectionModel().select(0);
+                }
+                else
+                {
+                    cb.getSelectionModel().select(1);
+                }
+                cb.valueProperty().addListener(new ChangeListener<String>()
+                {
+                    @Override
+                    public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+                    {
+                        if (parent instanceof Value)
+                        {
+                            ((Value)parent).setBoolean(new Boolean(newValue));
+                        }
+                        else if (parent instanceof Destination)
+                        {
+                            ((Destination)parent).setBoolean(new Boolean(newValue));
+                        }
+                        treeView.contentChanged();
+                    }
+                });
+                setGraphic((prefixLabel.length() > 0 ? Utility.prependLabel(prefixLabel, cb) : cb));
+                addMenus(treeItem.getNodeType(), parent, cm, treeItem);
             }
         }
         // done with massive if/else
@@ -472,40 +608,11 @@ public class LegoTreeCell<T> extends TreeCell<T>
         if (getGraphic() == null)
         {
             setText(item == null ? null : item.toString());
-            getStyleClass().add("boldLabel");
         }
         else
         {
             setText(null);
         }
-    }
-
-    private Node makeLabeledString(String label, final String value)
-    {
-        HBox hbox = new HBox();
-        hbox.setSpacing(10.0);
-        hbox.setAlignment(Pos.CENTER_LEFT);
-        Label l = new Label(label);
-        l.getStyleClass().add("boldLabel");
-        hbox.getChildren().add(l);
-
-        Label valueLabel = new CopyableLabel(value);
-        hbox.getChildren().add(valueLabel);
-
-        return hbox;
-    }
-
-    private Node prependLabel(String label, Node node)
-    {
-        HBox hbox = new HBox();
-        hbox.setSpacing(10.0);
-        hbox.setAlignment(Pos.CENTER_LEFT);
-        Label l = new Label(label);
-        l.getStyleClass().add("boldLabel");
-        hbox.getChildren().add(l);
-        hbox.getChildren().add(node);
-        HBox.setHgrow(node, Priority.ALWAYS);
-        return hbox;
     }
 
     private void removeMeasurement(Measurement m, TreeItem<String> ti)
@@ -1007,6 +1114,92 @@ public class LegoTreeCell<T> extends TreeCell<T>
         treeView.contentChanged();
         // No need to fire event here, there is no parent to notify
     }
+    
+    private void addText(Object parent, TreeItem<String> ti)
+    {
+        LegoTreeItem lti = null;
+        if (parent instanceof Value)
+        {
+            ((Value)parent).setText("");
+            lti = new LegoTreeItem((Value)parent, LegoTreeNodeType.text);
+        }
+        else if (parent instanceof Destination)
+        {
+            ((Destination)parent).setText("");
+            lti = new LegoTreeItem((Destination)parent, LegoTreeNodeType.text);
+        }
+        else
+        {
+            logger.error("Unexpected addText call");
+        }
+        treeView.contentChanged();
+        ti.getChildren().add(lti);
+        expandAll(lti);
+        Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+    }
+    
+    private void removeText(Object parent, TreeItem<String> ti)
+    {
+        if (parent instanceof Value)
+        {
+            ((Value)parent).setText(null);
+        }
+        else if (parent instanceof Destination)
+        {
+            ((Destination)parent).setText(null);
+        }
+        else
+        {
+            logger.error("Unexpected removeText call");
+        }
+        Event.fireEvent(ti.getParent(),
+                new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
+        ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
+    }
+    
+    private void addBoolean(Object parent, TreeItem<String> ti)
+    {
+        LegoTreeItem lti = null;
+        if (parent instanceof Value)
+        {
+            ((Value)parent).setBoolean(new Boolean(true));
+            lti = new LegoTreeItem((Value)parent, LegoTreeNodeType.bool);
+        }
+        else if (parent instanceof Destination)
+        {
+            ((Destination)parent).setBoolean(new Boolean(true));
+            lti = new LegoTreeItem((Destination)parent, LegoTreeNodeType.bool);
+        }
+        else
+        {
+            logger.error("Unexpected addBoolean call");
+        }
+        treeView.contentChanged();
+        ti.getChildren().add(lti);
+        expandAll(lti);
+        Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+    }
+    
+    private void removeBoolean(Object parent, TreeItem<String> ti)
+    {
+        if (parent instanceof Value)
+        {
+            ((Value)parent).setBoolean(null);
+        }
+        else if (parent instanceof Destination)
+        {
+            ((Destination)parent).setBoolean(null);
+        }
+        else
+        {
+            logger.error("Unexpected removeBoolean call");
+        }
+        Event.fireEvent(ti.getParent(),
+                new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti.getParent()));
+        ti.getParent().getChildren().remove(ti);
+        treeView.contentChanged();
+    }
 
     private void addAssertion()
     {
@@ -1188,11 +1381,12 @@ public class LegoTreeCell<T> extends TreeCell<T>
         cm.getItems().add(mi);
     }
     
-    private void addMenus(LegoTreeNodeType type, final AssertionComponent ac, ContextMenu cm)
+    private void addMenus(LegoTreeNodeType type, final Object parent, ContextMenu cm, final TreeItem<String> treeItem)
     {
         MenuItem mi;
         if (type == LegoTreeNodeType.assertionUUID)
         {
+            final AssertionComponent ac = (AssertionComponent) parent;
             mi = new MenuItem("View the defining Lego");
             mi.setOnAction(new EventHandler<ActionEvent>()
             {
@@ -1226,6 +1420,32 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     {
                         LegoGUI.getInstance().showErrorDialog("Invalid UUID", "The Lego Assertion UUID must be a valid UUID", "");
                     }
+                }
+            });
+            cm.getItems().add(mi);
+        }
+        else if (type == LegoTreeNodeType.text)
+        {
+            mi = new MenuItem("Remove Text");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    removeText(parent, treeItem);
+                }
+            });
+            cm.getItems().add(mi);
+        }
+        else if (type == LegoTreeNodeType.bool)
+        {
+            mi = new MenuItem("Remove Boolean");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    removeBoolean(parent, treeItem);
                 }
             });
             cm.getItems().add(mi);
@@ -1545,7 +1765,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
     }
     
-    private void addMenus(final Concept c, final LegoTreeItem treeItem, ContextMenu cm)
+    private void addMenus(final Concept c, final ConceptNode cn, final LegoTreeItem treeItem, ContextMenu cm)
     {
         if (treeItem.getNodeType() == LegoTreeNodeType.conceptOptional)
         {
@@ -1561,6 +1781,25 @@ public class LegoTreeCell<T> extends TreeCell<T>
             });
             cm.getItems().add(mi);
         }
+        
+        MenuItem mi = new MenuItem("View Concept");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                if (cn.isValid())
+                {
+                    LegoGUI.getInstance().showSnomedConceptDialog(UUID.fromString(c.getUuid()));
+                }
+                else
+                {
+                    LegoGUI.getInstance().showErrorDialog("Unknown Concept", "Can't lookup an invalid concept", "");
+                }
+            }
+        });
+        cm.getItems().add(mi);
+        
     }
     
     private void addMenus(final Relation r, final LegoTreeItem treeItem, ContextMenu cm, final DropTargetLabel label)
@@ -1570,8 +1809,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         if (r.getDestination().getExpression() == null && r.getDestination().getMeasurement() == null
                 && r.getDestination().getText() == null && r.getDestination().isBoolean() == null)
         {
-            // TODO text / boolean
-            mi = new MenuItem("Add a Destination Concept");
+            mi = new MenuItem("Add Dest Concept");
             mi.setOnAction(new EventHandler<ActionEvent>()
             {
                 @Override
@@ -1594,7 +1832,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
             });
             label.getDropContextMenu().getItems().add(mi);
 
-            mi = new MenuItem("Add Interval Measurement");
+            mi = new MenuItem("Add Dest Point");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    addMeasurement(r, true, false, null, treeItem);
+                }
+            });
+            cm.getItems().add(mi);
+            
+            mi = new MenuItem("Add Dest Interval ");
             mi.setOnAction(new EventHandler<ActionEvent>()
             {
                 @Override
@@ -1604,14 +1853,37 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             });
             cm.getItems().add(mi);
-
-            mi = new MenuItem("Add Point Measurement");
+            
+            mi = new MenuItem("Add Dest Bound ");
             mi.setOnAction(new EventHandler<ActionEvent>()
             {
                 @Override
                 public void handle(ActionEvent arg0)
                 {
-                    addMeasurement(r, true, false, null, treeItem);
+                    //TODO
+                    logger.error("Not implemented");
+                }
+            });
+            cm.getItems().add(mi);
+            
+            mi = new MenuItem("Add Dest Text");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    addText(r.getDestination(), treeItem);
+                }
+            });
+            cm.getItems().add(mi);
+            
+            mi = new MenuItem("Add Dest Boolean");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    addBoolean(r.getDestination(), treeItem);
                 }
             });
             cm.getItems().add(mi);
@@ -1673,7 +1945,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
         if (v.getExpression() == null && v.getMeasurement() == null && v.getText() == null
                 && v.isBoolean() == null)
         {
-            // TODO text and boolean
             MenuItem mi = new MenuItem("Add a Concept");
             mi.setOnAction(new EventHandler<ActionEvent>()
             {
@@ -1730,8 +2001,32 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             });
             label.getDropContextMenu().getItems().add(mi);
+            
+            mi = new MenuItem("Add Text");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    addText(v, treeItem);
+                }
+            });
+            cm.getItems().add(mi);
+            
+            mi = new MenuItem("Add Boolean");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    addBoolean(v, treeItem);
+                }
+            });
+            cm.getItems().add(mi);
         }
     }
+    
+
 
     private void expandAll(TreeItem<String> ti)
     {

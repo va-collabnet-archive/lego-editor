@@ -44,20 +44,22 @@ public class WBUtility
         {
             Thread t = Executors.defaultThreadFactory().newThread(r);
             t.setDaemon(true);
+            t.setName("Concept-Lookup-" + t.getId());
             return t;
         }
     });
     
     
-    public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback)
+    public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback, final long submitTime)
     {
+        logger.debug("Lookup '" + identifier + "'");
         Runnable r = new Runnable()
         {
             @Override
             public void run()
             {
                 Concept c = lookupSnomedIdentifier(identifier);
-                callback.lookupComplete(c);
+                callback.lookupComplete(c, submitTime);
             }
         };
         tpe.execute(r);

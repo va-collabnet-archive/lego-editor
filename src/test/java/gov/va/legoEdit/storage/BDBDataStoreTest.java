@@ -572,6 +572,7 @@ public class BDBDataStoreTest
     }
     
     //TODO TEST write a test to verify that import works properly (mock up a full XML file, do various tests to make sure everything exists as expected) 
+    //TODO TEST write a test to verify that legoListBylegoID works properly after delete - catch the bug I had.
     
     @Test
     public void testIterators() throws WriteException, InterruptedException

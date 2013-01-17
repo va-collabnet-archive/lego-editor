@@ -206,11 +206,11 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		else if (value.getText() != null)
 		{
-		    new LegoTreeItem("TODO text");  //TODO text
+		    getChildren().add(new LegoTreeItem(value, LegoTreeNodeType.text));
 		}
 		else if (value.isBoolean() != null)
 		{
-		    new LegoTreeItem("TODO booelan");  //TODO boolean
+		    getChildren().add(new LegoTreeItem(value, LegoTreeNodeType.bool));
 		}
 	}
 	
@@ -302,7 +302,7 @@ public class LegoTreeItem extends TreeItem<String>
     		}
 //    		else if (measurement.getBound() != null)
 //            {
-//    		    //TODO
+//    		    
 //                getChildren().add(new LegoTreeItem(measurement.getBound()));
 //            }
 	    }
@@ -442,13 +442,27 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		else if (d.getText() != null)
         {
-            new LegoTreeItem("TODO text");  //TODO text
+		    getChildren().add(new LegoTreeItem(d, LegoTreeNodeType.text));
         }
         else if (d.isBoolean() != null)
         {
-            new LegoTreeItem("TODO booelan");  //TODO boolean
+            getChildren().add(new LegoTreeItem(d, LegoTreeNodeType.bool));
         }
 	}
+	
+	public LegoTreeItem(Value value, LegoTreeNodeType type)
+	{
+        setValue("");
+        ltnt_ = type;
+        extraData_ = value;
+	}
+	
+	public LegoTreeItem(Destination destination, LegoTreeNodeType type)
+    {
+        setValue("");
+        ltnt_ = type;
+        extraData_ = destination;
+    }
 	
 	public LegoTreeNodeType getNodeType()
     {

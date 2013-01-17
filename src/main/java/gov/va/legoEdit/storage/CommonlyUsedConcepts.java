@@ -13,10 +13,9 @@ import gov.va.legoEdit.util.Utility;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeSet;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,7 @@ public class CommonlyUsedConcepts
     Logger logger = LoggerFactory.getLogger(CommonlyUsedConcepts.class);
     // Type to Concept UUID to usage count
     private HashMap<ConceptUsageType, HashMap<String, Count>> usageCounts_;
-    private HashMap<ConceptUsageType, ObservableList<ComboBoxConcept>> topLists_;
+    private HashMap<ConceptUsageType, List<ComboBoxConcept>> topLists_;
 
     public CommonlyUsedConcepts()
     {
@@ -34,7 +33,7 @@ public class CommonlyUsedConcepts
         for (ConceptUsageType cut : ConceptUsageType.values())
         {
             usageCounts_.put(cut, new HashMap<String, Count>());
-            topLists_.put(cut, FXCollections.observableArrayList(new ComboBoxConcept[] {}));
+            topLists_.put(cut, new ArrayList<ComboBoxConcept>());
         }
 
         initData();
@@ -103,7 +102,7 @@ public class CommonlyUsedConcepts
         }
     }
     
-    private ArrayList<ComboBoxConcept> getTop(ConceptUsageType cut, ObservableList<ComboBoxConcept> dupeCheck)
+    private ArrayList<ComboBoxConcept> getTop(ConceptUsageType cut, List<ComboBoxConcept> dupeCheck)
     {
         HashMap<String, Count> countToValueMap = usageCounts_.get(cut);
         TreeSet<Count> sortedCounts = new TreeSet<>(countToValueMap.values());
@@ -128,7 +127,7 @@ public class CommonlyUsedConcepts
         return temp;
     }
 
-    public ObservableList<ComboBoxConcept> getSuggestions(ConceptUsageType cut)
+    public List<ComboBoxConcept> getSuggestions(ConceptUsageType cut)
     {
         return topLists_.get(cut);
     }
@@ -146,7 +145,7 @@ public class CommonlyUsedConcepts
                 @Override
                 public void run()
                 {
-                    ObservableList<ComboBoxConcept> list = topLists_.get(cut);
+                    List<ComboBoxConcept> list = topLists_.get(cut);
                     //Remove until the list is size 5 (only things from the DB)
                     while (list.size() > 5)
                     {

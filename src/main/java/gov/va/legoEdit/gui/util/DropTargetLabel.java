@@ -11,7 +11,6 @@ public class DropTargetLabel extends Label
     public DropTargetLabel(String value, ContextMenu standardContextMenu)
     {
         super(value);
-        getStyleClass().add("boldLabel");
         setContextMenu(standardContextMenu);
         dropContextMenu = new ContextMenu();
     }

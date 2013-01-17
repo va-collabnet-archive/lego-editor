@@ -1,68 +1,77 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.ConceptLookupCallback;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
+import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConceptNode implements ConceptLookupCallback
 {
+    private static Logger logger = LoggerFactory.getLogger(ConceptNode.class);
     private static DropShadow invalidDropShadow = new DropShadow();
     static
     {
         invalidDropShadow.setColor(Color.RED);
     }
     
-    private VBox vbox_;
+    private HBox hbox_;
     private ComboBox<ComboBoxConcept> cb_;
     private Label descriptionLabel_;
-    private Label contentLabel_;
+    private Label typeLabel_;
     private ProgressIndicator pi_;
+    private ImageView lookupFailImage_;
     private Concept c_;
     private LegoTreeView legoTreeView_;
     
     private BooleanProperty isValid = new SimpleBooleanProperty(true);
-    private BooleanProperty lookupInProgress = new SimpleBooleanProperty(false);
-
-    public ConceptNode(String label, Concept c, ConceptUsageType cut, LegoTreeNodeType tct, LegoTreeView legoTreeView)
+    private volatile long lookupUpdateTime_ = 0;
+    private AtomicInteger lookupsInProgress_ = new AtomicInteger();
+    private BooleanBinding lookupInProgress = new BooleanBinding()
+    {
+        
+        @Override
+        protected boolean computeValue()
+        {
+            return lookupsInProgress_.get() > 0;
+        }
+    };
+    
+    public ConceptNode(String typeLabel, Concept c, ConceptUsageType cut, LegoTreeNodeType tct, LegoTreeView legoTreeView)
     {
         c_ = c;
-        legoTreeView_ = legoTreeView;
-        vbox_ = new VBox();
-        vbox_.setSpacing(5.0);
-        vbox_.setAlignment(Pos.CENTER_LEFT);
-        vbox_.setFillWidth(true);
-        if (label != null && label.length() > 0)
-        {
-            contentLabel_ = new Label(label);
-            contentLabel_.getStyleClass().add("boldLabel");
-        }
+        legoTreeView_ = legoTreeView;        
         cb_ = new ComboBox<>();
         cb_.setConverter(new StringConverter<ComboBoxConcept>()
         {
@@ -79,14 +88,21 @@ public class ConceptNode implements ConceptLookupCallback
             }
         });
         cb_.setEditable(true);
-        cb_.setMaxWidth(Double.MAX_VALUE);
+        cb_.setMaxWidth(300.0);
         cb_.setMinWidth(200.0);
-        cb_.setPrefWidth(200.0);
-        cb_.setPromptText("Specify or drop a Snomed SCTID or UUID");
-        cb_.setItems(LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().getSuggestions(cut));
+        cb_.setPrefWidth(300.0);
+        cb_.setPromptText("SCTID or UUID");
+        cb_.setItems(FXCollections.observableArrayList(LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().getSuggestions(cut)));
         cb_.setVisibleRowCount(11);
         
+        if (typeLabel != null && typeLabel.length() > 0)
+        {
+            typeLabel_ = new Label(typeLabel);
+        }
+        
         descriptionLabel_ = new Label();
+        descriptionLabel_.setMaxWidth(Double.MAX_VALUE);
+        descriptionLabel_.setMinWidth(100.0);
         descriptionLabel_.visibleProperty().bind(lookupInProgress.not());
 
         updateGUI();
@@ -97,30 +113,54 @@ public class ConceptNode implements ConceptLookupCallback
             @Override
             public void changed(ObservableValue<? extends ComboBoxConcept> observable, ComboBoxConcept oldValue, ComboBoxConcept newValue)
             {
+                if (oldValue.getId().trim().equals(newValue.getId().trim()))
+                {
+                    //Not a real change
+                    return;
+                }
+                c_.setDesc("");
                 lookup();
             }
         });
 
         LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(legoTreeView_.getLego(), cb_);
         
-        AnchorPane ap = new AnchorPane();
         pi_ = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
         pi_.visibleProperty().bind(lookupInProgress);
         pi_.setPrefHeight(20.0);
         pi_.setPrefWidth(20.0);
-        ap.getChildren().add(pi_);
-        ap.getChildren().add(descriptionLabel_);
-               
-        if (contentLabel_ != null)
-        {
-            vbox_.getChildren().add(contentLabel_);
-            VBox.setMargin(cb_, new Insets(0, 0, 0, 10));
-            VBox.setMargin(ap, new Insets(0, 0, 0, 10));
-        }
-        vbox_.getChildren().add(cb_);        
-        vbox_.getChildren().add(ap);
         
-        vbox_.setOnDragDetected(new EventHandler<MouseEvent>()
+        lookupFailImage_ = Images.EXCLAMATION.createImageView();
+        lookupFailImage_.visibleProperty().bind(isValid.not());
+        lookupFailImage_.setEffect(invalidDropShadow);
+        Tooltip t = new Tooltip("The specified concept was not found in the Snomed Database.");
+        Tooltip.install(lookupFailImage_, t);
+        
+        StackPane sp = new StackPane();
+        sp.getChildren().add(pi_);
+        sp.getChildren().add(lookupFailImage_);
+        sp.getChildren().add(descriptionLabel_);
+        sp.setMinWidth(100.0);
+        sp.setMaxWidth(Double.MAX_VALUE);
+        StackPane.setAlignment(descriptionLabel_, Pos.CENTER_LEFT);
+        StackPane.setAlignment(pi_, Pos.CENTER_LEFT);
+        StackPane.setAlignment(lookupFailImage_, Pos.CENTER_LEFT);
+        
+        
+        hbox_ = new HBox();
+        hbox_.setSpacing(5.0);
+        hbox_.setAlignment(Pos.CENTER_LEFT);
+        
+        if (typeLabel_ != null)
+        {
+            hbox_.getChildren().add(typeLabel_);
+        }
+        
+        hbox_.getChildren().add(cb_);
+        hbox_.getChildren().add(sp);
+        HBox.setHgrow(sp, Priority.ALWAYS);
+               
+        hbox_.setOnDragDetected(new EventHandler<MouseEvent>()
         {
             public void handle(MouseEvent event)
             {
@@ -152,36 +192,13 @@ public class ConceptNode implements ConceptLookupCallback
             }
         });
 
-        vbox_.setOnDragDone(new EventHandler<DragEvent>()
+        hbox_.setOnDragDone(new EventHandler<DragEvent>()
         {
             public void handle(DragEvent event)
             {
                 LegoGUI.getInstance().getLegoGUIController().snomedDragCompleted();
             }
         });
-        
-        MenuItem mi = new MenuItem("View Concept");
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                waitForLookupToComplete();
-                if (isValid.get())
-                {
-                    LegoGUI.getInstance().showSnomedConceptDialog(UUID.fromString(c_.getUuid()));
-                }
-                else
-                {
-                    LegoGUI.getInstance().showErrorDialog("Unknown Concept", "Can't lookup an invalid concept", "");
-                }
-            }
-        });
-        
-        //Would like to do this, as well, but can't, cause javafx doesn't let you get to this menu (yet - its a bug)
-        //cb_.getEditor().getContextMenu().getItems().add(0, mi);
-        
-        descriptionLabel_.setContextMenu(new ContextMenu(mi));
         
         isValid.addListener(new ChangeListener<Boolean>()
         {
@@ -191,10 +208,13 @@ public class ConceptNode implements ConceptLookupCallback
                 if (newValue)
                 {
                     cb_.setEffect(null);
+                    StackPane.setMargin(descriptionLabel_, new Insets(0.0, 0.0, 0.0, 0.0));
                 }
                 else
                 {
                     cb_.setEffect(invalidDropShadow);
+                    //if not valid, the icon will show, shift right 20 px.
+                    StackPane.setMargin(descriptionLabel_, new Insets(0.0, 0.0, 0.0, 20.0));
                 }
             }
         });
@@ -231,33 +251,14 @@ public class ConceptNode implements ConceptLookupCallback
             return;
         }
                 
-        waitForLookupToComplete();
-        lookupInProgress.set(true);
-        WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this);
+        lookupsInProgress_.incrementAndGet();
+        lookupInProgress.invalidate();
+        WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this, System.currentTimeMillis());
     }
     
-    private void waitForLookupToComplete()
-    {
-        synchronized (lookupInProgress)
-        {
-            while (lookupInProgress.get())
-            {
-                //Wait for previous lookup to complete
-                try
-                {
-                    lookupInProgress.wait();
-                }
-                catch (InterruptedException e)
-                {
-                    // noop
-                }
-            }
-        }
-    }
-
     public Node getNode()
     {
-        return vbox_;
+        return hbox_;
     }
 
     public Concept getConcept()
@@ -265,25 +266,33 @@ public class ConceptNode implements ConceptLookupCallback
         return c_;
     }
     
-    public BooleanProperty isValid()
+    public boolean isValid()
     {
-        waitForLookupToComplete();
-        return isValid;
+        return isValid.get();
     }
 
     @Override
-    public void lookupComplete(final Concept concept)
+    public void lookupComplete(final Concept concept, final long submitTime)
     {
         Platform.runLater(new Runnable()
         {
             @Override
             public void run()
             {
-                lookupInProgress.set(false);
-                synchronized (lookupInProgress)
+                lookupsInProgress_.decrementAndGet();
+                lookupInProgress.invalidate();
+                
+                if (submitTime < lookupUpdateTime_)
                 {
-                    lookupInProgress.notifyAll();
+                    //Throw it away, we already got back a newer lookup.
+                    logger.debug("throwing away a lookup");
+                    return;
                 }
+                else 
+                {
+                    lookupUpdateTime_ = submitTime;
+                }
+
                 if (concept != null)
                 {
                     c_.setDesc(concept.getDesc());
@@ -294,27 +303,27 @@ public class ConceptNode implements ConceptLookupCallback
                 }
                 else
                 {
-                    c_.setSctid(null);
-                    c_.setUuid(cb_.getValue().getId());
-                    
-                    String description = "";
-                    if (cb_.getValue().getId().length() > 0)
+                    //lookup failed - try to store what they entered, even if not valid.
+                    try
                     {
-                        //If we have an id but didn't get a concept, the lookup failed, and was an invalid concept.
-                        //label it as such.
-                        //TODO put this marker in as a different label, or perhaps, an icon
-                        description = c_.getDesc();
-                        if (!description.startsWith("[Invalid Concept] "))
+                        c_.setSctid(Long.parseLong(cb_.getValue().getId().toString().trim()));
+                        c_.setUuid(null);
+                    }
+                    catch (NumberFormatException e)
+                    {
+                        //that won't work.  Is it a UUID?
+                        try
                         {
-                            description = "[Invalid Concept] " + description;
+                            c_.setUuid(UUID.fromString(cb_.getValue().getId()).toString().trim());
+                            c_.setSctid(null);
+                        }
+                        catch (IllegalArgumentException e1)
+                        {
+                            //nope  Can't save it anywhere.
+                            c_.setUuid(null);
+                            c_.setSctid(null);
                         }
                     }
-                    else
-                    {
-                        //Just blank, no code yet entered.
-                        description = "";
-                    }
-                    c_.setDesc(description);
                     isValid.set(false);
                 }
                 legoTreeView_.contentChanged();

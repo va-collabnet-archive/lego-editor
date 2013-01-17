@@ -16,15 +16,16 @@ public enum LegoTreeNodeType
 	value(3),
 	assertionComponent(4),
 	
-	expressionValue(0), expressionDestination(0), expressionOptional(0), 
-	relation(1),
-	relationshipGroup(2),
+	concept(0), conceptOptional(1),
 	
-	concept(0), conceptOptional(0),
+	expressionValue(2), expressionDestination(2), expressionOptional(2), 
+	relation(3),
+	relationshipGroup(4),
 	
-	labeledUneditableString(0),
 	measurement(0),  interval(0), 
 	upper(0), lower(0), assertionUUID(0),  point(0),
+	
+	text(0), bool(0),
     
     blankLegoEndNode(50), 
     blankLegoListEndNode(50);

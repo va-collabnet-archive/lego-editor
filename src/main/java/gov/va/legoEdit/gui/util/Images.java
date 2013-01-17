@@ -32,6 +32,7 @@ public enum Images
     LEGO_EXPORT(setupImage("/icons/silk/16x16/brick_go.png")),
     LEGO_LIST_VIEW(setupImage("/icons/silk/16x16/bricks.png")),
     LEGO_SEARCH(setupImage("/icons/fugue/16x16/icons-shadowless/application-search-result.png")),
+    EXCLAMATION(setupImage("/icons/fugue/16x16/icons-shadowless/exclamation-red.png")),
     XML_VIEW_16(setupImage("/icons/text-xml-icon-16x16.png")),
     XML_VIEW_32(setupImage("/icons/text-xml-icon-32x32.png")),
     PROPERTIES(setupImage("/icons/document-properties-icon.png")),

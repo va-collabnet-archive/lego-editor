@@ -139,11 +139,13 @@ public class LegoTab extends Tab
         legoTree.getRoot().getChildren().add(new LegoTreeItem(displayedLego, LegoTreeNodeType.comment));
         for (Assertion a : displayedLego.getAssertion())
         {
-            legoTree.getRoot().getChildren().add(new LegoTreeItem(a));
+            LegoTreeItem lti = new LegoTreeItem(a);
+            legoTree.getRoot().getChildren().add(lti);
+            lti.setExpanded(true);
         }
         legoTree.getRoot().getChildren().add(new LegoTreeItem(LegoTreeNodeType.blankLegoEndNode));
         recursiveSort(legoTree.getRoot().getChildren());
-        expandAll(legoTree.getRoot());
+        legoTree.getRoot().setExpanded(true);
     }
     
     public String getDisplayedLegoID()

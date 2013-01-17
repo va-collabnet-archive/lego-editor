@@ -4,5 +4,5 @@ import gov.va.legoEdit.model.schemaModel.Concept;
 
 public interface ConceptLookupCallback
 {
-    public void lookupComplete(Concept concept);
+    public void lookupComplete(Concept concept, long submitTime);
 }
