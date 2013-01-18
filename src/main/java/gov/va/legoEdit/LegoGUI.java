@@ -155,7 +155,7 @@ public class LegoGUI extends Application
 	{
 		edc_.setVariables(errorMessage, detailedErrorMessage);
 		errorDialogStage_.setTitle(title);
-		errorDialogStage_.showAndWait();
+		errorDialogStage_.show();
 	}
 	
 	public void showCreateLegoDialog(LegoListByReference llbr, LegoTreeItem ti)

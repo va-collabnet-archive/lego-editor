@@ -52,6 +52,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -69,12 +70,15 @@ public class LegoTreeCell<T> extends TreeCell<T>
 {
     private static Logger logger = LoggerFactory.getLogger(LegoTreeCell.class);
     private static String sep = " \u25BB "; 
-    private static String middlePoint = " \u2716 ";
     public static ObservableList<String> statusChoices_ = FXCollections.observableArrayList(new String[] { "Active", "Inactive" });
     public static ObservableList<String> booleanChoices_ = FXCollections.observableArrayList(new String[] { "True", "False" });
     public static ObservableList<String> inclusiveChoices_ = FXCollections.observableArrayList(new String[] {"\u2264", "<"});
     
     private LegoTreeView treeView;
+    
+    //TODO there is a bug that I've seen a couple of times now, where the focus will start jumping between multiple fields, and you can't stop it
+    //without closing the lego tab.  From the logs, it doesn't seem to be doing snomed looks during the cycle either.  Not sure what is going on.
+    //need to catch it in a debugger...
     
     public LegoTreeCell(LegoTreeView ltv)
     {
@@ -407,6 +411,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     //odd, yes - on the point, we pass in the measurement.
                     final Measurement m = (Measurement) treeItem.getExtraData();
                     PointNode pn = new PointNode(m, PointNode.PointNodeType.point, treeView);
+                    PointNodeValidator pnv = new PointNodeValidator();
+                    pnv.addPointNode(pn);
+                    pnv.check();
                     addMenus(m, treeItem, cm);
                     setGraphic(pn.getNode());
                 }
@@ -427,9 +434,11 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         m.getInterval().setUpperBound(new Bound());
                     }
                     
-                    Node boundLow = makeBoundNode("Lower", m, m.getInterval().getLowerBound(), PointNodeType.intervalLowBoundLow, PointNodeType.intervalLowBoundHigh);
-                    Node boundHigh = makeBoundNode("Upper", m, m.getInterval().getUpperBound(), PointNodeType.intervalHighBoundLow, PointNodeType.intervalHighBoundHigh);
+                    PointNodeValidator pnv = new PointNodeValidator();
+                    Node boundLow = makeBoundNode("Lower", m, m.getInterval().getLowerBound(), PointNodeType.intervalLowBoundLow, PointNodeType.intervalLowBoundHigh, pnv);
+                    Node boundHigh = makeBoundNode("Upper", m, m.getInterval().getUpperBound(), PointNodeType.intervalHighBoundLow, PointNodeType.intervalHighBoundHigh, pnv);
                     
+                    pnv.check();
                     VBox vbox = new VBox();
                     vbox.setSpacing(5.0);
                     vbox.getChildren().add(boundLow);
@@ -447,7 +456,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     {
                         m.setBound(new Bound());
                     }
-                    setGraphic(makeBoundNode(null, m, m.getBound(), PointNodeType.boundLow, PointNodeType.boundHigh));
+                    PointNodeValidator pnv = new PointNodeValidator();
+                    setGraphic(makeBoundNode(null, m, m.getBound(), PointNodeType.boundLow, PointNodeType.boundHigh, pnv));
+                    pnv.check();
                 }
                 else if (treeItem.getNodeType() == LegoTreeNodeType.value)
                 {
@@ -589,23 +600,26 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
     }
     
-    private Node makeBoundNode(String labelText, Measurement m, final Bound b, PointNode.PointNodeType lowType, PointNode.PointNodeType highType)
+    private Node makeBoundNode(String labelText, Measurement m, final Bound b, PointNode.PointNodeType lowType, PointNode.PointNodeType highType, PointNodeValidator pnv)
     {
         PointNode low = new PointNode(m, lowType, treeView);
         PointNode high = new PointNode(m, highType, treeView);
         
+        pnv.addPointNode(low);
+        pnv.addPointNode(high);
+        
         HBox hbox = new HBox();
         hbox.setMaxWidth(Double.MAX_VALUE);
-        hbox.setSpacing(0.0);
+        hbox.setSpacing(1.0);
         if (labelText != null && labelText.length() > 0)
         {
             Label label = new Label(labelText);
             hbox.getChildren().add(label);
-            HBox.setMargin(label, new Insets(2.0, 5.0, 0.0, 0.0));
+            HBox.setMargin(label, new Insets(4.0, 4.0, 0.0, 0.0));
         }
         hbox.getChildren().add(low.getNode());
         HBox.setHgrow(low.getNode(), Priority.SOMETIMES);
-        final ChoiceBox<String> cbLow = new ChoiceBox<>(inclusiveChoices_);
+        final ComboBox<String> cbLow = new ComboBox<>(inclusiveChoices_);
         cbLow.setMaxWidth(10.0);
         cbLow.getSelectionModel().select((b.isLowerPointInclusive() != null && !b.isLowerPointInclusive().booleanValue() ? 1 : 0));
         cbLow.valueProperty().addListener(new ChangeListener<String>()
@@ -618,9 +632,11 @@ public class LegoTreeCell<T> extends TreeCell<T>
             }
         });
         hbox.getChildren().add(cbLow);
-        HBox.setMargin(cbLow, new Insets(0.0, 0.0, 0.0, 5.0));
-        hbox.getChildren().add(new Label(middlePoint));
-        final ChoiceBox<String> cbHigh = new ChoiceBox<>(inclusiveChoices_);
+        Label middle = new Label(" X ");
+        middle.getStyleClass().add("boldLabel");
+        HBox.setMargin(middle, new Insets(4.0, 0.0, 0.0, 0.0));
+        hbox.getChildren().add(middle);
+        final ComboBox<String> cbHigh = new ComboBox<>(inclusiveChoices_);
         cbHigh.setMaxWidth(10.0);
         cbHigh.getSelectionModel().select((b.isUpperPointInclusive() != null && !b.isUpperPointInclusive().booleanValue() ? 1 : 0));
         cbHigh.valueProperty().addListener(new ChangeListener<String>()

@@ -30,7 +30,6 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
@@ -82,9 +81,9 @@ public class ConceptNode implements ConceptLookupCallback
             }
         });
         cb_.setEditable(true);
-        cb_.setMaxWidth(300.0);
-        cb_.setMinWidth(200.0);
-        cb_.setPrefWidth(300.0);
+        cb_.setMaxWidth(320.0);
+        cb_.setMinWidth(320.0);
+        cb_.setPrefWidth(320.0);
         cb_.setPromptText("SCTID or UUID");
         cb_.setItems(FXCollections.observableArrayList(LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().getSuggestions(cut)));
         cb_.setVisibleRowCount(11);
@@ -121,8 +120,10 @@ public class ConceptNode implements ConceptLookupCallback
         
         pi_ = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
         pi_.visibleProperty().bind(lookupInProgress);
-        pi_.setPrefHeight(20.0);
-        pi_.setPrefWidth(20.0);
+        pi_.setPrefHeight(16.0);
+        pi_.setPrefWidth(16.0);
+        pi_.setMaxWidth(16.0);
+        pi_.setMaxHeight(16.0);
         
         lookupFailImage_ = Images.EXCLAMATION.createImageView();
         lookupFailImage_.visibleProperty().bind(isValid.not());
@@ -131,15 +132,14 @@ public class ConceptNode implements ConceptLookupCallback
         Tooltip.install(lookupFailImage_, t);
         
         StackPane sp = new StackPane();
-        sp.getChildren().add(pi_);
+        sp.getChildren().add(cb_);
         sp.getChildren().add(lookupFailImage_);
-        sp.getChildren().add(descriptionLabel_);
-        sp.setMinWidth(100.0);
-        sp.setMaxWidth(Double.MAX_VALUE);
-        StackPane.setAlignment(descriptionLabel_, Pos.CENTER_LEFT);
-        StackPane.setAlignment(pi_, Pos.CENTER_LEFT);
-        StackPane.setAlignment(lookupFailImage_, Pos.CENTER_LEFT);
-        
+        sp.getChildren().add(pi_);
+        StackPane.setAlignment(cb_, Pos.CENTER_LEFT);
+        StackPane.setAlignment(lookupFailImage_, Pos.CENTER_RIGHT);
+        StackPane.setMargin(lookupFailImage_, new Insets(0.0, 20.0, 0.0, 0.0));
+        StackPane.setAlignment(pi_, Pos.CENTER_RIGHT);
+        StackPane.setMargin(pi_, new Insets(0.0, 20.0, 0.0, 0.0));
         
         hbox_ = new HBox();
         hbox_.setSpacing(5.0);
@@ -150,9 +150,9 @@ public class ConceptNode implements ConceptLookupCallback
             hbox_.getChildren().add(typeLabel_);
         }
         
-        hbox_.getChildren().add(cb_);
         hbox_.getChildren().add(sp);
-        HBox.setHgrow(sp, Priority.ALWAYS);
+        //HBox.setHgrow(sp, Priority.ALWAYS);
+        hbox_.getChildren().add(descriptionLabel_);
                
         hbox_.setOnDragDetected(new EventHandler<MouseEvent>()
         {
