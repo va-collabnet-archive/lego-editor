@@ -26,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
@@ -42,6 +41,8 @@ import org.junit.Test;
  */
 public class BDBDataStoreTest
 {
+    public static int id = 0;
+    
     @BeforeClass
     public static void oneTimeSetUp() throws Exception
     {
@@ -121,12 +122,12 @@ public class BDBDataStoreTest
 
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
         BDBDataStoreImpl.getInstance().commitLego(l1, aId);
 
         Lego l2 = new Lego();
         l2.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
-        l2.setPncs(makeRandomPncs());
+        l2.setPncs(makeUniquePncs());
         BDBDataStoreImpl.getInstance().commitLego(l2, aId);
 
 
@@ -143,11 +144,10 @@ public class BDBDataStoreTest
 
     }
 
-    private Pncs makeRandomPncs()
+    private Pncs makeUniquePncs()
     {
-        Random r = new Random();
         Pncs pncs = new Pncs();
-        pncs.setId(r.nextInt(500));
+        pncs.setId(id++);
         pncs.setValue(pncs.getId() + " value");
         pncs.setName(pncs.getId() + " name");
         return pncs;
@@ -164,7 +164,7 @@ public class BDBDataStoreTest
 
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
         BDBDataStoreImpl.getInstance().commitLego(l1, aId);
 
 
@@ -185,7 +185,7 @@ public class BDBDataStoreTest
         String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
 
         Assertion a = new Assertion();
         a.setAssertionUUID(UUID.randomUUID().toString());
@@ -243,7 +243,7 @@ public class BDBDataStoreTest
     {
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
 
         Assertion a = createAssertion();
         String knownAssertionId = a.getAssertionUUID();
@@ -257,7 +257,7 @@ public class BDBDataStoreTest
         
         Lego l2 = new Lego();
         l2.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
-        l2.setPncs(makeRandomPncs());
+        l2.setPncs(makeUniquePncs());
 
         a = createAssertion();
         a.getAssertionComponent().add(makeAssertionComponent("fred"));
@@ -349,7 +349,7 @@ public class BDBDataStoreTest
 
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
         Pncs knownPncs1 = l1.getPncs();
         BDBDataStoreImpl.getInstance().commitLego(l1, aId);
 
@@ -401,7 +401,7 @@ public class BDBDataStoreTest
 
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
         Pncs knownPncs1 = l1.getPncs();
         BDBDataStoreImpl.getInstance().commitLego(l1, aId);
 
@@ -416,7 +416,7 @@ public class BDBDataStoreTest
         
         Lego l3 = new Lego();
         l3.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
-        l3.setPncs(makeRandomPncs());
+        l3.setPncs(makeUniquePncs());
         Pncs knownPncs3 = l3.getPncs();
         Stamp l3LegoStamp = BDBDataStoreImpl.getInstance().commitLego(l3, aId);
 
@@ -462,7 +462,7 @@ public class BDBDataStoreTest
 
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
         Pncs knownPncs1 = l1.getPncs();
         Stamp l1LegoStamp = BDBDataStoreImpl.getInstance().commitLego(l1, aId);
 
@@ -477,7 +477,7 @@ public class BDBDataStoreTest
         
         Lego l3 = new Lego();
         l3.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
-        l3.setPncs(makeRandomPncs());
+        l3.setPncs(makeUniquePncs());
         Pncs knownPncs3 = l3.getPncs();
         Stamp l3LegoStamp = BDBDataStoreImpl.getInstance().commitLego(l3, bId);
         
@@ -587,7 +587,7 @@ public class BDBDataStoreTest
         String legoListBId = BDBDataStoreImpl.getInstance().getLegoListByName("b").getLegoListUUID();
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
         Pncs knownPncs = l1.getPncs();
 
         Assertion a = new Assertion();
@@ -674,7 +674,7 @@ public class BDBDataStoreTest
 
         Lego l1 = new Lego();
         l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
-        l1.setPncs(makeRandomPncs());
+        l1.setPncs(makeUniquePncs());
 
         Assertion a = new Assertion();
         a.setAssertionUUID(UUID.randomUUID().toString());
@@ -820,11 +820,11 @@ public class BDBDataStoreTest
     @Test
     public void testStoreRetreive() throws WriteException, FileNotFoundException, JAXBException
     {
-        LegoList initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("badDay.xml").getFile()));
+        LegoList initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("/badDay.xml").getFile()));
         BDBDataStoreImpl.getInstance().importLegoList(initial);
 
         //reread, just incase
-        initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("badDay.xml").getFile()));
+        initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("/badDay.xml").getFile()));
         LegoList readBack = BDBDataStoreImpl.getInstance().getLegoListByID(initial.getLegoListUUID());
         
         assertTrue(SchemaEquals.equals(initial, readBack));

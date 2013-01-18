@@ -35,21 +35,26 @@ public class SchemaSummary
         }
         else if (m.getInterval() != null)
         {
-            if (m.getInterval().getLowerBound() != null && m.getInterval().getUpperBound() != null)
+            if (m.getInterval().getLowerBound() != null && 
+                    (m.getInterval().getLowerBound().getLowerPoint() != null || m.getInterval().getLowerBound().getUpperPoint() != null) && 
+                    m.getInterval().getUpperBound() != null && 
+                    (m.getInterval().getUpperBound().getLowerPoint() != null || m.getInterval().getUpperBound().getUpperPoint() != null))
             {
                 sb.append(summary(m.getInterval().getLowerBound(), true));
                 sb.append(" " + ltEq + center + ltEq + " ");
                 sb.append(summary(m.getInterval().getUpperBound(), true));
             }
-            else if (m.getInterval().getLowerBound() != null)
+            else if (m.getInterval().getLowerBound() != null &&
+                    (m.getInterval().getLowerBound().getLowerPoint() != null || m.getInterval().getLowerBound().getUpperPoint() != null))
             {
                 sb.append(gtEq + " ");
-                sb.append(summary(m.getInterval().getLowerBound(), false));
+                sb.append(summary(m.getInterval().getLowerBound(), true));
             }
-            else if (m.getInterval().getUpperBound() != null)
+            else if (m.getInterval().getUpperBound() != null &&
+                    (m.getInterval().getUpperBound().getLowerPoint() != null || m.getInterval().getUpperBound().getUpperPoint() != null))
             {
                 sb.append(ltEq + " ");
-                sb.append(summary(m.getInterval().getUpperBound(), false));
+                sb.append(summary(m.getInterval().getUpperBound(), true));
             }
         }
         if (m.getUnits() != null && m.getUnits().getConcept() != null && m.getUnits().getConcept().getDesc() != null)
