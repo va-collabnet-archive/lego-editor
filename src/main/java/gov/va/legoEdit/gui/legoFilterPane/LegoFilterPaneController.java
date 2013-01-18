@@ -4,6 +4,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
+import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
@@ -30,10 +31,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +55,6 @@ public class LegoFilterPaneController  implements Initializable {
     
     private LegoTreeView ltv;
     private volatile AtomicInteger updateDisabled = new AtomicInteger(0);  //Update will only run when this is 0 
-    private DropShadow ds;
     private Concept concept_;
 
     Logger logger = LoggerFactory.getLogger(LegoFilterPaneController.class);
@@ -84,9 +82,6 @@ public class LegoFilterPaneController  implements Initializable {
         assert pncsValue != null : "fx:id=\"pncsValue\" was not injected: check your FXML file 'Untitled 1'.";
 
         // initialize your logic here: all @FXML variables will have been injected
-        
-        ds = new DropShadow();
-        ds.setColor(Color.RED);
         
         ltv = new LegoTreeView(true);
         borderPane.setCenter(ltv);
@@ -176,7 +171,7 @@ public class LegoFilterPaneController  implements Initializable {
                 }
                 else
                 {
-                    snomedId.setEffect(ds);
+                    snomedId.setEffect(Utility.redDropShadow);
                 }
             }
         });

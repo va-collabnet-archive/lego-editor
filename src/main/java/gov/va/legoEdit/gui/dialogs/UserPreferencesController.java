@@ -3,6 +3,7 @@ package gov.va.legoEdit.gui.dialogs;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.formats.UserPrefsXMLUtils;
+import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -17,9 +18,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
@@ -29,12 +28,6 @@ public class UserPreferencesController implements Initializable
 {
     private static Logger logger = LoggerFactory.getLogger(UserPreferencesController.class);
     
-    private static DropShadow invalidDropShadow = new DropShadow();
-    static
-    {
-        invalidDropShadow.setColor(Color.RED);
-    }
-
     @FXML  // fx:id="rootPane"
     private AnchorPane rootPane; // Value injected by FXMLLoader
     @FXML  // fx:id="cancelButton"
@@ -134,7 +127,7 @@ public class UserPreferencesController implements Initializable
                 }
                 else
                 {
-                    author.setEffect(invalidDropShadow);
+                    author.setEffect(Utility.redDropShadow);
                 }
             }
         });
@@ -151,7 +144,7 @@ public class UserPreferencesController implements Initializable
                 }
                 else
                 {
-                    module.setEffect(invalidDropShadow);
+                    module.setEffect(Utility.redDropShadow);
                 }
             }
         });
@@ -168,7 +161,7 @@ public class UserPreferencesController implements Initializable
                 }
                 else
                 {
-                    path.setEffect(invalidDropShadow);
+                    path.setEffect(Utility.redDropShadow);
                 }
             }
         });

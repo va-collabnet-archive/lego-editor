@@ -22,8 +22,8 @@ public enum LegoTreeNodeType
 	relation(3),
 	relationshipGroup(4),
 	
-	measurement(0),  interval(0), 
-	upper(0), lower(0), assertionUUID(0),  point(0),
+	measurement(0), point(0), interval(0), bound(0), 
+	assertionUUID(0),
 	
 	text(0), bool(0),
     

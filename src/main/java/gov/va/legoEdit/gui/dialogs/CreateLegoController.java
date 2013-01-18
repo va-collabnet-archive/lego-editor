@@ -5,6 +5,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
@@ -29,10 +30,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 
@@ -55,7 +53,6 @@ public class CreateLegoController implements Initializable
     private AnchorPane rootPane; // Value injected by FXMLLoader
 
     private LegoListByReference llbr;
-    private DropShadow ds;
     private LegoTreeItem legoTreeItem;
     
     @Override
@@ -69,9 +66,6 @@ public class CreateLegoController implements Initializable
         assert pncsName != null : "fx:id=\"pncsName\" was not injected: check your FXML file 'CreateLegoPanel.fxml'.";
         assert pncsValue != null : "fx:id=\"pncsValue\" was not injected: check your FXML file 'CreateLegoPanel.fxml'.";
 
-        ds = new DropShadow();
-        ds.setColor(Color.RED);
-        
         pncsName.setPromptText("The PNCS Name");
         pncsValue.setPromptText("The PNCS Value");
         pncsID.setPromptText("The PNCS ID (must be an integer)");
@@ -121,7 +115,7 @@ public class CreateLegoController implements Initializable
                 //TODO UGLY HACK, need to find a better way.
                 legoTreeItem.getChildren().clear();
                 legoTreeItem.buildPNCSChildren();
-                expandAll(legoTreeItem);
+                Utility.expandAll(legoTreeItem);
                 llbr = null;
                 legoTreeItem = null;
                 ((Stage) rootPane.getScene().getWindow()).close();
@@ -159,15 +153,6 @@ public class CreateLegoController implements Initializable
         okButton.disableProperty().bind(bb.not());
     }
     
-    private void expandAll(TreeItem<String> ti)
-    {
-        ti.setExpanded(true);
-        for (TreeItem<String> tiChild : ti.getChildren())
-        {
-            expandAll(tiChild);
-        }
-    }
-    
     public void init(LegoListByReference llbr, LegoTreeItem lti)
     {
         this.llbr = llbr;
@@ -197,7 +182,7 @@ public class CreateLegoController implements Initializable
                     }
                     else
                     {
-                        textField.setEffect(ds);
+                        textField.setEffect(Utility.redDropShadow);
                     }
                 }
             });

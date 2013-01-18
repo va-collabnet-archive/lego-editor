@@ -5,15 +5,12 @@ import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
-import gov.va.legoEdit.model.schemaModel.Bound;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Destination;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
-import gov.va.legoEdit.model.schemaModel.Interval;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Measurement;
-import gov.va.legoEdit.model.schemaModel.Point;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
@@ -214,66 +211,6 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 	}
 	
-	public LegoTreeItem(Interval i)
-	{
-		setValue("Interval");
-		ltnt_ = LegoTreeNodeType.interval;
-		if (i != null)
-		{
-		    if (i.getLowerBound() != null)
-		    {
-		        getChildren().add(new LegoTreeItem(i.getLowerBound(), LegoTreeNodeType.lower));
-		    }
-		    
-		    if (i.getUpperBound() != null)
-			{
-				getChildren().add(new LegoTreeItem(i.getUpperBound(), LegoTreeNodeType.upper));
-			}
-		}
-	}
-	
-	public LegoTreeItem(Point p, LegoTreeNodeType tct)
-    {
-        if (tct == LegoTreeNodeType.upper)
-        {
-            setValue("less Than");
-        }
-        else if (tct == LegoTreeNodeType.lower)
-        {
-            setValue("greater Than");
-        }
-    }
-	
-	public LegoTreeItem(Bound b, LegoTreeNodeType tct)
-	{
-		if (tct == LegoTreeNodeType.upper)
-		{
-			setValue("less Than");
-		}
-		else if (tct == LegoTreeNodeType.lower)
-		{
-			setValue("greater Than");
-		}
-		
-		//TODO bound mess
-		
-		//b.isInclusive();
-//		getChildren().add(new LTreeItem("Inclusive"));
-//		
-//		if (b.getNumericPoint() != null)
-//		{
-//			getChildren().add(new LTreeItem(b.getNumericPoint() + "", TreeContentType.floatVal));
-//		}
-//		else if (b.getStringPoint() != null)
-//		{
-//			getChildren().add(new LTreeItem(b.getStringPoint().toString(), TreeContentType.measurementConstant));
-//		}
-//		else if (b.getPointPair() != null)
-//		{
-//			getChildren().add(new LTreeItem(b.getPointPair()));
-//		}
-	}
-	
 	public LegoTreeItem(Measurement measurement, LegoTreeNodeType type)
 	{
 	    if (type == LegoTreeNodeType.point)
@@ -282,6 +219,18 @@ public class LegoTreeItem extends TreeItem<String>
 	        ltnt_ = LegoTreeNodeType.point;
 	        extraData_ = measurement;
 	    }
+	    else if (type == LegoTreeNodeType.bound)
+	    {
+	        setValue("Bound");
+            ltnt_ = LegoTreeNodeType.bound;
+            extraData_ = measurement;
+	    }
+	    else if (type == LegoTreeNodeType.interval)
+        {
+            setValue("Interval");
+            ltnt_ = LegoTreeNodeType.interval;
+            extraData_ = measurement;
+        }
 	    else
 	    {
     		setValue(type == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement");
@@ -294,17 +243,16 @@ public class LegoTreeItem extends TreeItem<String>
     		}
     		if (measurement.getInterval() != null)
     		{
-    			getChildren().add(new LegoTreeItem(measurement.getInterval()));
+    			getChildren().add(new LegoTreeItem(measurement, LegoTreeNodeType.interval));
     		}
     		else if (measurement.getPoint() != null)
     		{
     		    getChildren().add(new LegoTreeItem(measurement, LegoTreeNodeType.point));
     		}
-//    		else if (measurement.getBound() != null)
-//            {
-//    		    
-//                getChildren().add(new LegoTreeItem(measurement.getBound()));
-//            }
+    		else if (measurement.getBound() != null)
+            {
+                getChildren().add(new LegoTreeItem(measurement, LegoTreeNodeType.bound));
+            }
 	    }
 	}
 	

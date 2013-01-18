@@ -176,13 +176,4 @@ public class LegoTab extends Tab
             recursiveSort(item.getChildren());
         }
     }
-    
-    private void expandAll(TreeItem<String> ti)
-    {
-        ti.setExpanded(true);
-        for (TreeItem<String> tiChild : ti.getChildren())
-        {
-            expandAll(tiChild);
-        }
-    }
 }

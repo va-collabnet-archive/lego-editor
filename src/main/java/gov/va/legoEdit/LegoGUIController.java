@@ -10,6 +10,7 @@ import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.LegoTab;
+import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.schemaModel.Concept;
@@ -64,7 +65,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -75,7 +75,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
 import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
@@ -107,7 +106,6 @@ public class LegoGUIController implements Initializable
     private BooleanBinding enableSaveButton;
     
     //TODO import of LEgos should update snomed dropdowns
-    //TODO finish adding support to editor for comment fields
     
     private static String NONE = "NONE";
 
@@ -617,9 +615,7 @@ public class LegoGUIController implements Initializable
             public void handle(DragEvent event)
             {
                 /* show to the user that it is an actual gesture target */
-                DropShadow ds = new DropShadow();
-                ds.setColor(Color.GREEN);
-                n.setEffect(ds);
+                n.setEffect(Utility.greenDropShadow);
                 event.consume();
             }
         });
@@ -629,9 +625,7 @@ public class LegoGUIController implements Initializable
             public void handle(DragEvent event)
             {
                 /* mouse moved away, remove the graphical cues */
-                DropShadow ds = new DropShadow();
-                ds.setColor(Color.LIGHTGREEN);
-                n.setEffect(ds);
+                n.setEffect(Utility.lightGreenDropShadow);
                 event.consume();
             }
         });
@@ -645,26 +639,22 @@ public class LegoGUIController implements Initializable
             String legoId = ((LegoTab)editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
             for (Node n : snomedCodeDropTargets.get(legoId))
             {
-                DropShadow ds = new DropShadow();
-                ds.setColor(Color.LIGHTGREEN);
                 Effect existing = n.getEffect();
                 if (existing != null)
                 {
                     existingEffect.put(n, existing);
                 }
-                n.setEffect(ds);
+                n.setEffect(Utility.lightGreenDropShadow);
             }
         }
         for (Node n : snomedCodeDropTargets.get(NONE))
         {
-            DropShadow ds = new DropShadow();
-            ds.setColor(Color.LIGHTGREEN);
             Effect existing = n.getEffect();
             if (existing != null)
             {
                 existingEffect.put(n, existing);
             }
-            n.setEffect(ds);
+            n.setEffect(Utility.lightGreenDropShadow);
         }
     }
 
@@ -961,7 +951,7 @@ public class LegoGUIController implements Initializable
         }
         if (ti != null)
         {
-            expandParents(ti);
+            Utility.expandParents(ti);
             Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
         }
     }
@@ -971,16 +961,6 @@ public class LegoGUIController implements Initializable
         for (String legoId : displayedLegos.keySet())
         {
             showTreeItem(null, legoId);
-        }
-    }
-    
-    private void expandParents(TreeItem<String> ti)
-    {
-        TreeItem<String> parent = ti.getParent();
-        if (parent != null)
-        {
-            ti.getParent().setExpanded(true);
-            expandParents(parent);
         }
     }
     

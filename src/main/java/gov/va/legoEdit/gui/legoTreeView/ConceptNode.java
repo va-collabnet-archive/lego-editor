@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.Images;
+import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.ConceptLookupCallback;
 import gov.va.legoEdit.storage.wb.WBUtility;
@@ -22,7 +23,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -32,7 +32,6 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,11 +39,6 @@ import org.slf4j.LoggerFactory;
 public class ConceptNode implements ConceptLookupCallback
 {
     private static Logger logger = LoggerFactory.getLogger(ConceptNode.class);
-    private static DropShadow invalidDropShadow = new DropShadow();
-    static
-    {
-        invalidDropShadow.setColor(Color.RED);
-    }
     
     private HBox hbox_;
     private ComboBox<ComboBoxConcept> cb_;
@@ -132,7 +126,7 @@ public class ConceptNode implements ConceptLookupCallback
         
         lookupFailImage_ = Images.EXCLAMATION.createImageView();
         lookupFailImage_.visibleProperty().bind(isValid.not());
-        lookupFailImage_.setEffect(invalidDropShadow);
+        lookupFailImage_.setEffect(Utility.redDropShadow);
         Tooltip t = new Tooltip("The specified concept was not found in the Snomed Database.");
         Tooltip.install(lookupFailImage_, t);
         
@@ -212,7 +206,7 @@ public class ConceptNode implements ConceptLookupCallback
                 }
                 else
                 {
-                    cb_.setEffect(invalidDropShadow);
+                    cb_.setEffect(Utility.redDropShadow);
                     //if not valid, the icon will show, shift right 20 px.
                     StackPane.setMargin(descriptionLabel_, new Insets(0.0, 0.0, 0.0, 20.0));
                 }

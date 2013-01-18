@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
@@ -22,9 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class LegoListPropertiesController implements Initializable
@@ -50,13 +49,6 @@ public class LegoListPropertiesController implements Initializable
     BooleanProperty nameValid = new SimpleBooleanProperty(false);
     BooleanProperty descValid = new SimpleBooleanProperty(false);
     BooleanBinding formValid;
-    
-    private static DropShadow invalidDropShadow = new DropShadow();
-    static
-    {
-        invalidDropShadow.setColor(Color.RED);
-    }
-    
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources)
@@ -83,7 +75,7 @@ public class LegoListPropertiesController implements Initializable
                 else
                 {
                     nameValid.set(false);
-                    legoListName.setEffect(invalidDropShadow);
+                    legoListName.setEffect(Utility.redDropShadow);
                 }
             }
         });
@@ -101,7 +93,7 @@ public class LegoListPropertiesController implements Initializable
                 else
                 {
                     descValid.set(false);
-                    legoListDescription.setEffect(invalidDropShadow);
+                    legoListDescription.setEffect(Utility.redDropShadow);
                 }
             }
         });

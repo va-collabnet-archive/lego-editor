@@ -14,6 +14,10 @@ import gov.va.legoEdit.model.schemaModel.Value;
 
 public class SchemaSummary
 {
+    private static String ltEq = "\u2264";
+    private static String gtEq = "\u2265";
+    private static String center = " \u2716 ";
+    
     public static String summary(Measurement m)
     {
         if (m == null)
@@ -27,25 +31,25 @@ public class SchemaSummary
         }
         else if (m.getBound() != null)
         {
-            sb.append(summary(m.getBound()));
+            sb.append(summary(m.getBound(), false));
         }
         else if (m.getInterval() != null)
         {
             if (m.getInterval().getLowerBound() != null && m.getInterval().getUpperBound() != null)
             {
-                sb.append(summary(m.getInterval().getLowerBound()));
-                sb.append(" <= Y <= ");
-                sb.append(summary(m.getInterval().getUpperBound()));
+                sb.append(summary(m.getInterval().getLowerBound(), true));
+                sb.append(" " + ltEq + center + ltEq + " ");
+                sb.append(summary(m.getInterval().getUpperBound(), true));
             }
             else if (m.getInterval().getLowerBound() != null)
             {
-                sb.append("Y >= ");
-                sb.append(summary(m.getInterval().getLowerBound()));
+                sb.append(gtEq + " ");
+                sb.append(summary(m.getInterval().getLowerBound(), false));
             }
             else if (m.getInterval().getUpperBound() != null)
             {
-                sb.append("Y <= ");
-                sb.append(summary(m.getInterval().getUpperBound()));
+                sb.append(ltEq + " ");
+                sb.append(summary(m.getInterval().getUpperBound(), false));
             }
         }
         if (m.getUnits() != null && m.getUnits().getConcept() != null && m.getUnits().getConcept().getDesc() != null)
@@ -72,32 +76,51 @@ public class SchemaSummary
         return "";
     }
     
-    public static String summary(Bound b)
+    public static String summary(Bound b, boolean useBrackets)
     {
         if (b == null)
         {
             return "";
         }
         StringBuilder sb = new StringBuilder();
+        if (useBrackets)
+        {
+            sb.append(b.isLowerPointInclusive() == null || b.isLowerPointInclusive().booleanValue() ? "[" : "(");
+        }
         if (b.getLowerPoint() != null && b.getUpperPoint() != null)
         {
             sb.append(summary(b.getLowerPoint()));
-            sb.append(b.isLowerPointInclusive() ? " <=" : " <");
-            sb.append(" X");
-            sb.append(b.isUpperPointInclusive() ? " <=" : " <");
+            if (!useBrackets)
+            {
+                sb.append(b.isLowerPointInclusive() == null || b.isLowerPointInclusive().booleanValue() ? " " + ltEq + " " : " < ");
+            }
+            sb.append(useBrackets ? ", " : center);
+            if (!useBrackets)
+            {
+                sb.append(b.isUpperPointInclusive() == null || b.isUpperPointInclusive().booleanValue() ? " " + ltEq + " " : " < ");
+            }
             sb.append(summary(b.getUpperPoint()));
         }
         else if (b.getLowerPoint() != null)
         {
-            sb.append("X ");
-            sb.append(b.isLowerPointInclusive() ? ">=" : ">");
+            if (!useBrackets)
+            {
+                sb.append(b.isLowerPointInclusive() == null || b.isLowerPointInclusive().booleanValue() ? gtEq + " " : "> ");
+            }
             sb.append(summary(b.getLowerPoint()));
         }
         else if (b.getUpperPoint() != null)
         {
-            sb.append("X ");
-            sb.append(b.isUpperPointInclusive() ? "<=" : "<");
+            if (!useBrackets)
+            {
+                sb.append(b.isUpperPointInclusive() == null || b.isUpperPointInclusive().booleanValue() ? ltEq + " " : "< ");
+            }
             sb.append(summary(b.getUpperPoint()));
+        }
+        
+        if (useBrackets)
+        {
+            sb.append(b.isUpperPointInclusive() == null || b.isUpperPointInclusive().booleanValue() ? "]" : ")");
         }
         return sb.toString();
     }
@@ -193,7 +216,7 @@ public class SchemaSummary
         {
             sb.append(r.getType().getConcept().getDesc());
         }
-        sb.append(" - ");
+        sb.append(" : ");
         sb.append(summary(r.getDestination()));
         return sb.toString();
     }

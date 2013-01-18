@@ -23,11 +23,11 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="DOB"/>
  *     &lt;enumeration value="NOW"/>
- *     &lt;enumeration value="Date of onset (observable entity)"/>
+ *     &lt;enumeration value="date of onset"/>
  *     &lt;enumeration value="start active service"/>
  *     &lt;enumeration value="end active service"/>
  *     &lt;enumeration value="several"/>
- *     &lt;enumeration value="Date of event (observable entity)"/>
+ *     &lt;enumeration value="date of event"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -39,16 +39,16 @@ public enum MeasurementConstant {
 
     DOB("DOB"),
     NOW("NOW"),
-    @XmlEnumValue("Date of onset (observable entity)")
-    DATE_OF_ONSET_OBSERVABLE_ENTITY("Date of onset (observable entity)"),
+    @XmlEnumValue("date of onset")
+    DATE_OF_ONSET("date of onset"),
     @XmlEnumValue("start active service")
     START_ACTIVE_SERVICE("start active service"),
     @XmlEnumValue("end active service")
     END_ACTIVE_SERVICE("end active service"),
     @XmlEnumValue("several")
     SEVERAL("several"),
-    @XmlEnumValue("Date of event (observable entity)")
-    DATE_OF_EVENT_OBSERVABLE_ENTITY("Date of event (observable entity)");
+    @XmlEnumValue("date of event")
+    DATE_OF_EVENT("date of event");
     private final String value;
 
     MeasurementConstant(String v) {
