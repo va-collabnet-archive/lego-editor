@@ -273,7 +273,6 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<LegoBDB> ec = null;
         try
         {
-            //TODO TEST write test for method
             EntityIndex<String, LegoBDB> ei = legoByUUID.subIndex(legoUUID);
             ec = ei.entities();
 
@@ -615,7 +614,6 @@ public class BDBDataStoreImpl implements DataStoreInterface
         EntityCursor<PncsBDB> pec = null;
         try
         {
-            //TODO TEST write test for method
             // First go to the pncs table to get all of the pncs objects by ID, get a unique list of their unique IDs.
             ArrayList<Pncs> results = new ArrayList<>();
             EntityIndex<String, PncsBDB> pei = pncsById.subIndex(id);
@@ -774,16 +772,20 @@ public class BDBDataStoreImpl implements DataStoreInterface
     @Override
     public void deleteLego(String legoListUUID, String legoUUID, String stampUUID) throws WriteException
     {
-        // TODO TEST test this method
         Transaction txn = null;
         try
         {
             LegoListBDB legoListBDB = legoListByUUID.get(legoListUUID);
             if (legoListBDB != null)
             {
-                txn = myEnv.beginTransaction(null, null);
-                
+                //verify that this lego is actually in this lego list...
                 String legoUniqueIdToDelete = ModelUtil.makeUniqueLegoID(legoUUID, stampUUID);
+                if (!legoListBDB.getUniqueLegoIds().contains(legoUniqueIdToDelete))
+                {
+                    return;
+                }
+                
+                txn = myEnv.beginTransaction(null, null);
 
                 LegoBDB legoBDBToDelete = legoByUniqueId.get(txn, legoUniqueIdToDelete, LockMode.READ_UNCOMMITTED);
 

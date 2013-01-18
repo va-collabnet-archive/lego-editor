@@ -18,6 +18,7 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
+import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.storage.util.BDBIterator;
 import java.io.File;
@@ -47,7 +48,6 @@ public class BDBDataStoreTest
         BDBDataStoreImpl.dbFolderPath = new File("testDB");
         FileUtils.deleteDirectory(BDBDataStoreImpl.dbFolderPath);
     }
-//TODO test comment storage
     @AfterClass
     public static void oneTimeTearDown() throws Exception
     {
@@ -388,7 +388,192 @@ public class BDBDataStoreTest
             count++;
         }
         assertEquals(2, count);
+    }
+    
+    @Test
+    public void testPncslookup() throws WriteException
+    {
+        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+
+        String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
+
+        Lego l1 = new Lego();
+        l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        l1.setPncs(makeRandomPncs());
+        Pncs knownPncs1 = l1.getPncs();
+        BDBDataStoreImpl.getInstance().commitLego(l1, aId);
+
+        Lego l2 = new Lego();
+        l2.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        Pncs knownPncs2 = new Pncs();
+        knownPncs2.setId(knownPncs1.getId());
+        knownPncs2.setName(knownPncs1.getName());
+        knownPncs2.setValue("testVal");
+        l2.setPncs(knownPncs2);
+        BDBDataStoreImpl.getInstance().commitLego(l2, aId);
         
+        Lego l3 = new Lego();
+        l3.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
+        l3.setPncs(makeRandomPncs());
+        Pncs knownPncs3 = l3.getPncs();
+        Stamp l3LegoStamp = BDBDataStoreImpl.getInstance().commitLego(l3, aId);
+
+        assertEquals("Wrong number of PNCS items found", 2, BDBDataStoreImpl.getInstance().getPncs(knownPncs1.getId()).size());
+        assertEquals("Wrong number of PNCS items found", 2, BDBDataStoreImpl.getInstance().getPncs(knownPncs2.getId()).size());
+        assertEquals("Wrong number of PNCS items found", 1, BDBDataStoreImpl.getInstance().getPncs(knownPncs3.getId()).size());       
+        
+        Iterator<Pncs> i = BDBDataStoreImpl.getInstance().getPncs();
+        int count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(3, count);
+        
+        BDBDataStoreImpl.getInstance().deleteLego(aId, l3.getLegoUUID(), l3LegoStamp.getUuid());
+        
+        assertEquals("Wrong number of PNCS items found", 2, BDBDataStoreImpl.getInstance().getPncs(knownPncs1.getId()).size());
+        assertEquals("Wrong number of PNCS items found", 2, BDBDataStoreImpl.getInstance().getPncs(knownPncs2.getId()).size());
+        assertEquals("Wrong number of PNCS items found", 0, BDBDataStoreImpl.getInstance().getPncs(knownPncs3.getId()).size());       
+        
+        i = BDBDataStoreImpl.getInstance().getPncs();
+        count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(2, count);
+    }
+    
+    @Test
+    public void testLegoGetAndDelete() throws WriteException
+    {
+        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+
+        String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
+        String bId = BDBDataStoreImpl.getInstance().getLegoListByName("b").getLegoListUUID();
+        String cId = BDBDataStoreImpl.getInstance().getLegoListByName("c").getLegoListUUID();
+
+        Lego l1 = new Lego();
+        l1.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        l1.setPncs(makeRandomPncs());
+        Pncs knownPncs1 = l1.getPncs();
+        Stamp l1LegoStamp = BDBDataStoreImpl.getInstance().commitLego(l1, aId);
+
+        Lego l2 = new Lego();
+        l2.setLegoUUID(UUID.nameUUIDFromBytes("foo".getBytes()).toString());
+        Pncs knownPncs2 = new Pncs();
+        knownPncs2.setId(knownPncs1.getId());
+        knownPncs2.setName(knownPncs1.getName());
+        knownPncs2.setValue("testVal");
+        l2.setPncs(knownPncs2);
+        Stamp l2LegoStamp = BDBDataStoreImpl.getInstance().commitLego(l2, aId);
+        
+        Lego l3 = new Lego();
+        l3.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
+        l3.setPncs(makeRandomPncs());
+        Pncs knownPncs3 = l3.getPncs();
+        Stamp l3LegoStamp = BDBDataStoreImpl.getInstance().commitLego(l3, bId);
+        
+        
+        Lego l = BDBDataStoreImpl.getInstance().getLego(l1.getLegoUUID(), l1LegoStamp.getUuid());
+        assertNotNull(l);
+        assertTrue(SchemaEquals.equals(knownPncs1, l.getPncs()));
+        
+        l = BDBDataStoreImpl.getInstance().getLego(l2.getLegoUUID(), l2LegoStamp.getUuid());
+        assertNotNull(l);
+        assertTrue(SchemaEquals.equals(knownPncs2, l.getPncs()));
+        
+        l = BDBDataStoreImpl.getInstance().getLego(l1.getLegoUUID(), l2LegoStamp.getUuid());
+        assertNotNull(l);
+        assertTrue(SchemaEquals.equals(knownPncs2, l.getPncs()));
+        
+        l = BDBDataStoreImpl.getInstance().getLego(l3.getLegoUUID(), l3LegoStamp.getUuid());
+        assertNotNull(l);
+        assertTrue(SchemaEquals.equals(knownPncs3, l.getPncs()));
+        
+        l = BDBDataStoreImpl.getInstance().getLego(l1.getLegoUUID(), l3LegoStamp.getUuid());
+        assertNull(l);
+        
+        Iterator<Lego> i = BDBDataStoreImpl.getInstance().getLegos();
+        int count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(3, count);
+        
+        //noop
+        BDBDataStoreImpl.getInstance().deleteLego(cId, l1.getLegoUUID(), l1LegoStamp.getUuid());
+        i = BDBDataStoreImpl.getInstance().getLegos();
+        count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(3, count);
+        
+        //noop
+        BDBDataStoreImpl.getInstance().deleteLego(bId, l1.getLegoUUID(), l1LegoStamp.getUuid());
+        i = BDBDataStoreImpl.getInstance().getLegos();
+        count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(3, count);
+        assertEquals(1, BDBDataStoreImpl.getInstance().getLegoListByLego(l1.getLegoUUID()).size());
+        
+        BDBDataStoreImpl.getInstance().deleteLego(aId, l1.getLegoUUID(), l1LegoStamp.getUuid());
+        i = BDBDataStoreImpl.getInstance().getLegos();
+        count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(2, count);
+        assertNull(BDBDataStoreImpl.getInstance().getLego(l1.getLegoUUID(), l1LegoStamp.getUuid()));
+        
+        assertEquals(1, BDBDataStoreImpl.getInstance().getLegoListByLego(l1.getLegoUUID()).size());
+        assertEquals(1, BDBDataStoreImpl.getInstance().getLegoListByLego(l2.getLegoUUID()).size());
+        assertEquals(1, BDBDataStoreImpl.getInstance().getLegoListByLego(l3.getLegoUUID()).size());
+        
+        //noop
+        BDBDataStoreImpl.getInstance().deleteLego(aId, l1.getLegoUUID(), l1LegoStamp.getUuid());
+        i = BDBDataStoreImpl.getInstance().getLegos();
+        count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(2, count);
+        
+        BDBDataStoreImpl.getInstance().deleteLego(aId, l2.getLegoUUID(), l2LegoStamp.getUuid());
+        i = BDBDataStoreImpl.getInstance().getLegos();
+        count = 0;
+        while (i.hasNext())
+        {
+            i.next();
+            count++;
+        }
+        assertEquals(1, count);
+        assertNull(BDBDataStoreImpl.getInstance().getLego(l2.getLegoUUID(), l2LegoStamp.getUuid()));
+        
+        assertEquals(0, BDBDataStoreImpl.getInstance().getLegoListByLego(l1.getLegoUUID()).size());
+        assertEquals(0, BDBDataStoreImpl.getInstance().getLegoListByLego(l2.getLegoUUID()).size());
+        assertEquals(1, BDBDataStoreImpl.getInstance().getLegoListByLego(l3.getLegoUUID()).size());
+        assertNotNull(BDBDataStoreImpl.getInstance().getLego(l3.getLegoUUID(), l3LegoStamp.getUuid()));
     }
     
     @Test
@@ -572,7 +757,6 @@ public class BDBDataStoreTest
     }
     
     //TODO TEST write a test to verify that import works properly (mock up a full XML file, do various tests to make sure everything exists as expected) 
-    //TODO TEST write a test to verify that legoListBylegoID works properly after delete - catch the bug I had.
     
     @Test
     public void testIterators() throws WriteException, InterruptedException
