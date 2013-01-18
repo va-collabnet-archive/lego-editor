@@ -105,7 +105,7 @@ public class SchemaSummary
         {
             if (!useBrackets)
             {
-                sb.append(b.isLowerPointInclusive() == null || b.isLowerPointInclusive().booleanValue() ? gtEq + " " : "> ");
+                sb.append(b.isLowerPointInclusive() == null || b.isLowerPointInclusive().booleanValue() ? center + " " + gtEq + " " : "> ");
             }
             sb.append(summary(b.getLowerPoint()));
         }
@@ -113,7 +113,7 @@ public class SchemaSummary
         {
             if (!useBrackets)
             {
-                sb.append(b.isUpperPointInclusive() == null || b.isUpperPointInclusive().booleanValue() ? ltEq + " " : "< ");
+                sb.append(b.isUpperPointInclusive() == null || b.isUpperPointInclusive().booleanValue() ? center + " " + ltEq + " " : "< ");
             }
             sb.append(summary(b.getUpperPoint()));
         }
