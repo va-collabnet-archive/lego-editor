@@ -1,6 +1,5 @@
 package gov.va.legoEdit;
 
-import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
 import gov.va.legoEdit.gui.legoTreeView.ComboBoxConcept;
@@ -473,7 +472,6 @@ public class LegoGUIController implements Initializable
                     if (db.hasString())
                     {
                         n.setValue(new ComboBoxConcept(db.getString()));
-                        updateRecentCodes(db.getString());
                         success = true;
                         //It will have updated its effect upon the set - we don't want to restore an old one.
                         existingEffect.remove(n);
@@ -512,7 +510,6 @@ public class LegoGUIController implements Initializable
                     if (db.hasString())
                     {
                         n.setText(db.getString());
-                        updateRecentCodes(db.getString());
                         success = true;
                     }
                 }
@@ -533,11 +530,20 @@ public class LegoGUIController implements Initializable
     
     public void updateRecentCodes(String newCode)
     {
+        Concept c = WBUtility.lookupSnomedIdentifier(newCode);
+        if (c != null)
+        {
+            updateRecentCodes(c);
+        }
+    }
+    
+    public void updateRecentCodes(Concept concept)
+    {
         ObservableList<MenuItem> items =  menuRecentSctCodes.getItems();
         MenuItem temp = null;
         for (MenuItem mi: items)
         {
-            if (mi.getUserData().equals(newCode))
+            if (mi.getUserData().equals(concept.getUuid()))
             {
                 temp = mi;
                 break;
@@ -551,10 +557,9 @@ public class LegoGUIController implements Initializable
         }
         else
         {
-            Concept c = WBUtility.lookupSnomedIdentifier(newCode);
-            final Label l = new Label(c == null ? newCode : c.getDesc());
+            final Label l = new Label(concept.getDesc());
             final MenuItem mi = new MenuItem(null, l);
-            mi.setUserData(newCode);
+            mi.setUserData(concept.getUuid());
             
             l.setOnDragDetected(new EventHandler<MouseEvent>()
             {
@@ -777,32 +782,8 @@ public class LegoGUIController implements Initializable
                 List<File> files = fc.showOpenMultipleDialog(rootPane.getScene().getWindow());
                 if (files != null && files.size() > 0)
                 {
-                    StringBuilder errors = new StringBuilder();
-                    for (File f : files)
-                    {
-                        if (f.exists() && f.isFile())
-                        {
-                            try
-                            {
-                                LegoXMLUtils.validate((f));
-                                LegoGUIModel.getInstance().importLegoList(LegoXMLUtils.readLegoList(f));
-                            }
-                            catch (Exception ex)
-                            {
-                                logger.info("Error loading file " + f.getName(), ex);
-                                errors.append("Error loading file " + f.getName() + ": ");
-                                errors.append((ex.getLocalizedMessage() == null ? ex.toString() : ex
-                                        .getLocalizedMessage()));
-                                errors.append(System.getProperty("line.separator"));
-                                errors.append(System.getProperty("line.separator"));
-                            }
-                        }
-                    }
-                    if (errors.length() > 0)
-                    {
-                        LegoGUI.getInstance().showErrorDialog("Error Loading LEGOs",
-                                "There was an error loading the specified files", errors.toString());
-                    }
+                    //TODO nasty bug here.  http://javafx-jira.kenai.com/browse/RT-27827
+                    LegoGUI.getInstance().showImportDialog(files);
                 }
             }
         });

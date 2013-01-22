@@ -1,8 +1,20 @@
 package gov.va.legoEdit.storage.wb;
 
+import gov.va.legoEdit.model.PendingConcepts;
+import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Concept;
+import gov.va.legoEdit.model.schemaModel.Expression;
+import gov.va.legoEdit.model.schemaModel.Lego;
+import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.model.schemaModel.Measurement;
+import gov.va.legoEdit.model.schemaModel.Relation;
+import gov.va.legoEdit.model.schemaModel.RelationGroup;
+import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.util.Utility;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
@@ -52,7 +64,7 @@ public class WBUtility
     
     public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback, final long submitTime)
     {
-        logger.debug("Lookup '" + identifier + "'");
+        logger.debug("Threaded Lookup: '" + identifier + "'");
         Runnable r = new Runnable()
         {
             @Override
@@ -67,7 +79,14 @@ public class WBUtility
     
     public static Concept lookupSnomedIdentifier(String identifier)
     {
+        logger.debug("Lookup: '" + identifier + "'");
         ConceptVersionBI result = lookupSnomedIdentifierAsCV(identifier);
+        if (result == null)
+        {
+            //check the pending concepts file
+            logger.debug("Lookup Pending Concepts: '" + identifier + "'");
+            return PendingConcepts.getConcept(identifier);
+        }
         return convertConcept(result);
     }
     
@@ -100,7 +119,8 @@ public class WBUtility
    
     public static ConceptVersionBI lookupSnomedIdentifierAsCV(String identifier)
     {
-        if (identifier == null)
+        logger.debug("WB DB Lookup '" + identifier + "'");
+        if (identifier == null || identifier.trim().length() == 0)
         {
             return null;
         }
@@ -112,7 +132,7 @@ public class WBUtility
             result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid);
             if (result.getUUIDs().size() == 0)
             {
-                //This is garbage that the moronic WB API invented.  Nothing like an undocumented getter which, rather than returning null when the thing
+                //This is garbage that the WB API invented.  Nothing like an undocumented getter which, rather than returning null when the thing
                 //you are asking for doesn't exist - it goes off and returns essentially a new, empty, useless node.  Sigh.
                 throw new IllegalArgumentException();
             }
@@ -125,7 +145,7 @@ public class WBUtility
                 result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
                 if (result.getUUIDs().size() == 0)
                 {
-                    //This is garbage that the moronic WB API invented.  Nothing like an undocumented getter which, rather than returning null when the thing
+                    //This is garbage that the WB API invented.  Nothing like an undocumented getter which, rather than returning null when the thing
                     //you are asking for doesn't exist - it goes off and returns essentially a new, empty, useless node.  Sigh.
                     result = null;
                 }
@@ -246,5 +266,136 @@ public class WBUtility
             }
         }
         return (bestFound == null ? concept.getConceptReference().getText() : bestFound);
+    }
+    
+    /**
+     * Updates (in place) all of the concepts within the supplied LegoList with the results from a WB lookup.
+     * Concepts which fail lookup are returned in the result list. 
+     */
+    public static List<Concept> lookupAllConcepts(LegoList ll)
+    {
+        ArrayList<Concept> failures = new ArrayList<>();
+        
+        //walk through the legolist, and to a lookup on each concept, flagging errors on the ones that failed lookup.
+        for (Lego l : ll.getLego())
+        {
+            for (Assertion a : l.getAssertion())
+            {
+                failures.addAll(lookupAll(a.getDiscernible().getExpression()));
+                failures.addAll(lookupAll(a.getQualifier().getExpression()));
+                failures.addAll(lookupAll(a.getValue().getExpression()));
+                if (a.getValue() != null && a.getValue().getMeasurement() != null)
+                {
+                    failures.addAll(lookupAll(a.getValue().getMeasurement()));
+                }
+                for (AssertionComponent ac : a.getAssertionComponent())
+                {
+                    failures.addAll(lookupAll(ac.getType()));
+                }
+            }
+        }
+        return failures;
+    }
+    
+    private static List<Concept> lookupAll(Expression e)
+    {
+        ArrayList<Concept> failures = new ArrayList<>();
+        if (e == null)
+        {
+            return failures;
+        }
+        if (e.getConcept() != null)
+        {
+            Concept result = lookupSnomedIdentifier(e.getConcept().getUuid());
+            if (result == null)
+            {
+                result = lookupSnomedIdentifier(e.getConcept().getSctid() + "");
+            }
+            if (result != null)
+            {
+                e.setConcept(result);
+            }
+            else
+            {
+                failures.add(e.getConcept());
+            }
+        }
+        for (Expression e1 : e.getExpression())
+        {
+            failures.addAll(lookupAll(e1));
+        }
+        for (Relation r : e.getRelation())
+        {
+            failures.addAll(lookupAll(r));
+        }
+        for (RelationGroup rg : e.getRelationGroup())
+        {
+            for (Relation r : rg.getRelation())
+            {
+                failures.addAll(lookupAll(r));
+            }
+        }
+        return failures;
+    }
+    
+    private static List<Concept> lookupAll(Relation r)
+    {
+        ArrayList<Concept> failures = new ArrayList<>();
+        if (r.getType() != null && r.getType().getConcept() != null)
+        {
+            failures.addAll(lookupAll(r.getType()));
+        }
+        if (r.getDestination() != null)
+        {
+            failures.addAll(lookupAll(r.getDestination().getExpression()));
+            failures.addAll(lookupAll(r.getDestination().getMeasurement()));
+        }
+        return failures;
+    }
+    
+    private static List<Concept> lookupAll(Type t)
+    {
+        ArrayList<Concept> failures = new ArrayList<Concept>();
+        if (t == null || t.getConcept() == null)
+        {
+            return failures;
+        }
+        Concept result = lookupSnomedIdentifier(t.getConcept().getUuid());
+        if (result == null)
+        {
+            result = lookupSnomedIdentifier(t.getConcept().getSctid() + "");
+        }
+        if (result != null)
+        {
+            t.setConcept(result);
+        }
+        else
+        {
+            failures.add(t.getConcept());
+        }
+        return failures;
+    }
+    
+    private static List<Concept> lookupAll(Measurement m)
+    {
+        ArrayList<Concept> failures = new ArrayList<>();
+        if (m == null || m.getUnits() == null || m.getUnits().getConcept() == null)
+        {
+            return failures;
+        }
+        Concept result = lookupSnomedIdentifier(m.getUnits().getConcept().getUuid());
+        if (result == null)
+        {
+            result = lookupSnomedIdentifier(m.getUnits().getConcept().getSctid() + "");
+        }
+        if (result != null)
+        {
+            m.getUnits().setConcept(result);
+        }
+        else
+        {
+            failures.add(m.getUnits().getConcept());
+        }
+        return failures;
     }
 }

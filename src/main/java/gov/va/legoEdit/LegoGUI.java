@@ -3,6 +3,7 @@ package gov.va.legoEdit;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
+import gov.va.legoEdit.gui.dialogs.ImportDialogController;
 import gov.va.legoEdit.gui.dialogs.LegoListPropertiesController;
 import gov.va.legoEdit.gui.dialogs.SnomedConceptViewController;
 import gov.va.legoEdit.gui.dialogs.UserPreferencesController;
@@ -13,7 +14,9 @@ import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.wb.WBDataStore;
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -157,6 +160,29 @@ public class LegoGUI extends Application
 		errorDialogStage_.setTitle(title);
 		errorDialogStage_.show();
 	}
+	
+    public void showImportDialog(List<File> filesToImport)
+    {
+        try
+        {
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(mainStage_);
+            stage.initStyle(StageStyle.UTILITY);
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(ErrorDialogController.class.getResource("ImportDialog.fxml"));
+            Scene scene = new Scene((Parent) loader.load(ImportDialogController.class.getResourceAsStream("ImportDialog.fxml")));
+            ImportDialogController idc = loader.getController();
+            scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+            stage.setScene(scene);
+            idc.importFiles(filesToImport);
+        }
+        catch (IOException e)
+        {
+            logger.error("Unexpected", e);
+            showErrorDialog("Unexpected error", "Unexpected error importing files", e.toString());
+        }
+    }
 	
 	public void showCreateLegoDialog(LegoListByReference llbr, LegoTreeItem ti)
     {

@@ -1,0 +1,87 @@
+#Format:
+#sctID	Description	UUID
+#UUID is optional
+#
+# From the style guide
+#
+36	Inheres In
+38	Inherent Location
+39	Property Type
+40	Inherent Ingredient
+41	Characterizes
+42	Process Agent
+43	Process Duration
+44	Process Output
+45	Toward
+46	Relative To
+47	Rel To Part Of
+48	Precondition
+49	Scale Type
+50	Units
+51	Technique
+52	Direct Site
+#
+# All of these are currently in use in the data I have to import
+#
+4	Clinical course (attribute)
+6	Due to (attribute)
+9	Associated with (attribute)
+10	Treated with (attribute)
+11	Associated finding (attribute)
+16	Finding site (attribute)
+17	Laterality (attribute)
+20	Location (attribute)
+21	Has objective observations (attribute)
+22	Severity (attribute)
+24	Associated morphology (attribute)
+25	Type of device (attribute)
+28	Frequency (attribute)
+29	Administration of drug or medicament via transurethral route
+30	Status (attribute)
+32	Grade (attribute)
+33	Temporal context (attribute)
+35	Method of wound closure (attribute)
+84	Metabolic equivalent tasks
+95	Estimation procedure
+102	Skin structure of iliac crest 
+115	Complication of pressure point
+130	Tenting of skin
+137	Normal skin moisture
+180	Fourth intercostal space midclavicular line
+181	Fifth intercostal space midclavicular line
+182	Sixth intercostal space midclavicular line
+225	Wound, healing
+247	Therapeutic application of penile vacuum constriction device
+307	Deep tissue injury
+308	Nonstageable
+309	Cold skin
+310	Hot skin
+320	Incapacitated function
+324	Knowledge of benefits
+325	Knowledge of monthly bills
+333	Impact on work performance
+337	Tardiness at work
+411	Poor therapeutic response
+413	Treatment side effects
+422	Foreign object retained in body
+480	Post military service
+526	Enlarged cardiac chamber
+551	Injury of extremity
+581	Tan color
+601	Wound approximated
+619	Finding of wound edge
+620	Undermined
+621	Attached
+622	Unattached
+623	Rolled
+629	Finding of temperature of wound
+632	Cooler than general body temperature
+633	Warmer than general body temperature
+634	Cooler than opposite body part
+635	Warmer than opposite body part
+636	Periwound
+637	Intrawound
+639	Slough
+640	Skin structure of ischial tuberosity
+648	Decubitus ulcer (observable entity)
+663	Pressure ulcer (observable entity)

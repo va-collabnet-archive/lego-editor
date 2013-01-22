@@ -223,12 +223,18 @@ public class LegoGUIModel
         LegoGUI.getInstance().getLegoGUIController().showLegosForAllOpenTabs();
     }
 
-    public void importLegoList(LegoList ll) throws WriteException
+    public void updateLegoLists()
     {
-        BDBDataStoreImpl.getInstance().importLegoList(ll);
         //Long way around to get back to the method above... but I need the filter params.
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
         LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
+        //TODO update dropdowns
+    }
+    
+    public void importLegoList(LegoList ll) throws WriteException
+    {
+        BDBDataStoreImpl.getInstance().importLegoList(ll);
+        updateLegoLists();
     }
     
     public void updateLegoList(LegoListByReference llbr, TreeItem<String> ti, String description, String comments) throws DataStoreException, WriteException
@@ -251,10 +257,7 @@ public class LegoGUIModel
             LegoGUI.getInstance().getLegoGUIController().removeNewLego(lr.getUniqueId());
         }
         BDBDataStoreImpl.getInstance().deleteLegoList(legoListByReference.getLegoListUUID());
-        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
-        //Long way around to get back to the method above... but I need the filter params.
-        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
-        
+        updateLegoLists();
     }
     
     public void removeLego(LegoListByReference legoListReference, LegoReference legoReference) throws WriteException
@@ -262,9 +265,7 @@ public class LegoGUIModel
         LegoGUI.getInstance().getLegoGUIController().closeTabIfOpen(legoReference);
         BDBDataStoreImpl.getInstance().deleteLego(legoListReference.getLegoListUUID(), legoReference.getLegoUUID(), legoReference.getStampUUID());
         LegoGUI.getInstance().getLegoGUIController().removeNewLego(legoReference.getUniqueId());
-        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
-        //Long way around to get back to the method above... but I need the filter params.
-        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
+        updateLegoLists();
     }
     
     public void exportLegoList(LegoListByReference legoListByReference)
