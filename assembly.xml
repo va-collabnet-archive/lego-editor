@@ -19,6 +19,13 @@
 				<include>**/*</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<directory>${basedir}/</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>pendingConcepts.tsv</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 	<files>
 		<file>
