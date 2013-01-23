@@ -306,7 +306,7 @@ public class LegoGUIModel
                 {
                     LegoList ll = i.next();
                     String s = LegoXMLUtils.toXML(ll);
-                    Files.write(new File(f, ll.getGroupName()).toPath(), s.getBytes(), StandardOpenOption.CREATE_NEW);
+                    Files.write(new File(f, ll.getGroupName() + ".xml").toPath(), s.getBytes(), StandardOpenOption.CREATE_NEW);
                 }
             }
         }
