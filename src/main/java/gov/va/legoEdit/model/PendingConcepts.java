@@ -19,6 +19,8 @@ public class PendingConcepts
     private HashMap<String, Concept> pendingConceptsByUuid = new HashMap<>();
     private static volatile PendingConcepts instance_;
     
+    //TODO validate pending concepts are unique, and don't exist in snomed.
+    
     private static PendingConcepts getInstance()
     {
         if (instance_ == null)

@@ -708,6 +708,8 @@ public class BDBDataStoreImpl implements DataStoreInterface
             throw new WriteException("Unexpected Error storing data", e);
         }
     }
+    
+    //TODO allow  lego list group name to be changed
 
     @Override
     public void importLegoList(LegoList legoList) throws WriteException
