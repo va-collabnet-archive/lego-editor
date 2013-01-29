@@ -43,3 +43,7 @@
 	-fx-border-radius: 5;
 	-fx-padding: 3;
 }
+
+.tree-cell {
+    -fx-indent: 20;
+}

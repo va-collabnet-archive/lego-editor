@@ -330,10 +330,6 @@ public class LegoTreeItem extends TreeItem<String>
 		    {
 		        LegoTreeItem rgti = new LegoTreeItem(rg);
 		        getChildren().add(rgti);
-		        for (Relation r : rg.getRelation())
-		        {
-		            rgti.getChildren().add(new LegoTreeItem(r));
-		        }
 		    }
 		}
 	}
