@@ -185,11 +185,11 @@ public class ImportDialogController implements Initializable
                     if (missingConcepts.size() > 0)
                     {
                         detailedMessage.appendText("Some concepts specified in the imported Legos do not exist in the SCT DB or the pending concepts file:");
-                        status.append(System.getProperty("line.separator"));
+                        detailedMessage.appendText(System.getProperty("line.separator"));
                         for (Concept c : missingConcepts.values())
                         {
                             detailedMessage.appendText(c.getSctid() + "\t" + c.getDesc() + (c.getUuid() != null ? "\t" + c.getUuid() : ""));
-                            status.append(System.getProperty("line.separator"));
+                            detailedMessage.appendText(System.getProperty("line.separator"));
                         }
                     }
                     
