@@ -14,9 +14,9 @@ import gov.va.legoEdit.model.schemaModel.Value;
 
 public class SchemaSummary
 {
-    private static String ltEq = "\u2264";
-    private static String gtEq = "\u2265";
-    private static String center = " \u2716 ";
+    public final static String ltEq = "\u2264";
+    public final static String gtEq = "\u2265";
+    public final static String center = " \u2716 ";
     
     public static String summary(Measurement m)
     {

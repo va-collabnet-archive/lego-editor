@@ -2,9 +2,11 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoTreeView.PointNode.PointNodeType;
 import gov.va.legoEdit.gui.util.CopyableLabel;
+import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
@@ -63,6 +65,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,6 +157,20 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         }
                     });
                     cm.getItems().add(mi);
+                    
+                    mi = new MenuItem("Paste Assertion");
+                    mi.setOnAction(new EventHandler<ActionEvent>()
+                    {
+                        @Override
+                        public void handle(ActionEvent arg0)
+                        {
+                            pasteAssertion();
+                        }
+                    });
+                    mi.visibleProperty().bind(CustomClipboard.containsAssertion);
+                    cm.getItems().add(mi);
+
+                    
                 }
                 else if (treeView.getLego() == null
                         || (!empty && treeItem.getNodeType() == LegoTreeNodeType.blankLegoListEndNode))
@@ -1286,6 +1303,41 @@ public class LegoTreeCell<T> extends TreeCell<T>
         ti.getParent().getChildren().remove(ti);
         treeView.contentChanged();
     }
+    
+    private void pasteAssertion()
+    {
+        try
+        {
+            if (CustomClipboard.containsType(Assertion.class))
+            {
+                Assertion a = CustomClipboard.getAssertion();
+                //need to clone this assertion - then change the UUID.
+                //Ugly but easy clone impl...
+                Assertion clonedAssertion = LegoXMLUtils.readAssertion(LegoXMLUtils.toXML(a));
+                
+                LegoTreeView ltv = (LegoTreeView) getTreeView();
+                //Change the Assertion UUID 
+                clonedAssertion.setAssertionUUID(UUID.randomUUID().toString());
+                ltv.getLego().getAssertion().add(clonedAssertion);
+                treeView.contentChanged();
+            
+                LegoTreeItem lti = new LegoTreeItem(clonedAssertion);
+                ltv.getRoot().getChildren().add(lti);
+                FXCollections.sort(ltv.getRoot().getChildren(), new LegoTreeItemComparator(true));
+                lti.setExpanded(true);
+            }
+            else
+            {
+                CustomClipboard.updateBindings();
+                LegoGUI.getInstance().showErrorDialog("No Assertion on Clipboard", "The Clipboard does not contain an Assertion", null);
+            }
+        }
+        catch (JAXBException e)
+        {
+            logger.error("Unexpected error handling paste", e);
+            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste", e.toString());
+        }
+    }
 
     private void addAssertion()
     {
@@ -1676,7 +1728,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
             label.getDropContextMenu().getItems().add(mi);
         }
 
-
         mi = new MenuItem("Add an Assertion Component");
         mi.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -1688,6 +1739,17 @@ public class LegoTreeCell<T> extends TreeCell<T>
         });
         cm.getItems().add(mi);
 
+        mi = new MenuItem("Copy Assertion");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                CustomClipboard.set(a);
+            }
+        });
+        cm.getItems().add(mi);
+        
         mi = new MenuItem("Delete Assertion");
         mi.setOnAction(new EventHandler<ActionEvent>()
         {

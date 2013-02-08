@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.sctSearch;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
@@ -29,7 +30,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -133,12 +133,10 @@ public class SnomedSearchPaneController implements Initializable
                                 @Override
                                 public void handle(ActionEvent event)
                                 {
-                                    ClipboardContent cc = new ClipboardContent();
                                     if (item.getConcept() != null)
                                     {
-                                        cc.putString(item.getConcept().getUUIDs().get(0).toString());
-                                        Clipboard.getSystemClipboard().setContent(cc);
-                                        LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(cc.getString());
+                                        CustomClipboard.set(item.getConcept().getUUIDs().get(0).toString());
+                                        LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(CustomClipboard.getString());
                                     }
                                 }
                             });

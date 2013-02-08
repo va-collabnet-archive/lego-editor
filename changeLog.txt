@@ -1,0 +1,3 @@
+Lego Editor Change Log
+
+  *  Implemented Copy/Paste for Assertions

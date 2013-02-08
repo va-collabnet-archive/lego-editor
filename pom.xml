@@ -22,6 +22,7 @@
         <!--javafx.version>2.2.3-b05</javafx.version--> 	<!-- From java 1.7.0_09 -->
         <!--javafx.version>2.2.4-ea-b13</javafx.version>--> <!-- From java 1.7.0_10-b13 -->
 		<!--<javafx.version>2.2.4-b18</javafx.version> --> 	<!-- From java 1.7.0_10 -->
+		<!--<javafx.version>2.2.5-b09</javafx.version> -->  <!-- From java 1.7.0_13 -->
         <javafx.version>2.2.6-ea-b07</javafx.version> 		<!-- From java 1.7.0_12-b07 -->
         <trek.version>3.0.1-SNAPSHOT</trek.version>
         <je.version>5.0.55</je.version>

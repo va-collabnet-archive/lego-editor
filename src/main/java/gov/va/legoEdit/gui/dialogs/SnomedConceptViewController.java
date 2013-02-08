@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.CopyableLabel;
+import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import java.net.URL;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
-import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -144,9 +144,7 @@ public class SnomedConceptViewController implements Initializable
                                 @Override
                                 public void handle(ActionEvent arg0)
                                 {
-                                    ClipboardContent content = new ClipboardContent();
-                                    content.putString(item.text);
-                                    Clipboard.getSystemClipboard().setContent(content);
+                                    CustomClipboard.set(item.text);
                                 }
                             });
                             

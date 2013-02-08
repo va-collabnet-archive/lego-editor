@@ -98,6 +98,12 @@ public class LegoXMLUtils
         return new String(baos.toByteArray());
     }
     
+    public static Assertion readAssertion(String xmlAssertion) throws JAXBException
+    {
+        Unmarshaller um = jc.createUnmarshaller();
+        return (Assertion) um.unmarshal(new ByteArrayInputStream(xmlAssertion.getBytes()));
+    }
+    
     public static String toHTML(LegoList ll) throws PropertyException, JAXBException, TransformerConfigurationException, TransformerException
     {
         String asXML = toXML(ll);

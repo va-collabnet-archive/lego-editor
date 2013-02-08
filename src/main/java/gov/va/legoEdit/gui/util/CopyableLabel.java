@@ -7,8 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 
 public class CopyableLabel extends Label
 {
@@ -43,9 +41,7 @@ public class CopyableLabel extends Label
             @Override
             public void handle(ActionEvent arg0)
             {
-                ClipboardContent content = new ClipboardContent();
-                content.putString(l.getText());
-                Clipboard.getSystemClipboard().setContent(content);
+                CustomClipboard.set(l.getText());
                 LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(l.getText());
             }
         });
