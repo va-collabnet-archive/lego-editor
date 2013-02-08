@@ -966,6 +966,62 @@ public class LegoTreeCell<T> extends TreeCell<T>
         ti.getParent().getChildren().remove(ti);
         treeView.contentChanged();
     }
+    
+    private void pasteExpression(Expression oldExpression, LegoTreeItem oldTreeItem)
+    {
+        try
+        {
+            if (CustomClipboard.containsType(Expression.class))
+            {
+                Expression e = CustomClipboard.getExpression();
+                //need to clone this expression 
+                //Ugly but easy clone impl...
+                Expression clonedExpression = LegoXMLUtils.readExpression(LegoXMLUtils.toXML(e));
+
+                boolean expand = oldTreeItem.isExpanded();
+                LegoTreeItem parentLegoTreeItem = (LegoTreeItem)oldTreeItem.getParent();
+               
+                LegoTreeItem newLTI = null;
+                if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
+                {
+                    Assertion a = (Assertion)parentLegoTreeItem.getExtraData();
+                    a.getDiscernible().setExpression(clonedExpression);
+                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDiscernible);
+                }
+                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
+                {
+                    Assertion a = (Assertion)parentLegoTreeItem.getExtraData();
+                    a.getQualifier().setExpression(clonedExpression);
+                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionQualifier);
+                }
+                else
+                {
+                    //TODO I know I need to handle Expression and Value Expression yet
+                    logger.error("Unhandled paste type in expression (not yet implemented)! " + parentLegoTreeItem.getExtraData().getClass().getName());
+                    return;
+                }
+                
+                //Need to delete the old value tree node
+                parentLegoTreeItem.getChildren().remove(oldTreeItem);
+               
+                newLTI.setExpanded(expand);
+                parentLegoTreeItem.getChildren().add(newLTI);
+                FXCollections.sort(parentLegoTreeItem.getChildren(), new LegoTreeItemComparator(true));
+                treeView.contentChanged();
+                Event.fireEvent(parentLegoTreeItem, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), parentLegoTreeItem));
+            }
+            else
+            {
+                CustomClipboard.updateBindings();
+                LegoGUI.getInstance().showErrorDialog("No Value on Clipboard", "The Clipboard does not contain a Value", null);
+            }
+        }
+        catch (JAXBException e)
+        {
+            logger.error("Unexpected error handling paste", e);
+            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste", e.toString());
+        }
+    }
 
     private void removeExpression(Expression e, TreeItem<String> ti)
     {
@@ -1085,6 +1141,52 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Utility.expandAll(ti);
         treeView.contentChanged();
         Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+    }
+    
+    private void pasteValue(Assertion parentAssertion, TreeItem<String> parentTreeItem)
+    {
+        try
+        {
+            if (CustomClipboard.containsType(Value.class))
+            {
+                Value v = CustomClipboard.getValue();
+                //need to clone this assertion - then change the UUID.
+                //Ugly but easy clone impl...
+                Value clonedValue = LegoXMLUtils.readValue(LegoXMLUtils.toXML(v));
+
+                boolean expand = true;
+                if (parentAssertion.getValue() != null)
+                {
+                    //Need to delete the old value tree node
+                    for (TreeItem<String> lti : parentTreeItem.getChildren())
+                    {
+                        if (((LegoTreeItem)lti).getExtraData() instanceof Value)
+                        {
+                            expand = lti.isExpanded();
+                            parentTreeItem.getChildren().remove(lti);
+                            break;
+                        }
+                    }
+                }
+                parentAssertion.setValue(clonedValue);
+                LegoTreeItem lti = new LegoTreeItem(clonedValue);
+                parentTreeItem.getChildren().add(lti);
+                FXCollections.sort(parentTreeItem.getChildren(), new LegoTreeItemComparator(true));
+                lti.setExpanded(expand);
+                treeView.contentChanged();
+                Event.fireEvent(parentTreeItem, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), parentTreeItem));
+            }
+            else
+            {
+                CustomClipboard.updateBindings();
+                LegoGUI.getInstance().showErrorDialog("No Value on Clipboard", "The Clipboard does not contain a Value", null);
+            }
+        }
+        catch (JAXBException e)
+        {
+            logger.error("Unexpected error handling paste", e);
+            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste", e.toString());
+        }
     }
 
     private void addValue(Assertion a, String sctUUID, TreeItem<String> ti)
@@ -1662,7 +1764,20 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             });
             cm.getItems().add(mi);
+            
+            mi = new MenuItem("Paste Value");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    pasteValue(a, treeItem);
+                }
+            });
+            mi.visibleProperty().bind(CustomClipboard.containsValue);
+            cm.getItems().add(mi);
         }
+
         if (a.getValue() != null && a.getValue().getExpression() == null
                 && a.getValue().getMeasurement() == null && a.getValue().getText() == null
                 && a.getValue().isBoolean() == null)
@@ -1959,6 +2074,30 @@ public class LegoTreeCell<T> extends TreeCell<T>
             });
             cm.getItems().add(mi);
         }
+        
+        mi = new MenuItem("Copy " + descriptionAddition + "Expression");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                CustomClipboard.set(e);
+            }
+        });
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Paste " + descriptionAddition + "Expression (Replace Existing)");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                pasteExpression(e, treeItem);
+            }
+        });
+        mi.visibleProperty().bind(CustomClipboard.containsExpression);
+        cm.getItems().add(mi);
+        
     }
     
     private void addMenus(final Concept c, final ConceptNode cn, final LegoTreeItem treeItem, ContextMenu cm)
@@ -2216,6 +2355,29 @@ public class LegoTreeCell<T> extends TreeCell<T>
             });
             cm.getItems().add(mi);
         }
+        MenuItem mi = new MenuItem("Copy Value");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                CustomClipboard.set(v);
+            }
+        });
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Paste Value (Replace Existing)");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                pasteValue((Assertion)((LegoTreeItem)treeItem.getParent()).getExtraData(), treeItem.getParent());
+            }
+        });
+        mi.visibleProperty().bind(CustomClipboard.containsValue);
+        cm.getItems().add(mi);
+        
     }
     
     private ConceptUsageType findType(LegoTreeItem lti)

@@ -1,7 +1,11 @@
 package gov.va.legoEdit.formats;
 
 import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.Discernible;
+import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.LegoList;
+import gov.va.legoEdit.model.schemaModel.Qualifier;
+import gov.va.legoEdit.model.schemaModel.Value;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -80,21 +84,41 @@ public class LegoXMLUtils
 
     public static String toXML(LegoList ll) throws PropertyException, JAXBException
     {
-        Marshaller m = jc.createMarshaller();
-        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        m.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "LEGO.xsd");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        m.marshal(ll, baos);
-        return new String(baos.toByteArray());
+        return marshall(ll);
+    }
+    
+    public static String toXML(Value v) throws PropertyException, JAXBException
+    {
+        return marshall(v);
     }
     
     public static String toXML(Assertion a) throws PropertyException, JAXBException
+    {
+        return marshall(a);
+    }
+    
+    public static String toXML(Discernible d) throws PropertyException, JAXBException
+    {
+        return marshall(d);
+    }
+    
+    public static String toXML(Qualifier q) throws PropertyException, JAXBException
+    {
+        return marshall(q);
+    }
+    
+    public static String toXML(Expression e) throws PropertyException, JAXBException
+    {
+       return marshall(e);
+    }
+    
+    private static String marshall(Object o)throws PropertyException, JAXBException
     {
         Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         m.setProperty(Marshaller.JAXB_FRAGMENT, true);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        m.marshal(a, baos);
+        m.marshal(o, baos);
         return new String(baos.toByteArray());
     }
     
@@ -102,6 +126,29 @@ public class LegoXMLUtils
     {
         Unmarshaller um = jc.createUnmarshaller();
         return (Assertion) um.unmarshal(new ByteArrayInputStream(xmlAssertion.getBytes()));
+    }
+    
+    public static Value readValue(String xmlValue) throws JAXBException
+    {
+        Unmarshaller um = jc.createUnmarshaller();
+        return (Value) um.unmarshal(new ByteArrayInputStream(xmlValue.getBytes()));
+    }
+    
+    public static Discernible readDiscernible(String xmlDiscernible) throws JAXBException
+    {
+        Unmarshaller um = jc.createUnmarshaller();
+        return (Discernible) um.unmarshal(new ByteArrayInputStream(xmlDiscernible.getBytes()));
+    }
+    
+    public static Qualifier readQualifier(String xmlQualifier) throws JAXBException
+    {
+        Unmarshaller um = jc.createUnmarshaller();
+        return (Qualifier) um.unmarshal(new ByteArrayInputStream(xmlQualifier.getBytes()));
+    }
+    
+    public static Expression readExpression(String xmlExpression) throws JAXBException
+    {
+        return (Expression) jc.createUnmarshaller().unmarshal(new ByteArrayInputStream(xmlExpression.getBytes()));
     }
     
     public static String toHTML(LegoList ll) throws PropertyException, JAXBException, TransformerConfigurationException, TransformerException

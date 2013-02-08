@@ -2,6 +2,8 @@ package gov.va.legoEdit.gui.util;
 
 import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.Expression;
+import gov.va.legoEdit.model.schemaModel.Value;
 import java.util.ArrayList;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.BooleanBinding;
@@ -36,19 +38,54 @@ public class CustomClipboard
         }
     };
     
+    public static BooleanBinding containsValue = new BooleanBinding()
+    {
+        @Override
+        protected boolean computeValue()
+        {
+            return containsType(Value.class);
+        }
+    };
+    
+    public static BooleanBinding containsExpression = new BooleanBinding()
+    {
+        @Override
+        protected boolean computeValue()
+        {
+            return containsType(Expression.class);
+        }
+    };
+    
     static
     {
         bindings_.add(containsAssertion);
+        bindings_.add(containsValue);
+        bindings_.add(containsExpression);
         bindings_.add(containsString);
     }
     
     
     public static void set(Assertion a)
     {
-       object_ = a;
+        set(a, SchemaToString.toString(a, ""));
+    }
+    
+    public static void set(Value v)
+    {
+        set(v, SchemaToString.toString(v, ""));
+    }
+    
+    public static void set(Expression e)
+    {
+        set(e, SchemaToString.toString(e, ""));
+    }
+    
+    private static void set(Object value, String stringValue)
+    {
+       object_ = value;
        ClipboardContent cc = new ClipboardContent();
-       cc.putString(SchemaToString.toString(a, ""));
-       cc.put(type_, Assertion.class.getName());
+       cc.putString(stringValue);
+       cc.put(type_, value.getClass().getName());
        clipboard_.setContent(cc);
        updateBindings();
     }
@@ -98,6 +135,26 @@ public class CustomClipboard
         if (containsAssertion.get())
         {
             return (Assertion)object_;
+        }
+
+        return null;
+    }
+    
+    public static Value getValue()
+    {
+        if (containsValue.get())
+        {
+            return (Value)object_;
+        }
+
+        return null;
+    }
+    
+    public static Expression getExpression()
+    {
+        if (containsExpression.get())
+        {
+            return (Expression)object_;
         }
 
         return null;
