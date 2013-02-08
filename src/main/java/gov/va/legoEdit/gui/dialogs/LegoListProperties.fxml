@@ -21,7 +21,7 @@
         <Label styleClass="boldLabel" text="Lego List Name" GridPane.columnIndex="0" GridPane.rowIndex="0" />
         <Label styleClass="boldLabel" text="Lego List Description" GridPane.columnIndex="0" GridPane.rowIndex="1" />
         <Label styleClass="boldLabel" text="Lego List UUID" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <TextField fx:id="legoListName" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <TextField fx:id="legoListName" GridPane.columnIndex="1" GridPane.rowIndex="0" />
         <TextField fx:id="legoListDescription" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
         <TextField fx:id="legoListUUID" editable="false" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
         <Label styleClass="boldLabel" text="Comments" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.valignment="TOP">

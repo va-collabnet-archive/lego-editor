@@ -92,14 +92,15 @@ public interface DataStoreInterface
      *
      * @throws WriteException if the operation fails
      */
-    public LegoList createLegoList(String groupName, String groupDescription, String comments) throws WriteException;
+    public LegoList createLegoList(String uuid, String groupName, String groupDescription, String comments) throws WriteException;
     
     /**
-     * A method to allow updating the the description and comments field that is stored on the lego list.
+     * A method to allow updating the the name, description and comments field that is stored on the lego list.
+     * @param groupName - the new name, or null to leave the existing name in place.  Cannot be an empty string.
      * @param groupDescription - the new description, or null to leave the existing description in place
      * @param comments - the new comments, or null to leave the existing comments in place.
      */
-    public void updateLegoListMetadata(String legoListUUID, String groupDescription, String comments) throws WriteException;
+    public void updateLegoListMetadata(String legoListUUID, String groupName, String groupDescription, String comments) throws WriteException;
 
     /**
      * Store the specified legoList. Note - this method cannot be used to replace an existing LegoList.

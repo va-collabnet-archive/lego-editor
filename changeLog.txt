@@ -4,3 +4,4 @@ Lego Editor Change Log
   *  Fixed null pointers that could happen with empty measurement values 
   *  artf227507 Fixed bound change not allowing save bug
   *  Fixed a bug that caused a doubleclick to sometimes not open a lego for editing
+  *  artf227475 Allow rename of lego list

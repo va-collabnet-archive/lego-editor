@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.Relationship;
@@ -39,12 +38,12 @@ public class LegoListBDB
         //required by BDB
     }
 
-    public LegoListBDB(String groupName, String groupDescription, String comment)
+    public LegoListBDB(String uuid, String groupName, String groupDescription, String comment)
     {
         this.groupName = groupName;
         this.groupDescription = groupDescription;
         this.comment = comment;
-        this.legoListUUID = UUID.nameUUIDFromBytes(groupName.getBytes()).toString();
+        this.legoListUUID = uuid;
         this.legoUniqueIds = new ArrayList<>();
         this.legoUUIDs = new HashSet<>();
         this.legoUUIDsUsage = new HashMap<>();
@@ -136,6 +135,11 @@ public class LegoListBDB
     public String getGroupName()
     {
         return groupName;
+    }
+    
+    public void setGroupName(String groupName)
+    {
+        this.groupName = groupName;
     }
 
     public String getGroupDescription()

@@ -154,17 +154,6 @@ public class ImportDialogController implements Initializable
                     status.append("Skipped " + f.getName());
                 }
                 
-                try
-                {
-                    //TODO BUG this helps with http://javafx-jira.kenai.com/browse/RT-27827
-                    //remove when we find a solution
-                    Thread.sleep(250);
-                }
-                catch (InterruptedException e)
-                {
-                    // noop
-                }
-                
                 status.append(System.getProperty("line.separator"));
                 status.append(System.getProperty("line.separator"));
                 count++;

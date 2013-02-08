@@ -237,9 +237,10 @@ public class LegoGUIModel
         updateLegoLists();
     }
     
-    public void updateLegoList(LegoListByReference llbr, TreeItem<String> ti, String description, String comments) throws DataStoreException, WriteException
+    public void updateLegoList(LegoListByReference llbr, TreeItem<String> ti, String name, String description, String comments) throws DataStoreException, WriteException
     {
-        BDBDataStoreImpl.getInstance().updateLegoListMetadata(llbr.getLegoListUUID(), description, comments);
+        BDBDataStoreImpl.getInstance().updateLegoListMetadata(llbr.getLegoListUUID(), name, description, comments);
+        llbr.setGroupName(name);
         llbr.setComments(comments);
         llbr.setDescription(description);
         if (ti != null)

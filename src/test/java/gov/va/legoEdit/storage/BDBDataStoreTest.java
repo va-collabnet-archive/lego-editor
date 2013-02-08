@@ -86,9 +86,9 @@ public class BDBDataStoreTest
     @Test
     public void testLegoListStorage() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         CloseableIterator<LegoList> iterator = BDBDataStoreImpl.getInstance().getLegoLists();
         int count = 0;
@@ -114,9 +114,9 @@ public class BDBDataStoreTest
     @Test
     public void testLegoListSearchByLegoId() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
 
@@ -156,9 +156,9 @@ public class BDBDataStoreTest
     @Test
     public void testLegoSearch() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
 
@@ -178,9 +178,9 @@ public class BDBDataStoreTest
     @Test
     public void testLegoSearchBySCTConcept() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
         Lego l1 = new Lego();
@@ -253,7 +253,7 @@ public class BDBDataStoreTest
 
         l1.getAssertion().add(a);
         
-        BDBDataStoreImpl.getInstance().commitLego(l1, BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null).getLegoListUUID());
+        BDBDataStoreImpl.getInstance().commitLego(l1, BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null).getLegoListUUID());
         
         Lego l2 = new Lego();
         l2.setLegoUUID(UUID.nameUUIDFromBytes("bar".getBytes()).toString());
@@ -266,8 +266,8 @@ public class BDBDataStoreTest
 
         l2.getAssertion().add(a);
         
-        BDBDataStoreImpl.getInstance().commitLego(l2, BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null).getLegoListUUID());
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().commitLego(l2, BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null).getLegoListUUID());
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
         
         assertEquals("Didn't find lego",
                 BDBDataStoreImpl.getInstance().getLegosUsingAssertion("jane").get(0).getLegoUUID(), UUID.nameUUIDFromBytes("foo".getBytes()).toString());
@@ -341,9 +341,9 @@ public class BDBDataStoreTest
     @Test
     public void testPncsSearch() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
 
@@ -393,9 +393,9 @@ public class BDBDataStoreTest
     @Test
     public void testPncslookup() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
 
@@ -452,9 +452,9 @@ public class BDBDataStoreTest
     @Test
     public void testLegoGetAndDelete() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         String aId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
         String bId = BDBDataStoreImpl.getInstance().getLegoListByName("b").getLegoListUUID();
@@ -579,9 +579,9 @@ public class BDBDataStoreTest
     @Test
     public void testDelete() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
 
         String legoListAId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
         String legoListBId = BDBDataStoreImpl.getInstance().getLegoListByName("b").getLegoListUUID();
@@ -666,8 +666,8 @@ public class BDBDataStoreTest
     @Test
     public void testCommitErrorCheck() throws WriteException
     {
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "a description", null);
 
         String legoListAId = BDBDataStoreImpl.getInstance().getLegoListByName("a").getLegoListUUID();
         String legoListBId = BDBDataStoreImpl.getInstance().getLegoListByName("b").getLegoListUUID();
@@ -770,9 +770,9 @@ public class BDBDataStoreTest
         }
         assertEquals("Should have been 0!", count, 0);
         
-        BDBDataStoreImpl.getInstance().createLegoList("a", "a description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("b", "b description", null);
-        BDBDataStoreImpl.getInstance().createLegoList("c", "c description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "a", "a description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "b", "b description", null);
+        BDBDataStoreImpl.getInstance().createLegoList(UUID.randomUUID().toString(), "c", "c description", null);
         
         count = 0;
         i = BDBDataStoreImpl.getInstance().getLegoLists();

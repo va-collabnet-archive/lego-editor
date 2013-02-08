@@ -55,6 +55,11 @@ public class LegoListByReference
         return comments;
     }
     
+    public void setGroupName(String groupName)
+    {
+        this.groupName = groupName;
+    }
+    
     public void setComments(String comments)
     {
         this.comments = comments;

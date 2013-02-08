@@ -23,7 +23,6 @@ import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Interval;
 import gov.va.legoEdit.model.schemaModel.Lego;
-import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.PointMeasurementConstant;
@@ -41,7 +40,6 @@ import gov.va.legoEdit.util.TimeConvert;
 import java.util.List;
 import java.util.UUID;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -79,10 +77,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
     public static ObservableList<String> inclusiveChoices_ = FXCollections.observableArrayList(new String[] {"\u2264", "<"});
     
     private LegoTreeView treeView;
-    
-    //TODO there is a bug that I've seen a couple of times now, where the focus will start jumping between multiple fields, and you can't stop it
-    //without closing the lego tab.  From the logs, it doesn't seem to be doing snomed looks during the cycle either.  Not sure what is going on.
-    //need to catch it in a debugger...
     
     public LegoTreeCell(LegoTreeView ltv)
     {
@@ -181,22 +175,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
             {
                 if (treeItem.getNodeType() == LegoTreeNodeType.legoListByReference)
                 {
-                    final SimpleStringProperty legoListDescriptionProperty = new SimpleStringProperty(
-                            ((LegoListByReference) treeItem.getExtraData()).getGroupDescription());
-                    Tooltip tp = new Tooltip();
-                    tp.textProperty().bind(legoListDescriptionProperty);
+                    Tooltip tp = new Tooltip(((LegoListByReference) treeItem.getExtraData()).getGroupDescription());
                     setTooltip(tp);
-    
-                    legoListDescriptionProperty.addListener(new ChangeListener<String>()
-                    {
-                        @Override
-                        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-                        {
-                            ((LegoList) treeItem.getExtraData()).setGroupDescription(newValue);
-                        }
-                    });
-                    
-                    addMenus((LegoListByReference) treeItem.getExtraData(), treeItem, legoListDescriptionProperty, cm);
+                    treeItem.setValue(((LegoListByReference) treeItem.getExtraData()).getGroupName());
+                    addMenus((LegoListByReference) treeItem.getExtraData(), treeItem, cm);
                 }
                 else if (treeItem.getNodeType() == LegoTreeNodeType.legoReference)
                 {
@@ -209,7 +191,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     {
                         styleProperty().bind(style);
                     }
-                    //setEditable(true);  //don't actually need this?
                     addMenus(legoReference, treeItem, cm);
                 }
                 else if (treeItem.getNodeType() == LegoTreeNodeType.status)
@@ -1518,7 +1499,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         }
     }
     
-    private void addMenus(final LegoListByReference llbr, final LegoTreeItem treeItem, final StringProperty legoListDescriptionProperty, ContextMenu cm)
+    private void addMenus(final LegoListByReference llbr, final LegoTreeItem treeItem, ContextMenu cm)
     {
         MenuItem mi;
         mi = new MenuItem("Create New Lego Within Lego List");

@@ -690,7 +690,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
     }
 
     @Override
-    public LegoList createLegoList(String groupName, String groupDescription, String comments) throws WriteException
+    public LegoList createLegoList(String uuid, String groupName, String groupDescription, String comments) throws WriteException
     {
         try
         {
@@ -698,7 +698,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
             {
                 throw new WriteException("A legoList already exists with the name " + groupName);
             }
-            LegoListBDB ll = new LegoListBDB(groupName, groupDescription, comments);
+            LegoListBDB ll = new LegoListBDB(uuid, groupName, groupDescription, comments);
             legoListByUUID.put(ll);
             return ll.toSchemaLegoList();
         }
@@ -708,8 +708,6 @@ public class BDBDataStoreImpl implements DataStoreInterface
             throw new WriteException("Unexpected Error storing data", e);
         }
     }
-    
-    //TODO allow  lego list group name to be changed
 
     @Override
     public void importLegoList(LegoList legoList) throws WriteException
@@ -768,8 +766,6 @@ public class BDBDataStoreImpl implements DataStoreInterface
             throw new WriteException("Unexpected error - LegoList was not stored", e);
         }
     }
-    
-    
 
     @Override
     public void deleteLego(String legoListUUID, String legoUUID, String stampUUID) throws WriteException
@@ -1102,7 +1098,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
     }
 
     @Override
-    public void updateLegoListMetadata(String legoListUUID, String groupDescription, String comments)
+    public void updateLegoListMetadata(String legoListUUID, String groupName, String groupDescription, String comments)
             throws WriteException
     {
         try
@@ -1114,6 +1110,18 @@ public class BDBDataStoreImpl implements DataStoreInterface
             }
             else
             {
+                if (groupName != null && !(ll.getGroupName().equals(groupName)))
+                {
+                    if (groupName.length() == 0)
+                    {
+                        throw new WriteException("No group name specified");
+                    }
+                    if (legoListByName.contains(groupName))
+                    {
+                        throw new WriteException("A legoList already exists with the name " + groupName);
+                    }
+                    ll.setGroupName(groupName);
+                }
                 if (groupDescription != null)
                 {
                     ll.setGroupDescription(groupDescription);
@@ -1133,6 +1141,5 @@ public class BDBDataStoreImpl implements DataStoreInterface
             logger.error("Unexpected error writing data", e);
             throw new DataStoreException("Data write failure", e);
         }
-        
     }
 }

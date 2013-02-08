@@ -66,8 +66,10 @@ public class LegoListPropertiesController implements Initializable
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
             {
-                //not editable when not new, so always valid
-                if (llbr_ != null || (newValue.length() > 0 && BDBDataStoreImpl.getInstance().getLegoListByName(newValue) == null))
+                //need to make sure it doesn't collide with something in the DB. Ok to collide with self.
+                if (newValue.length() > 0 
+                        && ((llbr_ != null && llbr_.getGroupName().equals(newValue)) 
+                                || BDBDataStoreImpl.getInstance().getLegoListByName(newValue) == null))
                 {
                     nameValid.set(true);
                     legoListName.setEffect(null);
@@ -145,7 +147,8 @@ public class LegoListPropertiesController implements Initializable
                 {
                     try
                     {
-                        LegoGUIModel.getInstance().updateLegoList(llbr_, ti_, legoListDescription.getText(), legoListComments.getText());
+                        LegoGUIModel.getInstance().updateLegoList(llbr_, ti_, legoListName.getText(), legoListDescription.getText(), 
+                                legoListComments.getText());
                     }
                     catch (WriteException e)
                     {
@@ -165,7 +168,6 @@ public class LegoListPropertiesController implements Initializable
         llbr_ = llbr;
         legoListDescription.setText(llbr == null ? "" : llbr.getGroupDescription());
         legoListName.setText(llbr == null ? "" : llbr.getGroupName());
-        legoListName.setEditable(llbr == null);
         legoListUUID.setText(llbr == null ? UUID.randomUUID().toString() : llbr.getLegoListUUID());
         legoListComments.setText(llbr == null ? "" : llbr.getComments());
     }
