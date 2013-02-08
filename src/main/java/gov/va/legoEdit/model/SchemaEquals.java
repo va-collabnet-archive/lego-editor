@@ -231,7 +231,17 @@ public class SchemaEquals
         }
         else if (a instanceof PointMeasurementConstant && b instanceof PointMeasurementConstant)
         {
-            return ((PointMeasurementConstant)a).getValue().equals(((PointMeasurementConstant)b).getValue());
+            PointMeasurementConstant pmca = (PointMeasurementConstant)a;
+            PointMeasurementConstant pmcb = (PointMeasurementConstant)b;
+            if (pmca.getValue() == null && pmcb.getValue() == null)
+            {
+                return true;
+            }
+            else if ((pmca.getValue() == null && pmcb.getValue() != null) || (pmca.getValue() != null && pmcb.getValue() == null))
+            {
+                return false;
+            }
+            return (pmca.getValue().equals(pmcb.getValue()));
         }
         //different types, or an unsupported type
         return false;

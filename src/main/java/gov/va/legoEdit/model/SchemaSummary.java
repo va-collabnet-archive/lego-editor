@@ -76,7 +76,10 @@ public class SchemaSummary
         }
         else if (p instanceof PointMeasurementConstant)
         {
-            return ((PointMeasurementConstant)p).getValue().name();
+            if (((PointMeasurementConstant)p).getValue() != null)
+            {
+                return ((PointMeasurementConstant)p).getValue().name();
+            }
         }
         return "";
     }

@@ -1,3 +1,4 @@
 Lego Editor Change Log
 
-  *  Implemented Copy/Paste for Assertions, D / Q / V and Expressions 
+  *  Implemented Copy/Paste for Assertions, D / Q / V and Expressions anywhere else the appear
+  *  Fixed null pointers that could happen with empty measurement values 

@@ -313,7 +313,10 @@ public class LegoTreeItem extends TreeItem<String>
 	        
 	        for (Expression e : expression.getExpression())
 	        {
-	            getChildren().add(new LegoTreeItem(e, tct));
+	            //If we are building a conjunction, and the type is Discernible or qualifier - the expressions become optional
+	            getChildren().add(new LegoTreeItem(e, 
+	                    (tct == LegoTreeNodeType.expressionDiscernible || tct == LegoTreeNodeType.expressionQualifier) 
+	                        ? LegoTreeNodeType.expressionOptional : tct));
 	        }
 		}
 		

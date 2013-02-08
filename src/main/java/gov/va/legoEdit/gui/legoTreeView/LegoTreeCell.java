@@ -896,13 +896,15 @@ public class LegoTreeCell<T> extends TreeCell<T>
             }
             Utility.expandAll(lti);
         }
-        else
+        else  //We know it has a concept
         {
+            //Becomes optional when on a conjunction.  Value is already optional, so don't need to switch that one.
             if (type == LegoTreeNodeType.expressionDiscernible || type == LegoTreeNodeType.expressionQualifier)
             {
                 type = LegoTreeNodeType.expressionOptional;
             }
 
+            //Not a conjunction yet - convert to one
             if (expression.getConcept() != null)
             {
                 // need to convert to a conjunction
@@ -936,6 +938,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             }
 
+            //Add to the conjunction
             Expression newExpression = new Expression();
             newExpression.setConcept(c);
             expression.getExpression().add(newExpression);
@@ -994,10 +997,30 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     a.getQualifier().setExpression(clonedExpression);
                     newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionQualifier);
                 }
+                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionValue)
+                {
+                    Value v = (Value)parentLegoTreeItem.getExtraData();
+                    v.setExpression(clonedExpression);
+                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionValue);
+                }
+                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDestination)
+                {
+                    Relation r = (Relation)parentLegoTreeItem.getExtraData();
+                    r.getDestination().setExpression(clonedExpression);
+                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDestination);
+                }
+                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionOptional)
+                {
+                    Expression parentExpression = (Expression)parentLegoTreeItem.getExtraData();
+                    parentExpression.getExpression().remove(oldExpression);
+                    parentExpression.getExpression().add(clonedExpression);
+                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionOptional);
+                }
                 else
                 {
-                    //TODO I know I need to handle Expression and Value Expression yet
-                    logger.error("Unhandled paste type in expression (not yet implemented)! " + parentLegoTreeItem.getExtraData().getClass().getName());
+                    //I think I have all the cases handled.... 
+                    logger.error("Unhandled paste type in expression " + parentLegoTreeItem.getExtraData().getClass().getName());
+                    LegoGUI.getInstance().showErrorDialog("Unhandled paste operation", "Unhandled paste operation", "Please file a bug with your log file attached");
                     return;
                 }
                 
