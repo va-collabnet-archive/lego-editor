@@ -62,6 +62,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -87,38 +88,27 @@ public class LegoTreeCell<T> extends TreeCell<T>
     {
         //For reasons I don't understand, the getTreeView() method is unreliable, sometimes returning null.  Either a bug in javafx, or really poorly documented...
         this.treeView = ltv;
-    }
-    
-    @Override
-    public void cancelEdit()
-    {
-        super.cancelEdit();
-    }
-
-    @Override
-    public void commitEdit(T newValue)
-    {
-        super.commitEdit(newValue);
-    }
-
-    @Override
-    public void startEdit()
-    {
-        super.startEdit();
-
-        final LegoTreeItem treeItem = (LegoTreeItem) getTreeItem();
-        if (treeItem.getNodeType() != null)
+        
+        addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>()
         {
-            if (LegoTreeNodeType.legoReference == treeItem.getNodeType())
+            @Override
+            public void handle(MouseEvent event)
             {
-                LegoReference lr = (LegoReference) treeItem.getExtraData();
-                LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(lr, treeItem);
+                if (event.getClickCount() > 1)
+                {
+                  final LegoTreeItem treeItem = (LegoTreeItem) getTreeItem();
+                  if (treeItem.getNodeType() != null)
+                  {
+                      if (LegoTreeNodeType.legoReference == treeItem.getNodeType())
+                      {
+                          LegoReference lr = (LegoReference) treeItem.getExtraData();
+                          LegoGUI.getInstance().getLegoGUIController().beginLegoEdit(lr, treeItem);
+                      }
+                  }
+                }
             }
-        }
-        //We don't need the edit to continue past this point, so cancel.  Might change this in the future.
-        cancelEdit();
+        });
     }
-
 
     @Override
     public void updateItem(T item, boolean empty)

@@ -83,7 +83,7 @@ public class LegoFilterPaneController  implements Initializable {
 
         // initialize your logic here: all @FXML variables will have been injected
         
-        ltv = new LegoTreeView(true);
+        ltv = new LegoTreeView();
         borderPane.setCenter(ltv);
         AnchorPane.setBottomAnchor(borderPane, 0.0);
         AnchorPane.setTopAnchor(borderPane, 0.0);

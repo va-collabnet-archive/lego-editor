@@ -11,7 +11,7 @@ public class LegoTreeView extends TreeView<String>
 {
     private LegoTab legoTab_;
     
-	public LegoTreeView(boolean editable)
+	public LegoTreeView()
 	{
 		getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		setCellFactory(new Callback<TreeView<String>, TreeCell<String>>()
@@ -22,7 +22,8 @@ public class LegoTreeView extends TreeView<String>
 				return new LegoTreeCell<String>(LegoTreeView.this);
 			}
 		});
-		setEditable(editable);
+		//Not going to use the edit API, not reliable.  Just detect doubleclick instead.
+		setEditable(false);
 		LegoTreeItem treeRoot = new LegoTreeItem();
         setShowRoot(false);
         setRoot(treeRoot);

@@ -207,7 +207,7 @@ public class SchemaEquals
         }
 
         return equals(a.getInterval(), b.getInterval()) && equals(a.getPoint(), b.getPoint())
-                && equals(a.getUnits(), b.getUnits());
+                && equals(a.getBound(), b.getBound()) && equals(a.getUnits(), b.getUnits());
     }
 
     public static boolean equals(Point a, Point b)

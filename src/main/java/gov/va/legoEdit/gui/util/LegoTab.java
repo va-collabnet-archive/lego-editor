@@ -127,7 +127,7 @@ public class LegoTab extends Tab
                 displayedLego.getLegoUUID(), displayedLego.getStamp().getAuthor(), displayedLego.getStamp().getModule(), 
                 TimeConvert.format(displayedLego.getStamp().getTime()), displayedLego.getStamp().getPath());
         
-        LegoTreeView legoTree = new LegoTreeView(false);
+        LegoTreeView legoTree = new LegoTreeView();
         legoTree.setLegoTab(this);
         
         BorderPane bp = new BorderPane();
