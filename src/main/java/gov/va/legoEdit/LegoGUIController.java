@@ -875,6 +875,11 @@ public class LegoGUIController implements Initializable
         }
     }
     
+    public LegoTab getLegoEditTabIfOpen(String uniqueLegoId)
+    {
+        return displayedLegos.get(uniqueLegoId);
+    }
+    
     private void beginLegoEdit(Lego lego, LegoTreeItem lti)
     {
         if (lego != null)

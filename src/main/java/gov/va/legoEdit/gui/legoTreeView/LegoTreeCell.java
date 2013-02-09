@@ -9,6 +9,7 @@ import gov.va.legoEdit.gui.util.CopyableLabel;
 import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.Images;
+import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoListByReference;
@@ -182,14 +183,46 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
                 else if (treeItem.getNodeType() == LegoTreeNodeType.legoReference)
                 {
-                    LegoReference legoReference = (LegoReference)treeItem.getExtraData();
-                    Label l = new Label(TimeConvert.format(legoReference.getStampTime()));
-                    l.setGraphic(legoReference.isNew() ? Images.LEGO_EDIT.createImageView() : Images.LEGO.createImageView());
+                    final LegoReference legoReference = (LegoReference)treeItem.getExtraData();
+                    final Label l = new Label(TimeConvert.format(legoReference.getStampTime()));
+                    
                     setGraphic(l);
+                    LegoTab lt = LegoGUI.getInstance().getLegoGUIController().getLegoEditTabIfOpen(legoReference.getUniqueId());
+                    if (lt == null)
+                    {
+                        l.setGraphic(legoReference.isNew() ? Images.LEGO_EDIT.createImageView() : Images.LEGO.createImageView());
+                    }
+                    else
+                    {
+                        l.setGraphic(lt.hasUnsavedChangesProperty().get() ? Images.LEGO_EDIT.createImageView() : Images.LEGO.createImageView());
+                        lt.hasUnsavedChangesProperty().addListener(new ChangeListener<Boolean>()
+                        {
+                            @Override
+                            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+                            {
+                                l.setGraphic(newValue ? Images.LEGO_EDIT.createImageView() : Images.LEGO.createImageView());
+                            }
+                        });
+                    }
                     StringProperty style = LegoGUI.getInstance().getLegoGUIController().getStyleForLego(legoReference); 
                     if (style != null)
                     {
                         styleProperty().bind(style);
+                        //Hack to set the graphic back when a lego is closed.  The style is updated when the lego is closed, so we know we 
+                        //can set the graphic back to the not-edited graphic.
+                        style.addListener(new ChangeListener<String>()
+                        {
+                            @Override
+                            public void changed(ObservableValue<? extends String> observable, String oldValue,
+                                    String newValue)
+                            {
+                                LegoTab lt = LegoGUI.getInstance().getLegoGUIController().getLegoEditTabIfOpen(legoReference.getUniqueId());
+                                if (lt == null)
+                                {
+                                    l.setGraphic(legoReference.isNew() ? Images.LEGO_EDIT.createImageView() : Images.LEGO.createImageView());
+                                }
+                            }
+                        });
                     }
                     addMenus(legoReference, treeItem, cm);
                 }
@@ -566,6 +599,15 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             }
             // done with massive if/else
+            //Deal with javafx memory leak (at least help)
+            if (getContextMenu() != null)
+            {
+                for (MenuItem mi : getContextMenu().getItems())
+                {
+                    mi.visibleProperty().unbind();
+                }
+                setContextMenu(null);
+            }
             if (cm.getItems().size() > 0)
             {
                 setContextMenu(cm);
@@ -2415,5 +2457,21 @@ public class LegoTreeCell<T> extends TreeCell<T>
             return findType((LegoTreeItem)parent);
         }
         return null;
+    }
+    
+    @Override
+    protected void finalize() throws Throwable
+    {
+        //Help deal with javafx memory leaks
+        styleProperty().unbind();
+        ContextMenu cm = getContextMenu();
+        if (cm != null)
+        {
+            for (MenuItem mi : cm.getItems())
+            {
+                mi.visibleProperty().unbind();
+            }
+        }
+        super.finalize();
     }
 }

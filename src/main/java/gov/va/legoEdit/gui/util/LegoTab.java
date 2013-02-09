@@ -106,8 +106,7 @@ public class LegoTab extends Tab
         
         legoNeedsSaving.addListener(new ChangeListener<Boolean>()
         {
-            
-            @Override
+           @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
             {
                 if (newValue)
