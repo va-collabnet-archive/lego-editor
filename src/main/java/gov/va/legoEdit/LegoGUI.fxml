@@ -81,6 +81,11 @@
             <MenuItem mnemonicParsing="false" text="Preferences..." fx:id="menuEditPreferences" />
           </items>
         </Menu>
+        <Menu id="menuHelp" text="_Help" fx:id="menuHelp">
+          <items>
+            <MenuItem id="menuHelpAbout" mnemonicParsing="false" text="About" fx:id="menuHelpAbout"/>
+          </items>
+        </Menu>
       </menus>
     </MenuBar>
   </children>

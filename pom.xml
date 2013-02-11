@@ -150,6 +150,30 @@
 	            	</execution>
 	            </executions>
 	        </plugin>
+			<plugin>
+				<!-- Get a proper SVN version number to be compiled into the editor for the about box -->
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<exec dir="${basedir}" executable="svn" failifexecutionfails="false" 
+								    output="${basedir}/src/main/resources/svnVersion.txt" searchpath="true">
+									<arg line="info"/>
+								</exec>
+								<exec dir="${basedir}" executable="svnversion" failifexecutionfails="false" 
+								    output="${basedir}/src/main/resources/svnVersion.txt" searchpath="true" append="true">
+								    <arg line="-n"/>
+								</exec>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
     </build>
 </project>

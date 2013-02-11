@@ -135,6 +135,10 @@ public class LegoGUIController implements Initializable
     private Menu menuEdit; // Value injected by FXMLLoader
     @FXML //  fx:id="menuEditPreferences"
     private MenuItem menuEditPreferences; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuHelp"
+    private Menu menuHelp; // Value injected by FXMLLoader
+    @FXML //  fx:id="menuHelpAbout"
+    private MenuItem menuHelpAbout; // Value injected by FXMLLoader
     @FXML //  fx:id="menuRecentSctCodes"
     private MenuButton menuRecentSctCodes; // Value injected by FXMLLoader
     @FXML //  fx:id="showAllLegoListBtn"
@@ -782,7 +786,7 @@ public class LegoGUIController implements Initializable
                 List<File> files = fc.showOpenMultipleDialog(rootPane.getScene().getWindow());
                 if (files != null && files.size() > 0)
                 {
-                    //TODO nasty bug here.  http://javafx-jira.kenai.com/browse/RT-27827
+                    //TODO nasty bug here.  http://javafx-jira.kenai.com/browse/RT-27827  Need to allow selecting a folder as well, to mitigate
                     LegoGUI.getInstance().showImportDialog(files);
                 }
             }
@@ -823,11 +827,19 @@ public class LegoGUIController implements Initializable
         menuEditPreferences.setGraphic(Images.PREFERENCES.createImageView());
         menuEditPreferences.setOnAction(new EventHandler<ActionEvent>()
         {
-            
             @Override
             public void handle(ActionEvent event)
             {
                 LegoGUI.getInstance().showUserPreferences();
+            }
+        });
+        
+        menuHelpAbout.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent event)
+            {
+                LegoGUI.getInstance().showAboutDialog();
             }
         });
     }

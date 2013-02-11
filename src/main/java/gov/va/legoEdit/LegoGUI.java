@@ -1,6 +1,7 @@
 package gov.va.legoEdit;
 
 import gov.va.legoEdit.formats.LegoXMLUtils;
+import gov.va.legoEdit.gui.dialogs.AboutDialogController;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
 import gov.va.legoEdit.gui.dialogs.ImportDialogController;
@@ -216,6 +217,7 @@ public class LegoGUI extends Application
             showErrorDialog("Unexpected Error", "Unexpected Error displaying snomed concept view", e.toString());
         }
     }
+	
     public void showSnomedConceptDialog(FxConcept concept)
     {
         try
@@ -246,6 +248,29 @@ public class LegoGUI extends Application
 	    llpc_.setVariables(llbr, ti);
 	    legoListPropertiesStage_.show();
 	}
+	
+	public void showAboutDialog()
+    {
+        try
+        {
+            Stage aboutStage = new Stage();
+            aboutStage.initModality(Modality.APPLICATION_MODAL);
+            aboutStage.initOwner(mainStage_);
+            aboutStage.initStyle(StageStyle.DECORATED);
+            FXMLLoader loader = new FXMLLoader();
+            Scene scene = new Scene((Parent) loader.load(AboutDialogController.class.getResourceAsStream("AboutDialog.fxml")));
+            scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+            aboutStage.setScene(scene);
+            aboutStage.setTitle("About Lego Editor");
+            aboutStage.getIcons().add(Images.APPLICATION.getImage());
+            aboutStage.show();
+        }
+        catch (Exception e)
+        {
+            logger.error("Unexpected error displaying about dialog", e);
+            showErrorDialog("Unexpected Error", "Unexpected Error displaying about dialot", e.toString());
+        }
+    }
 	
 	protected Stage getMainStage()
 	{
