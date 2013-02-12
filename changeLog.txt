@@ -1,5 +1,6 @@
 Lego Editor Change Log
 
+2012/02/10 - 0.5
   *  Fixed null pointers that could happen with empty measurement values 
   *  Fixed a bug that caused a doubleclick to sometimes not open a lego for editing
   *  Fix memory leaks caused by javafx Bindings
