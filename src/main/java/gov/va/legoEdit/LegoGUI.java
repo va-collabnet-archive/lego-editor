@@ -262,7 +262,7 @@ public class LegoGUI extends Application
             scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
             aboutStage.setScene(scene);
             aboutStage.setTitle("About Lego Editor");
-            aboutStage.getIcons().add(Images.APPLICATION.getImage());
+            aboutStage.getIcons().add(Images.INFO.getImage());
             aboutStage.show();
         }
         catch (Exception e)

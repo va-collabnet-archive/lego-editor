@@ -834,6 +834,7 @@ public class LegoGUIController implements Initializable
             }
         });
         
+        menuHelpAbout.setGraphic(Images.INFO.createImageView());
         menuHelpAbout.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override

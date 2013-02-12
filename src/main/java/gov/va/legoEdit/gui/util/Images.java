@@ -43,6 +43,7 @@ public enum Images
     PASTE(setupImage("/icons/fugue/16x16/icons-shadowless/clipboard-paste-document-text.png")),
     ADD(setupImage("/icons/silk/16x16/add.png")),
     DELETE(setupImage("/icons/silk/16x16/delete.png")),
+    INFO(setupImage("/icons/fugue/16x16/icons-shadowless/information-frame.png")),
     SAVE(setupImage("/icons/fugue/16x16/icons-shadowless/disk-black.png")),
     EXIT(setupImage("/icons/fugue/16x16/icons-shadowless/cross.png"));
     
