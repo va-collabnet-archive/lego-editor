@@ -65,12 +65,12 @@ public class SchemaToString
         
         StringBuilder sb = new StringBuilder();
         sb.append(prefix + "Stamp:");
-        sb.append(prefix + "  " + stamp.getAuthor());
-        sb.append(prefix + "  " + stamp.getModule());
-        sb.append(prefix + "  " + stamp.getPath());
-        sb.append(prefix + "  " + stamp.getStatus());
-        sb.append(prefix + "  " + new Date(TimeConvert.convert(stamp.getTime())).toString());
-        sb.append(prefix + "  " + stamp.getUuid());
+        sb.append(eol + prefix + "  Status: " + stamp.getStatus());
+        sb.append(eol + prefix + "  Time: " + new Date(TimeConvert.convert(stamp.getTime())).toString());
+        sb.append(eol + prefix + "  Author: " + stamp.getAuthor());
+        sb.append(eol + prefix + "  Module: " + stamp.getModule());
+        sb.append(eol + prefix + "  Path: " + stamp.getPath());
+        sb.append(eol + prefix + "  UUID: " + stamp.getUuid());
         
         return sb.toString();
     }
@@ -84,14 +84,14 @@ public class SchemaToString
         
         StringBuilder sb = new StringBuilder();
         sb.append(prefix + "Assertion " + a.getAssertionUUID());
-        sb.append(eol + prefix + toString(a.getDiscernible(), prefix + "  "));
-        sb.append(eol + prefix + toString(a.getQualifier(), prefix + "  "));
+        sb.append(eol + toString(a.getDiscernible(), prefix + "  "));
+        sb.append(eol + toString(a.getQualifier(), prefix + "  "));
         String timing = toString(a.getTiming(), prefix + "  ", "Timing");
         if (timing.length() > 0)
         {
-            sb.append(eol + prefix + timing);
+            sb.append(eol + timing);
         }
-        sb.append(eol + prefix + toString(a.getValue(), prefix + "  "));
+        sb.append(eol + toString(a.getValue(), prefix + "  "));
         if (a.getAssertionComponent().size() > 0)
         {
             sb.append(prefix + "Assertion Components" + eol);

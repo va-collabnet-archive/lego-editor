@@ -3,6 +3,7 @@ package gov.va.legoEdit.gui.util;
 import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Expression;
+import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Value;
 import java.util.ArrayList;
 import javafx.beans.binding.Binding;
@@ -56,14 +57,28 @@ public class CustomClipboard
         }
     };
     
+    public static BooleanBinding containsLego = new BooleanBinding()
+    {
+        @Override
+        protected boolean computeValue()
+        {
+            return containsType(Lego.class);
+        }
+    };
+    
     static
     {
         bindings_.add(containsAssertion);
         bindings_.add(containsValue);
         bindings_.add(containsExpression);
         bindings_.add(containsString);
+        bindings_.add(containsLego);
     }
     
+    public static void set(Lego l)
+    {
+        set(l, SchemaToString.toString(l));
+    }
     
     public static void set(Assertion a)
     {
@@ -127,6 +142,16 @@ public class CustomClipboard
         {
             return clipboard_.getString();
         }
+        return null;
+    }
+    
+    public static Lego getLego()
+    {
+        if (containsLego.get())
+        {
+            return (Lego)object_;
+        }
+
         return null;
     }
     

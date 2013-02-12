@@ -185,9 +185,9 @@ public class LegoGUI extends Application
         }
     }
 	
-	public void showCreateLegoDialog(LegoListByReference llbr, LegoTreeItem ti)
+	public void showCreateLegoDialog(LegoListByReference llbr, LegoTreeItem ti, boolean fromPaste)
     {
-	    clc_.init(llbr, ti);
+	    clc_.init(llbr, ti, fromPaste);
 	    createLegoStage_.show();
     }
 	

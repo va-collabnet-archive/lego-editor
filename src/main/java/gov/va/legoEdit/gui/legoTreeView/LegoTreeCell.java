@@ -141,6 +141,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                             addAssertion();
                         }
                     });
+                    mi.setGraphic(Images.ADD.createImageView());
                     cm.getItems().add(mi);
                     
                     mi = new MenuItem("Paste Assertion");
@@ -153,6 +154,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         }
                     });
                     mi.visibleProperty().bind(CustomClipboard.containsAssertion);
+                    mi.setGraphic(Images.PASTE.createImageView());
                     cm.getItems().add(mi);
 
                     
@@ -169,6 +171,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                             LegoGUI.getInstance().showLegoListPropertiesDialog(null, null);
                         }
                     });
+                    mi.setGraphic(Images.LEGO_ADD.createImageView());
                     cm.getItems().add(mi);
                 }
             }
@@ -260,10 +263,23 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         @Override
                         public void handle(ActionEvent arg0)
                         {
-                            createNewLego(treeItem);
+                            createNewLego(treeItem, false);
                         }
                     });
                     mi.setGraphic(Images.LEGO_ADD.createImageView());
+                    cm.getItems().add(mi);
+                    
+                    mi = new MenuItem("Paste Lego (using this PNCS name / value)");
+                    mi.setOnAction(new EventHandler<ActionEvent>()
+                    {
+                        @Override
+                        public void handle(ActionEvent arg0)
+                        {
+                            createNewLego(treeItem, true);
+                        }
+                    });
+                    mi.visibleProperty().bind(CustomClipboard.containsLego);
+                    mi.setGraphic(Images.PASTE.createImageView());
                     cm.getItems().add(mi);
                 }
                 else if (treeItem.getNodeType() == LegoTreeNodeType.assertion)
@@ -1049,7 +1065,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             else
             {
                 CustomClipboard.updateBindings();
-                LegoGUI.getInstance().showErrorDialog("No Value on Clipboard", "The Clipboard does not contain a Value", null);
+                LegoGUI.getInstance().showErrorDialog("No Expression on Clipboard", "The Clipboard does not contain an Expression", null);
             }
         }
         catch (JAXBException e)
@@ -1491,7 +1507,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
         Utility.expandAll(lti);
     }
 
-    private void createNewLego(LegoTreeItem ti)
+    private void createNewLego(LegoTreeItem ti, boolean fromPaste)
     {
         if (ti.getNodeType() == LegoTreeNodeType.pncsValue)
         {
@@ -1502,30 +1518,73 @@ public class LegoTreeCell<T> extends TreeCell<T>
             // Should always be at least one child
             int pncsId = ((LegoReference) ((LegoTreeItem) ti.getChildren().get(0)).getExtraData()).getPncs().getId();
             LegoListByReference llbr = (LegoListByReference) ((LegoTreeItem) ti.getParent().getParent()).getExtraData();
-    
-            Lego l = new Lego();
+            
             Pncs pncs = new Pncs();
             pncs.setName(pncsName);
             pncs.setValue(pncsValue);
             pncs.setId(pncsId);
-            l.setPncs(pncs);
-    
-            Stamp s = new Stamp();
+            
             UserPreferences up = LegoGUIModel.getInstance().getUserPreferences(); 
-            s.setAuthor(up.getAuthor());
-            s.setModule(up.getModule());
-            s.setPath(up.getPath());
-            s.setStatus(statusChoices_.get(0));
-            s.setTime(TimeConvert.convert(System.currentTimeMillis()));
-            s.setUuid(UUID.randomUUID().toString());
-            l.setStamp(s);
+            
+            Lego l;
+            if (fromPaste)
+            {
+                l = CustomClipboard.getLego();
+                if (l == null)
+                {
+                    LegoGUI.getInstance().showErrorDialog("Not a Lego", "The Clipboard does not contain a Lego", null);
+                    CustomClipboard.updateBindings();
+                    return;
+                }
+                Stamp s = l.getStamp();
+                if (s == null)
+                {
+                    //set everything
+                    s = new Stamp();
+                    s.setAuthor(up.getAuthor());
+                    s.setModule(up.getModule());
+                    s.setPath(up.getPath());
+                    s.setStatus(statusChoices_.get(0));
+                    s.setTime(TimeConvert.convert(System.currentTimeMillis()));
+                    s.setUuid(UUID.randomUUID().toString());
+                    l.setStamp(s);
+                }
+                else
+                {
+                    //just set the author, time and uuid
+                    s.setAuthor(up.getAuthor());
+                    s.setTime(TimeConvert.convert(System.currentTimeMillis()));
+                    s.setUuid(UUID.randomUUID().toString());
+                }
+                l.setStamp(s);
+                
+                //Change all the assertion UUIDs
+                for (Assertion a : l.getAssertion())
+                {
+                    a.setAssertionUUID(UUID.randomUUID().toString());
+                }
+            }
+            else
+            {
+                l = new Lego();
+        
+                Stamp s = new Stamp();
+                s.setAuthor(up.getAuthor());
+                s.setModule(up.getModule());
+                s.setPath(up.getPath());
+                s.setStatus(statusChoices_.get(0));
+                s.setTime(TimeConvert.convert(System.currentTimeMillis()));
+                s.setUuid(UUID.randomUUID().toString());
+                l.setStamp(s);
+        
+                Assertion a = new Assertion();
+                a.setAssertionUUID(UUID.randomUUID().toString());
+                l.getAssertion().add(a);
+            }
     
+            l.setPncs(pncs);
             l.setLegoUUID(UUID.randomUUID().toString());
-    
-            Assertion a = new Assertion();
-            a.setAssertionUUID(UUID.randomUUID().toString());
-            l.getAssertion().add(a);
-    
+            
             LegoReference lr = new LegoReference(l);
             lr.setIsNew(true);
             llbr.getLegoReference().add(lr);
@@ -1550,10 +1609,23 @@ public class LegoTreeCell<T> extends TreeCell<T>
             @Override
             public void handle(ActionEvent arg0)
             {
-                LegoGUI.getInstance().showCreateLegoDialog(llbr, treeItem);
+                LegoGUI.getInstance().showCreateLegoDialog(llbr, treeItem, false);
             }
         });
         mi.setGraphic(Images.LEGO_ADD.createImageView());
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Paste Lego into Lego List");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                LegoGUI.getInstance().showCreateLegoDialog(llbr, treeItem, true);
+            }
+        });
+        mi.visibleProperty().bind(CustomClipboard.containsLego);
+        mi.setGraphic(Images.PASTE.createImageView());
         cm.getItems().add(mi);
 
         mi = new MenuItem("Show XML View");
@@ -1655,6 +1727,30 @@ public class LegoTreeCell<T> extends TreeCell<T>
         });
         mi.setGraphic(Images.LEGO_DELETE.createImageView());
         cm.getItems().add(mi);
+        
+        if (!legoReference.isNew())
+        {
+            mi = new MenuItem("Copy Lego");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    Lego lego = BDBDataStoreImpl.getInstance().getLego(legoReference.getLegoUUID(), legoReference.getStampUUID());
+                    if (lego != null)
+                    {
+                        CustomClipboard.set(lego);
+                    }
+                    else
+                    {
+                        LegoGUI.getInstance().showErrorDialog("Lego Not Found", "Couldn't find the desired Lego in the Database", 
+                                "Legos can only be copied after they have been stored to the database.");
+                    }
+                }
+            });
+            mi.setGraphic(Images.COPY.createImageView());
+            cm.getItems().add(mi);
+        }
     }
     
     private void addMenus(LegoTreeNodeType type, final Object parent, ContextMenu cm, final TreeItem<String> treeItem)
@@ -1698,6 +1794,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     }
                 }
             });
+            mi.setGraphic(Images.LEGO.createImageView());
             cm.getItems().add(mi);
         }
         else if (type == LegoTreeNodeType.text)
@@ -1711,6 +1808,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removeText(parent, treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
         else if (type == LegoTreeNodeType.bool)
@@ -1724,6 +1822,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removeBoolean(parent, treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
         else
@@ -1747,6 +1846,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addDiscernibile(a, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
 
             mi = new MenuItem("Drop as a Discernibile");
@@ -1759,6 +1859,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label.setDroppedValue(null);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             label.getDropContextMenu().getItems().add(mi);
         }
 
@@ -1773,6 +1874,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addQualifier(a, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
 
             mi = new MenuItem("Drop as a Qualifier");
@@ -1785,6 +1887,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label.setDroppedValue(null);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             label.getDropContextMenu().getItems().add(mi);
         }
 
@@ -1799,6 +1902,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addValue(a, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Paste Value");
@@ -1811,6 +1915,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             });
             mi.visibleProperty().bind(CustomClipboard.containsValue);
+            mi.setGraphic(Images.PASTE.createImageView());
             cm.getItems().add(mi);
         }
 
@@ -1828,6 +1933,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label.setDroppedValue(null);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             label.getDropContextMenu().getItems().add(mi);
         }
 
@@ -1842,6 +1948,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addTiming(a, LegoTreeNodeType.point, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add a Bound Timing");
@@ -1853,6 +1960,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addTiming(a, LegoTreeNodeType.bound, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add an Interval Timing");
@@ -1864,6 +1972,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addTiming(a, LegoTreeNodeType.interval, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
 
             mi = new MenuItem("Drop as a Timing Unit");
@@ -1876,6 +1985,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label.setDroppedValue(null);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             label.getDropContextMenu().getItems().add(mi);
         }
 
@@ -1888,6 +1998,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 addAssertionComponent(a, treeItem);
             }
         });
+        mi.setGraphic(Images.ADD.createImageView());
         cm.getItems().add(mi);
 
         mi = new MenuItem("Copy Assertion");
@@ -1899,9 +2010,10 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 CustomClipboard.set(a);
             }
         });
+        mi.setGraphic(Images.COPY.createImageView());
         cm.getItems().add(mi);
         
-        mi = new MenuItem("Delete Assertion");
+        mi = new MenuItem("Remove Assertion");
         mi.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
@@ -1910,6 +2022,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 removeAssertion(a, treeItem);
             }
         });
+        mi.setGraphic(Images.DELETE.createImageView());
         cm.getItems().add(mi);
     }
     
@@ -1924,6 +2037,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 removeAssertionComponent(ac, treeItem);
             }
         });
+        mi.setGraphic(Images.DELETE.createImageView());
         cm.getItems().add(mi);
     }
     
@@ -1941,6 +2055,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removePoint(m, treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
         else if (treeItem.getNodeType() == LegoTreeNodeType.bound)
@@ -1954,6 +2069,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removeBound(m, treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
         else if (treeItem.getNodeType() == LegoTreeNodeType.interval)
@@ -1967,6 +2083,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removeInterval(m, treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
         else
@@ -1982,6 +2099,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         addUnits(m, treeItem);
                     }
                 });
+                mi.setGraphic(Images.ADD.createImageView());
                 cm.getItems().add(mi);
             }
             if (m.getInterval() == null && m.getPoint() == null && m.getBound() == null)
@@ -1995,6 +2113,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         addPoint(m, treeItem);
                     }
                 });
+                mi.setGraphic(Images.ADD.createImageView());
                 cm.getItems().add(mi);
                 
                 mi = new MenuItem("Add Bound");
@@ -2006,6 +2125,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         addBound(m, treeItem);
                     }
                 });
+                mi.setGraphic(Images.ADD.createImageView());
                 cm.getItems().add(mi);
     
                 mi = new MenuItem("Add Interval");
@@ -2017,6 +2137,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                         addInterval(m, treeItem);
                     }
                 });
+                mi.setGraphic(Images.ADD.createImageView());
                 cm.getItems().add(mi);
             }
     
@@ -2029,6 +2150,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removeMeasurement(m, treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
     }
@@ -2044,6 +2166,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 addConcept(e, null, treeItem);
             }
         });
+        mi.setGraphic(Images.ADD.createImageView());
         cm.getItems().add(mi);
 
         mi = new MenuItem("Add a Relationship");
@@ -2056,6 +2179,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 addRelation(e, null, treeItem);
             }
         });
+        mi.setGraphic(Images.ADD.createImageView());
         cm.getItems().add(mi);
 
         mi = new MenuItem("Add a Relationship Group");
@@ -2068,6 +2192,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 addRelationshipGroup(e, treeItem);
             }
         });
+        mi.setGraphic(Images.ADD.createImageView());
         cm.getItems().add(mi);
 
         mi = new MenuItem("Drop as a Concept");
@@ -2080,6 +2205,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 label.setDroppedValue(null);
             }
         });
+        mi.setGraphic(Images.ADD.createImageView());
         label.getDropContextMenu().getItems().add(mi);
 
         mi = new MenuItem("Drop as a Relation Type");
@@ -2092,6 +2218,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 label.setDroppedValue(null);
             }
         });
+        mi.setGraphic(Images.ADD.createImageView());
         label.getDropContextMenu().getItems().add(mi);
 
         if (treeItem.getNodeType() == LegoTreeNodeType.expressionValue
@@ -2108,6 +2235,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removeExpression(e, treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
         
@@ -2120,6 +2248,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 CustomClipboard.set(e);
             }
         });
+        mi.setGraphic(Images.COPY.createImageView());
         cm.getItems().add(mi);
         
         mi = new MenuItem("Paste " + descriptionAddition + "Expression (Replace Existing)");
@@ -2132,6 +2261,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             }
         });
         mi.visibleProperty().bind(CustomClipboard.containsExpression);
+        mi.setGraphic(Images.PASTE.createImageView());
         cm.getItems().add(mi);
         
     }
@@ -2150,6 +2280,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     removeConcept(treeItem);
                 }
             });
+            mi.setGraphic(Images.DELETE.createImageView());
             cm.getItems().add(mi);
         }
         
@@ -2169,6 +2300,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 }
             }
         });
+        mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
         cm.getItems().add(mi);
         
     }
@@ -2189,6 +2321,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addConcept(r, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
 
             mi = new MenuItem("Drop as the Destination Concept");
@@ -2201,6 +2334,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label.setDroppedValue(null);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             label.getDropContextMenu().getItems().add(mi);
 
             mi = new MenuItem("Add Dest Point");
@@ -2212,6 +2346,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addMeasurement(r, LegoTreeNodeType.point, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add Dest Bound ");
@@ -2223,6 +2358,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addMeasurement(r, LegoTreeNodeType.bound, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add Dest Interval ");
@@ -2234,6 +2370,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addMeasurement(r, LegoTreeNodeType.interval, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
            
             mi = new MenuItem("Add Dest Text");
@@ -2245,6 +2382,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addText(r.getDestination(), treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add Dest Boolean");
@@ -2256,6 +2394,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addBoolean(r.getDestination(), treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
         }
 
@@ -2268,6 +2407,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 removeRelation(r, treeItem);
             }
         });
+        mi.setGraphic(Images.DELETE.createImageView());
         cm.getItems().add(mi);
     }
     
@@ -2282,6 +2422,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 addRelation(rg, treeItem);
             }
         });
+        mi.setGraphic(Images.ADD.createImageView());
         cm.getItems().add(mi);
 
         mi = new MenuItem("Remove Relationship Group");
@@ -2293,6 +2434,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 removeRelationGroup(treeItem);
             }
         });
+        mi.setGraphic(Images.DELETE.createImageView());
         cm.getItems().add(mi);
     }
    
@@ -2310,6 +2452,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addConcept(v, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
 
             mi = new MenuItem("Add Point Measurement");
@@ -2321,6 +2464,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addMeasurement(v, LegoTreeNodeType.point, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add Bound Measurement");
@@ -2332,6 +2476,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addMeasurement(v, LegoTreeNodeType.bound, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add Interval Measurement");
@@ -2343,6 +2488,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addMeasurement(v, LegoTreeNodeType.interval, null, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
 
             mi = new MenuItem("Drop as a Concept");
@@ -2355,6 +2501,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label.setDroppedValue(null);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             label.getDropContextMenu().getItems().add(mi);
 
             mi = new MenuItem("Drop as Measurement Units");
@@ -2367,6 +2514,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     label.setDroppedValue(null);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             label.getDropContextMenu().getItems().add(mi);
             
             mi = new MenuItem("Add Text");
@@ -2378,6 +2526,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addText(v, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
             
             mi = new MenuItem("Add Boolean");
@@ -2389,6 +2538,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                     addBoolean(v, treeItem);
                 }
             });
+            mi.setGraphic(Images.ADD.createImageView());
             cm.getItems().add(mi);
         }
         MenuItem mi = new MenuItem("Copy Value");
@@ -2400,6 +2550,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 CustomClipboard.set(v);
             }
         });
+        mi.setGraphic(Images.COPY.createImageView());
         cm.getItems().add(mi);
         
         mi = new MenuItem("Paste Value (Replace Existing)");
@@ -2412,6 +2563,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
             }
         });
         mi.visibleProperty().bind(CustomClipboard.containsValue);
+        mi.setGraphic(Images.PASTE.createImageView());
         cm.getItems().add(mi);
         
     }

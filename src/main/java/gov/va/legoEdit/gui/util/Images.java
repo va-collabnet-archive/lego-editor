@@ -39,6 +39,10 @@ public enum Images
     PREFERENCES(setupImage("/icons/fugue/16x16/icons-shadowless/application-task.png")),
     APPLICATION(setupImage("/icons/fugue/16x16/icons-shadowless/application-block.png")),
     CONCEPT_VIEW(setupImage("/icons/fugue/16x16/icons-shadowless/gear.png")),
+    COPY(setupImage("/icons/fugue/16x16/icons-shadowless/document-copy.png")),
+    PASTE(setupImage("/icons/fugue/16x16/icons-shadowless/clipboard-paste-document-text.png")),
+    ADD(setupImage("/icons/silk/16x16/add.png")),
+    DELETE(setupImage("/icons/silk/16x16/delete.png")),
     SAVE(setupImage("/icons/fugue/16x16/icons-shadowless/disk-black.png")),
     EXIT(setupImage("/icons/fugue/16x16/icons-shadowless/cross.png"));
     

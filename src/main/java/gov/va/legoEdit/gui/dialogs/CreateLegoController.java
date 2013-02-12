@@ -5,6 +5,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
@@ -54,6 +55,7 @@ public class CreateLegoController implements Initializable
 
     private LegoListByReference llbr;
     private LegoTreeItem legoTreeItem;
+    private Lego legoFromPaste;
     
     @Override
     // This method is called by the FXMLLoader when initialization is complete
@@ -84,28 +86,58 @@ public class CreateLegoController implements Initializable
             @Override
             public void handle(ActionEvent event)
             {
-                Lego l = new Lego();
+                Lego l;
+                if (legoFromPaste == null)
+                {
+                    l = new Lego();
+                }
+                else
+                {
+                    l = legoFromPaste;
+                }
                 Pncs pncs = new Pncs();
                 pncs.setName(pncsName.getText());
                 pncs.setValue(pncsValue.getText());
                 pncs.setId(Integer.parseInt(pncsID.getText())); 
                 l.setPncs(pncs);
                 
-                Stamp s = new Stamp();
+                Stamp s;
+                if (legoFromPaste == null)
+                {
+                    s = new Stamp();
+                }
+                else
+                {
+                    s = legoFromPaste.getStamp();
+                }
                 UserPreferences up = LegoGUIModel.getInstance().getUserPreferences(); 
                 s.setAuthor(up.getAuthor());
-                s.setModule(up.getModule());
-                s.setPath(up.getPath());
-                s.setStatus(LegoTreeCell.statusChoices_.get(0));
+                if (legoFromPaste == null)
+                {
+                    s.setModule(up.getModule());
+                    s.setPath(up.getPath());
+                    s.setStatus(LegoTreeCell.statusChoices_.get(0));
+                }
                 s.setTime(TimeConvert.convert(System.currentTimeMillis()));
                 s.setUuid(UUID.randomUUID().toString());
                 l.setStamp(s);
                 
                 l.setLegoUUID(UUID.randomUUID().toString());
                 
-                Assertion a = new Assertion();
-                a.setAssertionUUID(UUID.randomUUID().toString());
-                l.getAssertion().add(a);
+                if (legoFromPaste == null)
+                {
+                    Assertion a = new Assertion();
+                    a.setAssertionUUID(UUID.randomUUID().toString());
+                    l.getAssertion().add(a);
+                }
+                else
+                {
+                    //Change all the assertion UUIDs
+                    for (Assertion a : l.getAssertion())
+                    {
+                        a.setAssertionUUID(UUID.randomUUID().toString());
+                    }
+                }
                 
                 LegoReference lr = new LegoReference(l);
                 lr.setIsNew(true);
@@ -153,14 +185,26 @@ public class CreateLegoController implements Initializable
         okButton.disableProperty().bind(bb.not());
     }
     
-    public void init(LegoListByReference llbr, LegoTreeItem lti)
+    public void init(LegoListByReference llbr, LegoTreeItem lti, boolean fromPaste)
     {
         this.llbr = llbr;
         this.legoTreeItem = lti;
         legoListName.setText(llbr.getGroupDescription());
-        pncsID.setText("");
-        pncsName.setText("");
-        pncsValue.setText("");
+        if (fromPaste)
+        {
+            legoFromPaste = CustomClipboard.getLego();
+            if (legoFromPaste == null)
+            {
+                LegoGUI.getInstance().showErrorDialog("Not a Lego", "The Clipboard does not contain a Lego", "A blank Lego will be created instead.");
+            }
+        }
+        else
+        {
+            legoFromPaste = null;
+        }
+        pncsID.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getId() + "");
+        pncsName.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getName());
+        pncsValue.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getValue());
     }
     
     private class TextFieldValidator
