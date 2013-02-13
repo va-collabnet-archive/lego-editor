@@ -5,10 +5,16 @@ import gov.va.legoEdit.storage.DataStoreException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Query;
 import org.ihtsdo.bdb.BdbTerminologyStore;
-import org.ihtsdo.cc.termstore.SearchType;
+import org.ihtsdo.cc.lucene.LuceneManager;
+import org.ihtsdo.cc.lucene.SearchResult;
 import org.ihtsdo.tk.Ts;
 import org.ihtsdo.tk.api.ComponentChroncileBI;
 import org.ihtsdo.tk.api.TerminologyStoreDI;
@@ -127,7 +133,8 @@ public class WBDataStore
 	/**
 	 * Returns null if search not available (only works with local DBs) - otherwise, returns the list of descriptions that matched.
 	 */
-	public List<ComponentChroncileBI<?>> descriptionSearch(String query) throws IOException
+	@SuppressWarnings("deprecation")
+    public List<ComponentChroncileBI<?>> descriptionSearch(String query) throws IOException
 	{
         if (!(dataStore_ instanceof BdbTerminologyStore))
         {
@@ -135,15 +142,34 @@ public class WBDataStore
         }
         else
         {
-            BdbTerminologyStore bts = (BdbTerminologyStore)dataStore_;
-            
-            Collection<Integer> result = bts.searchLucene(query, SearchType.DESCRIPTION);
-            ArrayList<ComponentChroncileBI<?>> resultToReturn = new ArrayList<>(result.size());
-            for (int i : result)
+            try
             {
-                resultToReturn.add(bts.getComponent(i));
+                BdbTerminologyStore bts = (BdbTerminologyStore)dataStore_;
+                
+                //sort of copied from Termstore.searchLucene(...)
+                //because that API throws away the scores, and returns the results in random order... which is rather useless.
+                Query q = new QueryParser(LuceneManager.version, "desc", new StandardAnalyzer(LuceneManager.version)).parse(query);
+                SearchResult result = LuceneManager.search(q);
+
+                if (result.topDocs.totalHits == 0) 
+                {
+                    q = new QueryParser(LuceneManager.version, "desc", new WhitespaceAnalyzer()).parse(query);
+                }
+                
+                result = LuceneManager.search(q);
+                
+                ArrayList<ComponentChroncileBI<?>> resultToReturn = new ArrayList<>(result.topDocs.totalHits);
+                for (int i = 0; i < result.topDocs.totalHits; i++) 
+                {
+                    Document doc  = result.searcher.doc(result.topDocs.scoreDocs[i].doc);
+                    resultToReturn.add(bts.getComponent(Integer.parseInt(doc.get("dnid"))));
+                }
+                return resultToReturn;
             }
-            return resultToReturn;
+            catch (NumberFormatException | ParseException e)
+            {
+                throw new IOException("Unexpected error during search", e);
+            }
         }
 	}
 }

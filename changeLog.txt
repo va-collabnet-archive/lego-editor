@@ -1,5 +1,9 @@
 Lego Editor Change Log
 
+2012/02/?? - 0.51
+  *  Improved type distinction between expression types during copy / paste
+  *  artf227420 - fixed lucene sort order issues
+
 2012/02/10 - 0.5
   *  Fixed null pointers that could happen with empty measurement values 
   *  Fixed a bug that caused a doubleclick to sometimes not open a lego for editing
