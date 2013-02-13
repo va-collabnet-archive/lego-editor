@@ -37,6 +37,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Callback;
@@ -98,7 +99,7 @@ public class TemplatesPaneController implements Initializable
                         if (!empty)
                         {
                             setText(item.getTemplate().getClass().getSimpleName() + ": " + item.getDescription());
-
+                            setTooltip(new Tooltip(SchemaToString.toString(item.getTemplate())));
                             ContextMenu cm = new ContextMenu();
                             MenuItem mi = new MenuItem("Copy Template");
                             mi.setOnAction(new EventHandler<ActionEvent>()
