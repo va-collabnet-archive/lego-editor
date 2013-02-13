@@ -1,8 +1,9 @@
 Lego Editor Change Log
 
-2012/02/?? - 0.51
+2012/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste
   *  artf227420 - fixed lucene sort order issues
+  *  artf226891 Implemented the ability to store / search / use templates
 
 2012/02/10 - 0.5
   *  Fixed null pointers that could happen with empty measurement values 
