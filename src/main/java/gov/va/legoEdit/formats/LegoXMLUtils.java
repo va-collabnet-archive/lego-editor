@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -112,14 +114,19 @@ public class LegoXMLUtils
        return marshall(e);
     }
     
-    private static String marshall(Object o)throws PropertyException, JAXBException
+    private static String marshall(Object o) throws PropertyException, JAXBException
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeXML(o, baos);
+        return new String(baos.toByteArray());
+    }
+    
+    public static void writeXML(Object o, OutputStream os) throws PropertyException, JAXBException
     {
         Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         m.setProperty(Marshaller.JAXB_FRAGMENT, true);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        m.marshal(o, baos);
-        return new String(baos.toByteArray());
+        m.marshal(o, os);
     }
     
     public static Assertion readAssertion(String xmlAssertion) throws JAXBException
@@ -149,6 +156,12 @@ public class LegoXMLUtils
     public static Expression readExpression(String xmlExpression) throws JAXBException
     {
         return (Expression) jc.createUnmarshaller().unmarshal(new ByteArrayInputStream(xmlExpression.getBytes()));
+    }
+    
+    public static Object read(InputStream is) throws JAXBException
+    {
+        Unmarshaller um = jc.createUnmarshaller();
+        return um.unmarshal(is);
     }
     
     public static String toHTML(LegoList ll) throws PropertyException, JAXBException, TransformerConfigurationException, TransformerException

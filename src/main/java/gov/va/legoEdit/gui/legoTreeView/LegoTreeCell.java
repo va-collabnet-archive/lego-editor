@@ -1003,75 +1003,91 @@ public class LegoTreeCell<T> extends TreeCell<T>
     {
         try
         {
+            Expression e;
             if (CustomClipboard.containsType(Expression.class))
             {
-                Expression e = CustomClipboard.getExpression();
-                //need to clone this expression 
-                //Ugly but easy clone impl...
-                Expression clonedExpression = LegoXMLUtils.readExpression(LegoXMLUtils.toXML(e));
-
-                boolean expand = oldTreeItem.isExpanded();
-                LegoTreeItem parentLegoTreeItem = (LegoTreeItem)oldTreeItem.getParent();
-               
-                LegoTreeItem newLTI = null;
-                if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
-                {
-                    Assertion a = (Assertion)parentLegoTreeItem.getExtraData();
-                    a.getDiscernible().setExpression(clonedExpression);
-                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDiscernible);
-                }
-                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
-                {
-                    Assertion a = (Assertion)parentLegoTreeItem.getExtraData();
-                    a.getQualifier().setExpression(clonedExpression);
-                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionQualifier);
-                }
-                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionValue)
-                {
-                    Value v = (Value)parentLegoTreeItem.getExtraData();
-                    v.setExpression(clonedExpression);
-                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionValue);
-                }
-                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDestination)
-                {
-                    Relation r = (Relation)parentLegoTreeItem.getExtraData();
-                    r.getDestination().setExpression(clonedExpression);
-                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDestination);
-                }
-                else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionOptional)
-                {
-                    Expression parentExpression = (Expression)parentLegoTreeItem.getExtraData();
-                    parentExpression.getExpression().remove(oldExpression);
-                    parentExpression.getExpression().add(clonedExpression);
-                    newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionOptional);
-                }
-                else
-                {
-                    //I think I have all the cases handled.... 
-                    logger.error("Unhandled paste type in expression " + parentLegoTreeItem.getExtraData().getClass().getName());
-                    LegoGUI.getInstance().showErrorDialog("Unhandled paste operation", "Unhandled paste operation", "Please file a bug with your log file attached");
-                    return;
-                }
-                
-                //Need to delete the old value tree node
-                parentLegoTreeItem.getChildren().remove(oldTreeItem);
-               
-                newLTI.setExpanded(expand);
-                parentLegoTreeItem.getChildren().add(newLTI);
-                FXCollections.sort(parentLegoTreeItem.getChildren(), new LegoTreeItemComparator(true));
-                treeView.contentChanged();
-                Event.fireEvent(parentLegoTreeItem, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), parentLegoTreeItem));
+                e = CustomClipboard.getExpression();
+            }
+            else if (CustomClipboard.containsType(Discernible.class))
+            {
+                e = CustomClipboard.getDiscernible().getExpression();
+            }
+            else if (CustomClipboard.containsType(Qualifier.class))
+            {
+                e = CustomClipboard.getQualifier().getExpression();
             }
             else
             {
                 CustomClipboard.updateBindings();
-                LegoGUI.getInstance().showErrorDialog("No Expression on Clipboard", "The Clipboard does not contain an Expression", null);
+                LegoGUI.getInstance().showErrorDialog("No Pasteable Expression on Clipboard",
+                        "The Clipboard does not contain an Expression", null);
+                return;
             }
+
+            // Ugly but easy clone impl...
+            Expression clonedExpression = LegoXMLUtils.readExpression(LegoXMLUtils.toXML(e));
+
+            boolean expand = oldTreeItem.isExpanded();
+            LegoTreeItem parentLegoTreeItem = (LegoTreeItem) oldTreeItem.getParent();
+
+            LegoTreeItem newLTI = null;
+            if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
+            {
+                Assertion a = (Assertion) parentLegoTreeItem.getExtraData();
+                a.getDiscernible().setExpression(clonedExpression);
+                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDiscernible);
+            }
+            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
+            {
+                Assertion a = (Assertion) parentLegoTreeItem.getExtraData();
+                a.getQualifier().setExpression(clonedExpression);
+                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionQualifier);
+            }
+            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionValue)
+            {
+                Value v = (Value) parentLegoTreeItem.getExtraData();
+                v.setExpression(clonedExpression);
+                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionValue);
+            }
+            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDestination)
+            {
+                Relation r = (Relation) parentLegoTreeItem.getExtraData();
+                r.getDestination().setExpression(clonedExpression);
+                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDestination);
+            }
+            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionOptional)
+            {
+                Expression parentExpression = (Expression) parentLegoTreeItem.getExtraData();
+                parentExpression.getExpression().remove(oldExpression);
+                parentExpression.getExpression().add(clonedExpression);
+                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionOptional);
+            }
+            else
+            {
+                // I think I have all the cases handled....
+                logger.error("Unhandled paste type in expression "
+                        + parentLegoTreeItem.getExtraData().getClass().getName());
+                LegoGUI.getInstance().showErrorDialog("Unhandled paste operation", "Unhandled paste operation",
+                        "Please file a bug with your log file attached");
+                return;
+            }
+
+            // Need to delete the old value tree node
+            parentLegoTreeItem.getChildren().remove(oldTreeItem);
+
+            newLTI.setExpanded(expand);
+            parentLegoTreeItem.getChildren().add(newLTI);
+            FXCollections.sort(parentLegoTreeItem.getChildren(), new LegoTreeItemComparator(true));
+            treeView.contentChanged();
+            Event.fireEvent(parentLegoTreeItem, new TreeItem.TreeModificationEvent<String>(
+                    TreeItem.valueChangedEvent(), parentLegoTreeItem));
+
         }
         catch (JAXBException e)
         {
             logger.error("Unexpected error handling paste", e);
-            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste", e.toString());
+            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste",
+                    e.toString());
         }
     }
 
@@ -1750,6 +1766,27 @@ public class LegoTreeCell<T> extends TreeCell<T>
             });
             mi.setGraphic(Images.COPY.createImageView());
             cm.getItems().add(mi);
+            
+            mi = new MenuItem("Create Template...");
+            mi.setOnAction(new EventHandler<ActionEvent>()
+            {
+                @Override
+                public void handle(ActionEvent arg0)
+                {
+                    Lego lego = BDBDataStoreImpl.getInstance().getLego(legoReference.getLegoUUID(), legoReference.getStampUUID());
+                    if (lego != null)
+                    {
+                        LegoGUI.getInstance().showCreateTemplateDialog(lego);
+                    }
+                    else
+                    {
+                        LegoGUI.getInstance().showErrorDialog("Lego Not Found", "Couldn't find the desired Lego in the Database", 
+                                "Legos can only be used as a template after they have been stored to the database.");
+                    }
+                }
+            });
+            mi.setGraphic(Images.TEMPLATE.createImageView());
+            cm.getItems().add(mi);
         }
     }
     
@@ -2013,6 +2050,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
         mi.setGraphic(Images.COPY.createImageView());
         cm.getItems().add(mi);
         
+        mi = new MenuItem("Create Template...");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                LegoGUI.getInstance().showCreateTemplateDialog(a);
+            }
+        });
+        mi.setGraphic(Images.TEMPLATE.createImageView());
+        cm.getItems().add(mi);
+        
         mi = new MenuItem("Remove Assertion");
         mi.setOnAction(new EventHandler<ActionEvent>()
         {
@@ -2245,10 +2294,44 @@ public class LegoTreeCell<T> extends TreeCell<T>
             @Override
             public void handle(ActionEvent arg0)
             {
-                CustomClipboard.set(e);
+                if (treeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
+                {
+                    CustomClipboard.set(((Assertion)((LegoTreeItem)treeItem.getParent()).getExtraData()).getDiscernible());
+                }
+                else if (treeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
+                {
+                    CustomClipboard.set(((Assertion)((LegoTreeItem)treeItem.getParent()).getExtraData()).getQualifier());
+                }
+                else
+                {
+                    CustomClipboard.set(e);
+                }
             }
         });
         mi.setGraphic(Images.COPY.createImageView());
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Create Template...");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                if (treeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
+                {
+                    LegoGUI.getInstance().showCreateTemplateDialog(((Assertion)((LegoTreeItem)treeItem.getParent()).getExtraData()).getDiscernible());
+                }
+                else if (treeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
+                {
+                    LegoGUI.getInstance().showCreateTemplateDialog(((Assertion)((LegoTreeItem)treeItem.getParent()).getExtraData()).getQualifier());
+                }
+                else
+                {
+                    LegoGUI.getInstance().showCreateTemplateDialog(e);
+                }
+            }
+        });
+        mi.setGraphic(Images.TEMPLATE.createImageView());
         cm.getItems().add(mi);
         
         mi = new MenuItem("Paste " + descriptionAddition + "Expression (Replace Existing)");
@@ -2260,7 +2343,20 @@ public class LegoTreeCell<T> extends TreeCell<T>
                 pasteExpression(e, treeItem);
             }
         });
-        mi.visibleProperty().bind(CustomClipboard.containsExpression);
+        
+        if (treeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
+        {
+            mi.visibleProperty().bind(CustomClipboard.containsDiscernible);
+        }
+        else if (treeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
+        {
+            mi.visibleProperty().bind(CustomClipboard.containsQualifier);
+        }
+        else
+        {
+            mi.visibleProperty().bind(CustomClipboard.containsExpression);
+        }
+        
         mi.setGraphic(Images.PASTE.createImageView());
         cm.getItems().add(mi);
         
@@ -2551,6 +2647,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
             }
         });
         mi.setGraphic(Images.COPY.createImageView());
+        cm.getItems().add(mi);
+        
+        mi = new MenuItem("Create Template...");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                LegoGUI.getInstance().showCreateTemplateDialog(v);
+            }
+        });
+        mi.setGraphic(Images.TEMPLATE.createImageView());
         cm.getItems().add(mi);
         
         mi = new MenuItem("Paste Value (Replace Existing)");

@@ -24,10 +24,46 @@ import gov.va.legoEdit.model.schemaModel.Units;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.util.TimeConvert;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SchemaToString
 {
+    private static Logger logger = LoggerFactory.getLogger(SchemaToString.class);
     public final static String eol = System.getProperty("line.separator"); 
+    
+    public static String toString(Object o)
+    {
+        if (o instanceof Lego)
+        {
+            return toString((Lego)o);
+        }
+        else if (o instanceof Assertion)
+        {
+            return toString((Assertion)o, "");
+        }
+        else if (o instanceof Discernible)
+        {
+            return toString((Discernible)o, "");
+        }
+        else if (o instanceof Qualifier)
+        {
+            return toString((Qualifier)o, "");
+        }
+        else if (o instanceof Value)
+        {
+            return toString((Value)o, "");
+        }
+        else if (o instanceof Expression)
+        {
+            return toString((Expression)o, "");
+        }
+        else
+        {
+            logger.warn("Unsupported use of SchemaToString for " + o);
+            return o.toString();
+        }
+    }
     
     public static String toString(Lego l)
     {

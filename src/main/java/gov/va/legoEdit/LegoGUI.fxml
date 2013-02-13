@@ -28,6 +28,11 @@
             <Insets bottom="120.0" />
           </VBox.margin>
         </ToggleButton>
+        <ToggleButton id="showTemplatesBtn" fx:id="showTemplatesBtn" minWidth="125.0" mnemonicParsing="false" rotate="-90.0" text="Templates" translateY="120.0">
+          <VBox.margin>
+            <Insets bottom="120.0" />
+          </VBox.margin>
+        </ToggleButton>
       </children>
     </VBox>
     <SplitPane fx:id="splitPane" dividerPositions="0.35" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
@@ -50,6 +55,7 @@
             </AnchorPane>
             <AnchorPane fx:id="splitLeftAllLegos" prefHeight="160.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
             <AnchorPane fx:id="splitLeftSctSearch" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
+            <AnchorPane fx:id="splitLeftTemplates" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
           </children>
         </AnchorPane>
         <AnchorPane fx:id="splitRight" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">

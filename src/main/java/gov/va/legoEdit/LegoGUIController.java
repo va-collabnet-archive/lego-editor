@@ -6,6 +6,7 @@ import gov.va.legoEdit.gui.legoTreeView.ComboBoxConcept;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchPaneController;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
+import gov.va.legoEdit.gui.templates.TemplatesPaneController;
 import gov.va.legoEdit.gui.util.DropTargetLabel;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.LegoTab;
@@ -98,6 +99,7 @@ public class LegoGUIController implements Initializable
     private HashMap<String, StringProperty> displayedLegosStyleInfo = new HashMap<>();
     private UnsavedLegos newLegos = new UnsavedLegos();
     private SnomedSearchPaneController sspc;
+    private TemplatesPaneController tpc;
     private Thread dbConnectThread;
     private Random random = new Random();
     private CommonlyUsedConcepts cut;
@@ -147,6 +149,8 @@ public class LegoGUIController implements Initializable
     private ToggleButton showSnomedBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="showSnomedSearchBtn"
     private ToggleButton showSnomedSearchBtn; // Value injected by FXMLLoader
+    @FXML //  fx:id="showTemplatesBtn"
+    private ToggleButton showTemplatesBtn; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeft"
     private AnchorPane splitLeft; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftAllLegos"
@@ -155,6 +159,8 @@ public class LegoGUIController implements Initializable
     private AnchorPane splitLeftSctSearch; // Value injected by FXMLLoader
     @FXML //  fx:id="splitLeftSct"
     private AnchorPane splitLeftSct; // Value injected by FXMLLoader
+    @FXML //  fx:id="splitLeftTemplates"
+    private AnchorPane splitLeftTemplates; // Value injected by FXMLLoader
     @FXML //  fx:id="splitPane"
     private SplitPane splitPane; // Value injected by FXMLLoader
     @FXML //  fx:id="splitRight"
@@ -194,6 +200,9 @@ public class LegoGUIController implements Initializable
         
         sspc = SnomedSearchPaneController.init();
         splitLeftSctSearch.getChildren().add(sspc.getBorderPane());
+        
+        tpc = TemplatesPaneController.init();
+        splitLeftTemplates.getChildren().add(tpc.getBorderPane());
 
         setupMenus();
         setupSctTree(); // This kicks off a thread that opens the DB connection
@@ -260,6 +269,7 @@ public class LegoGUIController implements Initializable
                 {
                     splitLeftSct.setVisible(false);
                     splitLeftSctSearch.setVisible(false);
+                    splitLeftTemplates.setVisible(false);
                     leftPaneLabel.setText("Lego Lists");
                     splitLeftAllLegos.setVisible(true);
                 }
@@ -278,6 +288,7 @@ public class LegoGUIController implements Initializable
                 {
                     splitLeftAllLegos.setVisible(false);
                     splitLeftSctSearch.setVisible(false);
+                    splitLeftTemplates.setVisible(false);
                     leftPaneLabel.setText("Snomed Browser");
                     splitLeftSct.setVisible(true);
                 }
@@ -296,8 +307,28 @@ public class LegoGUIController implements Initializable
                 {
                     splitLeftAllLegos.setVisible(false);
                     splitLeftSct.setVisible(false);
+                    splitLeftTemplates.setVisible(false);
                     leftPaneLabel.setText("Snomed Search");
                     splitLeftSctSearch.setVisible(true);
+                }
+            }
+        });
+        
+        showTemplatesBtn.setGraphic(Images.TEMPLATE.createImageView());
+        showTemplatesBtn.setTooltip(new Tooltip("Show the Templates Panel"));
+        showTemplatesBtn.setToggleGroup(tg);
+        showTemplatesBtn.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent e)
+            {
+                if (showTemplatesBtn.isSelected())
+                {
+                    splitLeftAllLegos.setVisible(false);
+                    splitLeftSct.setVisible(false);
+                    splitLeftSctSearch.setVisible(false);
+                    leftPaneLabel.setText("Templates");
+                    splitLeftTemplates.setVisible(true);
                 }
             }
         });

@@ -3,6 +3,7 @@ package gov.va.legoEdit;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.AboutDialogController;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
+import gov.va.legoEdit.gui.dialogs.CreateTemplateController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
 import gov.va.legoEdit.gui.dialogs.ImportDialogController;
 import gov.va.legoEdit.gui.dialogs.LegoListPropertiesController;
@@ -49,12 +50,14 @@ public class LegoGUI extends Application
 	private Stage createLegoStage_;
 	private Stage yesNoStage_;
 	private Stage userPrefsStage_;
+	private Stage templateStage_;
 	
 	private ErrorDialogController edc_;
 	private LegoGUIController lgc_;
 	private LegoListPropertiesController llpc_;
 	private CreateLegoController clc_;
 	private YesNoDialogController yndc_;
+	private CreateTemplateController ctc_;
 
 	public LegoGUI()
 	{
@@ -148,6 +151,18 @@ public class LegoGUI extends Application
         scene = new Scene((Parent)loader.load(UserPreferencesController.class.getResourceAsStream("UserPreferences.fxml")));
         scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
         userPrefsStage_.setScene(scene);
+        
+        //init create template dialog
+        templateStage_ = new Stage();
+        templateStage_.initModality(Modality.WINDOW_MODAL);
+        templateStage_.initOwner(mainStage_);
+        templateStage_.initStyle(StageStyle.UTILITY);
+        loader = new FXMLLoader();
+        loader.setLocation(CreateTemplateController.class.getResource("CreateTemplate.fxml"));
+        scene = new Scene((Parent)loader.load(CreateTemplateController.class.getResourceAsStream("CreateTemplate.fxml")));
+        scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+        ctc_ = loader.getController();
+        templateStage_.setScene(scene);
 	}
 
 	public LegoGUIController getLegoGUIController()
@@ -249,6 +264,12 @@ public class LegoGUI extends Application
 	    legoListPropertiesStage_.show();
 	}
 	
+	public void showCreateTemplateDialog(Object template)
+    {
+        ctc_.setVariables(template);
+        templateStage_.show();
+    }
+	
 	public void showAboutDialog()
     {
         try
@@ -258,6 +279,7 @@ public class LegoGUI extends Application
             aboutStage.initOwner(mainStage_);
             aboutStage.initStyle(StageStyle.DECORATED);
             FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(AboutDialogController.class.getResource("AboutDialog.fxml"));
             Scene scene = new Scene((Parent) loader.load(AboutDialogController.class.getResourceAsStream("AboutDialog.fxml")));
             scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
             aboutStage.setScene(scene);
@@ -268,7 +290,7 @@ public class LegoGUI extends Application
         catch (Exception e)
         {
             logger.error("Unexpected error displaying about dialog", e);
-            showErrorDialog("Unexpected Error", "Unexpected Error displaying about dialot", e.toString());
+            showErrorDialog("Unexpected Error", "Unexpected Error displaying about dialog", e.toString());
         }
     }
 	

@@ -11,16 +11,21 @@
 
 <AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="750.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.AboutDialogController">
   <children>
-    <Label fx:id="title" alignment="CENTER" text="_version goes here_" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="10.0">
+    <Label fx:id="title" alignment="CENTER" text="_version goes here_" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="15.0">
       <font>
         <Font name="System Bold" size="16.0" />
       </font>
     </Label>
-    <TextArea id="detailedMessage" fx:id="message" editable="false" wrapText="true" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="40.0" />
+    <TextArea id="detailedMessage" fx:id="message" editable="false" wrapText="true" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="50.0" />
     <HBox id="HBox" alignment="CENTER" spacing="5.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
       <children>
         <Button fx:id="okButton" mnemonicParsing="false" text="Ok" />
       </children>
     </HBox>
+    <ImageView fx:id="icon" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="10.0">
+      <image>
+        <Image url="@../../../../../icons/fugue/32x32/icons-shadowless/information.png" preserveRatio="false" smooth="false" />
+      </image>
+    </ImageView>
   </children>
 </AnchorPane>

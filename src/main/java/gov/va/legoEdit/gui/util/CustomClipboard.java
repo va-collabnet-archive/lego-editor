@@ -2,8 +2,10 @@ package gov.va.legoEdit.gui.util;
 
 import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Lego;
+import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Value;
 import java.util.ArrayList;
 import javafx.beans.binding.Binding;
@@ -57,6 +59,24 @@ public class CustomClipboard
         }
     };
     
+    public static BooleanBinding containsDiscernible = new BooleanBinding()
+    {
+        @Override
+        protected boolean computeValue()
+        {
+            return containsType(Discernible.class);
+        }
+    };
+    
+    public static BooleanBinding containsQualifier = new BooleanBinding()
+    {
+        @Override
+        protected boolean computeValue()
+        {
+            return containsType(Qualifier.class);
+        }
+    };
+    
     public static BooleanBinding containsLego = new BooleanBinding()
     {
         @Override
@@ -70,6 +90,8 @@ public class CustomClipboard
     {
         bindings_.add(containsAssertion);
         bindings_.add(containsValue);
+        bindings_.add(containsDiscernible);
+        bindings_.add(containsQualifier);
         bindings_.add(containsExpression);
         bindings_.add(containsString);
         bindings_.add(containsLego);
@@ -93,6 +115,16 @@ public class CustomClipboard
     public static void set(Expression e)
     {
         set(e, SchemaToString.toString(e, ""));
+    }
+    
+    public static void set(Discernible d)
+    {
+        set(d, SchemaToString.toString(d, ""));
+    }
+    
+    public static void set(Qualifier q)
+    {
+        set(q, SchemaToString.toString(q, ""));
     }
     
     private static void set(Object value, String stringValue)
@@ -180,6 +212,26 @@ public class CustomClipboard
         if (containsExpression.get())
         {
             return (Expression)object_;
+        }
+
+        return null;
+    }
+    
+    public static Discernible getDiscernible()
+    {
+        if (containsDiscernible.get())
+        {
+            return (Discernible)object_;
+        }
+
+        return null;
+    }
+    
+    public static Qualifier getQualifier()
+    {
+        if (containsQualifier.get())
+        {
+            return (Qualifier)object_;
         }
 
         return null;
