@@ -1,5 +1,6 @@
 package gov.va.legoEdit.gui.util;
 
+import gov.va.legoEdit.model.SchemaClone;
 import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Discernible;
@@ -17,6 +18,7 @@ import javafx.scene.input.DataFormat;
 
 public class CustomClipboard
 {
+    
     private final static Clipboard clipboard_ = Clipboard.getSystemClipboard();
     private static Object object_ = null;
     private static DataFormat type_ = new DataFormat("type");
@@ -99,32 +101,32 @@ public class CustomClipboard
     
     public static void set(Lego l)
     {
-        set(l, SchemaToString.toString(l));
+        set(SchemaClone.clone(l), SchemaToString.toString(l));
     }
     
     public static void set(Assertion a)
     {
-        set(a, SchemaToString.toString(a, ""));
+        set(SchemaClone.clone(a), SchemaToString.toString(a, ""));
     }
     
     public static void set(Value v)
     {
-        set(v, SchemaToString.toString(v, ""));
+        set(SchemaClone.clone(v), SchemaToString.toString(v, ""));
     }
     
     public static void set(Expression e)
     {
-        set(e, SchemaToString.toString(e, ""));
+        set(SchemaClone.clone(e), SchemaToString.toString(e, ""));
     }
     
     public static void set(Discernible d)
     {
-        set(d, SchemaToString.toString(d, ""));
+        set(SchemaClone.clone(d), SchemaToString.toString(d, ""));
     }
     
     public static void set(Qualifier q)
     {
-        set(q, SchemaToString.toString(q, ""));
+        set(SchemaClone.clone(q), SchemaToString.toString(q, ""));
     }
     
     private static void set(Object value, String stringValue)
@@ -181,7 +183,7 @@ public class CustomClipboard
     {
         if (containsLego.get())
         {
-            return (Lego)object_;
+            return SchemaClone.clone((Lego)object_);
         }
 
         return null;
@@ -191,7 +193,7 @@ public class CustomClipboard
     {
         if (containsAssertion.get())
         {
-            return (Assertion)object_;
+            return SchemaClone.clone((Assertion)object_);
         }
 
         return null;
@@ -201,7 +203,7 @@ public class CustomClipboard
     {
         if (containsValue.get())
         {
-            return (Value)object_;
+            return SchemaClone.clone((Value)object_);
         }
 
         return null;
@@ -211,7 +213,7 @@ public class CustomClipboard
     {
         if (containsExpression.get())
         {
-            return (Expression)object_;
+            return SchemaClone.clone((Expression)object_);
         }
 
         return null;
@@ -221,7 +223,7 @@ public class CustomClipboard
     {
         if (containsDiscernible.get())
         {
-            return (Discernible)object_;
+            return SchemaClone.clone((Discernible)object_);
         }
 
         return null;
@@ -231,7 +233,7 @@ public class CustomClipboard
     {
         if (containsQualifier.get())
         {
-            return (Qualifier)object_;
+            return SchemaClone.clone((Qualifier)object_);
         }
 
         return null;

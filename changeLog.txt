@@ -1,4 +1,7 @@
 Lego Editor Change Log
+2012/02/?? - 0.52
+  *  Fixed a bug with copy/paste of Legos that caused previously edited legos to change and 
+		generally behave strangely when a lego was pasted multiple times. 
 
 2012/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste
@@ -12,7 +15,7 @@ Lego Editor Change Log
   *  Add 'About Dialog' / version number
   *  Add more icons
   *  artf226891 (partial) Implemented Copy/Paste for Legos, Assertions, D / Q / V and Expressions 
-  		anywhere they appear
+		anywhere they appear
   *  artf227475 Allow rename of lego list
   *  artf227509 Fix consistency of 'pencil' icon in the left list of legos
   *  artf227507 Fixed bound change not allowing save bug

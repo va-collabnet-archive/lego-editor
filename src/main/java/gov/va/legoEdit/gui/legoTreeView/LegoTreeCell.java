@@ -2,7 +2,6 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
-import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoTreeView.PointNode.PointNodeType;
 import gov.va.legoEdit.gui.util.CopyableLabel;
@@ -65,7 +64,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1001,94 +999,81 @@ public class LegoTreeCell<T> extends TreeCell<T>
     
     private void pasteExpression(Expression oldExpression, LegoTreeItem oldTreeItem)
     {
-        try
+        Expression expression;
+        if (CustomClipboard.containsType(Expression.class))
         {
-            Expression e;
-            if (CustomClipboard.containsType(Expression.class))
-            {
-                e = CustomClipboard.getExpression();
-            }
-            else if (CustomClipboard.containsType(Discernible.class))
-            {
-                e = CustomClipboard.getDiscernible().getExpression();
-            }
-            else if (CustomClipboard.containsType(Qualifier.class))
-            {
-                e = CustomClipboard.getQualifier().getExpression();
-            }
-            else
-            {
-                CustomClipboard.updateBindings();
-                LegoGUI.getInstance().showErrorDialog("No Pasteable Expression on Clipboard",
-                        "The Clipboard does not contain an Expression", null);
-                return;
-            }
-
-            // Ugly but easy clone impl...
-            Expression clonedExpression = LegoXMLUtils.readExpression(LegoXMLUtils.toXML(e));
-
-            boolean expand = oldTreeItem.isExpanded();
-            LegoTreeItem parentLegoTreeItem = (LegoTreeItem) oldTreeItem.getParent();
-
-            LegoTreeItem newLTI = null;
-            if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
-            {
-                Assertion a = (Assertion) parentLegoTreeItem.getExtraData();
-                a.getDiscernible().setExpression(clonedExpression);
-                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDiscernible);
-            }
-            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
-            {
-                Assertion a = (Assertion) parentLegoTreeItem.getExtraData();
-                a.getQualifier().setExpression(clonedExpression);
-                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionQualifier);
-            }
-            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionValue)
-            {
-                Value v = (Value) parentLegoTreeItem.getExtraData();
-                v.setExpression(clonedExpression);
-                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionValue);
-            }
-            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDestination)
-            {
-                Relation r = (Relation) parentLegoTreeItem.getExtraData();
-                r.getDestination().setExpression(clonedExpression);
-                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionDestination);
-            }
-            else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionOptional)
-            {
-                Expression parentExpression = (Expression) parentLegoTreeItem.getExtraData();
-                parentExpression.getExpression().remove(oldExpression);
-                parentExpression.getExpression().add(clonedExpression);
-                newLTI = new LegoTreeItem(clonedExpression, LegoTreeNodeType.expressionOptional);
-            }
-            else
-            {
-                // I think I have all the cases handled....
-                logger.error("Unhandled paste type in expression "
-                        + parentLegoTreeItem.getExtraData().getClass().getName());
-                LegoGUI.getInstance().showErrorDialog("Unhandled paste operation", "Unhandled paste operation",
-                        "Please file a bug with your log file attached");
-                return;
-            }
-
-            // Need to delete the old value tree node
-            parentLegoTreeItem.getChildren().remove(oldTreeItem);
-
-            newLTI.setExpanded(expand);
-            parentLegoTreeItem.getChildren().add(newLTI);
-            FXCollections.sort(parentLegoTreeItem.getChildren(), new LegoTreeItemComparator(true));
-            treeView.contentChanged();
-            Event.fireEvent(parentLegoTreeItem, new TreeItem.TreeModificationEvent<String>(
-                    TreeItem.valueChangedEvent(), parentLegoTreeItem));
-
+            expression = CustomClipboard.getExpression();
         }
-        catch (JAXBException e)
+        else if (CustomClipboard.containsType(Discernible.class))
         {
-            logger.error("Unexpected error handling paste", e);
-            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste",
-                    e.toString());
+            expression = CustomClipboard.getDiscernible().getExpression();
         }
+        else if (CustomClipboard.containsType(Qualifier.class))
+        {
+            expression = CustomClipboard.getQualifier().getExpression();
+        }
+        else
+        {
+            CustomClipboard.updateBindings();
+            LegoGUI.getInstance().showErrorDialog("No Pasteable Expression on Clipboard",
+                    "The Clipboard does not contain an Expression", null);
+            return;
+        }
+
+        boolean expand = oldTreeItem.isExpanded();
+        LegoTreeItem parentLegoTreeItem = (LegoTreeItem) oldTreeItem.getParent();
+
+        LegoTreeItem newLTI = null;
+        if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDiscernible)
+        {
+            Assertion a = (Assertion) parentLegoTreeItem.getExtraData();
+            a.getDiscernible().setExpression(expression);
+            newLTI = new LegoTreeItem(expression, LegoTreeNodeType.expressionDiscernible);
+        }
+        else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionQualifier)
+        {
+            Assertion a = (Assertion) parentLegoTreeItem.getExtraData();
+            a.getQualifier().setExpression(expression);
+            newLTI = new LegoTreeItem(expression, LegoTreeNodeType.expressionQualifier);
+        }
+        else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionValue)
+        {
+            Value v = (Value) parentLegoTreeItem.getExtraData();
+            v.setExpression(expression);
+            newLTI = new LegoTreeItem(expression, LegoTreeNodeType.expressionValue);
+        }
+        else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionDestination)
+        {
+            Relation r = (Relation) parentLegoTreeItem.getExtraData();
+            r.getDestination().setExpression(expression);
+            newLTI = new LegoTreeItem(expression, LegoTreeNodeType.expressionDestination);
+        }
+        else if (oldTreeItem.getNodeType() == LegoTreeNodeType.expressionOptional)
+        {
+            Expression parentExpression = (Expression) parentLegoTreeItem.getExtraData();
+            parentExpression.getExpression().remove(oldExpression);
+            parentExpression.getExpression().add(expression);
+            newLTI = new LegoTreeItem(expression, LegoTreeNodeType.expressionOptional);
+        }
+        else
+        {
+            // I think I have all the cases handled....
+            logger.error("Unhandled paste type in expression "
+                    + parentLegoTreeItem.getExtraData().getClass().getName());
+            LegoGUI.getInstance().showErrorDialog("Unhandled paste operation", "Unhandled paste operation",
+                    "Please file a bug with your log file attached");
+            return;
+        }
+
+        // Need to delete the old value tree node
+        parentLegoTreeItem.getChildren().remove(oldTreeItem);
+
+        newLTI.setExpanded(expand);
+        parentLegoTreeItem.getChildren().add(newLTI);
+        FXCollections.sort(parentLegoTreeItem.getChildren(), new LegoTreeItemComparator(true));
+        treeView.contentChanged();
+        Event.fireEvent(parentLegoTreeItem, new TreeItem.TreeModificationEvent<String>(
+                TreeItem.valueChangedEvent(), parentLegoTreeItem));
     }
 
     private void removeExpression(Expression e, TreeItem<String> ti)
@@ -1213,47 +1198,36 @@ public class LegoTreeCell<T> extends TreeCell<T>
     
     private void pasteValue(Assertion parentAssertion, TreeItem<String> parentTreeItem)
     {
-        try
+        if (CustomClipboard.containsType(Value.class))
         {
-            if (CustomClipboard.containsType(Value.class))
-            {
-                Value v = CustomClipboard.getValue();
-                //need to clone this assertion - then change the UUID.
-                //Ugly but easy clone impl...
-                Value clonedValue = LegoXMLUtils.readValue(LegoXMLUtils.toXML(v));
+            Value v = CustomClipboard.getValue();
 
-                boolean expand = true;
-                if (parentAssertion.getValue() != null)
+            boolean expand = true;
+            if (parentAssertion.getValue() != null)
+            {
+                //Need to delete the old value tree node
+                for (TreeItem<String> lti : parentTreeItem.getChildren())
                 {
-                    //Need to delete the old value tree node
-                    for (TreeItem<String> lti : parentTreeItem.getChildren())
+                    if (((LegoTreeItem)lti).getExtraData() instanceof Value)
                     {
-                        if (((LegoTreeItem)lti).getExtraData() instanceof Value)
-                        {
-                            expand = lti.isExpanded();
-                            parentTreeItem.getChildren().remove(lti);
-                            break;
-                        }
+                        expand = lti.isExpanded();
+                        parentTreeItem.getChildren().remove(lti);
+                        break;
                     }
                 }
-                parentAssertion.setValue(clonedValue);
-                LegoTreeItem lti = new LegoTreeItem(clonedValue);
-                parentTreeItem.getChildren().add(lti);
-                FXCollections.sort(parentTreeItem.getChildren(), new LegoTreeItemComparator(true));
-                lti.setExpanded(expand);
-                treeView.contentChanged();
-                Event.fireEvent(parentTreeItem, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), parentTreeItem));
             }
-            else
-            {
-                CustomClipboard.updateBindings();
-                LegoGUI.getInstance().showErrorDialog("No Value on Clipboard", "The Clipboard does not contain a Value", null);
-            }
+            parentAssertion.setValue(v);
+            LegoTreeItem lti = new LegoTreeItem(v);
+            parentTreeItem.getChildren().add(lti);
+            FXCollections.sort(parentTreeItem.getChildren(), new LegoTreeItemComparator(true));
+            lti.setExpanded(expand);
+            treeView.contentChanged();
+            Event.fireEvent(parentTreeItem, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), parentTreeItem));
         }
-        catch (JAXBException e)
+        else
         {
-            logger.error("Unexpected error handling paste", e);
-            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste", e.toString());
+            CustomClipboard.updateBindings();
+            LegoGUI.getInstance().showErrorDialog("No Value on Clipboard", "The Clipboard does not contain a Value", null);
         }
     }
 
@@ -1476,36 +1450,25 @@ public class LegoTreeCell<T> extends TreeCell<T>
     
     private void pasteAssertion()
     {
-        try
+        if (CustomClipboard.containsType(Assertion.class))
         {
-            if (CustomClipboard.containsType(Assertion.class))
-            {
-                Assertion a = CustomClipboard.getAssertion();
-                //need to clone this assertion - then change the UUID.
-                //Ugly but easy clone impl...
-                Assertion clonedAssertion = LegoXMLUtils.readAssertion(LegoXMLUtils.toXML(a));
-                
-                LegoTreeView ltv = (LegoTreeView) getTreeView();
-                //Change the Assertion UUID 
-                clonedAssertion.setAssertionUUID(UUID.randomUUID().toString());
-                ltv.getLego().getAssertion().add(clonedAssertion);
-                treeView.contentChanged();
+            Assertion a = CustomClipboard.getAssertion();
             
-                LegoTreeItem lti = new LegoTreeItem(clonedAssertion);
-                ltv.getRoot().getChildren().add(lti);
-                FXCollections.sort(ltv.getRoot().getChildren(), new LegoTreeItemComparator(true));
-                lti.setExpanded(true);
-            }
-            else
-            {
-                CustomClipboard.updateBindings();
-                LegoGUI.getInstance().showErrorDialog("No Assertion on Clipboard", "The Clipboard does not contain an Assertion", null);
-            }
+            LegoTreeView ltv = (LegoTreeView) getTreeView();
+            //Change the Assertion UUID 
+            a.setAssertionUUID(UUID.randomUUID().toString());
+            ltv.getLego().getAssertion().add(a);
+            treeView.contentChanged();
+        
+            LegoTreeItem lti = new LegoTreeItem(a);
+            ltv.getRoot().getChildren().add(lti);
+            FXCollections.sort(ltv.getRoot().getChildren(), new LegoTreeItemComparator(true));
+            lti.setExpanded(true);
         }
-        catch (JAXBException e)
+        else
         {
-            logger.error("Unexpected error handling paste", e);
-            LegoGUI.getInstance().showErrorDialog("Unexpected Error during paste", "Unexpected error during paste", e.toString());
+            CustomClipboard.updateBindings();
+            LegoGUI.getInstance().showErrorDialog("No Assertion on Clipboard", "The Clipboard does not contain an Assertion", null);
         }
     }
 

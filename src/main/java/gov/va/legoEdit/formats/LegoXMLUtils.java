@@ -3,6 +3,7 @@ package gov.va.legoEdit.formats;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
+import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Value;
@@ -83,6 +84,11 @@ public class LegoXMLUtils
         Unmarshaller um = jc.createUnmarshaller();
         return (LegoList) um.unmarshal(new FileReader(path));
     }
+    
+    public static String toXML(Lego l) throws PropertyException, JAXBException
+    {
+        return marshall(l);
+    }
 
     public static String toXML(LegoList ll) throws PropertyException, JAXBException
     {
@@ -156,6 +162,11 @@ public class LegoXMLUtils
     public static Expression readExpression(String xmlExpression) throws JAXBException
     {
         return (Expression) jc.createUnmarshaller().unmarshal(new ByteArrayInputStream(xmlExpression.getBytes()));
+    }
+    
+    public static Lego readLego(String xmlLego) throws JAXBException
+    {
+        return (Lego) jc.createUnmarshaller().unmarshal(new ByteArrayInputStream(xmlLego.getBytes()));
     }
     
     public static Object read(InputStream is) throws JAXBException
