@@ -13,6 +13,7 @@ import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
+import gov.va.legoEdit.model.PendingConcepts;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
@@ -781,6 +782,8 @@ public class LegoGUIController implements Initializable
 							}
 						}
 					});
+					logger.info("Initialize pending concepts");
+					PendingConcepts.getConcept("5");  //Just need to make a request, so it initializes.
 				}
 				catch (Exception e)
 				{
