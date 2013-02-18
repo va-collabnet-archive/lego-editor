@@ -28,164 +28,174 @@ import org.slf4j.LoggerFactory;
 
 public class ImportDialogController implements Initializable
 {
-    Logger logger = LoggerFactory.getLogger(ImportDialogController.class);
-    @FXML //  fx:id="detailedMessage"
-    private TextArea detailedMessage; // Value injected by FXMLLoader
-    @FXML //  fx:id="importName"
-    private Label importName; // Value injected by FXMLLoader
-    @FXML //  fx:id="okButton"
-    private Button okButton; // Value injected by FXMLLoader
-    @FXML //  fx:id="progress"
-    private ProgressBar progress; // Value injected by FXMLLoader
-    @FXML //  fx:id="rootPane"
-    private AnchorPane rootPane; // Value injected by FXMLLoader
+	Logger logger = LoggerFactory.getLogger(ImportDialogController.class);
+	@FXML // fx:id="detailedMessage"
+	private TextArea detailedMessage; // Value injected by FXMLLoader
+	@FXML // fx:id="importName"
+	private Label importName; // Value injected by FXMLLoader
+	@FXML // fx:id="okButton"
+	private Button okButton; // Value injected by FXMLLoader
+	@FXML // fx:id="progress"
+	private ProgressBar progress; // Value injected by FXMLLoader
+	@FXML // fx:id="rootPane"
+	private AnchorPane rootPane; // Value injected by FXMLLoader
 
+	@Override
+	// This method is called by the FXMLLoader when initialization is complete
+	public void initialize(URL fxmlFileLocation, ResourceBundle resources)
+	{
+		assert detailedMessage != null : "fx:id=\"detailedMessage\" was not injected: check your FXML file 'ImportDialog.fxml'.";
+		assert importName != null : "fx:id=\"importName\" was not injected: check your FXML file 'ImportDialog.fxml'.";
+		assert okButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'ImportDialog.fxml'.";
+		assert progress != null : "fx:id=\"progress\" was not injected: check your FXML file 'ImportDialog.fxml'.";
+		assert rootPane != null : "fx:id=\"rootPane\" was not injected: check your FXML file 'ImportDialog.fxml'.";
 
-    @Override // This method is called by the FXMLLoader when initialization is complete
-    public void initialize(URL fxmlFileLocation, ResourceBundle resources) 
-    {
-        assert detailedMessage != null : "fx:id=\"detailedMessage\" was not injected: check your FXML file 'ImportDialog.fxml'.";
-        assert importName != null : "fx:id=\"importName\" was not injected: check your FXML file 'ImportDialog.fxml'.";
-        assert okButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'ImportDialog.fxml'.";
-        assert progress != null : "fx:id=\"progress\" was not injected: check your FXML file 'ImportDialog.fxml'.";
-        assert rootPane != null : "fx:id=\"rootPane\" was not injected: check your FXML file 'ImportDialog.fxml'.";
+		// initialize your logic here: all @FXML variables will have been injected
+		okButton.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				((Stage) rootPane.getScene().getWindow()).close();
+			}
+		});
+	}
 
-        // initialize your logic here: all @FXML variables will have been injected
-        okButton.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                ((Stage) rootPane.getScene().getWindow()).close();
-            }
-        });
-    }
+	public void importFiles(List<File> files)
+	{
+		okButton.setDisable(true);
+		progress.setProgress(0.0);
+		importName.setText("Importing initializing");
+		((Stage) rootPane.getScene().getWindow()).setOnCloseRequest(new EventHandler<WindowEvent>()
+		{
+			@Override
+			public void handle(WindowEvent event)
+			{
+				((Stage) rootPane.getScene().getWindow()).show();
+				event.consume();
+			}
+		});
+		ImportRunnable r = new ImportRunnable(files);
+		Thread t = new Thread(r, "Import Thread");
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
 
-    public void importFiles(List<File> files)
-    {
-        okButton.setDisable(true);
-        progress.setProgress(0.0);
-        importName.setText("Importing initializing");
-        ((Stage) rootPane.getScene().getWindow()).setOnCloseRequest(new EventHandler<WindowEvent>()
-        {
-            @Override
-            public void handle(WindowEvent event)
-            {
-                ((Stage) rootPane.getScene().getWindow()).show();
-                event.consume();
-            }
-        });
-        ImportRunnable r = new ImportRunnable(files);
-        Thread t = new Thread(r, "Import Thread");
-        t.setPriority(Thread.MIN_PRIORITY);
-        t.start();
+	}
 
-    }
-    
-    private class ImportRunnable implements Runnable
-    {
-        private List<File> files;
-        int count = 0;
-        StringBuilder status = new StringBuilder();
-        HashMap<String, Concept> missingConcepts = new HashMap<>();
-        
-        protected ImportRunnable(List<File> files)
-        {
-            this.files = files;
-        }
+	private class ImportRunnable implements Runnable
+	{
+		private List<File> files;
+		int count = 0;
+		StringBuilder status = new StringBuilder();
+		HashMap<String, Concept> missingConcepts = new HashMap<>();
 
-        @Override
-        public void run()
-        {
-            for (final File f : files)
-            {
-                final String temp = status.toString();
-                status.setLength(0);
-                Platform.runLater(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        ((Stage) rootPane.getScene().getWindow()).show();
-                        importName.setText("Importing " + f.getName() + "...");
-                        progress.setProgress((double)count / (double)files.size());
-                        if (temp.length() > 0)
-                        {
-                            detailedMessage.appendText(temp);
-                        }
-                    }
-                });
-                
-                if (f.exists() && f.isFile())
-                {
-                    try
-                    {
-                        LegoXMLUtils.validate((f));
-                        LegoList ll = LegoXMLUtils.readLegoList(f);
-                        List<Concept> failures = WBUtility.lookupAllConcepts(ll);
-                        BDBDataStoreImpl.getInstance().importLegoList(ll);
-                        for (Concept c : failures)
-                        {
-                            if (c.getSctid() != null)
-                            {
-                                missingConcepts.put(c.getSctid() + "", c);
-                            }
-                            else if (c.getUuid() != null && c.getUuid().length() > 0)
-                            {
-                                missingConcepts.put(c.getUuid(), c);
-                            }
-                            else
-                            {
-                                missingConcepts.put(c.getDesc(), c);
-                            }
-                        }
-                        
-                        status.append("Loaded " + f.getName());
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.info("Error loading file " + f.getName(), ex);
-                        status.append("Error loading file " + f.getName() + ": ");
-                        status.append((ex.getLocalizedMessage() == null ? ex.toString() : ex.getLocalizedMessage()));
-                    }
-                }
-                else
-                {
-                    status.append("Skipped " + f.getName());
-                }
-                
-                status.append(System.getProperty("line.separator"));
-                status.append(System.getProperty("line.separator"));
-                count++;
-            }
-            
-            Platform.runLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    detailedMessage.appendText(status.toString());
-                    importName.setText("Updating Editor");
-                    progress.setProgress(99.0);
-                    LegoGUIModel.getInstance().updateLegoLists();
-                    progress.setProgress(100.0);
-                    importName.setText("Import Complete");
-                    
-                    if (missingConcepts.size() > 0)
-                    {
-                        detailedMessage.appendText("Some concepts specified in the imported Legos do not exist in the SCT DB or the pending concepts file:");
-                        detailedMessage.appendText(System.getProperty("line.separator"));
-                        for (Concept c : missingConcepts.values())
-                        {
-                            detailedMessage.appendText(c.getSctid() + "\t" + c.getDesc() + (c.getUuid() != null ? "\t" + c.getUuid() : ""));
-                            detailedMessage.appendText(System.getProperty("line.separator"));
-                        }
-                    }
-                    
-                    okButton.setDisable(false);
-                    okButton.requestFocus();
-                }
-            });
-        }
-    }
+		protected ImportRunnable(List<File> files)
+		{
+			this.files = files;
+		}
+
+		@Override
+		public void run()
+		{
+			for (final File f : files)
+			{
+				final String temp = status.toString();
+				status.setLength(0);
+				Platform.runLater(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						((Stage) rootPane.getScene().getWindow()).show();
+						importName.setText("Importing " + f.getName() + "...");
+						progress.setProgress((double) count / (double) files.size());
+						if (temp.length() > 0)
+						{
+							detailedMessage.appendText(temp);
+						}
+					}
+				});
+
+				if (f.exists() && f.isFile())
+				{
+					try
+					{
+						try
+						{
+							LegoXMLUtils.validate((f));
+						}
+						catch (Exception e)
+						{
+							status.append("Warning - The file '" + f.getName() + "' is not schema valid.  Will attempt to import, but may fail.");
+							status.append("  The schema error was: " + e.getMessage());
+							status.append(System.getProperty("line.separator"));
+							status.append(System.getProperty("line.separator"));
+						}
+						LegoList ll = LegoXMLUtils.readLegoList(f);
+						List<Concept> failures = WBUtility.lookupAllConcepts(ll);
+						BDBDataStoreImpl.getInstance().importLegoList(ll);
+						for (Concept c : failures)
+						{
+							if (c.getSctid() != null)
+							{
+								missingConcepts.put(c.getSctid() + "", c);
+							}
+							else if (c.getUuid() != null && c.getUuid().length() > 0)
+							{
+								missingConcepts.put(c.getUuid(), c);
+							}
+							else
+							{
+								missingConcepts.put(c.getDesc(), c);
+							}
+						}
+
+						status.append("Loaded " + f.getName());
+					}
+					catch (Exception ex)
+					{
+						logger.info("Error loading file " + f.getName(), ex);
+						status.append("Error loading file " + f.getName() + ": ");
+						status.append((ex.getLocalizedMessage() == null ? ex.toString() : ex.getLocalizedMessage()));
+					}
+				}
+				else
+				{
+					status.append("Skipped " + f.getName());
+				}
+
+				status.append(System.getProperty("line.separator"));
+				status.append(System.getProperty("line.separator"));
+				count++;
+			}
+
+			Platform.runLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					detailedMessage.appendText(status.toString());
+					importName.setText("Updating Editor");
+					progress.setProgress(99.0);
+					LegoGUIModel.getInstance().updateLegoLists();
+					progress.setProgress(100.0);
+					importName.setText("Import Complete");
+
+					if (missingConcepts.size() > 0)
+					{
+						detailedMessage.appendText("Some concepts specified in the imported Legos do not exist in the SCT DB or the pending concepts file:");
+						detailedMessage.appendText(System.getProperty("line.separator"));
+						for (Concept c : missingConcepts.values())
+						{
+							detailedMessage.appendText(c.getSctid() + "\t" + c.getDesc() + (c.getUuid() != null ? "\t" + c.getUuid() : ""));
+							detailedMessage.appendText(System.getProperty("line.separator"));
+						}
+					}
+
+					okButton.setDisable(false);
+					okButton.requestFocus();
+				}
+			});
+		}
+	}
 }

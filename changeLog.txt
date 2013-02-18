@@ -2,6 +2,7 @@ Lego Editor Change Log
 2012/02/?? - 0.52
   *  Fixed a bug with copy/paste of Legos that caused previously edited legos to change and 
 		generally behave strangely when a lego was pasted multiple times. 
+  *  Allow import of Legos even when schema validation fails
 
 2012/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste
