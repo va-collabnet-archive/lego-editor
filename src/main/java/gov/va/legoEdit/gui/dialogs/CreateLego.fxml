@@ -16,9 +16,21 @@
         <Label styleClass="boldLabel" text="PNCS Name" GridPane.columnIndex="0" GridPane.rowIndex="1" />
         <Label styleClass="boldLabel" text="PNCS Value" GridPane.columnIndex="0" GridPane.rowIndex="2" />
         <Label styleClass="boldLabel" text="PNCS ID" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-        <TextField fx:id="pncsName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <TextField fx:id="pncsValue" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <TextField fx:id="pncsID" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <StackPane id="StackPane" fx:id="pncsNameStack" GridPane.columnIndex="1" GridPane.rowIndex="1">
+          <children>
+            <TextField fx:id="pncsName" />
+          </children>
+        </StackPane>
+        <StackPane id="StackPane" fx:id="pncsValueStack" GridPane.columnIndex="1" GridPane.rowIndex="2">
+          <children>
+            <TextField fx:id="pncsValue" prefWidth="200.0" />
+          </children>
+        </StackPane>
+        <StackPane id="StackPane" fx:id="pncsIDStack" GridPane.columnIndex="1" GridPane.rowIndex="3">
+          <children>
+            <TextField fx:id="pncsID" prefWidth="200.0" />
+          </children>
+        </StackPane>
         <Label styleClass="boldLabel" text="Lego List" GridPane.columnIndex="0" GridPane.rowIndex="0" />
         <Label fx:id="legoListName" text="Lego List Name" GridPane.columnIndex="1" GridPane.rowIndex="0" />
       </children>
@@ -35,11 +47,15 @@
     </GridPane>
     <GridPane alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
       <children>
-        <Button fx:id="okButton" alignment="CENTER" mnemonicParsing="false" text="Ok" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0">
-          <GridPane.margin>
-            <Insets right="20.0" />
-          </GridPane.margin>
-        </Button>
+        <StackPane id="StackPane" fx:id="okStack" GridPane.columnIndex="0" GridPane.rowIndex="0">
+          <children>
+            <Button fx:id="okButton" alignment="CENTER" mnemonicParsing="false" text="Ok" StackPane.alignment="CENTER_RIGHT">
+              <StackPane.margin>
+                <Insets right="20.0" />
+              </StackPane.margin>
+            </Button>
+          </children>
+        </StackPane>
         <Button fx:id="cancelButton" mnemonicParsing="false" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="0">
           <GridPane.margin>
             <Insets left="20.0" />

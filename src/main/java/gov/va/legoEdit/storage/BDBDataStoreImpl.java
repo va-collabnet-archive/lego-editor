@@ -1037,6 +1037,12 @@ public class BDBDataStoreImpl implements DataStoreInterface
 			throw new DataStoreException("Data read failure", e);
 		}
 	}
+	
+	@Override
+	public Pncs getPncs(int id, String value)
+	{
+		return getPncsByUniqueId(PncsBDB.makeUniqueId(id, value));
+	}
 
 	public Pncs getPncsByUniqueId(String uniqueId)
 	{
