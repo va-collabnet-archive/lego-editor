@@ -108,8 +108,6 @@ public class LegoGUIController implements Initializable
 
 	private BooleanBinding enableSaveButton;
 
-	// TODO import of LEgos should update snomed dropdowns
-
 	private static String NONE = "NONE";
 
 	// Copypaste from gui tool

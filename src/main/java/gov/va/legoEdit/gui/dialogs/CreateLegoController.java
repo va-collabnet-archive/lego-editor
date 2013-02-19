@@ -312,6 +312,7 @@ public class CreateLegoController implements Initializable
 		okStack.getChildren().add(okInvalidImage);
 		StackPane.setAlignment(okInvalidImage, Pos.CENTER_RIGHT);
 		StackPane.setMargin(okInvalidImage, new Insets(0.0, 32.0, 0.0, 0.0));
+		okInvalidImage.setVisible(false);
 		
 		formValid = new SimpleBooleanProperty(false);
 		okButton.disableProperty().bind(formValid.not());

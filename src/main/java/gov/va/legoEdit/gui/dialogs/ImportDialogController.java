@@ -1,5 +1,6 @@
 package gov.va.legoEdit.gui.dialogs;
 
+import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.model.schemaModel.Concept;
@@ -168,6 +169,8 @@ public class ImportDialogController implements Initializable
 				status.append(System.getProperty("line.separator"));
 				count++;
 			}
+			
+			LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().rebuildDBStats();
 
 			Platform.runLater(new Runnable()
 			{

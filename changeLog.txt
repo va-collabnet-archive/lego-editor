@@ -3,8 +3,11 @@ Lego Editor Change Log
   *  Fixed a bug with copy/paste of Legos that caused previously edited legos to change and 
 		generally behave strangely when a lego was pasted multiple times. 
   *  Allow import of Legos even when schema validation fails
-  *  Add proper validation to the pending concepts file (no duplicates, no overlap with real snomed concepts)
+  *  Add proper validation to the pending concepts file (no duplicates, no overlap with real snomed 
+		concepts)
   *  Fix a bug that was allowing users to inadvertently change the name associated with a PNCS.
+  *  Fix the recently-used drop down selections so that they properly update when legos are imported 
+		and deleted.
 
 2012/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste

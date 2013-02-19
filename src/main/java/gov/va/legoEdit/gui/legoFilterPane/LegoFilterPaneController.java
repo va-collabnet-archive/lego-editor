@@ -102,7 +102,7 @@ public class LegoFilterPaneController  implements Initializable {
             public void handle(ActionEvent event)
             {
                 updateDisabled.incrementAndGet();
-                //TODO UGLY HACK cause I can't figure out how to tell it to redo the items...
+                //UGLY HACK cause I can't figure out how to tell the combo box that the value of the items it is displaying changed.
                 PncsItem selected = pncsItem.getSelectionModel().getSelectedItem();
                 ObservableList<PncsItem> items = FXCollections.observableArrayList();
                 items.addAll(pncsItem.getItems());
