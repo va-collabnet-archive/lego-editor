@@ -10,6 +10,8 @@ Lego Editor Change Log
 		and deleted.
   *  Allow right click -> create new lego on the PNCS name level of the lego list tree.  Prepopulates
 		the name into the create dialog.
+  *  Added missing XML header information to Lego exports
+  *  artf227457 Add live schema validation to editor
 
 2012/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste

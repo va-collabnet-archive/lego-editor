@@ -9,8 +9,8 @@ import javafx.util.Callback;
 
 public class LegoTreeView extends TreeView<String>
 {
-    private LegoTab legoTab_;
-    
+	private LegoTab legoTab_;
+
 	public LegoTreeView()
 	{
 		getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -22,33 +22,32 @@ public class LegoTreeView extends TreeView<String>
 				return new LegoTreeCell<String>(LegoTreeView.this);
 			}
 		});
-		//Not going to use the edit API, not reliable.  Just detect doubleclick instead.
+		// Not going to use the edit API, not reliable. Just detect doubleclick instead.
 		setEditable(false);
 		LegoTreeItem treeRoot = new LegoTreeItem();
-        setShowRoot(false);
-        setRoot(treeRoot);
-	}
-	
-	public void setLegoTab(LegoTab legoTab)
-	{
-	    legoTab_ = legoTab;
+		setShowRoot(false);
+		setRoot(treeRoot);
 	}
 
-	
+	public void setLegoTab(LegoTab legoTab)
+	{
+		legoTab_ = legoTab;
+	}
+
 	protected Lego getLego()
 	{
-	    if (legoTab_ != null)
-	    {
-	        return legoTab_.getLego();
-	    }
-	    return null;
+		if (legoTab_ != null)
+		{
+			return legoTab_.getLego();
+		}
+		return null;
 	}
-	
+
 	protected void contentChanged()
 	{
-	    if (legoTab_ != null)
-	    {
-	        legoTab_.hasUnsavedChangesProperty().invalidate();
-	    }
+		if (legoTab_ != null)
+		{
+			legoTab_.contentChanged();
+		}
 	}
 }

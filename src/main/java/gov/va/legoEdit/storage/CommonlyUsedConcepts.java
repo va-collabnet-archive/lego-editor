@@ -66,9 +66,7 @@ public class CommonlyUsedConcepts
 			}
 		};
 
-		Thread t = new Thread(r, "CommonCodeLookup");
-		t.setDaemon(true);
-		t.start();
+		Utility.tpe.submit(r);
 	}
 
 	private void processLego(Lego lego, HashMap<ConceptUsageType, HashMap<String, Count>> usageCounts)

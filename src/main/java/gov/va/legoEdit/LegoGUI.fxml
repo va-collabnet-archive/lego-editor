@@ -4,6 +4,7 @@
 <?import java.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.web.*?>
@@ -28,7 +29,7 @@
             <Insets bottom="120.0" />
           </VBox.margin>
         </ToggleButton>
-        <ToggleButton id="showTemplatesBtn" fx:id="showTemplatesBtn" minWidth="125.0" mnemonicParsing="false" rotate="-90.0" text="Templates" translateY="120.0">
+        <ToggleButton fx:id="showTemplatesBtn" minWidth="125.0" mnemonicParsing="false" rotate="-90.0" text="Templates" translateY="120.0">
           <VBox.margin>
             <Insets bottom="120.0" />
           </VBox.margin>
@@ -64,7 +65,16 @@
             <ToolBar maxHeight="30.0" minHeight="30.0" prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
               <items>
                 <MenuButton fx:id="menuRecentSctCodes" mnemonicParsing="false" text="Recent Snomed Codes" />
-                <Region prefHeight="200.0" prefWidth="200.0"  HBox.hgrow="ALWAYS"/>
+                <Region prefHeight="20.0" prefWidth="150.0" HBox.hgrow="ALWAYS"/>
+                <StackPane id="StackPane" fx:id="legoInvalidStack">
+          			<children>
+		                <ImageView fx:id="legoInvalidImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+		                    <image>
+		                        <Image url="@../../../icons/fugue/16x16/icons-shadowless/exclamation-red.png" preserveRatio="false" smooth="false" />
+		                    </image>
+		                </ImageView>
+		            </children>
+		        </StackPane>
                 <Button id="save" fx:id="buttonSaveLego" mnemonicParsing="false" text="Save" />
               </items>
             </ToolBar>

@@ -5,6 +5,7 @@ import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
+import gov.va.legoEdit.util.Utility;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -48,337 +49,335 @@ import org.slf4j.LoggerFactory;
 
 public class SnomedSearchPaneController implements Initializable
 {
-    Logger logger = LoggerFactory.getLogger(SnomedSearchPaneController.class);
-    private boolean cancelSearch = false;
-    private BooleanProperty searchRunning = new SimpleBooleanProperty(false);
-    
-    @FXML // fx:id="searchButton"
-    private Button searchButton; // Value injected by FXMLLoader
-    @FXML //  fx:id="searchProgress"
-    private ProgressIndicator searchProgress; // Value injected by FXMLLoader
-    @FXML //  fx:id="searchText"
-    private TextField searchText; // Value injected by FXMLLoader
-    @FXML // fx:id="searchResults"
-    private ListView<SearchResult> searchResults; // Value injected by FXMLLoader
-    @FXML // fx:id="borderPane"
-    private BorderPane borderPane; // Value injected by FXMLLoader
-    
-    public static SnomedSearchPaneController init()
-    {
-        try
-        {
-            FXMLLoader loader = new FXMLLoader();
-            loader.load(SnomedSearchPaneController.class.getResourceAsStream("SnomedSearchPane.fxml"));
-            return loader.getController();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Unexpected", e);
-        }
-    }
+	Logger logger = LoggerFactory.getLogger(SnomedSearchPaneController.class);
+	private boolean cancelSearch = false;
+	private BooleanProperty searchRunning = new SimpleBooleanProperty(false);
 
-    @Override
-    // This method is called by the FXMLLoader when initialization is complete
-    public void initialize(URL fxmlFileLocation, ResourceBundle resources)
-    {
-        assert searchButton != null : "fx:id=\"searchButton\" was not injected: check your FXML file 'SearchPanel.fxml'.";
-        assert searchResults != null : "fx:id=\"searchResults\" was not injected: check your FXML file 'SearchPanel.fxml'.";
+	@FXML // fx:id="searchButton"
+	private Button searchButton; // Value injected by FXMLLoader
+	@FXML // fx:id="searchProgress"
+	private ProgressIndicator searchProgress; // Value injected by FXMLLoader
+	@FXML // fx:id="searchText"
+	private TextField searchText; // Value injected by FXMLLoader
+	@FXML // fx:id="searchResults"
+	private ListView<SearchResult> searchResults; // Value injected by FXMLLoader
+	@FXML // fx:id="borderPane"
+	private BorderPane borderPane; // Value injected by FXMLLoader
 
-        // initialize your logic here: all @FXML variables will have been injected
-        
-        borderPane.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
-        AnchorPane.setBottomAnchor(borderPane, 0.0);
-        AnchorPane.setTopAnchor(borderPane, 0.0);
-        AnchorPane.setLeftAnchor(borderPane, 0.0);
-        AnchorPane.setRightAnchor(borderPane, 0.0);
+	public static SnomedSearchPaneController init()
+	{
+		try
+		{
+			FXMLLoader loader = new FXMLLoader();
+			loader.load(SnomedSearchPaneController.class.getResourceAsStream("SnomedSearchPane.fxml"));
+			return loader.getController();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("Unexpected", e);
+		}
+	}
 
-        searchResults.setCellFactory(new Callback<ListView<SearchResult>, ListCell<SearchResult>>()
-        {
-            @Override
-            public ListCell<SearchResult> call(ListView<SearchResult> arg0)
-            {
-                return new ListCell<SearchResult>()
-                {
-                    @Override
-                    protected void updateItem(final SearchResult item, boolean empty)
-                    {
-                        super.updateItem(item, empty);
-                        if (!empty)
-                        {
-                            VBox box = new VBox();
-                            box.setFillWidth(true);
-                            final ConceptVersionBI wbConcept = item.getConcept();
-                            String preferredText = (wbConcept != null ? WBUtility.getFSN(wbConcept) : "error - see log");
-                            Label concept = new Label(preferredText);
-                            concept.getStyleClass().add("boldLabel");
-                            box.getChildren().add(concept);
+	@Override
+	// This method is called by the FXMLLoader when initialization is complete
+	public void initialize(URL fxmlFileLocation, ResourceBundle resources)
+	{
+		assert searchButton != null : "fx:id=\"searchButton\" was not injected: check your FXML file 'SearchPanel.fxml'.";
+		assert searchResults != null : "fx:id=\"searchResults\" was not injected: check your FXML file 'SearchPanel.fxml'.";
 
-                            for (String s : item.getMatchStrings())
-                            {
-                                if (s.equals(preferredText))
-                                {
-                                    continue;
-                                }
-                                Label matchString = new Label(s);
-                                VBox.setMargin(matchString, new Insets(0.0, 0.0, 0.0, 10.0));
-                                box.getChildren().add(matchString);
-                            }
-                            setGraphic(box);
-                            
-                            ContextMenu cm = new ContextMenu();
-                            MenuItem mi = new MenuItem("Copy UUID");
-                            mi.setOnAction(new EventHandler<ActionEvent>()
-                            {
+		// initialize your logic here: all @FXML variables will have been injected
 
-                                @Override
-                                public void handle(ActionEvent event)
-                                {
-                                    if (item.getConcept() != null)
-                                    {
-                                        CustomClipboard.set(item.getConcept().getUUIDs().get(0).toString());
-                                        LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(CustomClipboard.getString());
-                                    }
-                                }
-                            });
-                            cm.getItems().add(mi);
-                            
-                            mi = new MenuItem("View Concept");
-                            mi.setOnAction(new EventHandler<ActionEvent>()
-                            {
-                                @Override
-                                public void handle(ActionEvent event)
-                                {
-                                    LegoGUI.getInstance().showSnomedConceptDialog(item.getConcept().getUUIDs().get(0));
-                                }
-                            });
-                            cm.getItems().add(mi);
-                            
-                            mi = new MenuItem("Filter for Legos that use this Concept");
-                            mi.setOnAction(new EventHandler<ActionEvent>()
-                            {
+		borderPane.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+		AnchorPane.setBottomAnchor(borderPane, 0.0);
+		AnchorPane.setTopAnchor(borderPane, 0.0);
+		AnchorPane.setLeftAnchor(borderPane, 0.0);
+		AnchorPane.setRightAnchor(borderPane, 0.0);
 
-                                @Override
-                                public void handle(ActionEvent event)
-                                {
-                                    if (item.getConcept() != null)
-                                    {
-                                        LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController()
-                                            .filterOnConcept(item.getConcept().getUUIDs().get(0).toString());
-                                    }
-                                }
-                            });
-                            cm.getItems().add(mi);
-                            
-                            setContextMenu(cm);
-                            
-                            setOnMouseClicked(new EventHandler<MouseEvent>()
-                            {
-                                @Override
-                                public void handle(MouseEvent mouseEvent)
-                                {
-                                    if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
-                                    {
-                                        if (mouseEvent.getClickCount() == 2)
-                                        {
-                                            LegoGUI.getInstance().showSnomedConceptDialog(wbConcept.getUUIDs().get(0));
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    }
-                };
-            }
-        });
+		searchResults.setCellFactory(new Callback<ListView<SearchResult>, ListCell<SearchResult>>()
+		{
+			@Override
+			public ListCell<SearchResult> call(ListView<SearchResult> arg0)
+			{
+				return new ListCell<SearchResult>()
+				{
+					@Override
+					protected void updateItem(final SearchResult item, boolean empty)
+					{
+						super.updateItem(item, empty);
+						if (!empty)
+						{
+							VBox box = new VBox();
+							box.setFillWidth(true);
+							final ConceptVersionBI wbConcept = item.getConcept();
+							String preferredText = (wbConcept != null ? WBUtility.getFSN(wbConcept) : "error - see log");
+							Label concept = new Label(preferredText);
+							concept.getStyleClass().add("boldLabel");
+							box.getChildren().add(concept);
 
-        searchResults.setOnDragDetected(new EventHandler<MouseEvent>()
-        {
-            public void handle(MouseEvent event)
-            {
-                /* drag was detected, start a drag-and-drop gesture */
-                /* allow any transfer mode */
-                Dragboard db = searchResults.startDragAndDrop(TransferMode.COPY);
+							for (String s : item.getMatchStrings())
+							{
+								if (s.equals(preferredText))
+								{
+									continue;
+								}
+								Label matchString = new Label(s);
+								VBox.setMargin(matchString, new Insets(0.0, 0.0, 0.0, 10.0));
+								box.getChildren().add(matchString);
+							}
+							setGraphic(box);
 
-                /* Put a string on a dragboard */
-                SearchResult dragItem = searchResults.getSelectionModel().getSelectedItem();
+							ContextMenu cm = new ContextMenu();
+							MenuItem mi = new MenuItem("Copy UUID");
+							mi.setOnAction(new EventHandler<ActionEvent>()
+							{
 
-                if (dragItem.getConcept() != null)
-                {
-                    ClipboardContent content = new ClipboardContent();
-                    content.putString(dragItem.getConcept().getUUIDs().get(0).toString());
-                    db.setContent(content);
-                    LegoGUI.getInstance().getLegoGUIController().snomedDragStarted();
-                    event.consume();
-                }
-            }
-        });
+								@Override
+								public void handle(ActionEvent event)
+								{
+									if (item.getConcept() != null)
+									{
+										CustomClipboard.set(item.getConcept().getUUIDs().get(0).toString());
+										LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(CustomClipboard.getString());
+									}
+								}
+							});
+							cm.getItems().add(mi);
 
-        searchResults.setOnDragDone(new EventHandler<DragEvent>()
-        {
-            public void handle(DragEvent event)
-            {
-                LegoGUI.getInstance().getLegoGUIController().snomedDragCompleted();
-            }
-        });
+							mi = new MenuItem("View Concept");
+							mi.setOnAction(new EventHandler<ActionEvent>()
+							{
+								@Override
+								public void handle(ActionEvent event)
+								{
+									LegoGUI.getInstance().showSnomedConceptDialog(item.getConcept().getUUIDs().get(0));
+								}
+							});
+							cm.getItems().add(mi);
 
-        final BooleanProperty searchTextValid = new SimpleBooleanProperty(false);
-        searchProgress.visibleProperty().bind(searchRunning);
-        searchButton.disableProperty().bind(searchTextValid.not());
+							mi = new MenuItem("Filter for Legos that use this Concept");
+							mi.setOnAction(new EventHandler<ActionEvent>()
+							{
 
-        searchButton.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent e)
-            {
-                if (searchRunning.get())
-                {
-                    cancelSearch = true;
-                }
-                else
-                {
-                    search();
-                }
-            }
-        });
+								@Override
+								public void handle(ActionEvent event)
+								{
+									if (item.getConcept() != null)
+									{
+										LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController()
+												.filterOnConcept(item.getConcept().getUUIDs().get(0).toString());
+									}
+								}
+							});
+							cm.getItems().add(mi);
 
-        searchRunning.addListener(new ChangeListener<Boolean>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
-            {
-                if (searchRunning.get())
-                {
-                    searchButton.setText("Cancel");
-                }
-                else
-                {
-                    searchButton.setText("Search");
-                }
+							setContextMenu(cm);
 
-            }
-        });
+							setOnMouseClicked(new EventHandler<MouseEvent>()
+							{
+								@Override
+								public void handle(MouseEvent mouseEvent)
+								{
+									if (mouseEvent.getButton().equals(MouseButton.PRIMARY))
+									{
+										if (mouseEvent.getClickCount() == 2)
+										{
+											LegoGUI.getInstance().showSnomedConceptDialog(wbConcept.getUUIDs().get(0));
+										}
+									}
+								}
+							});
+						}
+					}
+				};
+			}
+		});
 
-        searchText.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent e)
-            {
-                if (searchTextValid.getValue())
-                {
-                    search();
-                }
-            }
-        });
+		searchResults.setOnDragDetected(new EventHandler<MouseEvent>()
+		{
+			public void handle(MouseEvent event)
+			{
+				/* drag was detected, start a drag-and-drop gesture */
+				/* allow any transfer mode */
+				Dragboard db = searchResults.startDragAndDrop(TransferMode.COPY);
 
-        searchText.textProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-            {
-                if (newValue.length() > 1)
-                {
-                    searchTextValid.set(true);
-                }
-                else
-                {
-                    searchTextValid.set(false);
-                }
-            }
-        });
-    }
+				/* Put a string on a dragboard */
+				SearchResult dragItem = searchResults.getSelectionModel().getSelectedItem();
 
-    private synchronized void search()
-    {
-        searchRunning.set(true);
-        searchResults.getItems().clear();
-        Thread t = new Thread(new Searcher(searchText.getText()));
-        t.setDaemon(true);
-        t.start();
-    }
+				if (dragItem.getConcept() != null)
+				{
+					ClipboardContent content = new ClipboardContent();
+					content.putString(dragItem.getConcept().getUUIDs().get(0).toString());
+					db.setContent(content);
+					LegoGUI.getInstance().getLegoGUIController().snomedDragStarted();
+					event.consume();
+				}
+			}
+		});
 
-    private class Searcher implements Runnable
-    {
-        private String searchString_;
+		searchResults.setOnDragDone(new EventHandler<DragEvent>()
+		{
+			public void handle(DragEvent event)
+			{
+				LegoGUI.getInstance().getLegoGUIController().snomedDragCompleted();
+			}
+		});
 
-        public Searcher(String searchText)
-        {
-            searchString_ = searchText;
-        }
+		final BooleanProperty searchTextValid = new SimpleBooleanProperty(false);
+		searchProgress.visibleProperty().bind(searchRunning);
+		searchButton.disableProperty().bind(searchTextValid.not());
 
-        @Override
-        public void run()
-        {
-            try
-            {
-                cancelSearch = false;
-                List<ComponentChroncileBI<?>> result = WBDataStore.getInstance().descriptionSearch(searchString_);
+		searchButton.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent e)
+			{
+				if (searchRunning.get())
+				{
+					cancelSearch = true;
+				}
+				else
+				{
+					search();
+				}
+			}
+		});
 
-                final HashMap<Integer, SearchResult> viewableResult = new HashMap<>();
-                
-                if (result == null)
-                {
-                    LegoGUI.getInstance().showErrorDialog("Search Not Supported", "Search not yet supported", "Search currently only works with a local database.");
-                    logger.error("Search not yet supported with FxConcept API");
-                    return;
-                }
-                
-                for (ComponentChroncileBI<?> cc : result)
-                {
-                    if (cancelSearch)
-                    {
-                        break;
-                    }
-                    SearchResult sr = viewableResult.get(cc.getConceptNid());
-                    if (sr == null)
-                    {
-                        sr = new SearchResult(cc.getConceptNid());
-                        viewableResult.put(cc.getConceptNid(), sr);
-                    }
-                    if (cc instanceof DescriptionAnalogBI)
-                    {
-                        sr.addMatchingString(((DescriptionAnalogBI<?>) cc).getText());
-                    }
-                    else
-                    {
-                        logger.error("Unexpected type returned from search");
-                        sr.addMatchingString("oops");
-                    }
-                }
+		searchRunning.addListener(new ChangeListener<Boolean>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
+			{
+				if (searchRunning.get())
+				{
+					searchButton.setText("Cancel");
+				}
+				else
+				{
+					searchButton.setText("Search");
+				}
 
-                Platform.runLater(new Runnable()
-                {
+			}
+		});
 
-                    @Override
-                    public void run()
-                    {
-                        searchResults.getItems().addAll(viewableResult.values());
-                        FXCollections.sort(searchResults.getItems(), new SearchResultComparator());
-                    }
-                });
-            }
-            catch (DataStoreException | IOException e)
-            {
-                logger.error("Unexpected Search Error", e);
-            }
-            finally
-            {
-                Platform.runLater(new Runnable()
-                {
+		searchText.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent e)
+			{
+				if (searchTextValid.getValue())
+				{
+					search();
+				}
+			}
+		});
 
-                    @Override
-                    public void run()
-                    {
-                        searchRunning.set(false);
+		searchText.textProperty().addListener(new ChangeListener<String>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				if (newValue.length() > 1)
+				{
+					searchTextValid.set(true);
+				}
+				else
+				{
+					searchTextValid.set(false);
+				}
+			}
+		});
+	}
 
-                    }
-                });
-            }
-        }
-    }
-    
-    public BorderPane getBorderPane()
-    {
-        return borderPane;
-    }
-    
+	private synchronized void search()
+	{
+		searchRunning.set(true);
+		searchResults.getItems().clear();
+		Utility.tpe.submit(new Searcher(searchText.getText()));
+	}
+
+	private class Searcher implements Runnable
+	{
+		private String searchString_;
+
+		public Searcher(String searchText)
+		{
+			searchString_ = searchText;
+		}
+
+		@Override
+		public void run()
+		{
+			try
+			{
+				cancelSearch = false;
+				List<ComponentChroncileBI<?>> result = WBDataStore.getInstance().descriptionSearch(searchString_);
+
+				final HashMap<Integer, SearchResult> viewableResult = new HashMap<>();
+
+				if (result == null)
+				{
+					LegoGUI.getInstance().showErrorDialog("Search Not Supported", "Search not yet supported", "Search currently only works with a local database.");
+					logger.error("Search not yet supported with FxConcept API");
+					return;
+				}
+
+				for (ComponentChroncileBI<?> cc : result)
+				{
+					if (cancelSearch)
+					{
+						break;
+					}
+					SearchResult sr = viewableResult.get(cc.getConceptNid());
+					if (sr == null)
+					{
+						sr = new SearchResult(cc.getConceptNid());
+						viewableResult.put(cc.getConceptNid(), sr);
+					}
+					if (cc instanceof DescriptionAnalogBI)
+					{
+						sr.addMatchingString(((DescriptionAnalogBI<?>) cc).getText());
+					}
+					else
+					{
+						logger.error("Unexpected type returned from search");
+						sr.addMatchingString("oops");
+					}
+				}
+
+				Platform.runLater(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						searchResults.getItems().addAll(viewableResult.values());
+						FXCollections.sort(searchResults.getItems(), new SearchResultComparator());
+					}
+				});
+			}
+			catch (DataStoreException | IOException e)
+			{
+				logger.error("Unexpected Search Error", e);
+			}
+			finally
+			{
+				Platform.runLater(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						searchRunning.set(false);
+
+					}
+				});
+			}
+		}
+	}
+
+	public BorderPane getBorderPane()
+	{
+		return borderPane;
+	}
+
 }

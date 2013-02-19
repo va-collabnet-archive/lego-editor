@@ -1,5 +1,6 @@
 package gov.va.legoEdit;
 
+import gov.va.legoEdit.formats.LegoValidateCallback;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
 import gov.va.legoEdit.gui.legoTreeView.ComboBoxConcept;
@@ -56,6 +57,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -67,6 +69,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.effect.Effect;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -76,6 +79,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
 import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
@@ -105,7 +109,10 @@ public class LegoGUIController implements Initializable
 	private Random random = new Random();
 	private CommonlyUsedConcepts cut;
 	private File importInitialDirectory = null;
-
+	private Tooltip legoInvalidReason = new Tooltip();
+	private ProgressIndicator legoValidationInProgress = new ProgressIndicator();
+	
+	private LegoTabInvalidationListener legoTabInvalidationListener = new LegoTabInvalidationListener();
 	private BooleanBinding enableSaveButton;
 
 	private static String NONE = "NONE";
@@ -165,6 +172,10 @@ public class LegoGUIController implements Initializable
 	private SplitPane splitPane; // Value injected by FXMLLoader
 	@FXML // fx:id="splitRight"
 	private AnchorPane splitRight; // Value injected by FXMLLoader
+	@FXML //  fx:id="legoInvalidImageView"
+	private ImageView legoInvalidImageView; // Value injected by FXMLLoader
+	@FXML //  fx:id="legoInvalidStack"
+	private StackPane legoInvalidStack; // Value injected by FXMLLoader
 
 	@Override
 	// This method is called by the FXMLLoader when initialization is complete
@@ -203,6 +214,21 @@ public class LegoGUIController implements Initializable
 
 		tpc = TemplatesPaneController.init();
 		splitLeftTemplates.getChildren().add(tpc.getBorderPane());
+		
+		legoInvalidImageView.setVisible(false);
+		Tooltip.install(legoInvalidImageView, legoInvalidReason);
+		
+		legoValidationInProgress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+		legoValidationInProgress.setVisible(false);
+		legoValidationInProgress.setPrefHeight(16.0);
+		legoValidationInProgress.setPrefWidth(16.0);
+		legoValidationInProgress.setMaxWidth(16.0);
+		legoValidationInProgress.setMaxHeight(16.0);
+		Tooltip.install(legoValidationInProgress, new Tooltip("Schema Validation in progress"));
+		
+		legoInvalidStack.getChildren().add(legoValidationInProgress);
+		legoInvalidStack.setMaxHeight(20.0);
+		legoInvalidStack.setMaxWidth(20.0);
 
 		setupMenus();
 		setupSctTree(); // This kicks off a thread that opens the DB connection
@@ -233,6 +259,7 @@ public class LegoGUIController implements Initializable
 					showTreeItem(null, ((LegoTab) newTab).getDisplayedLegoID());
 				}
 				enableSaveButton.invalidate();
+				legoTabInvalidationListener.schemaValidate((LegoTab) newTab);
 			}
 		});
 
@@ -347,7 +374,7 @@ public class LegoGUIController implements Initializable
 			}
 		};
 		enableSaveButton.invalidate();
-
+		
 		buttonSaveLego.setGraphic(Images.SAVE.createImageView());
 		buttonSaveLego.disableProperty().bind(enableSaveButton.not());
 		buttonSaveLego.setOnAction(new EventHandler<ActionEvent>()
@@ -934,14 +961,8 @@ public class LegoGUIController implements Initializable
 			else
 			{
 				final LegoTab tab = new LegoTab("Lego", lego);
-				tab.hasUnsavedChangesProperty().addListener(new InvalidationListener()
-				{
-					@Override
-					public void invalidated(Observable observable)
-					{
-						enableSaveButton.invalidate();
-					}
-				});
+				tab.hasUnsavedChangesProperty().addListener(legoTabInvalidationListener);
+				tab.hasChangedSinceLastValidate().addListener(legoTabInvalidationListener);
 				displayedLegos.put(legoId, tab);
 
 				int hue = random.nextInt(361);
@@ -962,7 +983,7 @@ public class LegoGUIController implements Initializable
 				editorTabPane.getTabs().add(tab);
 				editorTabPane.getSelectionModel().select(tab);
 			}
-
+			
 			showTreeItem(lti, ModelUtil.makeUniqueLegoID(lego));
 		}
 	}
@@ -1001,6 +1022,9 @@ public class LegoGUIController implements Initializable
 			style.setValue("-fx-effect: innershadow(two-pass-box , white , 0, 0.0 , 0 , 0);"); // Lego tree node is bound to this - auto update when
 																								// we clear it.
 		}
+		
+		tab.hasUnsavedChangesProperty().removeListener(legoTabInvalidationListener);
+		tab.hasChangedSinceLastValidate().removeListener(legoTabInvalidationListener);
 		snomedCodeDropTargets.remove(tab.getDisplayedLegoID());
 	}
 
@@ -1062,5 +1086,59 @@ public class LegoGUIController implements Initializable
 	public CommonlyUsedConcepts getCommonlyUsedConcept()
 	{
 		return cut;
+	}
+	
+	private class LegoTabInvalidationListener implements InvalidationListener, LegoValidateCallback
+	{
+		@Override
+		public void invalidated(Observable observable)
+		{
+			enableSaveButton.invalidate();
+			Tab t = editorTabPane.getSelectionModel().getSelectedItem();
+			if (t != null)
+			{
+				if (((LegoTab)t).hasChangedSinceLastValidate().get())
+				{
+					schemaValidate(((LegoTab)t));
+				}
+			}
+		}
+		
+		public void schemaValidate(LegoTab t)
+		{
+			legoInvalidImageView.setVisible(false);
+			if (t == null)
+			{
+				legoInvalidImageView.setVisible(false);
+			}
+			else
+			{
+				legoValidationInProgress.setVisible(true);
+				t.schemaValidate(this);
+			}
+		}
+
+		@Override
+		public void validateComplete(final boolean valid, final String errorMessage)
+		{
+			Platform.runLater(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					legoValidationInProgress.setVisible(false);
+					if (valid)
+					{
+						legoInvalidImageView.setVisible(false);
+					}
+					else
+					{
+						legoInvalidReason.setText("Lego Validation Failure:" + System.getProperty("line.separator") + errorMessage);
+						legoInvalidImageView.setVisible(true);
+					}
+				}
+			});
+		}
 	}
 }

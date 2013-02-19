@@ -16,6 +16,7 @@ import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.wb.WBDataStore;
+import gov.va.legoEdit.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -87,6 +88,7 @@ public class LegoGUI extends Application
 	{
 		mainStage_ = stage;
 		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(LegoGUI.class.getResource("LegoGUI.fxml"));
 		Scene scene = new Scene((Parent) loader.load(LegoGUI.class.getResourceAsStream("LegoGUI.fxml")));
 		scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
 		mainStage_.setScene(scene);
@@ -330,8 +332,6 @@ public class LegoGUI extends Application
 				});
 			}
 		};
-		Thread t = new Thread(r, "XMLViewThread");
-		t.setDaemon(true);
-		t.start();
+		Utility.tpe.submit(r);
 	}
 }
