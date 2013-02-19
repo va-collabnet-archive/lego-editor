@@ -8,6 +8,8 @@ Lego Editor Change Log
   *  Fix a bug that was allowing users to inadvertently change the name associated with a PNCS.
   *  Fix the recently-used drop down selections so that they properly update when legos are imported 
 		and deleted.
+  *  Allow right click -> create new lego on the PNCS name level of the lego list tree.  Prepopulates
+		the name into the create dialog.
 
 2012/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste

@@ -4,6 +4,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.Utility;
@@ -362,8 +363,16 @@ public class CreateLegoController implements Initializable
 		{
 			legoFromPaste = null;
 		}
+		
+		String defaultName = "";
+		if (lti.getNodeType() == LegoTreeNodeType.pncsName)
+		{
+			defaultName = lti.getValue();
+			this.legoTreeItem = (LegoTreeItem)lti.getParent();
+		}
+		
 		pncsID.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getId() + "");
-		pncsName.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getName());
+		pncsName.setText(legoFromPaste == null ? defaultName : legoFromPaste.getPncs().getName());
 		pncsValue.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getValue());
 	}
 }
