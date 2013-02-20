@@ -1,5 +1,6 @@
 Lego Editor Change Log
 2012/02/?? - 0.53
+  *  Add missing 'delete template' option to template gui panel.
 
 2012/02/19 - 0.52
   *  Fixed a bug with copy/paste of Legos that caused previously edited legos to change and 
@@ -17,7 +18,7 @@ Lego Editor Change Log
 
 2012/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste
-  *  artf227420 - fixed lucene sort order issues
+  *  artf227420 fixed lucene sort order issues
   *  artf226891 Implemented the ability to store / search / use templates
 
 2012/02/10 - 0.5

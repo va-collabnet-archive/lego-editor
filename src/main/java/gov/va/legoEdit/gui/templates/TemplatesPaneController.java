@@ -102,6 +102,7 @@ public class TemplatesPaneController implements Initializable
 							setText(item.getTemplate().getClass().getSimpleName() + ": " + item.getDescription());
 							setTooltip(new Tooltip(SchemaToString.toString(item.getTemplate())));
 							ContextMenu cm = new ContextMenu();
+							
 							MenuItem mi = new MenuItem("Copy Template");
 							mi.setOnAction(new EventHandler<ActionEvent>()
 							{
@@ -140,6 +141,19 @@ public class TemplatesPaneController implements Initializable
 								}
 							});
 							mi.setGraphic(Images.COPY.createImageView());
+							cm.getItems().add(mi);
+							
+							
+							mi = new MenuItem("Delete Template");
+							mi.setOnAction(new EventHandler<ActionEvent>()
+							{
+								@Override
+								public void handle(ActionEvent event)
+								{
+									LegoTemplateManager.getInstance().deleteTemplate(item.getDescription());
+								}
+							});
+							mi.setGraphic(Images.DELETE.createImageView());
 							cm.getItems().add(mi);
 
 							setContextMenu(cm);
