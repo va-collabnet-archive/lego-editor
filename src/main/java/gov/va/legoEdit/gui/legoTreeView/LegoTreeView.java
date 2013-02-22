@@ -7,6 +7,12 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeView;
 import javafx.util.Callback;
 
+/**
+ * LegoTreeView An enhanced tree view for Lego editing 
+ * @author Dan Armbrust 
+ * Copyright 2013
+ * 
+ */
 public class LegoTreeView extends TreeView<String>
 {
 	private LegoTab legoTab_;
@@ -43,11 +49,19 @@ public class LegoTreeView extends TreeView<String>
 		return null;
 	}
 
-	protected void contentChanged()
+	/**
+	 * Pass in null if there is no need to revalidate the node based on this change (useful for things like 
+	 * boolean dropdowns that can never be set invalid by the editor)
+	 */
+	protected void contentChanged(LegoTreeItem lti)
 	{
 		if (legoTab_ != null)
 		{
 			legoTab_.contentChanged();
+		}
+		if (lti != null)
+		{
+			lti.revalidateToRoot();
 		}
 	}
 }

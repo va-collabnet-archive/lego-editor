@@ -1,6 +1,8 @@
 Lego Editor Change Log
 2012/02/?? - 0.53
   *  Add missing 'delete template' option to template gui panel.
+  *  artf227457 - Add error rollup icons to the tree, refactor validation out of the GUI code, 
+		make it easy to hook in future SCT aware content validators.
 
 2012/02/19 - 0.52
   *  Fixed a bug with copy/paste of Legos that caused previously edited legos to change and 
