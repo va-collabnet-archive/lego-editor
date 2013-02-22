@@ -109,7 +109,7 @@ public class LegoTemplateManager implements Observable
 				logger.warn("Delete of template file " + f.getAbsolutePath() + "' from disk failed");
 			}
 		}
-		LegoTemplate t = templates_.remove(name);
+		LegoTemplate t = templates_.remove(name.toLowerCase());
 		notifyListeners();
 		return t;
 	}
