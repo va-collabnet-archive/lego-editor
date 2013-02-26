@@ -5,6 +5,7 @@ import gov.va.legoEdit.gui.dialogs.AboutDialogController;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.CreateTemplateController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
+import gov.va.legoEdit.gui.dialogs.ExportDialogController;
 import gov.va.legoEdit.gui.dialogs.ImportDialogController;
 import gov.va.legoEdit.gui.dialogs.LegoListPropertiesController;
 import gov.va.legoEdit.gui.dialogs.SnomedConceptViewController;
@@ -271,7 +272,34 @@ public class LegoGUI extends Application
 		ctc_.setVariables(template);
 		templateStage_.show();
 	}
-
+	
+	/**
+	 * Null can be sent in to request an export of all legos...
+	 * @param legoLists
+	 */
+	public void showExportDialog(List<LegoList> legoLists)
+	{
+		try
+		{
+			Stage exportStage = new Stage();
+			exportStage.initModality(Modality.WINDOW_MODAL);
+			exportStage.initOwner(mainStage_);
+			exportStage.initStyle(StageStyle.UTILITY);
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(ExportDialogController.class.getResource("ExportDialog.fxml"));
+			Scene scene = new Scene((Parent) loader.load(ExportDialogController.class.getResourceAsStream("ExportDialog.fxml")));
+			ExportDialogController exportDC = loader.getController();
+			scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+			exportStage.setScene(scene);
+			exportDC.exportFiles(legoLists);
+		}
+		catch (IOException e)
+		{
+			logger.error("Unexpected error", e);
+			showErrorDialog("Unexpected Error", "Sorry, unexpected error trying to initialize export",  null);
+		}
+	}
+	
 	public void showAboutDialog()
 	{
 		try

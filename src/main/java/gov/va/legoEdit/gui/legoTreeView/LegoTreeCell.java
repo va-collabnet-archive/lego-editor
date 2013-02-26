@@ -23,6 +23,7 @@ import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Interval;
 import gov.va.legoEdit.model.schemaModel.Lego;
+import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.PointMeasurementConstant;
@@ -37,9 +38,9 @@ import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.util.TimeConvert;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -1681,21 +1682,13 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		mi.setGraphic(Images.PROPERTIES.createImageView());
 		cm.getItems().add(mi);
 
-		mi = new MenuItem("Export as XML");
+		mi = new MenuItem("Export...");
 		mi.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent arg0)
 			{
-				Platform.runLater(new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-						LegoGUIModel.getInstance().exportLegoList(llbr);
-					}
-				});
+				LegoGUI.getInstance().showExportDialog(Arrays.asList(new LegoList[] {BDBDataStoreImpl.getInstance().getLegoListByID(llbr.getLegoListUUID())}));
 			}
 		});
 		mi.setGraphic(Images.LEGO_EXPORT.createImageView());

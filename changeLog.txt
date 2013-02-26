@@ -1,6 +1,9 @@
 Lego Editor Change Log
 2012/02/?? - 0.54
   *  Fix a silly mistake that lead to problems with template delete in some cases.
+  *  artf227107 Add XHTML export option.  Rework existing XML export to have a proper dialog
+  		and progress bar with status feedback.  Add the ability to export while running arbitrary
+  		(user supplied) XSLT transforms.
 
 2012/02/22 - 0.53
   *  Add missing 'delete template' option to template gui panel.

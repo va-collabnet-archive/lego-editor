@@ -56,7 +56,7 @@ public class LegoXMLUtils
 			schema = schemaFactory.newSchema(LegoXMLUtils.class.getResource("/LEGO.xsd"));
 			jc = JAXBContext.newInstance(LegoList.class);
 			TransformerFactory tf = TransformerFactory.newInstance();
-			xmlToHTMLTransformer = tf.newTransformer(new StreamSource(LegoXMLUtils.class.getResourceAsStream("/xmlToHTML.xslt")));
+			xmlToHTMLTransformer = tf.newTransformer(new StreamSource(LegoXMLUtils.class.getResourceAsStream("/xslTransforms/xmlRenderedAsHTML.xslt")));
 		}
 		catch (SAXException | JAXBException | TransformerConfigurationException e)
 		{

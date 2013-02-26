@@ -60,8 +60,8 @@
 							<xsl:value-of select="pncs/@name"/><br/> 
 						<table>
 							<tr>
-								<td style="width: 200px;">Value: <xsl:value-of select="pncs/@value"/></td>
-								<td style="width: 200px;">ID: <xsl:value-of select="pncs/@id"/></td>
+								<td style="min-width: 200px;">Value: <xsl:value-of select="pncs/@value"/></td>
+								<td style="min-width: 200px;">ID: <xsl:value-of select="pncs/@id"/></td>
 							</tr>
 							<tr>
 								<td>Author: <xsl:value-of select="stamp/@author"/></td>

@@ -865,7 +865,7 @@ public class LegoGUIController implements Initializable
 			@Override
 			public void handle(ActionEvent event)
 			{
-				LegoGUIModel.getInstance().exportAllLegoLists();
+				LegoGUI.getInstance().showExportDialog(null);
 			}
 		});
 

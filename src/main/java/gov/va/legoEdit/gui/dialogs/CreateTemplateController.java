@@ -65,7 +65,6 @@ public class CreateTemplateController implements Initializable
         // initialize your logic here: all @FXML variables will have been injected
         
         invalidImage_ = Images.EXCLAMATION.createImageView();
-        invalidImage_.setEffect(Utility.redDropShadow);
         invalidDescriptionReason_ = new Tooltip("A description is required");
         Tooltip.install(invalidImage_, invalidDescriptionReason_);
         

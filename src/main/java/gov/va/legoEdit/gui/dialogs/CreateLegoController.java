@@ -93,7 +93,6 @@ public class CreateLegoController implements Initializable
 
 		pncsName.setPromptText("The PNCS Name");
 		ImageView pncsNameInvalidImage = Images.EXCLAMATION.createImageView();
-		pncsNameInvalidImage.setEffect(Utility.redDropShadow);
 		pncsNameInvalidReason = new Tooltip("The PNCS Name is required");
 		Tooltip.install(pncsNameInvalidImage, pncsNameInvalidReason);
 		pncsNameStack.getChildren().add(pncsNameInvalidImage);
@@ -124,7 +123,6 @@ public class CreateLegoController implements Initializable
 		
 		pncsValue.setPromptText("The PNCS Value");
 		ImageView pncsValueInvalidImage = Images.EXCLAMATION.createImageView();
-		pncsValueInvalidImage.setEffect(Utility.redDropShadow);
 		pncsValueInvalidReason = new Tooltip("The PNCS Value is required");
 		Tooltip.install(pncsValueInvalidImage, pncsValueInvalidReason);
 		
@@ -157,7 +155,6 @@ public class CreateLegoController implements Initializable
 		
 		pncsID.setPromptText("The PNCS ID (must be an integer)");
 		ImageView pncsIDInvalidImage = Images.EXCLAMATION.createImageView();
-		pncsIDInvalidImage.setEffect(Utility.redDropShadow);
 		pncsIDInvalidReason = new Tooltip("The PNCS ID is required");
 		Tooltip.install(pncsIDInvalidImage, pncsIDInvalidReason);
 
@@ -306,7 +303,6 @@ public class CreateLegoController implements Initializable
 		});
 		
 		okInvalidImage = Images.EXCLAMATION.createImageView();
-		okInvalidImage.setEffect(Utility.redDropShadow);
 		okInvalidReason = new Tooltip("");
 		Tooltip.install(okInvalidImage, okInvalidReason);
 
