@@ -240,6 +240,10 @@ public class PendingConcepts implements Observable
 
 	public Concept getConcept(String sctIdOrUUID)
 	{
+		if (sctIdOrUUID == null)
+		{
+			return null;
+		}
 		loadCheck();
 		Concept temp = pendingConcepts.get(sctIdOrUUID.trim());
 		if (temp == null)

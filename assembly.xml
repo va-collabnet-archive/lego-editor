@@ -5,13 +5,13 @@
 		<format>zip</format>
 	</formats>
 	<fileSets>
-		<fileSet>
+		<!--fileSet>
 			<directory>${basedir}/data.db/</directory>
 			<outputDirectory>data.db/</outputDirectory>
 			<includes>
 				<include>**/*</include>
 			</includes>
-		</fileSet>
+		</fileSet-->
 		<fileSet>
 			<directory>${basedir}/scripts/</directory>
 			<outputDirectory>/</outputDirectory>
