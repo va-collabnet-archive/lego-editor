@@ -95,6 +95,7 @@
         <Menu id="menuEdit" text="_Edit" fx:id="menuEdit">
           <items>
             <MenuItem mnemonicParsing="false" text="Preferences..." fx:id="menuEditPreferences" />
+            <MenuItem mnemonicParsing="false" text="Add Pending Concept..." fx:id="menuEditAddPending" />
           </items>
         </Menu>
         <Menu id="menuHelp" text="_Help" fx:id="menuHelp">

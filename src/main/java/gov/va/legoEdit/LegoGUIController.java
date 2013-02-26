@@ -144,6 +144,8 @@ public class LegoGUIController implements Initializable
 	private Menu menuEdit; // Value injected by FXMLLoader
 	@FXML // fx:id="menuEditPreferences"
 	private MenuItem menuEditPreferences; // Value injected by FXMLLoader
+	@FXML // fx:id="menuEditAddPending"
+	private MenuItem menuEditAddPending; // Value injected by FXMLLoader
 	@FXML // fx:id="menuHelp"
 	private Menu menuHelp; // Value injected by FXMLLoader
 	@FXML // fx:id="menuHelpAbout"
@@ -808,7 +810,7 @@ public class LegoGUIController implements Initializable
 						}
 					});
 					logger.info("Initialize pending concepts");
-					PendingConcepts.getConcept("5");  //Just need to make a request, so it initializes.
+					PendingConcepts.getConcept(5);  //Just need to make a request, so it initializes.
 				}
 				catch (Exception e)
 				{
@@ -887,6 +889,16 @@ public class LegoGUIController implements Initializable
 			public void handle(ActionEvent event)
 			{
 				LegoGUI.getInstance().showUserPreferences();
+			}
+		});
+		
+		menuEditAddPending.setGraphic(Images.CONCEPT_VIEW.createImageView());
+		menuEditAddPending.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				LegoGUI.getInstance().showAddPendingConcept();
 			}
 		});
 

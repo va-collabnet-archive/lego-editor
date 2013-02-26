@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
+
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="300.0" prefHeight="188.0" prefWidth="652.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.CreatePendingConceptController">
+  <children>
+    <Label alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Create Pending Concept" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" />
+    <GridPane styleClass="itemBorder" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+      <children>
+        <Label styleClass="boldLabel" text="Concept ID" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <Label styleClass="boldLabel" text="Concept Description" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Label styleClass="boldLabel" text="Parent Concept" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <StackPane id="StackPane" fx:id="conceptIdStack" GridPane.columnIndex="1" GridPane.rowIndex="0">
+          <children>
+            <TextField id="pncsName" fx:id="conceptId" promptText="The ID to assign the new concept" />
+          </children>
+        </StackPane>
+        <StackPane id="StackPane" fx:id="conceptDescriptionStack" GridPane.columnIndex="1" GridPane.rowIndex="1">
+          <children>
+            <TextField id="pncsValue" fx:id="conceptDescription" prefWidth="200.0" promptText="The description for the new concept" />
+          </children>
+        </StackPane>
+        <StackPane id="StackPane" fx:id="parentConceptStack" GridPane.columnIndex="1" GridPane.rowIndex="2">
+          <children>
+            <TextField id="pncsID" fx:id="parentConcept" prefWidth="200.0" promptText="(optional) Drop snomed concept or enter ID" />
+          </children>
+        </StackPane>
+      </children>
+      <columnConstraints>
+        <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="191.0" minWidth="107.0" prefWidth="171.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="463.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="NEVER" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+      </rowConstraints>
+    </GridPane>
+    <GridPane alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+      <children>
+        <Button fx:id="okButton" alignment="CENTER" mnemonicParsing="false" text="Ok" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0">
+          <GridPane.margin>
+            <Insets right="20.0" />
+          </GridPane.margin>
+        </Button>
+        <Button fx:id="cancelButton" mnemonicParsing="false" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="0">
+          <GridPane.margin>
+            <Insets left="20.0" />
+          </GridPane.margin>
+        </Button>
+      </children>
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      </columnConstraints>
+      <padding>
+        <Insets bottom="10.0" />
+      </padding>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+    </GridPane>
+  </children>
+</AnchorPane>

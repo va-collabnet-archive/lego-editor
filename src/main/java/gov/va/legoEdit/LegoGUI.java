@@ -260,6 +260,31 @@ public class LegoGUI extends Application
 			showErrorDialog("Unexpected Error", "Unexpected Error displaying snomed concept view", e.toString());
 		}
 	}
+	
+	public void showAddPendingConcept()
+	{
+		try
+		{
+			Stage stage = new Stage();
+			stage.initModality(Modality.NONE);
+			stage.initOwner(mainStage_);
+			stage.initStyle(StageStyle.DECORATED);
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(ErrorDialogController.class.getResource("CreatePendingConcept.fxml"));
+			Scene scene = new Scene((Parent) loader.load(ImportDialogController.class.getResourceAsStream("CreatePendingConcept.fxml")));
+			scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+			stage.setScene(scene);
+			stage.setTitle("Add Pending Concept");
+			stage.getIcons().add(Images.CONCEPT_VIEW.getImage());
+			stage.show();
+		}
+		catch (IOException e)
+		{
+			logger.error("Unexpected", e);
+			showErrorDialog("Unexpected error", "Unexpected error", e.toString());
+		}
+	}
+
 
 	public void showLegoListPropertiesDialog(LegoListByReference llbr, TreeItem<String> ti)
 	{

@@ -1,7 +1,11 @@
 #Format:
-#sctID	Description	UUID
-#UUID is optional
 #
+#sctID	Description	parentSCTID	parentDescription
+#
+# sctID and Description are required.  parentSCTID is optional.  parentDescription must be provided if parentSCTID is provided. 
+#
+
+
 # From the style guide
 #
 36	Inheres In
@@ -20,9 +24,9 @@
 50	Units
 51	Technique
 52	Direct Site
-#
+
 # All of these are currently in use in the data I have to import
-#
+
 4	Clinical course (attribute)
 6	Due to (attribute)
 9	Associated with (attribute)

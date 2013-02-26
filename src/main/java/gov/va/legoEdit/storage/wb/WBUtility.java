@@ -59,6 +59,9 @@ public class WBUtility
 		}
 	});
 
+	/**
+	 * Looks up the identifier (sctid or UUID).  Checks the pendingConcepts list if not found in Snomed.
+	 */
 	public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback, final long submitTime)
 	{
 		logger.debug("Threaded Lookup: '" + identifier + "'");
@@ -74,6 +77,9 @@ public class WBUtility
 		tpe.execute(r);
 	}
 
+	/**
+	 * Looks up the identifier (sctid or UUID).  Checksthe pendingConcepts list if not found in Snomed.
+	 */
 	public static Concept lookupSnomedIdentifier(String identifier)
 	{
 		logger.debug("Lookup: '" + identifier + "'");
@@ -82,7 +88,14 @@ public class WBUtility
 		{
 			// check the pending concepts file
 			logger.debug("Lookup Pending Concepts: '" + identifier + "'");
-			return PendingConcepts.getConcept(identifier);
+			try
+			{
+				return PendingConcepts.getConcept(Long.parseLong(identifier));
+			}
+			catch (NumberFormatException e)
+			{
+				return null;
+			}
 		}
 		return convertConcept(result);
 	}
@@ -114,6 +127,9 @@ public class WBUtility
 		return c;
 	}
 
+	/**
+	 * Looks up the identifier (sctid or UUID).  Does not check the pendingConcepts list.
+	 */
 	public static ConceptVersionBI lookupSnomedIdentifierAsCV(String identifier)
 	{
 		logger.debug("WB DB Lookup '" + identifier + "'");
