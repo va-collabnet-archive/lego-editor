@@ -88,14 +88,7 @@ public class WBUtility
 		{
 			// check the pending concepts file
 			logger.debug("Lookup Pending Concepts: '" + identifier + "'");
-			try
-			{
-				return PendingConcepts.getConcept(Long.parseLong(identifier));
-			}
-			catch (NumberFormatException e)
-			{
-				return null;
-			}
+			return PendingConcepts.getInstance().getConcept(identifier);
 		}
 		return convertConcept(result);
 	}

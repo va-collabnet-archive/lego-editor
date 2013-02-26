@@ -5,6 +5,7 @@ import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
 import gov.va.legoEdit.gui.legoTreeView.ComboBoxConcept;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+import gov.va.legoEdit.gui.pendingConcepts.PendingConceptsPaneController;
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchPaneController;
 import gov.va.legoEdit.gui.sctTreeView.SimTreeView;
 import gov.va.legoEdit.gui.templates.TemplatesPaneController;
@@ -14,7 +15,6 @@ import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
-import gov.va.legoEdit.model.PendingConcepts;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
@@ -105,6 +105,7 @@ public class LegoGUIController implements Initializable
 	private UnsavedLegos newLegos = new UnsavedLegos();
 	private SnomedSearchPaneController sspc;
 	private TemplatesPaneController tpc;
+	private PendingConceptsPaneController pcpc;
 	private Thread dbConnectThread;
 	private Random random = new Random();
 	private CommonlyUsedConcepts cut;
@@ -160,6 +161,8 @@ public class LegoGUIController implements Initializable
 	private ToggleButton showSnomedSearchBtn; // Value injected by FXMLLoader
 	@FXML // fx:id="showTemplatesBtn"
 	private ToggleButton showTemplatesBtn; // Value injected by FXMLLoader
+	@FXML // fx:id="showTemplatesBtn"
+	private ToggleButton showPendingBtn; // Value injected by FXMLLoader
 	@FXML // fx:id="splitLeft"
 	private AnchorPane splitLeft; // Value injected by FXMLLoader
 	@FXML // fx:id="splitLeftAllLegos"
@@ -170,6 +173,8 @@ public class LegoGUIController implements Initializable
 	private AnchorPane splitLeftSct; // Value injected by FXMLLoader
 	@FXML // fx:id="splitLeftTemplates"
 	private AnchorPane splitLeftTemplates; // Value injected by FXMLLoader
+	@FXML // fx:id="splitLeftPending"
+	private AnchorPane splitLeftPending; // Value injected by FXMLLoader
 	@FXML // fx:id="splitPane"
 	private SplitPane splitPane; // Value injected by FXMLLoader
 	@FXML // fx:id="splitRight"
@@ -216,6 +221,9 @@ public class LegoGUIController implements Initializable
 
 		tpc = TemplatesPaneController.init();
 		splitLeftTemplates.getChildren().add(tpc.getBorderPane());
+		
+		pcpc = PendingConceptsPaneController.init();
+		splitLeftPending.getChildren().add(pcpc.getBorderPane());
 		
 		legoInvalidImageView.setVisible(false);
 		Tooltip.install(legoInvalidImageView, legoInvalidReason);
@@ -299,6 +307,7 @@ public class LegoGUIController implements Initializable
 					splitLeftSct.setVisible(false);
 					splitLeftSctSearch.setVisible(false);
 					splitLeftTemplates.setVisible(false);
+					splitLeftPending.setVisible(false);
 					leftPaneLabel.setText("Lego Lists");
 					splitLeftAllLegos.setVisible(true);
 				}
@@ -306,7 +315,7 @@ public class LegoGUIController implements Initializable
 		});
 
 		showSnomedBtn.setGraphic(Images.ROOT.createImageView());
-		showSnomedBtn.setTooltip(new Tooltip("Show the Snomed Tree"));
+		showSnomedBtn.setTooltip(new Tooltip("Show the Snomed Viewer"));
 		showSnomedBtn.setToggleGroup(tg);
 		showSnomedBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
@@ -318,6 +327,7 @@ public class LegoGUIController implements Initializable
 					splitLeftAllLegos.setVisible(false);
 					splitLeftSctSearch.setVisible(false);
 					splitLeftTemplates.setVisible(false);
+					splitLeftPending.setVisible(false);
 					leftPaneLabel.setText("Snomed Browser");
 					splitLeftSct.setVisible(true);
 				}
@@ -325,7 +335,7 @@ public class LegoGUIController implements Initializable
 		});
 
 		showSnomedSearchBtn.setGraphic(Images.LEGO_SEARCH.createImageView());
-		showSnomedSearchBtn.setTooltip(new Tooltip("Show the Search Panel"));
+		showSnomedSearchBtn.setTooltip(new Tooltip("Show the Snomed Search Panel"));
 		showSnomedSearchBtn.setToggleGroup(tg);
 		showSnomedSearchBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
@@ -337,6 +347,7 @@ public class LegoGUIController implements Initializable
 					splitLeftAllLegos.setVisible(false);
 					splitLeftSct.setVisible(false);
 					splitLeftTemplates.setVisible(false);
+					splitLeftPending.setVisible(false);
 					leftPaneLabel.setText("Snomed Search");
 					splitLeftSctSearch.setVisible(true);
 				}
@@ -344,7 +355,7 @@ public class LegoGUIController implements Initializable
 		});
 
 		showTemplatesBtn.setGraphic(Images.TEMPLATE.createImageView());
-		showTemplatesBtn.setTooltip(new Tooltip("Show the Templates Panel"));
+		showTemplatesBtn.setTooltip(new Tooltip("Show the Templates List"));
 		showTemplatesBtn.setToggleGroup(tg);
 		showTemplatesBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
@@ -356,8 +367,29 @@ public class LegoGUIController implements Initializable
 					splitLeftAllLegos.setVisible(false);
 					splitLeftSct.setVisible(false);
 					splitLeftSctSearch.setVisible(false);
+					splitLeftPending.setVisible(false);
 					leftPaneLabel.setText("Templates");
 					splitLeftTemplates.setVisible(true);
+				}
+			}
+		});
+		
+		showPendingBtn.setGraphic(Images.CONCEPT_VIEW.createImageView());
+		showPendingBtn.setTooltip(new Tooltip("Show the Pending Concepts List"));
+		showPendingBtn.setToggleGroup(tg);
+		showPendingBtn.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent e)
+			{
+				if (showPendingBtn.isSelected())
+				{
+					splitLeftAllLegos.setVisible(false);
+					splitLeftSct.setVisible(false);
+					splitLeftSctSearch.setVisible(false);
+					splitLeftTemplates.setVisible(false);
+					leftPaneLabel.setText("Pending Concepts");
+					splitLeftPending.setVisible(true);
 				}
 			}
 		});
@@ -809,8 +841,6 @@ public class LegoGUIController implements Initializable
 							}
 						}
 					});
-					logger.info("Initialize pending concepts");
-					PendingConcepts.getConcept(5);  //Just need to make a request, so it initializes.
 				}
 				catch (Exception e)
 				{

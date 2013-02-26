@@ -94,8 +94,8 @@ public class CreatePendingConceptController implements Initializable
 				{
 					try
 					{
-						long id = Long.parseLong(conceptId.getText());
-						Concept currentConcept = PendingConcepts.getConcept(id);
+						Long.parseLong(conceptId.getText().trim());
+						Concept currentConcept = PendingConcepts.getInstance().getConcept(conceptId.getText());
 						if (currentConcept != null)
 						{
 							conceptIdInvalidReason.setText("The specified concept ID already exists as a pending concept");
@@ -216,7 +216,7 @@ public class CreatePendingConceptController implements Initializable
 			}
 		});
 		
-		conceptId.setText(PendingConcepts.getUnusedId() + "");
+		conceptId.setText(PendingConcepts.getInstance().getUnusedId() + "");
 
 		okButton.disableProperty().bind(conceptIdValid.not().or(conceptDescriptionValid.not()).or(parentConceptValid.not()));
 	}

@@ -2,27 +2,33 @@ package gov.va.legoEdit.model;
 
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.WBUtility;
+import gov.va.legoEdit.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PendingConcepts
+public class PendingConcepts implements Observable
 {
 	public static File pendingConceptsFile = new File("pendingConcepts.tsv");
 	private static Logger logger = LoggerFactory.getLogger(PendingConcepts.class);
-	private HashMap<Long, Concept> pendingConcepts = new HashMap<>();
+	private HashMap<String, Concept> pendingConcepts = new HashMap<>();  //UUID to concept
 	private HashMap<Long, Concept> parentConcepts = new HashMap<>();
 	private long highestInUseId = 0;
 	private static volatile PendingConcepts instance_;
+	private ArrayList<InvalidationListener> listeners_ = new ArrayList<>();
+	private volatile boolean loadCompleted = false;
 
 	public static PendingConcepts getInstance()
 	{
@@ -41,84 +47,42 @@ public class PendingConcepts
 
 	private PendingConcepts()
 	{
-		logger.info("Loading pending concepts from: " + pendingConceptsFile.getAbsolutePath());
-		try
+		Utility.tpe.submit(new ReadData());
+	}
+	
+	private void loadCheck()
+	{
+		while (!loadCompleted)
 		{
-			if (pendingConceptsFile.exists())
+			synchronized (PendingConcepts.class)
 			{
-				List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.US_ASCII);
-				for (String s : lines)
+				if (!loadCompleted)
 				{
-					if (s.startsWith("#") || s.length() == 0)
+					try
 					{
-						continue;
+						PendingConcepts.class.wait();
 					}
-					String[] parts = s.split("\t");
-					if (parts.length > 1)
+					catch (InterruptedException e)
 					{
-						Concept c = new Concept();
-						try
-						{
-							c.setSctid(Long.parseLong(parts[0]));
-						}
-						catch (NumberFormatException e)
-						{
-							logger.error("Invalid ID in pending concepts file - line '" + s + "'");
-							continue;
-						}
-						c.setDesc(parts[1]);
-						c.setUuid(UUID.nameUUIDFromBytes(parts[0].getBytes()).toString());
-						
-						Concept parent = null;
-
-						if (parts.length > 2)
-						{
-							long parentSCTID = Long.parseLong(parts[2]);
-							//Use this lookup, since it doesn't loop back to pending.
-							ConceptVersionBI wbParentConcept =  WBUtility.lookupSnomedIdentifierAsCV(parentSCTID + "");
-							if (wbParentConcept != null)
-							{
-								parent = WBUtility.convertConcept(wbParentConcept);
-							}
-							else
-							{
-								logger.error("The specified parent concept for " + c.getSctid() + " doesn't exist and will be ignored");
-							}
-						}
-						
-						if (!areIdentifiersUnique(c))
-						{
-							logger.error("Pending concepts contains a value which is a duplicate, or already exists in snomed '" + c.getSctid() + "'.  Ignoring.");
-							continue;
-						}
-						
-						pendingConcepts.put(c.getSctid(), c);
-						if (c.getSctid() > highestInUseId)
-						{
-							highestInUseId = c.getSctid();
-						}
-						if (parent != null)
-						{
-							parentConcepts.put(c.getSctid(), parent);
-						}
-					}
-					else
-					{
-						logger.error("Pending concepts need an ID and a description");
+						//noop
 					}
 				}
 			}
-			logger.info("Loaded " + pendingConcepts.size() + " pending concepts");
-		}
-		catch (IOException e)
-		{
-			logger.error("Unexpected error loading pending concepts file", e);
 		}
 	}
 	
-	public boolean areIdentifiersUnique(Concept potentialPendingConcept)
+	public List<Concept> getPendingConcepts()
 	{
-		if (pendingConcepts.containsKey(potentialPendingConcept.getSctid()))
+		loadCheck();
+		ArrayList<Concept> results = new ArrayList<>(pendingConcepts.size());
+		results.addAll(pendingConcepts.values());
+		return results;
+	}
+	
+	private boolean areIdentifiersUnique(Concept potentialPendingConcept)
+	{
+		//no load check here - will cause a startup deadlock.  
+		if (pendingConcepts.containsKey(potentialPendingConcept.getUuid()))
 		{
 			return false;
 		}
@@ -136,13 +100,14 @@ public class PendingConcepts
 	
 	public void addConcept(long id, String description, Long parent) throws IllegalArgumentException
 	{
+		loadCheck();
 		Concept c = new Concept();
 		c.setSctid(id);
 		c.setDesc(description);
 		c.setUuid(UUID.nameUUIDFromBytes((c.getSctid() + "").getBytes()).toString());
 		if (areIdentifiersUnique(c))
 		{
-			pendingConcepts.put(id, c);
+			pendingConcepts.put(c.getUuid(), c);
 			if (c.getSctid() > highestInUseId)
 			{
 				highestInUseId = c.getSctid();
@@ -161,6 +126,7 @@ public class PendingConcepts
 					throw new IllegalArgumentException("The specified parent SCTID isn't a valid snomed concept");
 				}
 			}
+			notifyListeners();
 		}
 		else
 		{
@@ -173,7 +139,7 @@ public class PendingConcepts
 		catch (IOException e)
 		{
 			logger.error("Pending concepts Store failed", e);
-			pendingConcepts.remove(id);
+			pendingConcepts.remove(c.getUuid());
 			parentConcepts.remove(id);
 			throw new IllegalArgumentException("Sorry, store failed");
 		}
@@ -181,16 +147,18 @@ public class PendingConcepts
 	
 	public void deleteConcept(long id) throws IllegalArgumentException
 	{
-		Concept pending = pendingConcepts.remove(id);
+		loadCheck();
+		Concept pending = pendingConcepts.remove(UUID.nameUUIDFromBytes((id + "").getBytes()).toString());
 		Concept parent = parentConcepts.remove(id);
 		try
 		{
 			rewritePendingConceptsFile();
+			notifyListeners();
 		}
 		catch (IOException e)
 		{
 			logger.error("Pending concepts Store failed", e);
-			pendingConcepts.put(id,  pending);
+			pendingConcepts.put(pending.getUuid(),  pending);
 			if(parent != null)
 			{
 				parentConcepts.put(id, parent);
@@ -199,14 +167,15 @@ public class PendingConcepts
 		}
 	}
 	
-	public static long getUnusedId()
+	public long getUnusedId()
 	{
+		loadCheck();
 		while (true)
 		{
-			long temp = ++getInstance().highestInUseId;
+			long temp = ++highestInUseId;
 			Concept possible = new Concept();
 			possible.setSctid(temp);
-			if (getInstance().areIdentifiersUnique(possible))
+			if (areIdentifiersUnique(possible))
 			{
 				return temp;
 			}
@@ -217,8 +186,8 @@ public class PendingConcepts
 	{
 		//Read through the existing file, keeping the comments, and any lines we don't understand.  
 		//only keep the concepts if they our in our current list.  Finally, add any concepts that are missing.
-		
-		HashSet<Long> unstoredConcepts = new HashSet<>();
+		loadCheck();
+		HashSet<String> unstoredConcepts = new HashSet<>();
 		unstoredConcepts.addAll(pendingConcepts.keySet());
 		
 		List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.US_ASCII);
@@ -237,11 +206,12 @@ public class PendingConcepts
 				try
 				{
 					long id = Long.parseLong(parts[0]);
-					if (pendingConcepts.containsKey(id))
+					String uuid = UUID.nameUUIDFromBytes((id + "").getBytes()).toString();
+					if (pendingConcepts.containsKey(uuid))
 					{
-						replacement.append(buildLine(pendingConcepts.get(id)));
+						replacement.append(buildLine(pendingConcepts.get(uuid)));
 						replacement.append(eol);
-						unstoredConcepts.remove(id);
+						unstoredConcepts.remove(uuid);
 					}
 					
 				}
@@ -252,9 +222,9 @@ public class PendingConcepts
 				}
 			}
 		}
-		for (Long l : unstoredConcepts)
+		for (String uuid : unstoredConcepts)
 		{
-			replacement.append(buildLine(pendingConcepts.get(l)));
+			replacement.append(buildLine(pendingConcepts.get(uuid)));
 			replacement.append(eol);
 		}
 		
@@ -268,13 +238,127 @@ public class PendingConcepts
 		return c.getSctid() + "\t" + c.getDesc() + (parent == null ? "" : "\t" + parent.getSctid() + "\t" + parent.getDesc());
 	}
 
-	public static Concept getConcept(long id)
+	public Concept getConcept(String sctIdOrUUID)
 	{
-		return getInstance().pendingConcepts.get(id);
+		loadCheck();
+		Concept temp = pendingConcepts.get(sctIdOrUUID.trim());
+		if (temp == null)
+		{
+			temp = pendingConcepts.get(UUID.nameUUIDFromBytes((sctIdOrUUID.trim() + "").getBytes()).toString()); 
+		}
+		return temp;
 	}
 	
-	public static Concept getParentConcept(long pendingConceptId)
+	public Concept getParentConcept(long pendingConceptId)
 	{
-		return getInstance().pendingConcepts.get(pendingConceptId);
+		loadCheck();
+		return parentConcepts.get(pendingConceptId);
+	}
+	
+	private void notifyListeners()
+	{
+		for (InvalidationListener il : listeners_)
+		{
+			il.invalidated(this);
+		}
+	}
+
+	@Override
+	public void addListener(InvalidationListener arg0)
+	{
+		listeners_.add(arg0);
+	}
+
+	@Override
+	public void removeListener(InvalidationListener arg0)
+	{
+		listeners_.remove(arg0);
+	}
+	
+	private class ReadData implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			logger.info("Loading pending concepts from: " + pendingConceptsFile.getAbsolutePath());
+			try
+			{
+				if (pendingConceptsFile.exists())
+				{
+					List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.US_ASCII);
+					for (String s : lines)
+					{
+						if (s.startsWith("#") || s.length() == 0)
+						{
+							continue;
+						}
+						String[] parts = s.split("\t");
+						if (parts.length > 1)
+						{
+							Concept c = new Concept();
+							try
+							{
+								c.setSctid(Long.parseLong(parts[0]));
+							}
+							catch (NumberFormatException e)
+							{
+								logger.error("Invalid ID in pending concepts file - line '" + s + "'");
+								continue;
+							}
+							c.setDesc(parts[1]);
+							c.setUuid(UUID.nameUUIDFromBytes(parts[0].getBytes()).toString());
+							
+							Concept parent = null;
+
+							if (parts.length > 2)
+							{
+								long parentSCTID = Long.parseLong(parts[2]);
+								//Use this lookup, since it doesn't loop back to pending.
+								ConceptVersionBI wbParentConcept =  WBUtility.lookupSnomedIdentifierAsCV(parentSCTID + "");
+								if (wbParentConcept != null)
+								{
+									parent = WBUtility.convertConcept(wbParentConcept);
+								}
+								else
+								{
+									logger.error("The specified parent concept for " + c.getSctid() + " doesn't exist and will be ignored");
+								}
+							}
+							
+							if (!areIdentifiersUnique(c))
+							{
+								logger.error("Pending concepts contains a value which is a duplicate, or already exists in snomed '" + c.getSctid() + "'.  Ignoring.");
+								continue;
+							}
+							
+							pendingConcepts.put(c.getUuid(), c);
+							if (c.getSctid() > highestInUseId)
+							{
+								highestInUseId = c.getSctid();
+							}
+							if (parent != null)
+							{
+								parentConcepts.put(c.getSctid(), parent);
+							}
+						}
+						else
+						{
+							logger.error("Pending concepts need an ID and a description");
+						}
+					}
+				}
+				logger.info("Loaded " + pendingConcepts.size() + " pending concepts");
+			}
+			catch (IOException e)
+			{
+				logger.error("Unexpected error loading pending concepts file", e);
+			}
+			synchronized (PendingConcepts.class)
+			{
+				loadCompleted = true;
+			}
+			PendingConcepts.class.notifyAll();
+		}
+		
 	}
 }

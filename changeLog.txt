@@ -5,6 +5,7 @@ Lego Editor Change Log
   		and progress bar with status feedback.  Add the ability to export while running arbitrary
   		(user supplied) XSLT transforms.
   *  artf227621 Add a GUI dialog for creating new pending concepts.
+  *  artf227621 Add a panel for browsing / searching the pending concepts.
 
 2012/02/22 - 0.53
   *  Add missing 'delete template' option to template gui panel.
