@@ -2,7 +2,6 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.Images;
-import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.storage.templates.LegoTemplateManager;
 import java.net.URL;
