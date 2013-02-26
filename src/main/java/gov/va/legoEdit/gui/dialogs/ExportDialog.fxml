@@ -11,19 +11,19 @@
 <?import javafx.scene.text.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="344.0" prefWidth="600.0" styleClass="dialogBackground, itemBorder" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.ExportDialogController">
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="344.0" prefWidth="600.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.ExportDialogController">
   <children>
-    <GridPane id="GridPane" hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="136.0" prefWidth="600.0" vgap="5.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <GridPane id="GridPane" hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="136.0" prefWidth="600.0" styleClass="itemBorder" vgap="5.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
       <children>
-        <Label id="errorMessage" alignment="TOP_LEFT" text="Export To" wrapText="true" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <Label id="errorMessage" alignment="TOP_LEFT" styleClass="boldLabel" text="Export To" wrapText="true" GridPane.columnIndex="0" GridPane.rowIndex="0" />
         <StackPane id="StackPane" fx:id="exportToStack" GridPane.columnIndex="1" GridPane.rowIndex="0">
           <children>
             <TextField fx:id="exportTo" editable="false" prefWidth="200.0" />
           </children>
         </StackPane>
-        <Label text="Export Transform" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Label styleClass="boldLabel" text="Export Transform" GridPane.columnIndex="0" GridPane.rowIndex="1" />
         <ComboBox fx:id="exportType" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
-        <Label text="File Extension" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <Label styleClass="boldLabel" text="File Extension" GridPane.columnIndex="0" GridPane.rowIndex="2" />
         <StackPane id="StackPane" fx:id="fileExtensionStack" GridPane.columnIndex="1" GridPane.rowIndex="2">
           <children>
             <TextField fx:id="fileExtension" maxWidth="1.7976931348623157E308" prefWidth="200.0" />
@@ -35,9 +35,9 @@
         <Button id="chooseDirectory" fx:id="chooseTransform" mnemonicParsing="false" text="Choose..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
       </children>
       <columnConstraints>
-        <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="231.0" minWidth="10.0" prefWidth="123.0" />
-        <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="373.0" />
-        <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="497.0" minWidth="10.0" prefWidth="84.0" />
+        <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="231.0" minWidth="10.0" prefWidth="139.0" />
+        <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="347.0" />
+        <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="497.0" minWidth="10.0" prefWidth="86.0" />
       </columnConstraints>
       <padding>
         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -74,5 +74,6 @@
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       </rowConstraints>
     </GridPane>
+    <Label alignment="CENTER" styleClass="titleLabel" text="Export Lego Lists" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" />
   </children>
 </AnchorPane>
