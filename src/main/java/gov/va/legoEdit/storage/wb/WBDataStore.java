@@ -1,5 +1,6 @@
 package gov.va.legoEdit.storage.wb;
 
+import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import java.io.File;
@@ -67,6 +68,11 @@ public class WBDataStore
 				}
 				else
 				{
+					LegoGUI.getInstance().showErrorDialog("No Snomed Database", "The Snomed Database was not found.", 
+							"Please download the file " + System.getProperty("line.separator") + System.getProperty("line.separator")
+							+ "https://csfe.aceworkspace.net/sf/frs/do/downloadFile/projects.veterans_administration_project/frs.lego_editor.1_13_13/frs3751?dl=1"
+							+ System.getProperty("line.separator") + System.getProperty("line.separator") + " and unzip it into " + System.getProperty("line.separator")
+							+ new File("").getAbsolutePath() + System.getProperty("line.separator") + " and then restart the editor.");
 					throw new DataStoreException("Couldn't find the database - had: " + bdbFolderPath.getAbsolutePath());
 					// Ts.setup(Ts.EMBEDDED_BERKELEY_DB_IMPL_CLASS, directory);
 					// System.out.println("Start load of eConcept.jbin");

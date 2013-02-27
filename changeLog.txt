@@ -1,4 +1,8 @@
 Lego Editor Change Log
+2012/02/?? - 0.55
+  *  Improve error handling when snomed DB is missing
+  *  artf227108 Add Install4j installer script.
+
 2012/02/26 - 0.54
   *  Fix a silly mistake that lead to problems with template delete in some cases.
   *  artf227107 Add XHTML export option.  Rework existing XML export to have a proper dialog

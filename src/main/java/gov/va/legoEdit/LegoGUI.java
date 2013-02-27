@@ -40,6 +40,7 @@ import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+import com.sun.javafx.tk.Toolkit;
 
 public class LegoGUI extends Application
 {
@@ -173,11 +174,42 @@ public class LegoGUI extends Application
 		return lgc_;
 	}
 
-	public void showErrorDialog(String title, String errorMessage, String detailedErrorMessage)
+	public void showErrorDialog(final String title, final String errorMessage, final String detailedErrorMessage)
 	{
-		edc_.setVariables(errorMessage, detailedErrorMessage);
-		errorDialogStage_.setTitle(title);
-		errorDialogStage_.show();
+		while (edc_ == null)
+		{
+			//If we have an error during startup, the GUI might not be up yet.  Of course, it may never come up either... but 
+			//the app is so hosed at that point... not going to worry about it.
+			try
+			{
+				Thread.sleep(50);
+			}
+			catch (InterruptedException e)
+			{
+				//noop
+			}
+		}
+		try
+		{
+			Toolkit.getToolkit().checkFxUserThread();
+			edc_.setVariables(errorMessage, detailedErrorMessage);
+			errorDialogStage_.setTitle(title);
+			errorDialogStage_.show();
+		}
+		catch (IllegalStateException e)
+		{
+			Platform.runLater(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					edc_.setVariables(errorMessage, detailedErrorMessage);
+					errorDialogStage_.setTitle(title);
+					errorDialogStage_.show();
+				}
+			});
+		}
 	}
 
 	public void showImportDialog(List<File> filesToImport)
