@@ -3,7 +3,7 @@
 
 	<groupId>gov.va</groupId>
 	<artifactId>lego-editor</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.55-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lego-editor</name>
@@ -83,6 +83,22 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>version.txt</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>version.txt</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -179,4 +195,73 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>installer</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.google.code.maven-install4j</groupId>
+						<artifactId>maven-install4j-plugin</artifactId>
+						<version>0.1.1</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+								<configuration>
+									<configFile>${basedir}/install4j/Installer.install4j</configFile>
+									<executable>install4jc</executable>
+									<compilerVariables>
+										<property>
+											<name>project.version</name>
+											<value>${project.version}</value>
+										</property>
+									</compilerVariables>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>attach-installers</id>
+								<goals>
+									<goal>attach-artifact</goal>
+								</goals>
+								<configuration>
+									<artifacts>
+										<artifact>
+											<file>${project.build.directory}/install4j/LegoEditor_macos_${project.version}.dmg</file>
+											<type>dmg</type>
+											<classifier>installer_x64</classifier>
+										</artifact>
+										<artifact>
+											<file>${project.build.directory}/install4j/LegoEditor_windows_${project.version}.exe</file>
+											<type>exe</type>
+											<classifier>installer_x32</classifier>
+										</artifact>
+										<artifact>
+											<file>${project.build.directory}/install4j/LegoEditor_windows-x64_${project.version}.exe</file>
+											<type>exe</type>
+											<classifier>installer_x64</classifier>
+										</artifact>
+										<artifact>
+											<file>${project.build.directory}/install4j/LegoEditor_unix_${project.version}.sh</file>
+											<type>sh</type>
+											<classifier>installer_x64</classifier>
+										</artifact>
+									</artifacts>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
