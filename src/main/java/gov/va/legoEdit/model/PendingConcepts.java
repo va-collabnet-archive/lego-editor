@@ -351,7 +351,6 @@ public class PendingConcepts implements Observable
 						}
 					}
 				}
-				logger.info("Loaded " + pendingConcepts.size() + " pending concepts");
 			}
 			catch (IOException e)
 			{
@@ -360,8 +359,9 @@ public class PendingConcepts implements Observable
 			synchronized (PendingConcepts.class)
 			{
 				loadCompleted = true;
+				PendingConcepts.class.notifyAll();
 			}
-			PendingConcepts.class.notifyAll();
+			logger.info("Loaded " + pendingConcepts.size() + " pending concepts");
 		}
 		
 	}
