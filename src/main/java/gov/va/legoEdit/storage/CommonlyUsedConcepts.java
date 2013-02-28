@@ -122,7 +122,11 @@ public class CommonlyUsedConcepts
 	public List<ComboBoxConcept> getSuggestions(ConceptUsageType cut)
 	{
 		ArrayList<ComboBoxConcept> result = new ArrayList<>(HOW_MANY_EACH_TYPE * 2);
-		result.addAll(dbTopLists_.get(cut));
+		//If you are fast, you can make this request before the dbinit has finished.  Prevent the null pointer.
+		if (dbTopLists_ != null)
+		{
+			result.addAll(dbTopLists_.get(cut));
+		}
 		result.addAll(sessionTopLists_.get(cut));
 		return result;
 	}
