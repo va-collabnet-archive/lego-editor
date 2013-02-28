@@ -234,7 +234,7 @@ public class ConceptNode implements ConceptLookupCallback
 
 		lookupsInProgress_.incrementAndGet();
 		lookupInProgress.invalidate();
-		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this, System.currentTimeMillis());
+		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this);
 	}
 
 	public Node getNode()

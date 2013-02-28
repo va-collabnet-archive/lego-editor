@@ -62,9 +62,10 @@ public class WBUtility
 	/**
 	 * Looks up the identifier (sctid or UUID).  Checks the pendingConcepts list if not found in Snomed.
 	 */
-	public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback, final long submitTime)
+	public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback)
 	{
 		logger.debug("Threaded Lookup: '" + identifier + "'");
+		final long submitTime = System.currentTimeMillis();
 		Runnable r = new Runnable()
 		{
 			@Override
@@ -78,7 +79,7 @@ public class WBUtility
 	}
 
 	/**
-	 * Looks up the identifier (sctid or UUID).  Checksthe pendingConcepts list if not found in Snomed.
+	 * Looks up the identifier (sctid or UUID).  Checks the pendingConcepts list if not found in Snomed.
 	 */
 	public static Concept lookupSnomedIdentifier(String identifier)
 	{
