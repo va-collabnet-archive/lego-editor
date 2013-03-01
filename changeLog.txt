@@ -1,5 +1,5 @@
 Lego Editor Change Log
-2012/02/?? - 0.55
+2013/03/01 - 0.55
   *  Improve error handling when snomed DB is missing.
   *  Fixed deadlock that could happen if you typed in the snomed ID filter field before the Snomed
   		DB was initialized.
@@ -12,7 +12,7 @@ Lego Editor Change Log
   *  artf227108 Add Install4j installer script.
   *  artf227106 Add Undo/Redo support to Lego Editor tabs.
 
-2012/02/26 - 0.54
+2013/02/26 - 0.54
   *  Fix a silly mistake that lead to problems with template delete in some cases.
   *  artf227107 Add XHTML export option.  Rework existing XML export to have a proper dialog
   		and progress bar with status feedback.  Add the ability to export while running arbitrary
@@ -20,12 +20,12 @@ Lego Editor Change Log
   *  artf227621 Add a GUI dialog for creating new pending concepts.
   *  artf227621 Add a panel for browsing / searching the pending concepts.
 
-2012/02/22 - 0.53
+2013/02/22 - 0.53
   *  Add missing 'delete template' option to template gui panel.
   *  artf227457 - Add error rollup icons to the tree, refactor validation out of the GUI code, 
 		make it easy to hook in future SCT aware content validators.
 
-2012/02/19 - 0.52
+2013/02/19 - 0.52
   *  Fixed a bug with copy/paste of Legos that caused previously edited legos to change and 
 		generally behave strangely when a lego was pasted multiple times. 
   *  Allow import of Legos even when schema validation fails
@@ -39,12 +39,12 @@ Lego Editor Change Log
   *  Added missing XML header information to Lego exports
   *  artf227457 Add live schema validation to editor
 
-2012/02/12 - 0.51
+2013/02/12 - 0.51
   *  Improved type distinction between expression types during copy / paste
   *  artf227420 fixed lucene sort order issues
   *  artf226891 Implemented the ability to store / search / use templates
 
-2012/02/10 - 0.5
+2013/02/10 - 0.5
   *  Fixed null pointers that could happen with empty measurement values 
   *  Fixed a bug that caused a doubleclick to sometimes not open a lego for editing
   *  Fix memory leaks caused by javafx Bindings
