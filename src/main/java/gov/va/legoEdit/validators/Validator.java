@@ -14,6 +14,7 @@ import gov.va.legoEdit.model.schemaModel.PointLong;
 import gov.va.legoEdit.model.schemaModel.PointMeasurementConstant;
 import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
+import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Value;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -74,6 +75,10 @@ public class Validator
 		else if (o instanceof Qualifier)
 		{
 			return validate((Qualifier)o);
+		}
+		else if (o instanceof RelationGroup)
+		{
+			return validate((RelationGroup)o);
 		}
 		
 		else
@@ -262,6 +267,15 @@ public class Validator
 					&& r.getDestination().getText() == null && r.getDestination().isBoolean() == null))
 		{
 			return "A Relationship must have a Destination";
+		}
+		return null;
+	}
+	
+	public static String validate(RelationGroup rg)
+	{
+		if (rg.getRelation().size() == 0)
+		{
+			return "A Relationship Group must have at least one relationship";
 		}
 		return null;
 	}
