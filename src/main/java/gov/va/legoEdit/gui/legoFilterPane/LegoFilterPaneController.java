@@ -4,6 +4,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
+import gov.va.legoEdit.gui.util.ExpandedNode;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;
@@ -277,7 +278,10 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			pncsFilterValue = pncsValue.getSelectionModel().getSelectedItem();
 		}
 
+		ExpandedNode before = Utility.buildExpandedNodeHierarchy(ltv.getRoot());
 		LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot().getChildren(), pncsFilterId, pncsFilterValue, concept_);
+		Utility.setExpandedStates(before, ltv.getRoot());
+		ltv.getSelectionModel().clearSelection();
 	}
 
 	public BorderPane getBorderPane()

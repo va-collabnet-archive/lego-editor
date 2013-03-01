@@ -6,6 +6,7 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.CustomClipboard;
+import gov.va.legoEdit.gui.util.ExpandedNode;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoListByReference;
@@ -264,10 +265,13 @@ public class CreateLegoController implements Initializable
 				lr.setIsNew(true);
 				llbr.getLegoReference().add(lr);
 				LegoGUI.getInstance().getLegoGUIController().addNewLego(llbr.getLegoListUUID(), l);
-
-				// TODO UGLY HACK, need to find a better way.
+				
+				ExpandedNode before = Utility.buildExpandedNodeHierarchy(legoTreeItem);
+				
 				legoTreeItem.getChildren().clear();
 				legoTreeItem.buildPNCSChildren();
+				
+				Utility.setExpandedStates(before, legoTreeItem);
 				
 				boolean found = false;
 				for (TreeItem<String> nameItem : legoTreeItem.getChildren())

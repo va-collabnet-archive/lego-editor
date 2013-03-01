@@ -67,54 +67,6 @@ public class PointNode
 		cb_.setMinWidth(200.0);
 		cb_.setPrefWidth(200.0);
 
-		cb_.valueProperty().addListener(new ChangeListener<String>()
-		{
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-			{
-				try
-				{
-					if (newValue.contains("."))
-					{
-						PointDouble p = new PointDouble();
-						p.setValue(Double.parseDouble(newValue.trim()));
-						setPoint(p);
-					}
-					else
-					{
-						PointLong p = new PointLong();
-						p.setValue(Long.parseLong(newValue.trim()));
-						setPoint(p);
-					}
-					localInvalidMessage_.set(null);
-				}
-				catch (NumberFormatException e)
-				{
-					try
-					{
-						MeasurementConstant ms = MeasurementConstant.fromValue(newValue);
-						PointMeasurementConstant p = new PointMeasurementConstant();
-						p.setValue(ms);
-						setPoint(p);
-						localInvalidMessage_.set(null);
-					}
-					catch (IllegalArgumentException ex)
-					{
-						setPoint(null);
-						if (newValue.length() > 0)
-						{
-							localInvalidMessage_.set("The value must be a number, or an item from the drop down");
-						}
-						else
-						{
-							// blank might be ok, but we can't tell without more info - needs to happen in group validation
-							localInvalidMessage_.set(null);
-						}
-					}
-				}
-			}
-		});
-
 		BooleanBinding valid = new BooleanBinding()
 		{
 			{
@@ -151,6 +103,56 @@ public class PointNode
 		{
 			cb_.setValue(((PointLong) p).getValue() + "");
 		}
+		
+		//Add the listeners after setting the values, to prevent extra setChanged calls.
+		cb_.valueProperty().addListener(new ChangeListener<String>()
+				{
+					@Override
+					public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+					{
+						try
+						{
+							if (newValue.contains("."))
+							{
+								PointDouble p = new PointDouble();
+								p.setValue(Double.parseDouble(newValue.trim()));
+								setPoint(p);
+							}
+							else
+							{
+								PointLong p = new PointLong();
+								p.setValue(Long.parseLong(newValue.trim()));
+								setPoint(p);
+							}
+							localInvalidMessage_.set(null);
+						}
+						catch (NumberFormatException e)
+						{
+							try
+							{
+								MeasurementConstant ms = MeasurementConstant.fromValue(newValue);
+								PointMeasurementConstant p = new PointMeasurementConstant();
+								p.setValue(ms);
+								setPoint(p);
+								localInvalidMessage_.set(null);
+							}
+							catch (IllegalArgumentException ex)
+							{
+								setPoint(null);
+								if (newValue.length() > 0)
+								{
+									localInvalidMessage_.set("The value must be a number, or an item from the drop down");
+								}
+								else
+								{
+									// blank might be ok, but we can't tell without more info - needs to happen in group validation
+									localInvalidMessage_.set(null);
+								}
+							}
+						}
+					}
+				});
+
 
 		invalidImage_ = Images.EXCLAMATION.createImageView();
 		invalidImage_.visibleProperty().bind(valid.not());

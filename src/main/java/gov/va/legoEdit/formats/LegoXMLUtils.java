@@ -1,6 +1,7 @@
 package gov.va.legoEdit.formats;
 
 import gov.va.legoEdit.model.schemaModel.Assertion;
+import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Discernible;
 import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Lego;
@@ -91,6 +92,11 @@ public class LegoXMLUtils
 	{
 		return marshall(l, true);
 	}
+	
+	public static String toXML(Concept c) throws PropertyException, JAXBException
+	{
+		return marshall(c, true);
+	}
 
 	public static String toXML(LegoList ll) throws PropertyException, JAXBException
 	{
@@ -177,6 +183,11 @@ public class LegoXMLUtils
 	public static Lego readLego(String xmlLego) throws JAXBException
 	{
 		return (Lego) jc.createUnmarshaller().unmarshal(new ByteArrayInputStream(xmlLego.getBytes()));
+	}
+	
+	public static Concept readConcept(String xmlConcept) throws JAXBException
+	{
+		return (Concept) jc.createUnmarshaller().unmarshal(new ByteArrayInputStream(xmlConcept.getBytes()));
 	}
 
 	public static Object read(InputStream is) throws JAXBException

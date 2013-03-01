@@ -9,12 +9,14 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.model.ModelUtil;
+import gov.va.legoEdit.model.SchemaClone;
 import gov.va.legoEdit.model.SchemaEquals;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.util.TimeConvert;
+import java.util.ArrayList;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -36,7 +38,9 @@ import com.sun.javafx.scene.control.skin.TabPaneSkin;
 
 public class LegoTab extends Tab
 {
-	private Lego displayedLego;
+	private Lego displayedLego;  
+	private ArrayList<Lego> displayedLegoHistory;  //This is for storing a history of changes for undo/redo
+	private int displayedLegoPositionInHistory;  //part of the history	 for undo/redo
 	private LegoInfoPanel lip;
 	private BooleanBinding legoNeedsSaving;
 	private BooleanBinding hasChangedSinceLastValidate;
@@ -44,11 +48,33 @@ public class LegoTab extends Tab
 	private long lastChangeTime = 1;
 	private ImageView open = Images.LEGO.createImageView();
 	private ImageView openEdited = Images.LEGO_EDIT.createImageView();
+	private LegoTreeView legoTree;
+	
+	private BooleanBinding canUndo = new BooleanBinding()
+	{
+		@Override
+		protected boolean computeValue()
+		{
+			return (displayedLegoPositionInHistory + 1) < displayedLegoHistory.size();
+		}
+	};
+	
+	private BooleanBinding canRedo = new BooleanBinding()
+	{
+		@Override
+		protected boolean computeValue()
+		{
+			return displayedLegoPositionInHistory > 0;
+		}
+	};
 
 	public LegoTab(String tabName, Lego displayedLego)
 	{
 		super();
 		this.displayedLego = displayedLego;
+		displayedLegoHistory = new ArrayList<>();
+		displayedLegoPositionInHistory = 0;
+		this.displayedLegoHistory.add(0, SchemaClone.clone(displayedLego));
 		this.setClosable(false); // Don't show the native close button
 		HBox hbox = new HBox();
 		final Label titleLabel = new Label(tabName);
@@ -98,10 +124,6 @@ public class LegoTab extends Tab
 
 		legoNeedsSaving = new BooleanBinding()
 		{
-			{
-				invalidate();
-			}
-
 			@Override
 			protected boolean computeValue()
 			{
@@ -129,10 +151,6 @@ public class LegoTab extends Tab
 		
 		hasChangedSinceLastValidate = new BooleanBinding()
 		{
-			{
-				invalidate();
-			}
-
 			@Override
 			protected boolean computeValue()
 			{
@@ -142,11 +160,17 @@ public class LegoTab extends Tab
 
 		titleLabel.setGraphic(legoNeedsSaving.get() ? openEdited : open);
 
+		buildLegoView(displayedLego);
+	}
+	
+	private void buildLegoView(Lego displayedLego)
+	{
+		this.setContent(null);
 		lip = new LegoInfoPanel(displayedLego.getPncs().getName(), displayedLego.getPncs().getValue(), displayedLego.getPncs().getId() + "", displayedLego.getLegoUUID(),
 				displayedLego.getStamp().getAuthor(), displayedLego.getStamp().getModule(), TimeConvert.format(displayedLego.getStamp().getTime()), displayedLego
 						.getStamp().getPath());
 
-		LegoTreeView legoTree = new LegoTreeView();
+		legoTree = new LegoTreeView();
 		legoTree.setLegoTab(this);
 
 		BorderPane bp = new BorderPane();
@@ -181,6 +205,16 @@ public class LegoTab extends Tab
 	{
 		return legoNeedsSaving;
 	}
+	
+	public BooleanBinding canUndo()
+	{
+		return canUndo;
+	}
+	
+	public BooleanBinding canRedo()
+	{
+		return canRedo;
+	}
 
 	public BooleanBinding hasChangedSinceLastValidate()
 	{
@@ -196,14 +230,64 @@ public class LegoTab extends Tab
 
 	public void contentChanged()
 	{
-		legoNeedsSaving.invalidate();
+		while (displayedLegoPositionInHistory > 0)
+		{
+			displayedLegoHistory.remove(0);
+			displayedLegoPositionInHistory--;
+		}
+		//And clone the new current state
+		displayedLegoHistory.add(0, SchemaClone.clone(displayedLego));
+		
 		lastChangeTime = System.currentTimeMillis();
+		legoNeedsSaving.invalidate();
+		canUndo.invalidate();
+		canRedo.invalidate();
 		hasChangedSinceLastValidate.invalidate();
 	}
+	
+	public void undo()
+	{
+		ExpandedNode currentState = Utility.buildExpandedNodeHierarchy(legoTree.getRoot());
 
-	public void updateInfoPanel(Stamp stamp)
+		displayedLegoPositionInHistory++;
+		displayedLego = SchemaClone.clone(displayedLegoHistory.get(displayedLegoPositionInHistory));
+		
+		buildLegoView(displayedLego);
+		
+		lastChangeTime = System.currentTimeMillis();
+		legoNeedsSaving.invalidate();
+		canUndo.invalidate();
+		canRedo.invalidate();
+		hasChangedSinceLastValidate.invalidate();
+		
+		Utility.setExpandedStates(currentState, legoTree.getRoot());
+	}
+	
+	public void redo()
+	{
+		ExpandedNode currentState = Utility.buildExpandedNodeHierarchy(legoTree.getRoot());
+		
+		displayedLegoPositionInHistory--;
+		displayedLego = SchemaClone.clone(displayedLegoHistory.get(displayedLegoPositionInHistory));
+		
+		buildLegoView(displayedLego);
+		
+		lastChangeTime = System.currentTimeMillis();
+		legoNeedsSaving.invalidate();
+		canUndo.invalidate();
+		canRedo.invalidate();
+		hasChangedSinceLastValidate.invalidate();
+		Utility.setExpandedStates(currentState, legoTree.getRoot());
+	}
+
+	public void updateForSave(Stamp stamp)
 	{
 		lip.update(stamp.getAuthor(), stamp.getModule(), TimeConvert.format(stamp.getTime()), stamp.getPath());
+		displayedLegoPositionInHistory = 0;  //would be very tricky to maintain the history after a save, so just clear it.
+		displayedLegoHistory.clear();
+		this.displayedLegoHistory.add(0, SchemaClone.clone(displayedLego));
+		canUndo.invalidate();
+		canRedo.invalidate();
 	}
 
 	private void recursiveSort(ObservableList<TreeItem<String>> items)

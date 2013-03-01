@@ -14,11 +14,11 @@
   <children>
     <VBox id="VBox" alignment="TOP_CENTER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" spacing="5.0" styleClass="headerBackground" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="25.0">
       <children>
-        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" minWidth="110.0" mnemonicParsing="false" rotate="-90.0" text="Lego Lists" translateY="70.0"/>
-        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" minWidth="160.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Browser" translateY="185.0"/>
-        <ToggleButton id="showLegoList" fx:id="showSnomedSearchBtn" minWidth="150.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Search" translateY="320.0"/>
-        <ToggleButton id="showLegoList" fx:id="showTemplatesBtn" minWidth="120.0" mnemonicParsing="false" rotate="-90.0" text="Templates" translateY="435"/>
-        <ToggleButton id="showLegoList" fx:id="showPendingBtn" minWidth="160.0" mnemonicParsing="false" rotate="-90.0" text="Pending Concepts" translateY="555.0"/>
+        <ToggleButton id="showLegoList" fx:id="showAllLegoListBtn" minWidth="110.0" mnemonicParsing="false" rotate="-90.0" text="Lego Lists" translateY="70.0" />
+        <ToggleButton id="showLegoList" fx:id="showSnomedBtn" minWidth="160.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Browser" translateY="185.0" />
+        <ToggleButton id="showLegoList" fx:id="showSnomedSearchBtn" minWidth="150.0" mnemonicParsing="false" rotate="-90.0" text="Snomed Search" translateY="320.0" />
+        <ToggleButton id="showLegoList" fx:id="showTemplatesBtn" minWidth="120.0" mnemonicParsing="false" rotate="-90.0" text="Templates" translateY="435.0" />
+        <ToggleButton id="showLegoList" fx:id="showPendingBtn" minWidth="160.0" mnemonicParsing="false" rotate="-90.0" text="Pending Concepts" translateY="555.0" />
       </children>
     </VBox>
     <SplitPane fx:id="splitPane" dividerPositions="0.35" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
@@ -51,16 +51,18 @@
             <ToolBar maxHeight="30.0" minHeight="30.0" prefHeight="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
               <items>
                 <MenuButton fx:id="menuRecentSctCodes" mnemonicParsing="false" text="Recent Snomed Codes" />
+                <Button fx:id="buttonUndo" mnemonicParsing="false" text="Undo" />
+                <Button fx:id="buttonRedo" mnemonicParsing="false" text="Redo" />
                 <Region prefHeight="20.0" prefWidth="150.0" HBox.hgrow="ALWAYS"/>
                 <StackPane id="StackPane" fx:id="legoInvalidStack">
-          			<children>
-		                <ImageView fx:id="legoInvalidImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-		                    <image>
-		                        <Image url="@../../../icons/fugue/16x16/icons-shadowless/exclamation-red.png" preserveRatio="false" smooth="false" />
-		                    </image>
-		                </ImageView>
-		            </children>
-		        </StackPane>
+                  <children>
+                    <ImageView fx:id="legoInvalidImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                      <image>
+                        <Image url="@../../../icons/fugue/16x16/icons-shadowless/exclamation-red.png" preserveRatio="false" smooth="false" />
+                      </image>
+                    </ImageView>
+                  </children>
+                </StackPane>
                 <Button id="save" fx:id="buttonSaveLego" mnemonicParsing="false" text="Save" />
               </items>
             </ToolBar>
@@ -86,7 +88,7 @@
         </Menu>
         <Menu id="menuHelp" text="_Help" fx:id="menuHelp">
           <items>
-            <MenuItem id="menuHelpAbout" mnemonicParsing="false" text="About" fx:id="menuHelpAbout"/>
+            <MenuItem id="menuHelpAbout" mnemonicParsing="false" text="About" fx:id="menuHelpAbout" />
           </items>
         </Menu>
       </menus>

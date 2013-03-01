@@ -114,13 +114,17 @@ public class LegoGUIController implements Initializable
 	private ProgressIndicator legoValidationInProgress = new ProgressIndicator();
 	
 	private LegoTabInvalidationListener legoTabInvalidationListener = new LegoTabInvalidationListener();
-	private BooleanBinding enableSaveButton;
+	private BooleanBinding enableSaveButton, enableUndoButton, enableRedoButton;
 
 	private static String NONE = "NONE";
 
 	// Copypaste from gui tool
 	@FXML // fx:id="rootPane"
 	private AnchorPane rootPane; // Value injected by FXMLLoader
+	@FXML //  fx:id="buttonRedo"
+	private Button buttonRedo; // Value injected by FXMLLoader
+	@FXML // fx:id="buttonUndo"
+	private Button buttonUndo; // Value injected by FXMLLoader
 	@FXML // fx:id="buttonSaveLego"
 	private Button buttonSaveLego; // Value injected by FXMLLoader
 	@FXML // fx:id="editorTabPane"
@@ -269,6 +273,8 @@ public class LegoGUIController implements Initializable
 					showTreeItem(null, ((LegoTab) newTab).getDisplayedLegoID());
 				}
 				enableSaveButton.invalidate();
+				enableUndoButton.invalidate();
+				enableRedoButton.invalidate();
 				legoTabInvalidationListener.schemaValidate((LegoTab) newTab);
 			}
 		});
@@ -393,6 +399,58 @@ public class LegoGUIController implements Initializable
 				}
 			}
 		});
+		
+		enableUndoButton = new BooleanBinding()
+		{
+			@Override
+			protected boolean computeValue()
+			{
+				Tab t = editorTabPane.getSelectionModel().getSelectedItem();
+				if (t != null)
+				{
+					return ((LegoTab) t).canUndo().get();
+				}
+				return false;
+			}
+		};
+		
+		buttonUndo.setGraphic(Images.UNDO.createImageView());
+		buttonUndo.disableProperty().bind(enableUndoButton.not());
+		buttonUndo.setOnAction(new EventHandler<ActionEvent>()
+		{
+			
+			@Override
+			public void handle(ActionEvent event)
+			{
+				((LegoTab) editorTabPane.getSelectionModel().getSelectedItem()).undo();
+			}
+		});
+
+		enableRedoButton = new BooleanBinding()
+		{
+			@Override
+			protected boolean computeValue()
+			{
+				Tab t = editorTabPane.getSelectionModel().getSelectedItem();
+				if (t != null)
+				{
+					return ((LegoTab) t).canRedo().get();
+				}
+				return false;
+			}
+		};
+		
+		buttonRedo.setGraphic(Images.REDO.createImageView());
+		buttonRedo.disableProperty().bind(enableRedoButton.not());
+		buttonRedo.setOnAction(new EventHandler<ActionEvent>()
+		{
+			
+			@Override
+			public void handle(ActionEvent event)
+			{
+				((LegoTab) editorTabPane.getSelectionModel().getSelectedItem()).redo();
+			}
+		});
 
 		enableSaveButton = new BooleanBinding()
 		{
@@ -407,7 +465,6 @@ public class LegoGUIController implements Initializable
 				return false;
 			}
 		};
-		enableSaveButton.invalidate();
 		
 		buttonSaveLego.setGraphic(Images.SAVE.createImageView());
 		buttonSaveLego.disableProperty().bind(enableSaveButton.not());
@@ -469,7 +526,7 @@ public class LegoGUIController implements Initializable
 					snomedCodeDropTargets.put(newId, dropTargets);
 					getLegoFilterPaneController().updateLegoList();
 					lt.hasUnsavedChangesProperty().invalidate();
-					lt.updateInfoPanel(updatedStamp);
+					lt.updateForSave(updatedStamp);
 					cut.legoCommitted(lego);
 				}
 				catch (DataStoreException | WriteException e)
@@ -1005,6 +1062,8 @@ public class LegoGUIController implements Initializable
 				final LegoTab tab = new LegoTab("Lego", lego);
 				tab.hasUnsavedChangesProperty().addListener(legoTabInvalidationListener);
 				tab.hasChangedSinceLastValidate().addListener(legoTabInvalidationListener);
+				tab.canRedo().addListener(legoTabInvalidationListener);
+				tab.canUndo().addListener(legoTabInvalidationListener);
 				displayedLegos.put(legoId, tab);
 
 				int hue = random.nextInt(361);
@@ -1067,6 +1126,8 @@ public class LegoGUIController implements Initializable
 		
 		tab.hasUnsavedChangesProperty().removeListener(legoTabInvalidationListener);
 		tab.hasChangedSinceLastValidate().removeListener(legoTabInvalidationListener);
+		tab.canRedo().removeListener(legoTabInvalidationListener);
+		tab.canUndo().removeListener(legoTabInvalidationListener);
 		snomedCodeDropTargets.remove(tab.getDisplayedLegoID());
 	}
 
@@ -1136,6 +1197,8 @@ public class LegoGUIController implements Initializable
 		public void invalidated(Observable observable)
 		{
 			enableSaveButton.invalidate();
+			enableUndoButton.invalidate();
+			enableRedoButton.invalidate();
 			Tab t = editorTabPane.getSelectionModel().getSelectedItem();
 			if (t != null)
 			{

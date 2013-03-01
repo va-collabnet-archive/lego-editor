@@ -2,6 +2,8 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.Images;
+import gov.va.legoEdit.model.SchemaClone;
+import gov.va.legoEdit.model.SchemaEquals;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.ConceptLookupCallback;
 import gov.va.legoEdit.storage.wb.WBUtility;
@@ -106,13 +108,25 @@ public class ConceptNode implements ConceptLookupCallback
 		descriptionLabel_.visibleProperty().bind(lookupInProgress.not());
 
 		updateGUI();
-		lookup();
+		if (cb_.getValue().getId().length() > 0)
+		{
+			//don't force lookup on load for blank items
+			lookup();
+		}
+		else
+		{
+			isValid.set(false);
+		}
 
 		cb_.valueProperty().addListener(new ChangeListener<ComboBoxConcept>()
 		{
 			@Override
 			public void changed(ObservableValue<? extends ComboBoxConcept> observable, ComboBoxConcept oldValue, ComboBoxConcept newValue)
 			{
+				if (newValue.shouldIgnoreChange())
+				{
+					return;
+				}
 				if (oldValue.getId().trim().equals(newValue.getId().trim()))
 				{
 					// Not a real change
@@ -208,15 +222,15 @@ public class ConceptNode implements ConceptLookupCallback
 		// read the ID.
 		if (c_.getSctid() != null)
 		{
-			cb_.setValue(new ComboBoxConcept(c_.getSctid() + "", c_.getSctid() + ""));
+			cb_.setValue(new ComboBoxConcept(c_.getSctid() + "", c_.getSctid() + "", true));
 		}
 		else if (c_.getUuid() != null)
 		{
-			cb_.setValue(new ComboBoxConcept(c_.getUuid(), c_.getUuid()));
+			cb_.setValue(new ComboBoxConcept(c_.getUuid(), c_.getUuid(), true));
 		}
 		else
 		{
-			cb_.setValue(new ComboBoxConcept("", ""));
+			cb_.setValue(new ComboBoxConcept("", "", true));
 		}
 		descriptionLabel_.setText(c_.getDesc() == null ? "" : c_.getDesc());
 	}
@@ -231,7 +245,7 @@ public class ConceptNode implements ConceptLookupCallback
 		{
 			return;
 		}
-
+		
 		lookupsInProgress_.incrementAndGet();
 		lookupInProgress.invalidate();
 		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this);
@@ -260,6 +274,7 @@ public class ConceptNode implements ConceptLookupCallback
 			@Override
 			public void run()
 			{
+				Concept conceptBefore = SchemaClone.clone(c_);
 				lookupsInProgress_.decrementAndGet();
 				lookupInProgress.invalidate();
 
@@ -307,7 +322,11 @@ public class ConceptNode implements ConceptLookupCallback
 					}
 					isValid.set(false);
 				}
-				legoTreeView_.contentChanged(lti_);
+				if (!SchemaEquals.equals(conceptBefore, c_))
+				{
+					//only notify changed if actually changed, otherwise we mess up the undo/redo history with concepts that fail lookup
+					legoTreeView_.contentChanged(lti_);
+				}
 				updateGUI();
 			}
 		});

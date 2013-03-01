@@ -67,4 +67,42 @@ public class Utility
 		StackPane.setMargin(image, new Insets(0.0, offsetFromRight, 0.0, 0.0));
 	}
 
+	public static ExpandedNode buildExpandedNodeHierarchy(TreeItem<?> treeItem)
+	{
+		//If this is called, assume the called node is expanded.  Only care about children.
+		ExpandedNode en = new ExpandedNode();
+		for (TreeItem<?> ti : treeItem.getChildren())
+		{
+			if (ti.isExpanded())
+			{
+				en.addExpanded(buildExpandedNodeHierarchy(ti));
+			}
+			else
+			{
+				en.addCollapsed();
+			}
+		}
+		return en;
+	}
+	
+	public static void setExpandedStates(ExpandedNode expandedNode, TreeItem<?> treeItem)
+	{
+		for (int i = 0; i < expandedNode.getItems().size(); i++)
+		{
+			//If the structure changed, just have to ignore
+			//maybe in the future, try to keep track of ids or something, so we can better align
+			if (treeItem.getChildren().size() >  i)
+			{
+				if (expandedNode.getItems().get(i) != null)
+				{
+					treeItem.getChildren().get(i).setExpanded(true);
+					setExpandedStates(expandedNode.getItems().get(i), treeItem.getChildren().get(i));
+				}
+				else
+				{
+					treeItem.getChildren().get(i).setExpanded(false);
+				}
+			}
+		}
+	}
 }

@@ -46,7 +46,9 @@ public enum Images
     DELETE(setupImage("/icons/silk/16x16/delete.png")),
     INFO(setupImage("/icons/fugue/16x16/icons-shadowless/information-frame.png")),
     SAVE(setupImage("/icons/fugue/16x16/icons-shadowless/disk-black.png")),
-    EXIT(setupImage("/icons/fugue/16x16/icons-shadowless/cross.png"));
+    EXIT(setupImage("/icons/fugue/16x16/icons-shadowless/cross.png")),
+    UNDO(setupImage("/icons/fugue/16x16/icons-shadowless/arrow-curve-180.png")),
+    REDO(setupImage("/icons/fugue/16x16/icons-shadowless/arrow-curve-000-left.png"));
     
     private Image iconImage_;
 
