@@ -2,7 +2,8 @@
 #
 #sctID	Description	parentSCTID	parentDescription
 #
-# sctID and Description are required.  parentSCTID is optional.  parentDescription must be provided if parentSCTID is provided. 
+# sctID and Description are required.  parentSCTID is optional.  parentDescription is only provided for convenience, and is ignored 
+# by the legoEditor.  The LegoEditor will populate/update this field automatically when the pendingConcept file is read. 
 #
 
 
