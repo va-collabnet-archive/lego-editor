@@ -297,7 +297,7 @@ public class Validator
 		
 		if (a.getTiming() != null)
 		{
-			//TODO check for timing units, of right type
+			//TODO check for timing units, of right type - need the snomed concept first.
 		}
 		return null;
 	}
