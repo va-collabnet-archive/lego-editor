@@ -20,7 +20,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,10 +131,9 @@ public class CreatePendingConceptController implements Initializable
 						return true;
 					}
 					
-					ConceptVersionBI cv = WBUtility.lookupSnomedIdentifierAsCV(parentConcept.getText());
-					if (cv != null)
+					selectedParentConcept = WBUtility.lookupSnomedIdentifier(parentConcept.getText());
+					if (selectedParentConcept != null)
 					{
-						selectedParentConcept = WBUtility.convertConcept(cv);
 						parentConcept.setText(selectedParentConcept.getDesc());
 						return true;
 					}

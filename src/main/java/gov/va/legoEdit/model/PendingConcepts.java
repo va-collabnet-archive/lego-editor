@@ -114,11 +114,10 @@ public class PendingConcepts implements Observable
 			}
 			if (parent != null)
 			{
-				//Use this lookup, since it doesn't loop back to pending.
-				ConceptVersionBI wbParentConcept =  WBUtility.lookupSnomedIdentifierAsCV(parent + "");
-				if (wbParentConcept != null)
+				//allow ref to pending, but not self....
+				Concept parentConcept =  WBUtility.lookupSnomedIdentifier(parent + "");
+				if (parentConcept != null && parentConcept.getSctid().longValue() != id)
 				{
-					Concept parentConcept = WBUtility.convertConcept(wbParentConcept);
 					parentConcepts.put(id, parentConcept);
 				}
 				else

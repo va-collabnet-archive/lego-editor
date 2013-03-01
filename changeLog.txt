@@ -7,6 +7,7 @@ Lego Editor Change Log
   *  Fixed a null pointer that could happen if you brought up an editor tab before the commonly used 
   		concepts finished intializing.
   *  Fixed a validator error with Relationship Groups
+  *  Allow pendingConcept parents to be other pending concepts
   *  artf227108 Add Install4j installer script.
 
 2012/02/26 - 0.54
