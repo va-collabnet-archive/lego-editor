@@ -87,6 +87,11 @@ public class LegoXMLUtils
 		Unmarshaller um = jc.createUnmarshaller();
 		return (LegoList) um.unmarshal(new FileReader(path));
 	}
+	
+	public static LegoList readLegoList(InputStream is) throws JAXBException
+	{
+		return (LegoList) jc.createUnmarshaller().unmarshal(is);
+	}
 
 	public static String toXML(Lego l) throws PropertyException, JAXBException
 	{
