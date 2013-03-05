@@ -48,7 +48,7 @@ public class CommonlyUsedConcepts
 			@Override
 			public void run()
 			{
-				logger.debug("Gathering Snomed Concept Usage Stats");				
+				logger.debug("Gathering Snomed Concept Usage Stats");
 				HashMap<ConceptUsageType, HashMap<String, Count>> dbUsageCounts = new HashMap<>();
 				for (ConceptUsageType cut : ConceptUsageType.values())
 				{
@@ -211,8 +211,7 @@ public class CommonlyUsedConcepts
 			String id = c.getUuid();
 			if (Utility.isEmpty(id) && c.getSctid() != null)
 			{
-				id = c.getSctid() + " "; // Dan hack - purposely put a space after the ID. The lookup later will trim it off, but this
-				// will prevent the .equals checks in the combo box drop downs from selecting this item, and doing odd things with it.
+				id = c.getSctid() + "";
 			}
 			Count count = countMap.get(id);
 			if (count == null)

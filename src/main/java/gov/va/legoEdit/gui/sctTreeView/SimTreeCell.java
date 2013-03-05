@@ -53,6 +53,7 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
                 LegoGUI.getInstance().showSnomedConceptDialog(SimTreeCell.this.getItem().getConcept().getPrimordialUuid());
             }
         });
+        mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
         cm.getItems().add(mi);
         
         mi = new MenuItem("Filter for Legos that use this Concept");
@@ -65,6 +66,7 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
                         .filterOnConcept(SimTreeCell.this.getItem().getConcept().getPrimordialUuid().toString());
             }
         });
+        mi.setGraphic(Images.FILTER.createImageView());
         cm.getItems().add(mi);
         
         setContextMenu(cm);

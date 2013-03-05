@@ -383,15 +383,21 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.measurement || treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement)
 				{
+					DropTargetLabel dtl;
 					if (!treeItem.isExpanded())
 					{
-						nodeBox.getChildren().add(new Label(treeItem.getValue() + sep + SchemaSummary.summary((Measurement) treeItem.getExtraData())));
+						dtl = new DropTargetLabel(treeItem.getValue() + sep + SchemaSummary.summary((Measurement) treeItem.getExtraData()), cm);
+						nodeBox.getChildren().add(dtl);
 					}
 					else
 					{
-						nodeBox.getChildren().add(new Label(treeItem.getValue()));
+						dtl = new DropTargetLabel(treeItem.getValue(), cm);
+						nodeBox.getChildren().add(dtl);
 					}
-					addMenus((Measurement) treeItem.getExtraData(), treeItem, cm);
+
+					addMenus((Measurement) treeItem.getExtraData(), treeItem, cm, dtl);
+					LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), dtl);
+
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.expressionValue
 						|| treeItem.getNodeType() == LegoTreeNodeType.expressionDestination
@@ -479,7 +485,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					// odd, yes - on the point, we pass in the measurement.
 					final Measurement m = (Measurement) treeItem.getExtraData();
 					PointNode pn = new PointNode(m, PointNode.PointNodeType.point, treeView, treeItem);
-					addMenus(m, treeItem, cm);
+					addMenus(m, treeItem, cm, null);
 					nodeBox.getChildren().add(pn.getNode());
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.interval)
@@ -517,14 +523,14 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					vbox.getChildren().add(boundLow);
 					vbox.getChildren().add(boundHigh);
 
-					addMenus(m, treeItem, cm);
+					addMenus(m, treeItem, cm, null);
 					nodeBox.getChildren().add(vbox);
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.bound)
 				{
 					// odd, yes - on the bound, we pass in the measurement.
 					final Measurement m = (Measurement) treeItem.getExtraData();
-					addMenus(m, treeItem, cm);
+					addMenus(m, treeItem, cm, null);
 					if (m.getBound() == null)
 					{
 						m.setBound(new Bound());
@@ -770,10 +776,14 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		treeView.contentChanged(treeParent);
 	}
 
-	private void addUnits(Measurement m, LegoTreeItem ti)
+	private void addUnits(Measurement m, String sctUUID, LegoTreeItem ti)
 	{
 		Units u = new Units();
 		Concept c = new Concept();
+		if (sctUUID != null)
+		{
+			c.setUuid(sctUUID);
+		}
 		u.setConcept(c);
 		m.setUnits(u);
 		LegoTreeItem lti = new LegoTreeItem(c, LegoTreeNodeType.conceptOptional);
@@ -2095,7 +2105,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		cm.getItems().add(mi);
 	}
 
-	private void addMenus(final Measurement m, final LegoTreeItem treeItem, ContextMenu cm)
+	private void addMenus(final Measurement m, final LegoTreeItem treeItem, ContextMenu cm, final DropTargetLabel label)
 	{
 		MenuItem mi;
 		if (treeItem.getNodeType() == LegoTreeNodeType.point)
@@ -2150,11 +2160,24 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					@Override
 					public void handle(ActionEvent arg0)
 					{
-						addUnits(m, treeItem);
+						addUnits(m, null, treeItem);
 					}
 				});
 				mi.setGraphic(Images.ADD.createImageView());
 				cm.getItems().add(mi);
+				
+				mi = new MenuItem("Drop as a " + (treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement") + " Unit");
+				mi.setOnAction(new EventHandler<ActionEvent>()
+				{
+					@Override
+					public void handle(ActionEvent arg0)
+					{
+						addUnits(m, label.getDroppedValue(), treeItem);
+						label.setDroppedValue(null);
+					}
+				});
+				mi.setGraphic(Images.ADD.createImageView());
+				label.getDropContextMenu().getItems().add(mi);
 			}
 			if (m.getInterval() == null && m.getPoint() == null && m.getBound() == null)
 			{
@@ -2401,6 +2424,42 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			}
 		});
 		mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
+		cm.getItems().add(mi);
+		
+		mi = new MenuItem("Copy Text");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				CustomClipboard.set(cn.getDisplayedText());
+			}
+		});
+		mi.setGraphic(Images.COPY.createImageView());
+		cm.getItems().add(mi);
+		
+		mi = new MenuItem("Copy SCTID");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				CustomClipboard.set(c.getSctid() + "");
+			}
+		});
+		mi.setGraphic(Images.COPY.createImageView());
+		cm.getItems().add(mi);
+		
+		mi = new MenuItem("Paste");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				cn.set(CustomClipboard.getString());
+			}
+		});
+		mi.setGraphic(Images.PASTE.createImageView());
 		cm.getItems().add(mi);
 
 	}

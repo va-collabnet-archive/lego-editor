@@ -1,4 +1,10 @@
 Lego Editor Change Log
+2013/03/?? - 0.56
+  *  Added missing "Drop as Units" option to Timing and Measurement. 
+  *  Fixed a null pointer that could happen on drag and drop from the SCT Tree View.
+  *  artf227498 Change snomed concept drop down boxes to not show the SCTID, also reworked the 
+  		concept filter option to not show the ID.
+
 2013/03/01 - 0.55
   *  Improve error handling when snomed DB is missing.
   *  Fixed deadlock that could happen if you typed in the snomed ID filter field before the Snomed

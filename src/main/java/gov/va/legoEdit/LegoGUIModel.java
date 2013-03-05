@@ -221,7 +221,6 @@ public class LegoGUIModel
 	{
 		// Long way around to get back to the method above... but I need the filter params.
 		LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
-		LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
 	}
 
 	public void importLegoList(LegoList ll) throws WriteException

@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.sctSearch;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.CustomClipboard;
+import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
@@ -141,6 +142,7 @@ public class SnomedSearchPaneController implements Initializable
 									}
 								}
 							});
+							mi.setGraphic(Images.COPY.createImageView());
 							cm.getItems().add(mi);
 
 							mi = new MenuItem("View Concept");
@@ -152,6 +154,7 @@ public class SnomedSearchPaneController implements Initializable
 									LegoGUI.getInstance().showSnomedConceptDialog(item.getConcept().getUUIDs().get(0));
 								}
 							});
+							mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
 							cm.getItems().add(mi);
 
 							mi = new MenuItem("Filter for Legos that use this Concept");
@@ -168,6 +171,7 @@ public class SnomedSearchPaneController implements Initializable
 									}
 								}
 							});
+							mi.setGraphic(Images.FILTER.createImageView());
 							cm.getItems().add(mi);
 
 							setContextMenu(cm);

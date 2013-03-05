@@ -19,12 +19,6 @@ public class ComboBoxConcept
 		id_ = id;
 	}
 
-	public ComboBoxConcept(String id)
-	{
-		description_ = null;
-		id_ = id;
-	}
-
 	public String getDescription()
 	{
 		return description_;
@@ -56,10 +50,14 @@ public class ComboBoxConcept
 		if (obj instanceof ComboBoxConcept)
 		{
 			ComboBoxConcept other = (ComboBoxConcept) obj;
-			// I really only care about the ID field. Some hacking happens with the description field in the ConceptNode class, so ignore it.
-			return Utility.isEqual(id_, other.id_);
+			return Utility.isEqual(id_, other.id_) && Utility.isEqual(description_, other.description_);
 		}
 		return false;
 	}
 
+	@Override
+	public String toString()
+	{
+		return id_ + ":" + description_;
+	}
 }

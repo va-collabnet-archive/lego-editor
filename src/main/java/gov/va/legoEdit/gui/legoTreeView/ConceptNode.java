@@ -7,6 +7,7 @@ import gov.va.legoEdit.model.SchemaEquals;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.ConceptLookupCallback;
 import gov.va.legoEdit.storage.wb.WBUtility;
+import gov.va.legoEdit.util.Utility;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
@@ -31,6 +32,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
@@ -48,20 +50,19 @@ public class ConceptNode implements ConceptLookupCallback
 
 	private HBox hbox_;
 	private ComboBox<ComboBoxConcept> cb_;
-	private Label descriptionLabel_;
 	private Label typeLabel_;
 	private ProgressIndicator pi_;
 	private ImageView lookupFailImage_;
 	private Concept c_;
 	private LegoTreeView legoTreeView_;
 	private LegoTreeItem lti_;
+	private ComboBoxConcept codeSetComboBoxConcept_ = null;
 
 	private BooleanProperty isValid = new SimpleBooleanProperty(true);
 	private volatile long lookupUpdateTime_ = 0;
 	private AtomicInteger lookupsInProgress_ = new AtomicInteger();
 	private BooleanBinding lookupInProgress = new BooleanBinding()
 	{
-
 		@Override
 		protected boolean computeValue()
 		{
@@ -90,10 +91,9 @@ public class ConceptNode implements ConceptLookupCallback
 			}
 		});
 		cb_.setEditable(true);
-		cb_.setMaxWidth(320.0);
+		cb_.setMaxWidth(Double.MAX_VALUE);
 		cb_.setMinWidth(320.0);
-		cb_.setPrefWidth(320.0);
-		cb_.setPromptText("SCTID or UUID");
+		cb_.setPromptText("Drop or Select a Concept");
 		cb_.setItems(FXCollections.observableArrayList(LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().getSuggestions(cut)));
 		cb_.setVisibleRowCount(11);
 
@@ -102,15 +102,10 @@ public class ConceptNode implements ConceptLookupCallback
 			typeLabel_ = new Label(typeLabel);
 		}
 
-		descriptionLabel_ = new Label();
-		descriptionLabel_.setMaxWidth(Double.MAX_VALUE);
-		descriptionLabel_.setMinWidth(100.0);
-		descriptionLabel_.visibleProperty().bind(lookupInProgress.not());
-
 		updateGUI();
+		//don't force lookup on load for blank items
 		if (cb_.getValue().getId().length() > 0)
 		{
-			//don't force lookup on load for blank items
 			lookup();
 		}
 		else
@@ -127,9 +122,10 @@ public class ConceptNode implements ConceptLookupCallback
 				{
 					return;
 				}
-				if (oldValue.getId().trim().equals(newValue.getId().trim()))
+				//Whenever the focus leaves the combo box editor, a new combo box is generated.  But, the new generated will have the description
+				//in place of the id.  detect and ignore.
+				if (codeSetComboBoxConcept_ != null && newValue.getId().equals(codeSetComboBoxConcept_.getDescription()))
 				{
-					// Not a real change
 					return;
 				}
 				c_.setDesc("");
@@ -152,6 +148,7 @@ public class ConceptNode implements ConceptLookupCallback
 		Tooltip.install(lookupFailImage_, t);
 
 		StackPane sp = new StackPane();
+		sp.setMaxWidth(Double.MAX_VALUE);
 		sp.getChildren().add(cb_);
 		sp.getChildren().add(lookupFailImage_);
 		sp.getChildren().add(pi_);
@@ -171,10 +168,8 @@ public class ConceptNode implements ConceptLookupCallback
 		}
 
 		hbox_.getChildren().add(sp);
-		// HBox.setHgrow(sp, Priority.ALWAYS);
-		hbox_.getChildren().add(descriptionLabel_);
-
-		hbox_.setOnDragDetected(new EventHandler<MouseEvent>()
+		HBox.setHgrow(sp, Priority.ALWAYS);
+		cb_.getEditor().setOnDragDetected(new EventHandler<MouseEvent>()
 		{
 			public void handle(MouseEvent event)
 			{
@@ -206,7 +201,7 @@ public class ConceptNode implements ConceptLookupCallback
 			}
 		});
 
-		hbox_.setOnDragDone(new EventHandler<DragEvent>()
+		cb_.getEditor().setOnDragDone(new EventHandler<DragEvent>()
 		{
 			public void handle(DragEvent event)
 			{
@@ -217,22 +212,12 @@ public class ConceptNode implements ConceptLookupCallback
 
 	private void updateGUI()
 	{
-		// Bad design by dan. In the drop down, I want to show description. However, in the combo field, I want to show id.
-		// So my hack fix is to put the ID in both fields, when the update comes back from the lookup. When there is a value change, we only
-		// read the ID.
-		if (c_.getSctid() != null)
-		{
-			cb_.setValue(new ComboBoxConcept(c_.getSctid() + "", c_.getSctid() + "", true));
-		}
-		else if (c_.getUuid() != null)
-		{
-			cb_.setValue(new ComboBoxConcept(c_.getUuid(), c_.getUuid(), true));
-		}
-		else
-		{
-			cb_.setValue(new ComboBoxConcept("", "", true));
-		}
-		descriptionLabel_.setText(c_.getDesc() == null ? "" : c_.getDesc());
+		codeSetComboBoxConcept_ = new ComboBoxConcept((c_.getDesc() == null ? "" : c_.getDesc()),
+				(c_.getSctid() == null ? 
+						(c_.getUuid() == null ? "" : c_.getUuid()) 
+						: c_.getSctid() + ""), true); 
+		cb_.setValue(codeSetComboBoxConcept_);
+
 	}
 
 	private synchronized void lookup()
@@ -240,8 +225,8 @@ public class ConceptNode implements ConceptLookupCallback
 		// If the concept is fully populated, and the sctId equals the displayed value,
 		// don't bother doing the lookup (conceptNodes are created whenever a tree expand/collapse takes place - most of the time
 		// the value hasn't changed....
-		if (c_ != null && c_.getDesc() != null && c_.getUuid() != null && c_.getSctid() != null && c_.getDesc().length() > 0 && c_.getUuid().length() > 0
-				&& cb_.getValue().getId().equals(c_.getSctid() + ""))
+		if (c_ != null && !Utility.isEmpty(c_.getDesc()) && !Utility.isEmpty(c_.getUuid()) && c_.getSctid() != null
+				&& (cb_.getValue().getId().equals(c_.getSctid() + "") || cb_.getValue().getId().equals(c_.getUuid())))
 		{
 			return;
 		}
@@ -260,7 +245,17 @@ public class ConceptNode implements ConceptLookupCallback
 	{
 		return c_;
 	}
+	
+	protected String getDisplayedText()
+	{
+		return cb_.getValue().getDescription();
+	}
 
+	protected void set(String newValue)
+	{
+		cb_.setValue(new ComboBoxConcept(newValue, newValue));
+	}
+	
 	public boolean isValid()
 	{
 		return isValid.get();
@@ -274,7 +269,6 @@ public class ConceptNode implements ConceptLookupCallback
 			@Override
 			public void run()
 			{
-				Concept conceptBefore = SchemaClone.clone(c_);
 				lookupsInProgress_.decrementAndGet();
 				lookupInProgress.invalidate();
 
@@ -289,6 +283,7 @@ public class ConceptNode implements ConceptLookupCallback
 					lookupUpdateTime_ = submitTime;
 				}
 
+				Concept conceptBefore = SchemaClone.clone(c_);
 				if (concept != null)
 				{
 					c_.setDesc(concept.getDesc());

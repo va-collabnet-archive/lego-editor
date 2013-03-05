@@ -5,6 +5,7 @@ import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
 import gov.va.legoEdit.gui.util.ExpandedNode;
+import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;
@@ -35,9 +36,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -57,15 +59,16 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	@FXML// fx:id="snomedId"
 	private TextField snomedId; // Value injected by FXMLLoader
 	@FXML //  fx:id="snomedIdStack"
-    private StackPane snomedIdStack; // Value injected by FXMLLoader
-	@FXML// fx:id="snomedLabel"
-	private Label snomedLabel; // Value injected by FXMLLoader
+	private StackPane snomedIdStack; // Value injected by FXMLLoader
 	@FXML// fx:id="clearButton"
 	private Button clearButton; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedButton"
+	private Button advancedButton; // Value injected by FXMLLoader
 
 	private LegoTreeView ltv;
 	private volatile AtomicInteger updateDisabled = new AtomicInteger(0);  // Update will only run when this is 0
 	private Concept concept_;
+	private Tooltip conceptInvalidTooltip_;
 
 	private ProgressIndicator pi_;
 	BooleanProperty snomedIdValid = new SimpleBooleanProperty(true);
@@ -182,21 +185,10 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			}
 		});
 
-		snomedIdValid.addListener(new ChangeListener<Boolean>()
-		{
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
-			{
-				if (snomedIdValid.get())
-				{
-					snomedId.setEffect(null);
-				}
-				else
-				{
-					snomedId.setEffect(Utility.redDropShadow);
-				}
-			}
-		});
+		ImageView lookupFailImage = Images.EXCLAMATION.createImageView();
+		lookupFailImage.visibleProperty().bind(snomedIdValid.not());
+		conceptInvalidTooltip_ = new Tooltip("The specified concept was not found in the Snomed Database.");
+		Tooltip.install(lookupFailImage, conceptInvalidTooltip_);
 
 		snomedId.textProperty().addListener(new ChangeListener<String>()
 		{
@@ -205,14 +197,18 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			{
 				if (oldValue.length() > 0 && newValue.length() == 0)
 				{
-					snomedLabel.setText("No Snomed concept entered");
 					snomedIdValid.set(true);
+					snomedId.setTooltip(null);
 					concept_ = null;
 					updateLegoList();
 				}
 
 				if (newValue.length() > 0)
 				{
+					if (updateDisabled.get() > 0)
+					{
+						return;
+					}
 					lookupsInProgress_.incrementAndGet();
 					lookupInProgress.invalidate();
 					WBUtility.lookupSnomedIdentifier(newValue, LegoFilterPaneController.this);
@@ -224,15 +220,10 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 
 		clearButton.setOnAction(new EventHandler<ActionEvent>()
 		{
-
 			@Override
 			public void handle(ActionEvent event)
 			{
-				updateDisabled.incrementAndGet();
-				pncsItem.getSelectionModel().select(0);
-				snomedId.setText("");
-				updateDisabled.decrementAndGet();
-				updateLegoList();
+				clearFilter();
 			}
 		});
 		
@@ -246,6 +237,11 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		snomedIdStack.getChildren().add(pi_);
 		StackPane.setAlignment(pi_, Pos.CENTER_RIGHT);
 		StackPane.setMargin(pi_, new Insets(0.0, 5.0, 0.0, 0.0));
+		snomedIdStack.getChildren().add(lookupFailImage);
+		StackPane.setAlignment(lookupFailImage, Pos.CENTER_RIGHT);
+		StackPane.setMargin(lookupFailImage, new Insets(0.0, 5.0, 0.0, 0.0));
+		
+		advancedButton.setDisable(true);
 
 		updateLegoList();
 	}
@@ -253,11 +249,20 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	public synchronized void filterOnConcept(String conceptId)
 	{
 		updateDisabled.incrementAndGet();
-		pncsItem.getSelectionModel().select(0);
+		clearFilter();
+		updateDisabled.decrementAndGet();
 		snomedId.setText(conceptId);
+		LegoGUI.getInstance().getLegoGUIController().showLegoLists();
+	}
+	
+	private void clearFilter()
+	{
+		updateDisabled.incrementAndGet();
+		pncsItem.getSelectionModel().select(0);
+		snomedId.setText("");
+		snomedId.setTooltip(null);
 		updateDisabled.decrementAndGet();
 		updateLegoList();
-		LegoGUI.getInstance().getLegoGUIController().showLegoLists();
 	}
 
 	public void updateLegoList()
@@ -293,8 +298,8 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	{
 		updateDisabled.incrementAndGet();
 		loadPncs();
-		snomedId.setText("");
 		updateDisabled.decrementAndGet();
+		clearFilter();
 	}
 
 	private void loadPncs()
@@ -339,11 +344,10 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 
 				if (concept_ != null)
 				{
-					if (concept_.getSctid() != null)
-					{
-						snomedId.setText(concept_.getSctid() + "");
-					}
-					snomedLabel.setText(concept_.getDesc());
+					updateDisabled.incrementAndGet();
+					snomedId.setText(concept_.getDesc());
+					snomedId.setTooltip(new Tooltip(concept_.getDesc() + " " + (concept_.getSctid() != null ? concept_.getSctid() : "")));
+					updateDisabled.decrementAndGet();
 					snomedIdValid.set(true);
 					updateLegoList();
 				}
@@ -351,7 +355,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 				{
 					concept_ = null;
 					snomedIdValid.set(false);
-					snomedLabel.setText("Cannot find Snomed Concept");
+					conceptInvalidTooltip_.setText("The specified concept was not found in the Snomed Database, and this value is not being used in the filter.");
 				}
 			}
 		});

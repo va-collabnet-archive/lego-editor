@@ -112,6 +112,7 @@ public class LegoGUIController implements Initializable
 	private File importInitialDirectory = null;
 	private Tooltip legoInvalidReason = new Tooltip();
 	private ProgressIndicator legoValidationInProgress = new ProgressIndicator();
+	private volatile long dragStartedAt = 0;
 	
 	private LegoTabInvalidationListener legoTabInvalidationListener = new LegoTabInvalidationListener();
 	private BooleanBinding enableSaveButton, enableUndoButton, enableRedoButton;
@@ -621,7 +622,7 @@ public class LegoGUIController implements Initializable
 				{
 					if (db.hasString())
 					{
-						n.setValue(new ComboBoxConcept(db.getString()));
+						n.setValue(new ComboBoxConcept(db.getString(), db.getString()));
 						success = true;
 						// It will have updated its effect upon the set - we don't want to restore an old one.
 						existingEffect.remove(n);
@@ -785,6 +786,18 @@ public class LegoGUIController implements Initializable
 
 	public void snomedDragStarted()
 	{
+		//There is a bug in javafx with comboboxs - it seems to fire dragStarted events twice.
+		//http://javafx-jira.kenai.com/browse/RT-28778
+		if ((System.currentTimeMillis() - dragStartedAt) < 2000)
+		{
+			logger.debug("Ignoring duplicate drag event");
+			return;
+		}
+		if (dragStartedAt > 0)
+		{
+			logger.warn("Unclosed drag event is still active while another was started!");
+		}
+		dragStartedAt = System.currentTimeMillis();
 		if (editorTabPane.getSelectionModel().getSelectedItem() != null)
 		{
 			String legoId = ((LegoTab) editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
@@ -811,6 +824,7 @@ public class LegoGUIController implements Initializable
 
 	public void snomedDragCompleted()
 	{
+		dragStartedAt = 0;
 		if (editorTabPane.getSelectionModel().getSelectedItem() != null)
 		{
 			String legoId = ((LegoTab) editorTabPane.getSelectionModel().getSelectedItem()).getDisplayedLegoID();
@@ -868,6 +882,11 @@ public class LegoGUIController implements Initializable
 
 										/* Put a string on a dragboard */
 										TreeItem<FxTaxonomyReferenceWithConcept> dragItem = sctTree.getSelectionModel().getSelectedItem();
+										if (dragItem == null)
+										{
+											//Don't know why, but I've seen this happen...
+											return;
+										}
 
 										ClipboardContent content = new ClipboardContent();
 										content.putString(dragItem.getValue().getConcept().getPrimordialUuid().toString());
