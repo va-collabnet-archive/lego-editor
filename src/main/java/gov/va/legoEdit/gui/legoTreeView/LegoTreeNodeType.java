@@ -7,8 +7,8 @@ public enum LegoTreeNodeType
 	pncsValue(0), 
 	pncsName(0),
 	
-	status(0),
-	comment(1),
+	comment(0),
+	status(1),
 	assertion(2),
 	expressionDiscernible(0),
 	expressionQualifier(1),

@@ -141,6 +141,20 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			{
 				treeItem.setTreeNodeGraphic(nodeBox);
 				treeItem.updateValidityImage();
+				if (!treeItem.isLeaf())
+				{
+					MenuItem mi = new MenuItem("Expand All");
+					mi.setOnAction(new EventHandler<ActionEvent>()
+					{
+						@Override
+						public void handle(ActionEvent arg0)
+						{
+							Utility.expandAll(treeItem);
+						}
+					});
+					mi.setGraphic(Images.EXPAND_ALL.createImageView());
+					cm.getItems().add(mi);
+				}
 			}
 
 			if (empty || treeItem.getNodeType() == LegoTreeNodeType.blankLegoEndNode || treeItem.getNodeType() == LegoTreeNodeType.blankLegoListEndNode)

@@ -4,6 +4,7 @@ Lego Editor Change Log
   *  Fixed a null pointer that could happen on drag and drop from the SCT Tree View.
   *  artf227498 Change snomed concept drop down boxes to not show the SCTID, also reworked the 
   		concept filter option to not show the ID.
+  *  artf227501 Add an option to expand all nodes recursively on each node in both trees.
 
 2013/03/01 - 0.55
   *  Improve error handling when snomed DB is missing.

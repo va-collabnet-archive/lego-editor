@@ -49,7 +49,8 @@ public enum Images
 	EXIT(setupImage("/icons/fugue/16x16/icons-shadowless/cross.png")),
 	UNDO(setupImage("/icons/fugue/16x16/icons-shadowless/arrow-curve-180.png")),
 	REDO(setupImage("/icons/fugue/16x16/icons-shadowless/arrow-curve-000-left.png")),
-	FILTER(setupImage("/icons/filter_16x16.png"));
+	FILTER(setupImage("/icons/filter_16x16.png")),
+	EXPAND_ALL(setupImage("/icons/diagona-icons/src/main/resources/diagona/16x16/109.png"));
 
 	private Image iconImage_;
 
