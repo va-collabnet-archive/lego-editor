@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 
-<!-- Version 2013/01/17 -->
+<!-- Version 2013/03/06 -->
 <!-- 
 	Changelog:
-	1/17/13 - Changing the wording of the measurementConstants to be more user friendly.
-	1/15    - Changed point from a float to a double and allowed to to be a double or a long.  Also changed the way it is structured, 
+	3/06/13	- Removed unnecessary enum values.
+	1/17/13	- Changing the wording of the measurementConstants to be more user friendly.
+	1/15	- Changed point from a float to a double and allowed to to be a double or a long.  Also changed the way it is structured, 
 				so that the generated java code uses inheritance, instead of a choice (closer alignment to sim-api which uses Number, 
 				but that can't be mapped from XML - double or long should let us hold anything we need to)
-	1/10    - Reorganized Bound and Interval under measurement to better align with the sim-api.  No changes to what is representable.
+	1/10	- Reorganized Bound and Interval under measurement to better align with the sim-api.  No changes to what is representable.
 				Got rid of timing node, which served no purpose (moved measurement up a level under the assertion)
-	1/8     - Getting rid of the unnecessary assertionComponents field.  Allowed the assertionComponent in assertion to be an unbounded
+	1/8		- Getting rid of the unnecessary assertionComponents field.  Allowed the assertionComponent in assertion to be an unbounded
 				list instead of a single reference instead.
-	1/4     - Added (optional) comment fields to the Lego and the Lego List.
+	1/4		- Added (optional) comment fields to the Lego and the Lego List.
 	12/14	- Got rid of 'expressionConjuction' - no longer necessary now that we have the 'expression' type.
-	12/13 	- Moved relationships from concept to a new type 'expression'.  'discernible', 'qualifier', 'value' and 'destination'
+	12/13	- Moved relationships from concept to a new type 'expression'.  'discernible', 'qualifier', 'value' and 'destination'
 				have their target types changed to 'expression'.  'type' and 'units' remain as concept - so type and units can no longer
 				have nested rels.
 			- Renamed 'conceptConjunction' to 'expressionConjunction'.  Reordered the elements within for consistency.
-	12/07 	- Renamed 'rel' to 'relation' for consistency.  
+	12/07	- Renamed 'rel' to 'relation' for consistency.  
 			- Added 'relationGroup' as a possible target of 'concept', instead of just 'relation'.  
 			- Created 'conceptConjunction' - added as a possible target for 'discernible', 'qualifier', 'value', 'destination'
 			- Created 'boolean' and 'text' as new types - can be used within a 'value' or a 'destination'
 			- Renamed 'stringValue' to 'stringConstant' within 'point' to make it more clear, help differentiate from the new literal
 				'text' type which allows any string.
-	11/28 	- removed minOccur=0 from measurement in timing - it didn't make sense.  If you have a timing, you need a measurement.
-	11/26 	- added a UUID to the stamp for lego editor sanity - otherwise, there was nothing to define a unique lego.  
+	11/28	- removed minOccur=0 from measurement in timing - it didn't make sense.  If you have a timing, you need a measurement.
+	11/26	- added a UUID to the stamp for lego editor sanity - otherwise, there was nothing to define a unique lego.  
 				Now, stampUUID + legoUUID is globally unique.
  -->
 
@@ -181,11 +182,8 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="DOB" />
 			<xs:enumeration value="NOW" />
-			<xs:enumeration value="date of onset" />
 			<xs:enumeration value="start active service" />
 			<xs:enumeration value="end active service" />
-			<xs:enumeration value="several" />
-			<xs:enumeration value="date of event" />
 		</xs:restriction>
 	</xs:simpleType>
 

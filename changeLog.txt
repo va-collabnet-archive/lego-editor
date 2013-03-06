@@ -1,5 +1,8 @@
 Lego Editor Change Log
 2013/03/?? - 0.56
+  *  <DB COMPATIBILITY BREAKAGE> Updated to the latest (and final?) version of the schema.  
+		This change makes it impossible to read database created with older editors.  Must export 
+		the Legos using the previously installed version, and re-import.
   *  Added missing "Drop as Units" option to Timing and Measurement for drag and drop operations. 
   *  Fixed a null pointer that could happen on drag and drop from the SCT Tree View.
   *  Tweaked the sort order of the lego to move the comment to the top.

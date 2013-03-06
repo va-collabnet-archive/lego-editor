@@ -469,7 +469,11 @@ public class SchemaToString
 			}
 			else if (p instanceof PointMeasurementConstant)
 			{
-				sb.append(((PointMeasurementConstant) p).getValue().name());
+				//This happens after we removed some enum types when you read old data.
+				if (((PointMeasurementConstant) p).getValue() != null)
+				{
+					sb.append(((PointMeasurementConstant) p).getValue().value());
+				}
 			}
 		}
 		return sb.toString();
