@@ -1,10 +1,14 @@
 Lego Editor Change Log
 2013/03/?? - 0.56
-  *  Added missing "Drop as Units" option to Timing and Measurement. 
+  *  Added missing "Drop as Units" option to Timing and Measurement for drag and drop operations. 
   *  Fixed a null pointer that could happen on drag and drop from the SCT Tree View.
+  *  Tweaked the sort order of the lego to move the comment to the top.
+  *  Cleaned up the the consistency of interval notation vs set notation for displays of 
+  		bounds and intervals.
   *  artf227498 Change snomed concept drop down boxes to not show the SCTID, also reworked the 
   		concept filter option to not show the ID.
   *  artf227501 Add an option to expand all nodes recursively on each node in both trees.
+  *  artf227426 Added an (optional) summary view to the editor tab
 
 2013/03/01 - 0.55
   *  Improve error handling when snomed DB is missing.

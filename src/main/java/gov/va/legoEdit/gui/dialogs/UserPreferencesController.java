@@ -17,6 +17,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -26,144 +27,148 @@ import org.slf4j.LoggerFactory;
 
 public class UserPreferencesController implements Initializable
 {
-    private static Logger logger = LoggerFactory.getLogger(UserPreferencesController.class);
-    
-    @FXML  // fx:id="rootPane"
-    private AnchorPane rootPane; // Value injected by FXMLLoader
-    @FXML  // fx:id="cancelButton"
-    private Button cancelButton; // Value injected by FXMLLoader
-    @FXML  // fx:id="legoListDescription"
-    private TextField author; // Value injected by FXMLLoader
-    @FXML  // fx:id="legoListName"
-    private TextField module; // Value injected by FXMLLoader
-    @FXML  // fx:id="legoListUUID"
-    private TextField path; // Value injected by FXMLLoader
-    @FXML  // fx:id="okButton"
-    private Button okButton; // Value injected by FXMLLoader
+	private static Logger logger = LoggerFactory.getLogger(UserPreferencesController.class);
 
-    private UserPreferences up;
-    private BooleanProperty authorValid = new SimpleBooleanProperty(true);
-    private BooleanProperty moduleValid = new SimpleBooleanProperty(true);
-    private BooleanProperty pathValid = new SimpleBooleanProperty(true);
-    
-    private BooleanBinding formValid;
+	@FXML// fx:id="rootPane"
+	private AnchorPane rootPane; // Value injected by FXMLLoader
+	@FXML// fx:id="cancelButton"
+	private Button cancelButton; // Value injected by FXMLLoader
+	@FXML// fx:id="legoListDescription"
+	private TextField author; // Value injected by FXMLLoader
+	@FXML// fx:id="legoListName"
+	private TextField module; // Value injected by FXMLLoader
+	@FXML// fx:id="legoListUUID"
+	private TextField path; // Value injected by FXMLLoader
+	@FXML// fx:id="okButton"
+	private Button okButton; // Value injected by FXMLLoader
+	@FXML// fx:id="summaryView"
+	private ChoiceBox<String> summaryView; // Value injected by FXMLLoader
 
-    @Override
-    // This method is called by the FXMLLoader when initialization is complete
-    public void initialize(URL fxmlFileLocation, ResourceBundle resources)
-    {
-        assert cancelButton != null : "fx:id=\"cancelButton\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
-        assert author != null : "fx:id=\"legoListDescription\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
-        assert module != null : "fx:id=\"legoListName\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
-        assert path != null : "fx:id=\"legoListUUID\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
-        assert okButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
+	private UserPreferences up;
+	private BooleanProperty authorValid = new SimpleBooleanProperty(true);
+	private BooleanProperty moduleValid = new SimpleBooleanProperty(true);
+	private BooleanProperty pathValid = new SimpleBooleanProperty(true);
 
-        // initialize your logic here: all @FXML variables will have been injected
+	private BooleanBinding formValid;
 
-        up = LegoGUIModel.getInstance().getUserPreferences();
+	@Override
+	// This method is called by the FXMLLoader when initialization is complete
+	public void initialize(URL fxmlFileLocation, ResourceBundle resources)
+	{
+		assert cancelButton != null : "fx:id=\"cancelButton\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
+		assert author != null : "fx:id=\"legoListDescription\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
+		assert module != null : "fx:id=\"legoListName\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
+		assert path != null : "fx:id=\"legoListUUID\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
+		assert okButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'LegoListProperties.fxml'.";
 
-        author.setText(up.getAuthor());
-        module.setText(up.getModule());
-        path.setText(up.getPath());
-        
-        formValid = new BooleanBinding()
-        {
-            {
-                super.bind(authorValid, moduleValid, pathValid);
-            }
-            @Override
-            protected boolean computeValue()
-            {
-                return authorValid.get() && moduleValid.get() && pathValid.get();
-            }
-        };
+		// initialize your logic here: all @FXML variables will have been injected
 
-        cancelButton.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                author.setText(up.getAuthor());
-                module.setText(up.getModule());
-                path.setText(up.getPath());
-                ((Stage) rootPane.getScene().getWindow()).close();
-            }
-        });
+		up = LegoGUIModel.getInstance().getUserPreferences();
 
-        okButton.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                up.setAuthor(author.getText());
-                up.setModule(module.getText());
-                up.setPath(path.getText());
-                try
-                {
-                    UserPrefsXMLUtils.writeUserPreferences(up);
-                }
-                catch (JAXBException e)
-                {
-                    logger.error("Unexpected error storing preferences", e);
-                    LegoGUI.getInstance().showErrorDialog("Error storing preferences",
-                            "Failed to store the user preferences", e.toString());
-                }
+		author.setText(up.getAuthor());
+		module.setText(up.getModule());
+		path.setText(up.getPath());
+		summaryView.getSelectionModel().select(up.getShowSummary() ? 0 : 1);
 
-                ((Stage) rootPane.getScene().getWindow()).close();
-            }
-        });
-        
-        okButton.disableProperty().bind(formValid.not());
+		formValid = new BooleanBinding()
+		{
+			{
+				super.bind(authorValid, moduleValid, pathValid);
+			}
 
-        author.textProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-            {
-                authorValid.set(newValue.length() > 0);
-                if (authorValid.get())
-                {
-                    author.setEffect(null);
-                }
-                else
-                {
-                    author.setEffect(Utility.redDropShadow);
-                }
-            }
-        });
+			@Override
+			protected boolean computeValue()
+			{
+				return authorValid.get() && moduleValid.get() && pathValid.get();
+			}
+		};
 
-        module.textProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-            {
-                moduleValid.set(newValue.length() > 0);
-                if (moduleValid.get())
-                {
-                    module.setEffect(null);
-                }
-                else
-                {
-                    module.setEffect(Utility.redDropShadow);
-                }
-            }
-        });
+		cancelButton.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				author.setText(up.getAuthor());
+				module.setText(up.getModule());
+				path.setText(up.getPath());
+				((Stage) rootPane.getScene().getWindow()).close();
+			}
+		});
 
-        path.textProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-            {
-                pathValid.set(newValue.length() > 0);
-                if (pathValid.get())
-                {
-                    path.setEffect(null);
-                }
-                else
-                {
-                    path.setEffect(Utility.redDropShadow);
-                }
-            }
-        });
-    }
+		okButton.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				up.setAuthor(author.getText());
+				up.setModule(module.getText());
+				up.setPath(path.getText());
+				up.setShowSummary(summaryView.getSelectionModel().getSelectedIndex() == 0 ? true : false);
+				try
+				{
+					UserPrefsXMLUtils.writeUserPreferences(up);
+				}
+				catch (JAXBException e)
+				{
+					logger.error("Unexpected error storing preferences", e);
+					LegoGUI.getInstance().showErrorDialog("Error storing preferences", "Failed to store the user preferences", e.toString());
+				}
+
+				((Stage) rootPane.getScene().getWindow()).close();
+			}
+		});
+
+		okButton.disableProperty().bind(formValid.not());
+
+		author.textProperty().addListener(new ChangeListener<String>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				authorValid.set(newValue.length() > 0);
+				if (authorValid.get())
+				{
+					author.setEffect(null);
+				}
+				else
+				{
+					author.setEffect(Utility.redDropShadow);
+				}
+			}
+		});
+
+		module.textProperty().addListener(new ChangeListener<String>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				moduleValid.set(newValue.length() > 0);
+				if (moduleValid.get())
+				{
+					module.setEffect(null);
+				}
+				else
+				{
+					module.setEffect(Utility.redDropShadow);
+				}
+			}
+		});
+
+		path.textProperty().addListener(new ChangeListener<String>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				pathValid.set(newValue.length() > 0);
+				if (pathValid.get())
+				{
+					path.setEffect(null);
+				}
+				else
+				{
+					path.setEffect(Utility.redDropShadow);
+				}
+			}
+		});
+	}
 }

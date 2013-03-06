@@ -357,7 +357,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 							treeView.contentChanged(null);
 						}
 					});
-					nodeBox.getChildren().add(Utility.prependLabel("Comment", tf));
+					nodeBox.getChildren().add(Utility.prependLabel(treeItem.getValue(), tf));
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.assertionUUID)
 				{

@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.util;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.formats.LegoValidateCallback;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
@@ -11,12 +12,14 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.SchemaClone;
 import gov.va.legoEdit.model.SchemaEquals;
+import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.util.TimeConvert;
 import java.util.ArrayList;
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -28,12 +31,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 
 public class LegoTab extends Tab
@@ -49,6 +54,7 @@ public class LegoTab extends Tab
 	private ImageView open = Images.LEGO.createImageView();
 	private ImageView openEdited = Images.LEGO_EDIT.createImageView();
 	private LegoTreeView legoTree;
+	private TextArea summary;
 	
 	private BooleanBinding canUndo = new BooleanBinding()
 	{
@@ -172,11 +178,39 @@ public class LegoTab extends Tab
 
 		legoTree = new LegoTreeView();
 		legoTree.setLegoTab(this);
+		
+		VBox summaryVBox = null;
+		if (LegoGUIModel.getInstance().getUserPreferences().getShowSummary())
+		{
+			summaryVBox = new VBox();
+			summaryVBox.getStyleClass().add("itemBorder");
+			Label l = new Label("Summary");
+			l.getStyleClass().add("boldLabel");
+			summaryVBox.getChildren().add(l);
+			summary = new TextArea();
+			summary.setEditable(false);
+			summary.setWrapText(false);
+			summary.setFocusTraversable(false);
+			updateSummary();
+			summaryVBox.getChildren().add(summary);
+			VBox.setVgrow(summary, Priority.ALWAYS);
+			summaryVBox.setMaxHeight(200.0);
+			summaryVBox.setMinHeight(200.0);
+		}
 
-		BorderPane bp = new BorderPane();
-		bp.setTop(lip.getPane());
-		bp.setCenter(legoTree);
-		this.setContent(bp);
+		VBox tabContent = new VBox();
+		tabContent.getChildren().add(lip.getPane());
+		VBox.setVgrow(lip.getPane(), Priority.NEVER);
+		
+		if (summary != null)
+		{
+			tabContent.getChildren().add(summaryVBox);
+			VBox.setVgrow(summaryVBox, Priority.NEVER);
+		}
+		
+		tabContent.getChildren().add(legoTree);
+		VBox.setVgrow(legoTree, Priority.ALWAYS);
+		this.setContent(tabContent);
 
 		legoTree.getRoot().getChildren().add(new LegoTreeItem(displayedLego.getStamp(), LegoTreeNodeType.status));
 		legoTree.getRoot().getChildren().add(new LegoTreeItem(displayedLego, LegoTreeNodeType.comment));
@@ -243,6 +277,40 @@ public class LegoTab extends Tab
 		canUndo.invalidate();
 		canRedo.invalidate();
 		hasChangedSinceLastValidate.invalidate();
+		if (summary != null)
+		{
+			updateSummary();
+		}
+	}
+	
+	private void updateSummary()
+	{
+		Runnable r = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				final StringBuilder value = new StringBuilder();
+				for (Assertion a : displayedLego.getAssertion())
+				{
+					value.append(SchemaToString.summary(a));
+					value.append(SchemaToString.eol);
+				}
+				Platform.runLater(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						double scrollTop = summary.getScrollTop();
+						summary.setText(value.toString());
+						summary.setScrollTop(scrollTop);
+					}
+				});
+				
+			}
+		};
+		
+		gov.va.legoEdit.util.Utility.tpe.execute(r);
 	}
 	
 	public void undo()

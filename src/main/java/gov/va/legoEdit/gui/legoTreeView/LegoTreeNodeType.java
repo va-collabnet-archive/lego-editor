@@ -8,8 +8,8 @@ public enum LegoTreeNodeType
 	pncsName(0),
 	
 	comment(0),
-	status(1),
-	assertion(2),
+	status(2),
+	assertion(3),
 	expressionDiscernible(0),
 	expressionQualifier(1),
 	timingMeasurement(2),
@@ -26,20 +26,20 @@ public enum LegoTreeNodeType
 	assertionUUID(0),
 	
 	text(0), bool(0),
-    
-    blankLegoEndNode(50), 
-    blankLegoListEndNode(50);
+
+	blankLegoEndNode(50),
+	blankLegoListEndNode(50);
 	
 	
 	private int sortOrder_;
 	
 	private LegoTreeNodeType(int sortOrder)
 	{
-	    sortOrder_ = sortOrder;
+		sortOrder_ = sortOrder;
 	}
 	
 	public int getSortOrder()
 	{
-	    return sortOrder_;
+		return sortOrder_;
 	}
 }

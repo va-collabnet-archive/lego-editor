@@ -152,7 +152,14 @@ public class LegoTreeItem extends TreeItem<String>
 
 	public LegoTreeItem(Lego l, LegoTreeNodeType ltnt)
 	{
-		setValue("Comment");
+		if (ltnt == LegoTreeNodeType.comment)
+		{
+			setValue("Comment");
+		}
+		else
+		{
+			throw new IllegalArgumentException();
+		}
 		extraData_ = l;
 		ltnt_ = ltnt;
 	}
