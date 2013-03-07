@@ -341,9 +341,14 @@ public class SnomedSearchPaneController implements Initializable
 					{
 						sr.addMatchingString(((DescriptionAnalogBI<?>) cc).getText());
 					}
+					else if (cc instanceof ConceptVersionBI)
+					{
+						//This is the type returned when the do a UUID or SCTID search
+						sr.addMatchingString(searchString_.trim());
+					}
 					else
 					{
-						logger.error("Unexpected type returned from search");
+						logger.error("Unexpected type returned from search: " + cc.getClass().getName());
 						sr.addMatchingString("oops");
 					}
 				}

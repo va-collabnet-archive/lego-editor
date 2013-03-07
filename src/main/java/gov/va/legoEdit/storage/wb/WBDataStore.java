@@ -3,6 +3,7 @@ package gov.va.legoEdit.storage.wb;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
+import gov.va.legoEdit.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import org.ihtsdo.cc.lucene.SearchResult;
 import org.ihtsdo.tk.Ts;
 import org.ihtsdo.tk.api.ComponentChroncileBI;
 import org.ihtsdo.tk.api.TerminologyStoreDI;
+import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.rest.client.TtkRestClient;
 import org.slf4j.Logger;
@@ -182,6 +184,17 @@ public class WBDataStore
 					Document doc = result.searcher.doc(result.topDocs.scoreDocs[i].doc);
 					resultToReturn.add(bts.getComponent(Integer.parseInt(doc.get("dnid"))));
 				}
+				
+				//If it is a UUID or sctid, try a direct lookup.
+				if (query.trim().length() == 36 || Utility.isLong(query.trim()))
+				{
+					ConceptVersionBI temp = WBUtility.lookupSnomedIdentifierAsCV(query);
+					if (temp != null)
+					{
+						resultToReturn.add(0, temp);
+					}
+				}
+				
 				return resultToReturn;
 			}
 			catch (NumberFormatException | ParseException e)
