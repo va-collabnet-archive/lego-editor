@@ -159,7 +159,7 @@ public class Validator
 			return "The concept must be specified";
 		}
 		// better validation is still handled on the GUI side - but when it fails lookup, at least one of these gets set to null
-		if (concept.getDesc() == null || concept.getSctid() == null || concept.getUuid() == null)
+		if (concept.getSctid() == null && concept.getUuid() == null)
 		{
 			return "The concept is not properly specified";
 		}
