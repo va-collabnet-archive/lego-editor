@@ -7,12 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Version;
 import org.ihtsdo.bdb.BdbTerminologyStore;
 import org.ihtsdo.cc.lucene.LuceneManager;
 import org.ihtsdo.cc.lucene.SearchResult;
@@ -23,7 +24,6 @@ import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.rest.client.TtkRestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public class WBDataStore
 {
@@ -70,11 +70,17 @@ public class WBDataStore
 				{
 					if (LegoGUI.getInstance() != null)
 					{
-						LegoGUI.getInstance().showErrorDialog("No Snomed Database", "The Snomed Database was not found.", 
-								"Please download the file " + System.getProperty("line.separator") + System.getProperty("line.separator")
-								+ "https://csfe.aceworkspace.net/sf/frs/do/downloadFile/projects.veterans_administration_project/frs.lego_editor.1_13_13/frs3751?dl=1"
-								+ System.getProperty("line.separator") + System.getProperty("line.separator") + " and unzip it into " + System.getProperty("line.separator")
-								+ new File("").getAbsolutePath() + System.getProperty("line.separator") + " and then restart the editor.");
+						LegoGUI.getInstance()
+								.showErrorDialog(
+										"No Snomed Database",
+										"The Snomed Database was not found.",
+										"Please download the file "
+												+ System.getProperty("line.separator")
+												+ System.getProperty("line.separator")
+												+ "https://csfe.aceworkspace.net/sf/frs/do/downloadFile/projects.veterans_administration_project/frs.lego_editor.snomed_database_0_56_and_newer/frs4344?dl=1"
+												+ System.getProperty("line.separator") + System.getProperty("line.separator") + " and unzip it into "
+												+ System.getProperty("line.separator") + new File("").getAbsolutePath() + System.getProperty("line.separator")
+												+ " and then restart the editor.");
 					}
 					throw new DataStoreException("Couldn't find the database - had: " + bdbFolderPath.getAbsolutePath());
 					// Ts.setup(Ts.EMBEDDED_BERKELEY_DB_IMPL_CLASS, directory);
@@ -120,69 +126,68 @@ public class WBDataStore
 		logger.info("WB Datastore Shutdown called");
 		if (instance_ != null)
 		{
-    		if (instance_.dataStore_ != null && instance_.dataStore_ instanceof BdbTerminologyStore)
-    		{
-    			try
-    			{
-    				Ts.close();
-    			}
-    			catch (Exception e)
-    			{
-    			    instance_.dataStore_ = null;
-    				logger.error("Error shutting down the DB", e);
-    				throw new DataStoreException("Unexpected error shutting down the DB");
-    			}
-    		}
-    		instance_.dataStore_ = null;
+			if (instance_.dataStore_ != null && instance_.dataStore_ instanceof BdbTerminologyStore)
+			{
+				try
+				{
+					Ts.close();
+				}
+				catch (Exception e)
+				{
+					instance_.dataStore_ = null;
+					logger.error("Error shutting down the DB", e);
+					throw new DataStoreException("Unexpected error shutting down the DB");
+				}
+			}
+			instance_.dataStore_ = null;
 		}
 		logger.info("WB Datastore Shutdown completed");
 	}
-	
+
 	public static TerminologyStoreDI Ts()
 	{
 		return WBDataStore.getInstance().dataStore_;
 	}
-	
+
 	/**
 	 * Returns null if search not available (only works with local DBs) - otherwise, returns the list of descriptions that matched.
 	 */
-	@SuppressWarnings("deprecation")
-    public List<ComponentChroncileBI<?>> descriptionSearch(String query) throws IOException
+	public List<ComponentChroncileBI<?>> descriptionSearch(String query) throws IOException
 	{
-        if (!(dataStore_ instanceof BdbTerminologyStore))
-        {
-            return null;
-        }
-        else
-        {
-            try
-            {
-                BdbTerminologyStore bts = (BdbTerminologyStore)dataStore_;
-                
-                //sort of copied from Termstore.searchLucene(...)
-                //because that API throws away the scores, and returns the results in random order... which is rather useless.
-                Query q = new QueryParser(LuceneManager.version, "desc", new StandardAnalyzer(LuceneManager.version)).parse(query);
-                SearchResult result = LuceneManager.search(q);
+		if (!(dataStore_ instanceof BdbTerminologyStore))
+		{
+			return null;
+		}
+		else
+		{
+			try
+			{
+				BdbTerminologyStore bts = (BdbTerminologyStore) dataStore_;
 
-                if (result.topDocs.totalHits == 0) 
-                {
-                    q = new QueryParser(LuceneManager.version, "desc", new WhitespaceAnalyzer()).parse(query);
-                }
-                
-                result = LuceneManager.search(q);
-                
-                ArrayList<ComponentChroncileBI<?>> resultToReturn = new ArrayList<>(result.topDocs.totalHits);
-                for (int i = 0; i < result.topDocs.totalHits; i++) 
-                {
-                    Document doc  = result.searcher.doc(result.topDocs.scoreDocs[i].doc);
-                    resultToReturn.add(bts.getComponent(Integer.parseInt(doc.get("dnid"))));
-                }
-                return resultToReturn;
-            }
-            catch (NumberFormatException | ParseException e)
-            {
-                throw new IOException("Unexpected error during search", e);
-            }
-        }
+				// sort of copied from Termstore.searchLucene(...)
+				// because that API throws away the scores, and returns the results in random order... which is rather useless.
+				Query q = new QueryParser(Version.LUCENE_40, "desc", new StandardAnalyzer(Version.LUCENE_40)).parse(query);
+				SearchResult result = LuceneManager.search(q);
+
+				if (result.topDocs.totalHits == 0)
+				{
+					q = new QueryParser(Version.LUCENE_40, "desc", new WhitespaceAnalyzer(Version.LUCENE_40)).parse(query);
+				}
+
+				result = LuceneManager.search(q);
+
+				ArrayList<ComponentChroncileBI<?>> resultToReturn = new ArrayList<>(result.topDocs.totalHits);
+				for (int i = 0; i < result.topDocs.totalHits; i++)
+				{
+					Document doc = result.searcher.doc(result.topDocs.scoreDocs[i].doc);
+					resultToReturn.add(bts.getComponent(Integer.parseInt(doc.get("dnid"))));
+				}
+				return resultToReturn;
+			}
+			catch (NumberFormatException | ParseException e)
+			{
+				throw new IOException("Unexpected error during search", e);
+			}
+		}
 	}
 }

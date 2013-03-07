@@ -1,13 +1,16 @@
 Lego Editor Change Log
 2013/03/?? - 0.56
   *  <DB COMPATIBILITY BREAKAGE> Updated to the latest (and final?) version of the schema.  
-		This change makes it impossible to read database created with older editors.  Must export 
-		the Legos using the previously installed version, and re-import.
+		This change makes it impossible to read the Lego database created with older editors.  Must 
+		export the Legos using the previously installed version, and re-import.
   *  Added missing "Drop as Units" option to Timing and Measurement for drag and drop operations. 
   *  Fixed a null pointer that could happen on drag and drop from the SCT Tree View.
   *  Tweaked the sort order of the lego to move the comment to the top.
   *  Cleaned up the the consistency of interval notation vs set notation for displays of 
   		bounds and intervals.
+  *  artf227370 <DB COMPATIBILITY BREAKAGE> Updated the snomed database that is used by the editor.
+  		You will need the new snomed DB - 
+  		https://csfe.aceworkspace.net/sf/frs/do/downloadFile/projects.veterans_administration_project/frs.lego_editor.snomed_database_0_56_and_newer/frs4344?dl=1
   *  artf227498 Change snomed concept drop down boxes to not show the SCTID, also reworked the 
   		concept filter option to not show the ID.
   *  artf227501 Add an option to expand all nodes recursively on each node in both trees.

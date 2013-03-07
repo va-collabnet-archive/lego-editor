@@ -35,9 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class WBUtility
 {
-	// TODO WB BUG - fix after https://csfe.aceworkspace.net/sf/go/artf227370
-	// private static UUID snomedIdType = UUID.fromString("0418a591-f75b-39ad-be2c-3ab849326da9"); //SNOMED integer id
-	private static UUID snomedIdType = UUID.fromString("f7495b58-6630-3499-a44e-2052b5fcf06c"); // user
+	private static UUID snomedIdType = UUID.fromString("0418a591-f75b-39ad-be2c-3ab849326da9"); //SNOMED integer id
 	public static Integer snomedIdTypeNid = null;  //This is public for JUnit test purposes in the sim-api conversions.
 	private static UUID FSN_UUID = UUID.fromString("00791270-77c9-32b6-b34f-d932569bd2bf");
 	private static Integer FSNTypeNid = null;
@@ -116,6 +114,10 @@ public class WBUtility
 			catch (Exception e)
 			{
 				// noop
+			}
+			if (c.getSctid() == null)
+			{
+				logger.warn("Couldn't find SCTID for concept " + c.getDesc() + " " + c.getUuid());
 			}
 		}
 		return c;
