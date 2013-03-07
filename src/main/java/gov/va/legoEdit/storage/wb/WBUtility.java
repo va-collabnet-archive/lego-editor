@@ -25,17 +25,19 @@ import java.util.concurrent.TimeUnit;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionChronicle;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
+import org.ihtsdo.helper.uuid.UuidFactory;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.api.description.DescriptionChronicleBI;
 import org.ihtsdo.tk.api.description.DescriptionVersionBI;
 import org.ihtsdo.tk.api.id.IdBI;
+import org.ihtsdo.tk.binding.TermAux;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WBUtility
 {
-	private static UUID snomedIdType = UUID.fromString("0418a591-f75b-39ad-be2c-3ab849326da9"); //SNOMED integer id
+	private static UUID snomedIdType = TermAux.SNOMED_IDENTIFIER.getUuids()[0]; //SNOMED integer id
 	public static Integer snomedIdTypeNid = null;  //This is public for JUnit test purposes in the sim-api conversions.
 	private static UUID FSN_UUID = UUID.fromString("00791270-77c9-32b6-b34f-d932569bd2bf");
 	private static Integer FSNTypeNid = null;
@@ -117,7 +119,7 @@ public class WBUtility
 			}
 			if (c.getSctid() == null)
 			{
-				logger.warn("Couldn't find SCTID for concept " + c.getDesc() + " " + c.getUuid());
+				logger.info("Couldn't find SCTID for concept " + c.getDesc() + " " + c.getUuid());
 			}
 		}
 		return c;
@@ -151,7 +153,9 @@ public class WBUtility
 			// try looking up by ID
 			try
 			{
-				result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
+				//getConceptVersionFromAlternateId seems broke after the DB update, make the UUID myself instead.
+				result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), UuidFactory.getUuidFromAlternateId(snomedIdType, identifier.trim()));
+				//result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
 				if (result.getUUIDs().size() == 0)
 				{
 					// This is garbage that the WB API invented. Nothing like an undocumented getter which, rather than returning null when the thing
