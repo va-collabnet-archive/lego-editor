@@ -217,6 +217,17 @@ public class ConceptNode implements ConceptLookupCallback
 						(c_.getUuid() == null ? "" : c_.getUuid()) 
 						: c_.getSctid() + ""), true); 
 		cb_.setValue(codeSetComboBoxConcept_);
+		if (c_.getDesc() != null)
+		{
+			Tooltip t = new Tooltip(c_.getDesc());
+			cb_.setTooltip(t);
+			cb_.getEditor().setTooltip(t);
+		}
+		else
+		{
+			cb_.setTooltip(null);
+			cb_.getEditor().setTooltip(null);
+		}
 
 	}
 
