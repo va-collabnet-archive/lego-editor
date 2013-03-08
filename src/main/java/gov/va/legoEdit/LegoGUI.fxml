@@ -21,30 +21,66 @@
         <ToggleButton id="showLegoList" fx:id="showPendingBtn" minWidth="160.0" mnemonicParsing="false" rotate="-90.0" text="Pending Concepts" translateY="555.0" />
       </children>
     </VBox>
-    <SplitPane fx:id="splitPane" dividerPositions="0.35" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+    <SplitPane id="splitPane" fx:id="mainSplitPane" dividerPositions="0.43" focusTraversable="true" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
       <items>
-        <AnchorPane fx:id="splitLeft" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
-          <children>
-            <AnchorPane id="AnchorPane" prefHeight="25.0" prefWidth="295.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <SplitPane fx:id="splitLeft" dividerPositions="0.2, 0.4, 0.6, 0.8" focusTraversable="true" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+          <items>
+            <AnchorPane fx:id="splitPanelLegoLists" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
               <children>
-                <Label fx:id="leftPaneLabel" styleClass="boldLabel" text="Lego Lists" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                <AnchorPane id="AnchorPane" fx:id="legoListsHeader" prefHeight="25.0" prefWidth="369.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <Label id="leftPaneLabel" styleClass="boldLabel" text="Lego Lists" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                  </children>
+                </AnchorPane>
+                <AnchorPane fx:id="legoListsPanel" maxHeight="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
               </children>
             </AnchorPane>
-            <AnchorPane fx:id="splitLeftSct" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+            <AnchorPane id="AnchorPane" fx:id="splitPanelSnomedBrowser" prefHeight="496.0" prefWidth="369.0">
               <children>
-                <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <AnchorPane id="AnchorPane" fx:id="snomedBrowserHeader" prefHeight="25.0" prefWidth="369.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <Label id="leftPaneLabel" styleClass="boldLabel" text="Snomed Browser" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                  </children>
+                </AnchorPane>
+                <BorderPane fx:id="snomedBrowserPanel" maxHeight="1.7976931348623157E308" prefHeight="972.0" prefWidth="369.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
                   <center>
                     <ProgressIndicator maxHeight="100.0" maxWidth="100.0" />
                   </center>
                 </BorderPane>
               </children>
             </AnchorPane>
-            <AnchorPane fx:id="splitLeftAllLegos" prefHeight="160.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
-            <AnchorPane fx:id="splitLeftSctSearch" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
-            <AnchorPane fx:id="splitLeftTemplates" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
-            <AnchorPane fx:id="splitLeftPending" prefHeight="160.0" prefWidth="100.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
-          </children>
-        </AnchorPane>
+            <AnchorPane id="splitPanelLegoLists" fx:id="splitPanelSnomedSearch" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                <AnchorPane id="AnchorPane" fx:id="snomedSearchHeader" prefHeight="25.0" prefWidth="369.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <Label id="leftPaneLabel" styleClass="boldLabel" text="Snomed Search" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                  </children>
+                </AnchorPane>
+                <AnchorPane id="legoListsPanel" fx:id="snomedSearchPanel" maxHeight="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
+              </children>
+            </AnchorPane>
+            <AnchorPane id="splitPanelLegoLists" fx:id="splitPanelTemplates" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                <AnchorPane id="AnchorPane" fx:id="templatesHeader" prefHeight="25.0" prefWidth="369.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <Label id="leftPaneLabel" styleClass="boldLabel" text="Templates" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                  </children>
+                </AnchorPane>
+                <AnchorPane id="legoListsPanel" fx:id="templatesPanel" maxHeight="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
+              </children>
+            </AnchorPane>
+            <AnchorPane id="splitPanelLegoLists" fx:id="splitPanelPendingConcepts" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                <AnchorPane id="AnchorPane" fx:id="pendingConceptsHeader" prefHeight="25.0" prefWidth="369.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <Label id="leftPaneLabel" styleClass="boldLabel" text="Pending Concepts" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                  </children>
+                </AnchorPane>
+                <AnchorPane id="legoListsPanel" fx:id="pendingConceptsPanel" maxHeight="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
+              </children>
+            </AnchorPane>
+          </items>
+        </SplitPane>
         <AnchorPane fx:id="splitRight" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
           <children>
             <TabPane id="tabPane" fx:id="editorTabPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
@@ -53,7 +89,7 @@
                 <MenuButton fx:id="menuRecentSctCodes" mnemonicParsing="false" text="Recent Snomed Codes" />
                 <Button fx:id="buttonUndo" mnemonicParsing="false" text="Undo" />
                 <Button fx:id="buttonRedo" mnemonicParsing="false" text="Redo" />
-                <Region prefHeight="20.0" prefWidth="150.0" HBox.hgrow="ALWAYS"/>
+                <Region prefHeight="20.0" prefWidth="50.0" HBox.hgrow="ALWAYS"/>
                 <StackPane id="StackPane" fx:id="legoInvalidStack">
                   <children>
                     <ImageView fx:id="legoInvalidImageView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">

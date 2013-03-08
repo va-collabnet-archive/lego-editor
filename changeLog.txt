@@ -19,6 +19,7 @@ Lego Editor Change Log
   *  artf227427 Allow snomed search by UUID and SCTID.
   *  artf227500 Allow selecting the Snomed FSN or the Snomed Preferred Synonym when displaying concepts
   		via a user preference.
+  *  artf227506 Allow any combination of left panels to be shown at the same time.
 
 2013/03/01 - 0.55
   *  Improve error handling when snomed DB is missing.

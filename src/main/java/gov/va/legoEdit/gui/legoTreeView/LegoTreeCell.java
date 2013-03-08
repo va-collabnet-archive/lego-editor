@@ -2452,6 +2452,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		mi.setGraphic(Images.COPY.createImageView());
 		cm.getItems().add(mi);
 		
+		mi = new MenuItem("Copy UUID");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				CustomClipboard.set(c.getUuid());
+			}
+		});
+		mi.setGraphic(Images.COPY.createImageView());
+		cm.getItems().add(mi);
+		
 		mi = new MenuItem("Copy SCTID");
 		mi.setOnAction(new EventHandler<ActionEvent>()
 		{

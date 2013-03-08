@@ -47,6 +47,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -63,9 +64,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.effect.Effect;
@@ -79,6 +78,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
@@ -113,6 +113,8 @@ public class LegoGUIController implements Initializable
 	private Tooltip legoInvalidReason = new Tooltip();
 	private ProgressIndicator legoValidationInProgress = new ProgressIndicator();
 	private volatile long dragStartedAt = 0;
+	private double dividerPosition = 0.3;
+	private AnchorPane[] splitPaneOrder;
 	
 	private LegoTabInvalidationListener legoTabInvalidationListener = new LegoTabInvalidationListener();
 	private BooleanBinding enableSaveButton, enableUndoButton, enableRedoButton;
@@ -120,95 +122,133 @@ public class LegoGUIController implements Initializable
 	private static String NONE = "NONE";
 
 	// Copypaste from gui tool
-	@FXML // fx:id="rootPane"
-	private AnchorPane rootPane; // Value injected by FXMLLoader
-	@FXML //  fx:id="buttonRedo"
+	@FXML// fx:id="buttonRedo"
 	private Button buttonRedo; // Value injected by FXMLLoader
-	@FXML // fx:id="buttonUndo"
-	private Button buttonUndo; // Value injected by FXMLLoader
-	@FXML // fx:id="buttonSaveLego"
+	@FXML// fx:id="buttonSaveLego"
 	private Button buttonSaveLego; // Value injected by FXMLLoader
-	@FXML // fx:id="editorTabPane"
+	@FXML// fx:id="buttonUndo"
+	private Button buttonUndo; // Value injected by FXMLLoader
+	@FXML// fx:id="editorTabPane"
 	private TabPane editorTabPane; // Value injected by FXMLLoader
-	@FXML // fx:id="leftButtons"
-	private AnchorPane leftButtons; // Value injected by FXMLLoader
-	@FXML // fx:id="leftPaneLabel"
-	private Label leftPaneLabel; // Value injected by FXMLLoader
-	@FXML // fx:id="menu"
-	private MenuBar menu; // Value injected by FXMLLoader
-	@FXML // fx:id="menuFile"
-	private Menu menuFile; // Value injected by FXMLLoader
-	@FXML // fx:id="menuFileExit"
-	private MenuItem menuFileExit; // Value injected by FXMLLoader
-	@FXML // fx:id="menuFileImport"
-	private MenuItem menuFileImport; // Value injected by FXMLLoader
-	@FXML // fx:id="menuFileCreateLego"
-	private MenuItem menuFileCreateLego; // Value injected by FXMLLoader
-	@FXML // fx:id="menuFileExportLegoLists"
-	private MenuItem menuFileExportLegoLists; // Value injected by FXMLLoader
-	@FXML // fx:id="menuEdit"
-	private Menu menuEdit; // Value injected by FXMLLoader
-	@FXML // fx:id="menuEditPreferences"
-	private MenuItem menuEditPreferences; // Value injected by FXMLLoader
-	@FXML // fx:id="menuEditAddPending"
-	private MenuItem menuEditAddPending; // Value injected by FXMLLoader
-	@FXML // fx:id="menuHelp"
-	private Menu menuHelp; // Value injected by FXMLLoader
-	@FXML // fx:id="menuHelpAbout"
-	private MenuItem menuHelpAbout; // Value injected by FXMLLoader
-	@FXML // fx:id="menuRecentSctCodes"
-	private MenuButton menuRecentSctCodes; // Value injected by FXMLLoader
-	@FXML // fx:id="showAllLegoListBtn"
-	private ToggleButton showAllLegoListBtn; // Value injected by FXMLLoader
-	@FXML // fx:id="showSnomedBtn"
-	private ToggleButton showSnomedBtn; // Value injected by FXMLLoader
-	@FXML // fx:id="showSnomedSearchBtn"
-	private ToggleButton showSnomedSearchBtn; // Value injected by FXMLLoader
-	@FXML // fx:id="showTemplatesBtn"
-	private ToggleButton showTemplatesBtn; // Value injected by FXMLLoader
-	@FXML // fx:id="showTemplatesBtn"
-	private ToggleButton showPendingBtn; // Value injected by FXMLLoader
-	@FXML // fx:id="splitLeft"
-	private AnchorPane splitLeft; // Value injected by FXMLLoader
-	@FXML // fx:id="splitLeftAllLegos"
-	private AnchorPane splitLeftAllLegos; // Value injected by FXMLLoader
-	@FXML // fx:id="splitLeftSctSearch"
-	private AnchorPane splitLeftSctSearch; // Value injected by FXMLLoader
-	@FXML // fx:id="splitLeftSct"
-	private AnchorPane splitLeftSct; // Value injected by FXMLLoader
-	@FXML // fx:id="splitLeftTemplates"
-	private AnchorPane splitLeftTemplates; // Value injected by FXMLLoader
-	@FXML // fx:id="splitLeftPending"
-	private AnchorPane splitLeftPending; // Value injected by FXMLLoader
-	@FXML // fx:id="splitPane"
-	private SplitPane splitPane; // Value injected by FXMLLoader
-	@FXML // fx:id="splitRight"
-	private AnchorPane splitRight; // Value injected by FXMLLoader
-	@FXML //  fx:id="legoInvalidImageView"
+	@FXML// fx:id="legoInvalidImageView"
 	private ImageView legoInvalidImageView; // Value injected by FXMLLoader
-	@FXML //  fx:id="legoInvalidStack"
+	@FXML// fx:id="legoInvalidStack"
 	private StackPane legoInvalidStack; // Value injected by FXMLLoader
+	@FXML// fx:id="legoListsPanel"
+	private AnchorPane legoListsPanel; // Value injected by FXMLLoader
+	@FXML// fx:id="mainSplitPane"
+	private SplitPane mainSplitPane; // Value injected by FXMLLoader
+	@FXML// fx:id="menu"
+	private MenuBar menu; // Value injected by FXMLLoader
+	@FXML// fx:id="menuEdit"
+	private Menu menuEdit; // Value injected by FXMLLoader
+	@FXML// fx:id="menuEditAddPending"
+	private MenuItem menuEditAddPending; // Value injected by FXMLLoader
+	@FXML// fx:id="menuEditPreferences"
+	private MenuItem menuEditPreferences; // Value injected by FXMLLoader
+	@FXML// fx:id="menuFile"
+	private Menu menuFile; // Value injected by FXMLLoader
+	@FXML// fx:id="menuFileCreateLego"
+	private MenuItem menuFileCreateLego; // Value injected by FXMLLoader
+	@FXML// fx:id="menuFileExit"
+	private MenuItem menuFileExit; // Value injected by FXMLLoader
+	@FXML// fx:id="menuFileExportLegoLists"
+	private MenuItem menuFileExportLegoLists; // Value injected by FXMLLoader
+	@FXML// fx:id="menuFileImport"
+	private MenuItem menuFileImport; // Value injected by FXMLLoader
+	@FXML// fx:id="menuHelp"
+	private Menu menuHelp; // Value injected by FXMLLoader
+	@FXML// fx:id="menuHelpAbout"
+	private MenuItem menuHelpAbout; // Value injected by FXMLLoader
+	@FXML// fx:id="menuRecentSctCodes"
+	private MenuButton menuRecentSctCodes; // Value injected by FXMLLoader
+	@FXML// fx:id="pendingConceptsPanel"
+	private AnchorPane pendingConceptsPanel; // Value injected by FXMLLoader
+	@FXML// fx:id="rootPane"
+	private AnchorPane rootPane; // Value injected by FXMLLoader
+	@FXML// fx:id="showAllLegoListBtn"
+	private ToggleButton showAllLegoListBtn; // Value injected by FXMLLoader
+	@FXML// fx:id="showPendingBtn"
+	private ToggleButton showPendingBtn; // Value injected by FXMLLoader
+	@FXML// fx:id="showSnomedBtn"
+	private ToggleButton showSnomedBtn; // Value injected by FXMLLoader
+	@FXML// fx:id="showSnomedSearchBtn"
+	private ToggleButton showSnomedSearchBtn; // Value injected by FXMLLoader
+	@FXML// fx:id="showTemplatesBtn"
+	private ToggleButton showTemplatesBtn; // Value injected by FXMLLoader
+	@FXML// fx:id="snomedBrowserPanel"
+	private BorderPane snomedBrowserPanel; // Value injected by FXMLLoader
+	@FXML// fx:id="snomedSearchPanel"
+	private AnchorPane snomedSearchPanel; // Value injected by FXMLLoader
+	@FXML// fx:id="splitLeft"
+	private SplitPane splitLeft; // Value injected by FXMLLoader
+	@FXML// fx:id="splitPanelLegoLists"
+	private AnchorPane splitPanelLegoLists; // Value injected by FXMLLoader
+	@FXML// fx:id="splitPanelLegoSearch"
+	private AnchorPane splitPanelSnomedSearch; // Value injected by FXMLLoader
+	@FXML// fx:id="splitPanelPendingConcepts"
+	private AnchorPane splitPanelPendingConcepts; // Value injected by FXMLLoader
+	@FXML// fx:id="splitPanelSnomedSearch"
+	private AnchorPane splitPanelSnomedBrowser; // Value injected by FXMLLoader
+	@FXML// fx:id="splitPanelTemplates"
+	private AnchorPane splitPanelTemplates; // Value injected by FXMLLoader
+	@FXML// fx:id="splitRight"
+	private AnchorPane splitRight; // Value injected by FXMLLoader
+	@FXML// fx:id="templatesPanel"
+	private AnchorPane templatesPanel; // Value injected by FXMLLoader
+	@FXML// fx:id="pendingConceptsHeader"
+	private AnchorPane pendingConceptsHeader; // Value injected by FXMLLoader
+	@FXML// fx:id="snomedSearchHeader"
+	private AnchorPane snomedSearchHeader; // Value injected by FXMLLoader
+	@FXML// fx:id="templatesHeader"
+	private AnchorPane templatesHeader; // Value injected by FXMLLoader
+	@FXML// fx:id="legoListsHeader"
+	private AnchorPane legoListsHeader; // Value injected by FXMLLoader
+	@FXML// fx:id="snomedBrowserHeader"
+	private AnchorPane snomedBrowserHeader; // Value injected by FXMLLoader
 
 	@Override
 	// This method is called by the FXMLLoader when initialization is complete
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources)
 	{
 		// Copy paste from gui tool
+		assert buttonRedo != null : "fx:id=\"buttonRedo\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert buttonSaveLego != null : "fx:id=\"buttonSaveLego\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert buttonUndo != null : "fx:id=\"buttonUndo\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert editorTabPane != null : "fx:id=\"editorTabPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-		assert leftButtons != null : "fx:id=\"leftButtons\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-		assert leftPaneLabel != null : "fx:id=\"leftPaneLabel\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert legoInvalidImageView != null : "fx:id=\"legoInvalidImageView\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert legoInvalidStack != null : "fx:id=\"legoInvalidStack\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert legoListsPanel != null : "fx:id=\"legoListsPanel\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert mainSplitPane != null : "fx:id=\"mainSplitPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menu != null : "fx:id=\"menu\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuEdit != null : "fx:id=\"menuEdit\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuEditAddPending != null : "fx:id=\"menuEditAddPending\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuEditPreferences != null : "fx:id=\"menuEditPreferences\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFile != null : "fx:id=\"menuFile\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuFileCreateLego != null : "fx:id=\"menuFileCreateLego\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFileExit != null : "fx:id=\"menuFileExit\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuFileExportLegoLists != null : "fx:id=\"menuFileExportLegoLists\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFileImport != null : "fx:id=\"menuFileImport\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-		assert menuEdit != null : "fx:id=\"menuView\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuHelp != null : "fx:id=\"menuHelp\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuHelpAbout != null : "fx:id=\"menuHelpAbout\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuRecentSctCodes != null : "fx:id=\"menuRecentSctCodes\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert pendingConceptsPanel != null : "fx:id=\"pendingConceptsPanel\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert rootPane != null : "fx:id=\"rootPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert showAllLegoListBtn != null : "fx:id=\"showAllLegoListBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert showPendingBtn != null : "fx:id=\"showPendingBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert showSnomedBtn != null : "fx:id=\"showSnomedBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert showSnomedSearchBtn != null : "fx:id=\"showSnomedSearchBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert showTemplatesBtn != null : "fx:id=\"showTemplatesBtn\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert snomedBrowserPanel != null : "fx:id=\"snomedBrowserPanel\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert snomedSearchPanel != null : "fx:id=\"snomedSearchPanel\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert splitLeft != null : "fx:id=\"splitLeft\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-		assert splitLeftAllLegos != null : "fx:id=\"splitLeftAllLegos\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-		assert splitLeftSct != null : "fx:id=\"splitLeftSct\" was not injected: check your FXML file 'LegoGUI.fxml'.";
-		assert splitPane != null : "fx:id=\"splitPane\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert splitPanelLegoLists != null : "fx:id=\"splitPanelLegoLists\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert splitPanelSnomedSearch != null : "fx:id=\"splitPanelLegoSearch\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert splitPanelPendingConcepts != null : "fx:id=\"splitPanelPendingConcepts\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert splitPanelSnomedBrowser != null : "fx:id=\"splitPanelSnomedSearch\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert splitPanelTemplates != null : "fx:id=\"splitPanelTemplates\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert splitRight != null : "fx:id=\"splitRight\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert templatesPanel != null : "fx:id=\"templatesPanel\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 
 		// initialize your logic here: all @FXML variables will have been injected
 	}
@@ -219,16 +259,16 @@ public class LegoGUIController implements Initializable
 	protected void finishInit()
 	{
 		lfpc = LegoFilterPaneController.init();
-		splitLeftAllLegos.getChildren().add(lfpc.getBorderPane());
+		legoListsPanel.getChildren().add(lfpc.getBorderPane());
 
 		sspc = SnomedSearchPaneController.init();
-		splitLeftSctSearch.getChildren().add(sspc.getBorderPane());
+		snomedSearchPanel.getChildren().add(sspc.getBorderPane());
 
 		tpc = TemplatesPaneController.init();
-		splitLeftTemplates.getChildren().add(tpc.getBorderPane());
+		templatesPanel.getChildren().add(tpc.getBorderPane());
 		
 		pcpc = PendingConceptsPaneController.init();
-		splitLeftPending.getChildren().add(pcpc.getBorderPane());
+		pendingConceptsPanel.getChildren().add(pcpc.getBorderPane());
 		
 		legoInvalidImageView.setVisible(false);
 		Tooltip.install(legoInvalidImageView, legoInvalidReason);
@@ -279,125 +319,74 @@ public class LegoGUIController implements Initializable
 				legoTabInvalidationListener.schemaValidate((LegoTab) newTab);
 			}
 		});
-
-		final ToggleGroup tg = new ToggleGroup();
-		tg.selectedToggleProperty().addListener(new ChangeListener<Toggle>()
-		{
-			double dividerPosition = 0.3;
-
-			public void changed(ObservableValue<? extends Toggle> ov, Toggle toggle, Toggle new_toggle)
-			{
-				if (new_toggle == null)
-				{
-					dividerPosition = splitPane.getDividerPositions()[0];
-					splitPane.getItems().remove(splitLeft);
-				}
-				else if (!splitPane.getItems().contains(splitLeft))
-				{
-					splitPane.getItems().add(0, splitLeft);
-					splitPane.setDividerPosition(0, dividerPosition);
-				}
-			}
-		});
+		
+		//The fxml file puts all 5 views into the split pane.  Remove all but the lego list for starters.
+		splitLeft.getItems().remove(splitPanelSnomedBrowser);
+		splitLeft.getItems().remove(splitPanelSnomedSearch);
+		splitLeft.getItems().remove(splitPanelTemplates);
+		splitLeft.getItems().remove(splitPanelPendingConcepts);
+		
+		splitPaneOrder = new AnchorPane[] {splitPanelLegoLists, splitPanelSnomedBrowser, splitPanelSnomedSearch, splitPanelTemplates, splitPanelPendingConcepts};
+		
+		createPanelCloseButton(legoListsHeader, showAllLegoListBtn, splitPanelLegoLists);
+		createPanelCloseButton(snomedBrowserHeader, showSnomedBtn, splitPanelSnomedBrowser);
+		createPanelCloseButton(snomedSearchHeader, showSnomedSearchBtn, splitPanelSnomedSearch);
+		createPanelCloseButton(templatesHeader, showTemplatesBtn, splitPanelTemplates);
+		createPanelCloseButton(pendingConceptsHeader, showPendingBtn, splitPanelPendingConcepts);
 
 		showAllLegoListBtn.setGraphic(Images.LEGO_LIST_VIEW.createImageView());
 		showAllLegoListBtn.setTooltip(new Tooltip("Show all Lego Lists in the system"));
-		showAllLegoListBtn.setToggleGroup(tg);
 		showAllLegoListBtn.setSelected(true);
 		showAllLegoListBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent e)
 			{
-				if (showAllLegoListBtn.isSelected())
-				{
-					splitLeftSct.setVisible(false);
-					splitLeftSctSearch.setVisible(false);
-					splitLeftTemplates.setVisible(false);
-					splitLeftPending.setVisible(false);
-					leftPaneLabel.setText("Lego Lists");
-					splitLeftAllLegos.setVisible(true);
-				}
+				updatePanels(showAllLegoListBtn, splitPanelLegoLists);
 			}
 		});
 
 		showSnomedBtn.setGraphic(Images.ROOT.createImageView());
 		showSnomedBtn.setTooltip(new Tooltip("Show the Snomed Viewer"));
-		showSnomedBtn.setToggleGroup(tg);
 		showSnomedBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent e)
 			{
-				if (showSnomedBtn.isSelected())
-				{
-					splitLeftAllLegos.setVisible(false);
-					splitLeftSctSearch.setVisible(false);
-					splitLeftTemplates.setVisible(false);
-					splitLeftPending.setVisible(false);
-					leftPaneLabel.setText("Snomed Browser");
-					splitLeftSct.setVisible(true);
-				}
+				updatePanels(showSnomedBtn, splitPanelSnomedBrowser);
 			}
 		});
 
 		showSnomedSearchBtn.setGraphic(Images.LEGO_SEARCH.createImageView());
 		showSnomedSearchBtn.setTooltip(new Tooltip("Show the Snomed Search Panel"));
-		showSnomedSearchBtn.setToggleGroup(tg);
 		showSnomedSearchBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent e)
 			{
-				if (showSnomedSearchBtn.isSelected())
-				{
-					splitLeftAllLegos.setVisible(false);
-					splitLeftSct.setVisible(false);
-					splitLeftTemplates.setVisible(false);
-					splitLeftPending.setVisible(false);
-					leftPaneLabel.setText("Snomed Search");
-					splitLeftSctSearch.setVisible(true);
-				}
+				updatePanels(showSnomedSearchBtn, splitPanelSnomedSearch);
 			}
 		});
 
 		showTemplatesBtn.setGraphic(Images.TEMPLATE.createImageView());
 		showTemplatesBtn.setTooltip(new Tooltip("Show the Templates List"));
-		showTemplatesBtn.setToggleGroup(tg);
 		showTemplatesBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent e)
 			{
-				if (showTemplatesBtn.isSelected())
-				{
-					splitLeftAllLegos.setVisible(false);
-					splitLeftSct.setVisible(false);
-					splitLeftSctSearch.setVisible(false);
-					splitLeftPending.setVisible(false);
-					leftPaneLabel.setText("Templates");
-					splitLeftTemplates.setVisible(true);
-				}
+				updatePanels(showTemplatesBtn, splitPanelTemplates);
 			}
 		});
 		
 		showPendingBtn.setGraphic(Images.CONCEPT_VIEW.createImageView());
 		showPendingBtn.setTooltip(new Tooltip("Show the Pending Concepts List"));
-		showPendingBtn.setToggleGroup(tg);
 		showPendingBtn.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent e)
 			{
-				if (showPendingBtn.isSelected())
-				{
-					splitLeftAllLegos.setVisible(false);
-					splitLeftSct.setVisible(false);
-					splitLeftSctSearch.setVisible(false);
-					splitLeftTemplates.setVisible(false);
-					leftPaneLabel.setText("Pending Concepts");
-					splitLeftPending.setVisible(true);
-				}
+				updatePanels(showPendingBtn, splitPanelPendingConcepts);
 			}
 		});
 		
@@ -535,6 +524,81 @@ public class LegoGUIController implements Initializable
 					logger.error("Unexpected error saving Lego", e);
 					LegoGUI.getInstance().showErrorDialog("Error Saving Changes", "Unexpected error storing lego", e.toString());
 				}
+			}
+		});
+	}
+	
+	private void updatePanels(ToggleButton button, AnchorPane splitPanePanel)
+	{
+		if (button.isSelected())
+		{
+			if (!splitLeft.getItems().contains(splitPanePanel))
+			{
+				//always put the in the same order as the buttons
+				int insertPosition = 0;
+				for (int i = 0; i < splitPaneOrder.length; i++)
+				{
+					if (splitPaneOrder[i] == splitPanePanel)
+					{
+						insertPosition = i;
+						break;
+					}
+				}
+				for (int i = insertPosition - 1; i >= 0; i--)
+				{
+					if (!splitLeft.getItems().contains(splitPaneOrder[i]))
+					{
+						insertPosition--;
+					}
+				}
+				
+				splitLeft.getItems().add(insertPosition, splitPanePanel);
+			}
+			if (mainSplitPane.getItems().size() == 1)
+			{
+				mainSplitPane.getItems().add(0, splitLeft);
+				mainSplitPane.setDividerPosition(0, dividerPosition);
+			}
+		}
+		else
+		{
+			if (splitLeft.getItems().contains(splitPanePanel))
+			{
+				splitLeft.getItems().remove(splitPanePanel);
+			}
+			if (splitLeft.getItems().size() == 0)
+			{
+				dividerPosition = mainSplitPane.getDividerPositions()[0];
+				mainSplitPane.getItems().remove(splitLeft);
+			}
+		}
+		if (splitLeft.getItems().size() > 1)
+		{
+			double size = 1.0 / (double)splitLeft.getItems().size();
+			for (int i = 0; i < splitLeft.getItems().size() - 1; i++)
+			{
+				splitLeft.setDividerPosition(i, (size  * (double)(i + 1)));
+			}
+		}
+	}
+	
+	private void createPanelCloseButton(AnchorPane headerPanel, final ToggleButton button, final AnchorPane splitPanePanel)
+	{
+		StackPane closeBtn = new StackPane();
+		closeBtn.getStyleClass().setAll(new String[] { "tab-close-button" });
+		closeBtn.setStyle("-fx-cursor:hand;");
+		closeBtn.setPadding(new Insets(10, 10, 10, 10));
+		AnchorPane.setTopAnchor(closeBtn, 0.0);
+		AnchorPane.setRightAnchor(closeBtn, 5.0);
+		headerPanel.getChildren().add(closeBtn);
+
+		closeBtn.setOnMouseReleased(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent paramT)
+			{
+				button.setSelected(false);
+				updatePanels(button, splitPanePanel);
 			}
 		});
 	}
@@ -908,8 +972,7 @@ public class LegoGUIController implements Initializable
 								AnchorPane.setBottomAnchor(sctTree, 0.0);
 								AnchorPane.setLeftAnchor(sctTree, 0.0);
 								AnchorPane.setRightAnchor(sctTree, 0.0);
-								splitLeftSct.getChildren().remove(0);
-								splitLeftSct.getChildren().add(sctTree);
+								snomedBrowserPanel.setCenter(sctTree);
 							}
 							catch (Exception e)
 							{
