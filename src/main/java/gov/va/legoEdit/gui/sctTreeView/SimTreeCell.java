@@ -150,7 +150,7 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
                     setGraphic(graphicBorderPane);
                 }
 
-                setText(WBUtility.getFSN(t.getConcept()));
+                setText(WBUtility.getDescription(t.getConcept()));
 
                 return;
             }
@@ -185,7 +185,7 @@ public final class SimTreeCell extends TreeCell<FxTaxonomyReferenceWithConcept> 
             }
             else
             {
-                setText(WBUtility.getFSN(t.getConcept()));
+                setText(WBUtility.getDescription(t.getConcept()));
             }
 
             BorderPane graphicBorderPane = new BorderPane();

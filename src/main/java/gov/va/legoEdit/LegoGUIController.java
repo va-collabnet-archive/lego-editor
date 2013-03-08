@@ -1164,6 +1164,11 @@ public class LegoGUIController implements Initializable
 	{
 		return lfpc;
 	}
+	
+	public void rebuildSCTTree()
+	{
+		sctTree.rebuild();
+	}
 
 	private void shutdown()
 	{

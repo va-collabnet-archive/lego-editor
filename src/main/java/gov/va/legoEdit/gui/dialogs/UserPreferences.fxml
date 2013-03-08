@@ -10,7 +10,7 @@
 <?import javafx.scene.text.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="214.0" prefWidth="570.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.UserPreferencesController">
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="243.0" prefWidth="570.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.UserPreferencesController">
   <children>
     <Label alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Stamp Properties" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
       <font>
@@ -34,12 +34,22 @@
             </FXCollections>
           </items>
         </ChoiceBox>
+        <Label styleClass="boldLabel" text="Description Type" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <ChoiceBox fx:id="useFSNDescription" GridPane.columnIndex="1" GridPane.rowIndex="4">
+          <items>
+            <FXCollections fx:factory="observableArrayList">
+              <String fx:value="Display Fully Specified Name" />
+              <String fx:value="Display Synonym Preferred" />
+            </FXCollections>
+          </items>
+        </ChoiceBox>
       </children>
       <columnConstraints>
         <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="160.0" minWidth="160.0" prefWidth="160.0" />
         <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="392.0" />
       </columnConstraints>
       <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />

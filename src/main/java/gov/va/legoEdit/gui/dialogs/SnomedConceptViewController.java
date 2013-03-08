@@ -77,7 +77,7 @@ public class SnomedConceptViewController implements Initializable
         FxConceptAttributesVersion cav = ca.getVersions().get(ca.getVersions().size() - 1); 
         conceptDefined.setText(cav.isDefined() + "");
         conceptStatus.setText(cav.getStatusReference().getText());
-        fsnLabel.setText(WBUtility.getFSN(concept));
+        fsnLabel.setText(WBUtility.getDescription(concept));
         CopyableLabel.addCopyMenu(fsnLabel);
         uuid.setText(concept.getPrimordialUuid().toString());
         CopyableLabel.addCopyMenu(uuid);

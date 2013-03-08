@@ -110,7 +110,7 @@ public class SnomedSearchPaneController implements Initializable
 							VBox box = new VBox();
 							box.setFillWidth(true);
 							final ConceptVersionBI wbConcept = item.getConcept();
-							String preferredText = (wbConcept != null ? WBUtility.getFSN(wbConcept) : "error - see log");
+							String preferredText = (wbConcept != null ? WBUtility.getDescription(wbConcept) : "error - see log");
 							Label concept = new Label(preferredText);
 							concept.getStyleClass().add("boldLabel");
 							box.getChildren().add(concept);

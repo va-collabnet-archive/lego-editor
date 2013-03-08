@@ -1,5 +1,6 @@
 package gov.va.legoEdit.storage.wb;
 
+import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.model.PendingConcepts;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
@@ -11,9 +12,11 @@ import gov.va.legoEdit.model.schemaModel.Measurement;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Type;
+import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.util.Utility;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -25,12 +28,16 @@ import java.util.concurrent.TimeUnit;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionChronicle;
 import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
+import org.ihtsdo.fxmodel.concept.component.refex.FxRefexChronicle;
+import org.ihtsdo.fxmodel.concept.component.refex.type_comp.FxRefexCompVersion;
 import org.ihtsdo.helper.uuid.UuidFactory;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.api.description.DescriptionChronicleBI;
 import org.ihtsdo.tk.api.description.DescriptionVersionBI;
 import org.ihtsdo.tk.api.id.IdBI;
+import org.ihtsdo.tk.api.refex.RefexChronicleBI;
+import org.ihtsdo.tk.binding.SnomedMetadataRf2;
 import org.ihtsdo.tk.binding.TermAux;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +46,16 @@ public class WBUtility
 {
 	private static UUID snomedIdType = TermAux.SNOMED_IDENTIFIER.getUuids()[0]; //SNOMED integer id
 	public static Integer snomedIdTypeNid = null;  //This is public for JUnit test purposes in the sim-api conversions.
-	private static UUID FSN_UUID = UUID.fromString("00791270-77c9-32b6-b34f-d932569bd2bf");
+	private static UUID FSN_UUID = SnomedMetadataRf2.FULLY_SPECIFIED_NAME_RF2.getUuids()[0];
 	private static Integer FSNTypeNid = null;
+	private static UUID PREFERRED_UUID = SnomedMetadataRf2.PREFERRED_RF2.getUuids()[0];
+	private static Integer preferredNid = null;
+	private static UUID SYNONYM_UUID = SnomedMetadataRf2.SYNONYM_RF2.getUuids()[0];
+	private static Integer synonymNid = null;
 	private static UUID ACTIVE_VALUE_UUID = UUID.fromString("d12702ee-c37f-385f-a070-61d56d4d0f1f");
 	private static Integer ActiveValueTypeNid = null;
+	
+	public static UserPreferences up = LegoGUIModel.getInstance().getUserPreferences();
 
 	private static Logger logger = LoggerFactory.getLogger(Utility.class);
 
@@ -100,7 +113,7 @@ public class WBUtility
 		if (concept != null && concept.getUUIDs() != null && concept.getUUIDs().size() > 0)
 		{
 			c = new Concept();
-			c.setDesc(getFSN(concept));
+			c.setDesc(getDescription(concept));
 			c.setUuid(concept.getUUIDs().get(0).toString());
 			try
 			{
@@ -204,6 +217,40 @@ public class WBUtility
 		}
 		return FSNTypeNid;
 	}
+	
+	private static int getPreferredTypeNid()
+	{
+		if (preferredNid == null)
+		{
+			try
+			{
+				preferredNid = WBDataStore.Ts().getNidForUuids(PREFERRED_UUID);
+			}
+			catch (IOException e)
+			{
+				logger.error("Couldn't find nid for Preferred UUID", e);
+				preferredNid = -1;
+			}
+		}
+		return preferredNid;
+	}
+	
+	private static int getSynonymTypeNid()
+	{
+		if (synonymNid == null)
+		{
+			try
+			{
+				synonymNid = WBDataStore.Ts().getNidForUuids(SYNONYM_UUID);
+			}
+			catch (IOException e)
+			{
+				logger.error("Couldn't find nid for synonymNid UUID", e);
+				synonymNid = -1;
+			}
+		}
+		return synonymNid;
+	}
 
 	private static int getActiveValueTypeNid()
 	{
@@ -225,8 +272,10 @@ public class WBUtility
 	/**
 	 * Note, this method isn't smart enough to work with multiple versions properly.... assumes you only pass in a concept with current values
 	 */
-	public static String getFSN(ConceptVersionBI concept)
+	public static String getDescription(ConceptVersionBI concept)
 	{
+		String fsn = null;
+		String preferred = null;
 		String bestFound = null;
 		try
 		{
@@ -240,7 +289,33 @@ public class WBUtility
 					{
 						if (descVer.getStatusNid() == getActiveValueTypeNid())
 						{
-							return descVer.getText();
+							if (up.getUseFSN())
+							{
+								return descVer.getText();
+							}
+							else
+							{
+								fsn = descVer.getText();
+							}
+							
+						}
+						else
+						{
+							bestFound = descVer.getText();
+						}
+					}
+					else if (descVer.getTypeNid() == getSynonymTypeNid() && isPreferred(descVer.getAnnotations()))
+					{
+						if (descVer.getStatusNid() == getActiveValueTypeNid())
+						{
+							if (!up.getUseFSN())
+							{
+								return descVer.getText();
+							}
+							else
+							{
+								preferred = descVer.getText();
+							}
 						}
 						else
 						{
@@ -254,16 +329,20 @@ public class WBUtility
 		{
 			// noop
 		}
-		return (bestFound == null ? concept.toUserString() : bestFound);
+		//If we get here, we didn't find what they were looking for. Pick something....
+		return (fsn != null ? fsn : (preferred != null ? preferred : (bestFound != null ? bestFound : concept.toUserString())));
 	}
 
-	public static String getFSN(FxConcept concept)
+	public static String getDescription(FxConcept concept)
 	{
 		// Go hunting for a FSN
 		if (concept.getDescriptions() == null)
 		{
 			return concept.getConceptReference().getText();
 		}
+		
+		String fsn = null;
+		String preferred = null;
 		String bestFound = null;
 		for (FxDescriptionChronicle d : concept.getDescriptions())
 		{
@@ -272,7 +351,32 @@ public class WBUtility
 			{
 				if (dv.getStatusReference().getUuid().equals(ACTIVE_VALUE_UUID))
 				{
-					return dv.getText();
+					if (up.getUseFSN())
+					{
+						return dv.getText();
+					}
+					else
+					{
+						fsn = dv.getText();
+					}
+				}
+				else
+				{
+					bestFound = dv.getText();
+				}
+			}
+			else if (dv.getTypeReference().getUuid().equals(SYNONYM_UUID))
+			{
+				if (dv.getStatusReference().getUuid().equals(ACTIVE_VALUE_UUID) && isPreferred(dv.getAnnotations()))
+				{
+					if (!up.getUseFSN())
+					{
+						return dv.getText();
+					}
+					else
+					{
+						preferred = dv.getText();
+					}
 				}
 				else
 				{
@@ -280,7 +384,35 @@ public class WBUtility
 				}
 			}
 		}
-		return (bestFound == null ? concept.getConceptReference().getText() : bestFound);
+		//If we get here, we didn't find what they were looking for. Pick something....
+		return (fsn != null ? fsn : (preferred != null ? preferred : (bestFound != null ? bestFound : concept.getConceptReference().getText())));
+	}
+	
+	private static boolean isPreferred(List<FxRefexChronicle<?, ?>> annotations)
+	{
+		for (FxRefexChronicle<?, ?> frc : annotations)
+		{
+			for (Object version : frc.getVersions())
+			{
+				if (version instanceof FxRefexCompVersion && ((FxRefexCompVersion<?,?>)version).getComp1Ref().getUuid().equals(PREFERRED_UUID))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private static boolean isPreferred(Collection<? extends RefexChronicleBI<?>> collection)
+	{
+		for (RefexChronicleBI<?> rc : collection)
+		{
+			if (rc.getRefexNid() == getPreferredTypeNid());
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

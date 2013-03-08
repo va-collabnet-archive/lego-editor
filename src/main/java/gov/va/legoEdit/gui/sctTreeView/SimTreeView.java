@@ -95,6 +95,15 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 	}
 	
 	/**
+	 * rebuild the tree from the root down.  Useful when the requested description type changes.
+	 */
+	public void rebuild()
+	{
+		getRoot().getChildren().get(0).getChildren().clear();
+		((SimTreeItem)getRoot().getChildren().get(0)).addChildren();
+	}
+	
+	/**
 	 * Tell the sim tree to stop whatever threading operations it has running, as the application is exiting.
 	 */
 	public static void shutdown()

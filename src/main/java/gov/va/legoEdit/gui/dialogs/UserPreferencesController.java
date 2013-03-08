@@ -43,6 +43,8 @@ public class UserPreferencesController implements Initializable
 	private Button okButton; // Value injected by FXMLLoader
 	@FXML// fx:id="summaryView"
 	private ChoiceBox<String> summaryView; // Value injected by FXMLLoader
+	@FXML// fx:id="useFSNDescription"
+	private ChoiceBox<String> useFSNDescription; // Value injected by FXMLLoader
 
 	private UserPreferences up;
 	private BooleanProperty authorValid = new SimpleBooleanProperty(true);
@@ -69,6 +71,7 @@ public class UserPreferencesController implements Initializable
 		module.setText(up.getModule());
 		path.setText(up.getPath());
 		summaryView.getSelectionModel().select(up.getShowSummary() ? 0 : 1);
+		useFSNDescription.getSelectionModel().select(up.getUseFSN() ? 0 : 1);
 
 		formValid = new BooleanBinding()
 		{
@@ -88,9 +91,12 @@ public class UserPreferencesController implements Initializable
 			@Override
 			public void handle(ActionEvent event)
 			{
+				//prep for next display
 				author.setText(up.getAuthor());
 				module.setText(up.getModule());
 				path.setText(up.getPath());
+				summaryView.getSelectionModel().select(up.getShowSummary() ? 0 : 1);
+				useFSNDescription.getSelectionModel().select(up.getUseFSN() ? 0 : 1);
 				((Stage) rootPane.getScene().getWindow()).close();
 			}
 		});
@@ -104,6 +110,7 @@ public class UserPreferencesController implements Initializable
 				up.setModule(module.getText());
 				up.setPath(path.getText());
 				up.setShowSummary(summaryView.getSelectionModel().getSelectedIndex() == 0 ? true : false);
+				up.setUseFSN(useFSNDescription.getSelectionModel().getSelectedIndex() == 0 ? true : false);
 				try
 				{
 					UserPrefsXMLUtils.writeUserPreferences(up);
@@ -113,7 +120,6 @@ public class UserPreferencesController implements Initializable
 					logger.error("Unexpected error storing preferences", e);
 					LegoGUI.getInstance().showErrorDialog("Error storing preferences", "Failed to store the user preferences", e.toString());
 				}
-
 				((Stage) rootPane.getScene().getWindow()).close();
 			}
 		});

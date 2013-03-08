@@ -235,7 +235,7 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
         }
 
         if (getValue().conceptProperty().get() != null) {
-            return WBUtility.getFSN(getValue().conceptProperty().get());
+            return WBUtility.getDescription(getValue().conceptProperty().get());
         }
 
         return "root";

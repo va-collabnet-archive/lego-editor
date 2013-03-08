@@ -1,5 +1,6 @@
 package gov.va.legoEdit.model.userPrefs;
 
+import gov.va.legoEdit.LegoGUI;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -11,11 +12,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "userPreferences")
 public class UserPreferences
 {
-
 	@XmlAttribute(name = "author") protected String author;
 	@XmlAttribute(name = "module") protected String module;
 	@XmlAttribute(name = "path") protected String path;
 	@XmlAttribute(name = "showSummary") protected boolean showSummary = true;
+	@XmlAttribute(name = "useFSN") protected boolean useFSN = true;
 
 	/**
 	 * Gets the value of the author property.
@@ -98,5 +99,19 @@ public class UserPreferences
 	public void setShowSummary(boolean showSummary)
 	{
 		this.showSummary = showSummary;
+	}
+	
+	public boolean getUseFSN()
+	{
+		return useFSN;
+	}
+
+	public void setUseFSN(boolean useFSN)
+	{
+		if (useFSN !=  this.useFSN)
+		{
+			LegoGUI.getInstance().getLegoGUIController().rebuildSCTTree();
+		}
+		this.useFSN = useFSN;
 	}
 }

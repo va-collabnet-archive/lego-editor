@@ -1,10 +1,12 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.model.SchemaClone;
 import gov.va.legoEdit.model.SchemaEquals;
 import gov.va.legoEdit.model.schemaModel.Concept;
+import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.wb.ConceptLookupCallback;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
@@ -47,6 +49,7 @@ import org.slf4j.LoggerFactory;
 public class ConceptNode implements ConceptLookupCallback
 {
 	private static Logger logger = LoggerFactory.getLogger(ConceptNode.class);
+	private static UserPreferences up = LegoGUIModel.getInstance().getUserPreferences();
 
 	private HBox hbox_;
 	private ComboBox<ComboBoxConcept> cb_;
@@ -233,11 +236,15 @@ public class ConceptNode implements ConceptLookupCallback
 
 	private synchronized void lookup()
 	{
-		// If the concept is fully populated, and the sctId equals the displayed value,
+		// If the concept is fully populated, and the id matches one of the proper IDs
 		// don't bother doing the lookup (conceptNodes are created whenever a tree expand/collapse takes place - most of the time
 		// the value hasn't changed....
+		//However, check to see if the desc type has changed.... let the lookup happen if the description type has changed.
 		if (c_ != null && !Utility.isEmpty(c_.getDesc()) && !Utility.isEmpty(c_.getUuid()) && c_.getSctid() != null
-				&& (cb_.getValue().getId().equals(c_.getSctid() + "") || cb_.getValue().getId().equals(c_.getUuid())))
+				&& (cb_.getValue().getId().equals(c_.getSctid() + "") || cb_.getValue().getId().equals(c_.getUuid()))
+				&& (
+					(up.getUseFSN() && c_.getDesc().indexOf("(") > 0 && c_.getDesc().indexOf(")") > 0)
+					|| (!up.getUseFSN() && c_.getDesc().indexOf("(") == -1 && c_.getDesc().indexOf(")") == -1)))
 		{
 			return;
 		}

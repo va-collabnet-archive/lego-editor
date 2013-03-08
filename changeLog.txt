@@ -17,6 +17,8 @@ Lego Editor Change Log
   *  artf227426 Added an (optional) summary view to the editor tab
   *  artf227499 Add tooltips to snomed drop downs for viewing concepts with long descriptions.
   *  artf227427 Allow snomed search by UUID and SCTID.
+  *  artf227500 Allow selecting the Snomed FSN or the Snomed Preferred Synonym when displaying concepts
+  		via a user preference.
 
 2013/03/01 - 0.55
   *  Improve error handling when snomed DB is missing.
