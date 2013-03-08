@@ -1,5 +1,6 @@
 package gov.va.legoEdit.validators;
 
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
 import gov.va.legoEdit.model.schemaModel.Bound;
@@ -24,9 +25,12 @@ import org.slf4j.LoggerFactory;
  * Handle the validation of various aspects of the Lego.  The LegoTreeView uses this to display error markers, and reasons.
  * Additional validators should be registered with this class (apis to be determined) - these validators are automatically called
  * when content changes as necessary.
+ * 
+ * Validators should return null if there is no problem.  They should return a user-friendly string error message if something is wrong.
+ * The error message will be displayed in the Lego tree.
+ * 
  * @author Dan Armbrust 
  * Copyright 2013
- * 
  */
 public class Validator
 {
@@ -34,51 +38,51 @@ public class Validator
 	public static final String UPPER_BOUND = "upper bound";
 	public static final String LOWER_BOUND = "lower bound";
 	
-	public static String isValid(Object o)
+	public static String isValid(Object o, LegoTreeItem lti)
 	{
 		if (o instanceof AssertionComponent)
 		{
-			return validate((AssertionComponent) o);
+			return validate((AssertionComponent) o, lti);
 		}
 		else if (o instanceof Value)
 		{
-			return validate((Value) o);
+			return validate((Value) o, lti);
 		}
 		else if (o instanceof Destination)
 		{
-			return validate((Destination) o);
+			return validate((Destination) o, lti);
 		}
 		else if (o instanceof Concept)
 		{
-			return validate((Concept) o);
+			return validate((Concept) o, lti);
 		}
 		else if (o instanceof Measurement)
 		{
-			return validate((Measurement) o);
+			return validate((Measurement) o, lti);
 		}
 		else if (o instanceof Assertion)
 		{
-			return validate((Assertion)o);
+			return validate((Assertion)o, lti);
 		}
 		else if (o instanceof Expression)
 		{
-			return validate((Expression)o);
+			return validate((Expression)o, lti);
 		}
 		else if (o instanceof Relation)
 		{
-			return validate((Relation)o);
+			return validate((Relation)o, lti);
 		}
 		else if (o instanceof Discernible)
 		{
-			return validate((Discernible)o);
+			return validate((Discernible)o, lti);
 		}
 		else if (o instanceof Qualifier)
 		{
-			return validate((Qualifier)o);
+			return validate((Qualifier)o, lti);
 		}
 		else if (o instanceof RelationGroup)
 		{
-			return validate((RelationGroup)o);
+			return validate((RelationGroup)o, lti);
 		}
 		
 		else
@@ -88,7 +92,7 @@ public class Validator
 		}
 	}
 
-	public static String validate(AssertionComponent ac)
+	public static String validate(AssertionComponent ac, LegoTreeItem lti)
 	{
 		try
 		{
@@ -101,7 +105,7 @@ public class Validator
 		}
 	}
 
-	public static String validate(Value value)
+	public static String validate(Value value, LegoTreeItem lti)
 	{
 		if (value.getText() != null)
 		{
@@ -127,7 +131,7 @@ public class Validator
 		return "Value cannot be empty";
 	}
 
-	public static String validate(Destination destination)
+	public static String validate(Destination destination, LegoTreeItem lti)
 	{
 		if (destination.getText() != null)
 		{
@@ -152,7 +156,7 @@ public class Validator
 		return "Destination cannot be empty";
 	}
 
-	public static String validate(Concept concept)
+	public static String validate(Concept concept, LegoTreeItem lti)
 	{
 		if (concept == null)
 		{
@@ -169,7 +173,7 @@ public class Validator
 		}
 	}
 
-	public static String validate(Measurement measurement)
+	public static String validate(Measurement measurement, LegoTreeItem lti)
 	{
 		if (hasValue(measurement.getPoint()))
 		{
@@ -242,7 +246,7 @@ public class Validator
 		return null;
 	}
 
-	public static String validate(Expression e)
+	public static String validate(Expression e, LegoTreeItem lti)
 	{
 		if (e == null)
 		{
@@ -256,7 +260,7 @@ public class Validator
 		return null;
 	}
 
-	public static String validate(Relation r)
+	public static String validate(Relation r, LegoTreeItem lti)
 	{
 		if (r.getType() == null)
 		{
@@ -271,7 +275,7 @@ public class Validator
 		return null;
 	}
 	
-	public static String validate(RelationGroup rg)
+	public static String validate(RelationGroup rg, LegoTreeItem lti)
 	{
 		if (rg.getRelation().size() == 0)
 		{
@@ -280,7 +284,7 @@ public class Validator
 		return null;
 	}
 	
-	public static String validate(Assertion a)
+	public static String validate(Assertion a, LegoTreeItem lti)
 	{
 		if (a.getValue() == null)
 		{
@@ -302,7 +306,7 @@ public class Validator
 		return null;
 	}
 	
-	public static String validate(Discernible d)
+	public static String validate(Discernible d, LegoTreeItem lti)
 	{
 		if (d == null)
 		{
@@ -311,7 +315,7 @@ public class Validator
 		return null;
 	}
 	
-	public static String validate(Qualifier q)
+	public static String validate(Qualifier q, LegoTreeItem lti)
 	{
 		if (q == null)
 		{

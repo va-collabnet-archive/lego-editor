@@ -493,7 +493,7 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		else
 		{
-			invalidReason_ = Validator.isValid(extraData_);
+			invalidReason_ = Validator.isValid(extraData_, this);
 		}
 		isValid = invalidReason_ == null;
 	}
