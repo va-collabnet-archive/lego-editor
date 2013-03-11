@@ -40,6 +40,7 @@
                 <AnchorPane id="AnchorPane" fx:id="snomedBrowserHeader" prefHeight="25.0" prefWidth="369.0" styleClass="headerBackground" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                   <children>
                     <Label id="leftPaneLabel" styleClass="boldLabel" text="Snomed Browser" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
+                    <ProgressIndicator fx:id="findConceptPI" maxHeight="16.0" maxWidth="16.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="1.0" />
                   </children>
                 </AnchorPane>
                 <BorderPane fx:id="snomedBrowserPanel" maxHeight="1.7976931348623157E308" prefHeight="972.0" prefWidth="369.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">

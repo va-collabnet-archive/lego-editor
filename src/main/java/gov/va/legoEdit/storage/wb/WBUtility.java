@@ -332,12 +332,33 @@ public class WBUtility
 		//If we get here, we didn't find what they were looking for. Pick something....
 		return (fsn != null ? fsn : (preferred != null ? preferred : (bestFound != null ? bestFound : concept.toUserString())));
 	}
+	
+	public static String getDescription(UUID uuid)
+	{
+		try
+		{
+			return getDescription(WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid));
+		}
+		catch (Exception e)
+		{
+			logger.warn("Unexpected error looking up description", e);
+			return null;
+		}
+	}
 
 	public static String getDescription(FxConcept concept)
 	{
 		// Go hunting for a FSN
+		if (concept == null)
+		{
+			return null;
+		}
 		if (concept.getDescriptions() == null)
 		{
+			if (concept.getConceptReference() == null)
+			{
+				return null;
+			}
 			return concept.getConceptReference().getText();
 		}
 		

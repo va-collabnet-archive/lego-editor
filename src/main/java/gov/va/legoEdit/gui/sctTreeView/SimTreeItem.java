@@ -154,8 +154,7 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
 
     @Override
     public int compareTo(SimTreeItem o) {
-        return this.getValue().getRelationshipVersion().getOriginReference().getText().compareTo(
-                o.getValue().getRelationshipVersion().getOriginReference().getText());
+        return this.toString().compareTo(o.toString());
     }
 
     public Node computeGraphic() {
@@ -228,9 +227,28 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
     public String toString() {
         if (getValue().getRelationshipVersion() != null) {
             if (multiParentDepth > 0) {
-                return getValue().getRelationshipVersion().getDestinationReference().getText();
+            	String temp = WBUtility.getDescription(getValue().getRelationshipVersion().getDestinationReference().getUuid());
+            	if (temp == null)
+            	{
+            		return getValue().getRelationshipVersion().getDestinationReference().getText();
+            	}
+            	else
+            	{
+            		return temp;
+            	}
+            		
+                
             } else {
-                return getValue().getRelationshipVersion().getOriginReference().getText();
+            	String temp = WBUtility.getDescription(getValue().getRelationshipVersion().getOriginReference().getUuid());
+            	if (temp == null)
+            	{
+            		return getValue().getRelationshipVersion().getOriginReference().getText();
+            	}
+            	else
+            	{
+            		return temp;
+            	}
+                
             }
         }
 
@@ -289,7 +307,11 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
     }
 
     public void setProgressIndicator(ProgressIndicator pi) {
-        this.pi = pi;
+        synchronized (childFetcherPool)
+        {
+            this.pi = pi;
+            childFetcherPool.notifyAll();
+        }
     }
 
     public void setSecondaryParentOpened(boolean secondaryParentOpened) {
@@ -369,4 +391,26 @@ public class SimTreeItem extends TreeItem<FxTaxonomyReferenceWithConcept> implem
             return true;
         }
     }
+    
+	public void blockUntilChildrenReady()
+	{
+		if (pi != null)
+		{
+			synchronized (childFetcherPool)
+			{
+				while (pi != null)
+				{
+					try
+					{
+						childFetcherPool.wait();
+					}
+					catch (InterruptedException e)
+					{
+						// noop
+					}
+				}
+			}
+		}
+
+	}
 }

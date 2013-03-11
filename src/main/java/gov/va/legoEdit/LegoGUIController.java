@@ -33,10 +33,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -82,7 +85,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
-import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
 import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
@@ -115,6 +117,7 @@ public class LegoGUIController implements Initializable
 	private volatile long dragStartedAt = 0;
 	private double dividerPosition = 0.3;
 	private AnchorPane[] splitPaneOrder;
+	private BooleanProperty findConceptInProgress = new SimpleBooleanProperty(false);
 	
 	private LegoTabInvalidationListener legoTabInvalidationListener = new LegoTabInvalidationListener();
 	private BooleanBinding enableSaveButton, enableUndoButton, enableRedoButton;
@@ -206,6 +209,8 @@ public class LegoGUIController implements Initializable
 	private AnchorPane legoListsHeader; // Value injected by FXMLLoader
 	@FXML// fx:id="snomedBrowserHeader"
 	private AnchorPane snomedBrowserHeader; // Value injected by FXMLLoader
+	@FXML //  fx:id="findConceptPI"
+	private ProgressIndicator findConceptPI; // Value injected by FXMLLoader
 
 	@Override
 	// This method is called by the FXMLLoader when initialization is complete
@@ -284,6 +289,8 @@ public class LegoGUIController implements Initializable
 		legoInvalidStack.getChildren().add(legoValidationInProgress);
 		legoInvalidStack.setMaxHeight(20.0);
 		legoInvalidStack.setMaxWidth(20.0);
+		
+		findConceptPI.visibleProperty().bind(findConceptInProgress);
 
 		setupMenus();
 		setupSctTree(); // This kicks off a thread that opens the DB connection
@@ -908,6 +915,17 @@ public class LegoGUIController implements Initializable
 		showAllLegoListBtn.selectedProperty().set(true);
 		showAllLegoListBtn.fireEvent(new ActionEvent());
 	}
+	
+	public void findConceptInTree(UUID concept)
+	{
+		findConceptInProgress.set(true);
+		sctTree.showConcept(concept, findConceptInProgress);
+		if (!showSnomedBtn.selectedProperty().get())
+		{
+			showSnomedBtn.selectedProperty().set(true);
+			showSnomedBtn.fireEvent(new ActionEvent());
+		}
+	}
 
 	private void setupSctTree()
 	{
@@ -936,38 +954,6 @@ public class LegoGUIController implements Initializable
 							try
 							{
 								sctTree = new SimTreeView(fxc, WBDataStore.Ts());
-								sctTree.setOnDragDetected(new EventHandler<MouseEvent>()
-								{
-									public void handle(MouseEvent event)
-									{
-										/* drag was detected, start a drag-and-drop gesture */
-										/* allow any transfer mode */
-										Dragboard db = sctTree.startDragAndDrop(TransferMode.COPY);
-
-										/* Put a string on a dragboard */
-										TreeItem<FxTaxonomyReferenceWithConcept> dragItem = sctTree.getSelectionModel().getSelectedItem();
-										if (dragItem == null)
-										{
-											//Don't know why, but I've seen this happen...
-											return;
-										}
-
-										ClipboardContent content = new ClipboardContent();
-										content.putString(dragItem.getValue().getConcept().getPrimordialUuid().toString());
-										db.setContent(content);
-										snomedDragStarted();
-										event.consume();
-									}
-								});
-
-								sctTree.setOnDragDone(new EventHandler<DragEvent>()
-								{
-									public void handle(DragEvent event)
-									{
-										snomedDragCompleted();
-									}
-								});
-
 								AnchorPane.setTopAnchor(sctTree, 0.0);
 								AnchorPane.setBottomAnchor(sctTree, 0.0);
 								AnchorPane.setLeftAnchor(sctTree, 0.0);

@@ -10,41 +10,41 @@ import javafx.scene.control.MenuItem;
 
 public class CopyableLabel extends Label
 {
-    public CopyableLabel()
-    {
-        super();
-        addMenu();
-    }
-    
-    public CopyableLabel(String text)
-    {
-        super(text);
-        addMenu();
-    }
-    
-    public CopyableLabel(String text, Node graphic)
-    {
-        super(text, graphic);
-        addMenu();
-    }
-    
-    private void addMenu()
-    {
-       addCopyMenu(this);
-    }
-    
-    public static void addCopyMenu(final Label l)
-    {
-        MenuItem mi = new MenuItem("Copy");
-        mi.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent arg0)
-            {
-                CustomClipboard.set(l.getText());
-                LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(l.getText());
-            }
-        });
-        l.setContextMenu(new ContextMenu(mi));
-    }
+	public CopyableLabel()
+	{
+		super();
+		addCopyMenu();
+	}
+
+	public CopyableLabel(String text)
+	{
+		super(text);
+		addCopyMenu();
+	}
+
+	public CopyableLabel(String text, Node graphic)
+	{
+		super(text, graphic);
+		addCopyMenu();
+	}
+
+	private void addCopyMenu()
+	{
+		addCopyMenu(this);
+	}
+
+	public static void addCopyMenu(final Label l)
+	{
+		MenuItem mi = new MenuItem("Copy");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				CustomClipboard.set(l.getText());
+				LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(l.getText());
+			}
+		});
+		l.setContextMenu(new ContextMenu(mi));
+	}
 }

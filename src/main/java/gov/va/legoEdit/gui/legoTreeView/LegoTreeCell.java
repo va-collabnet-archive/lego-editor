@@ -2440,6 +2440,25 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
 		cm.getItems().add(mi);
 		
+		mi = new MenuItem("Find Concept in Tree");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				if (cn.isValid())
+				{
+					LegoGUI.getInstance().getLegoGUIController().findConceptInTree(UUID.fromString(c.getUuid()));
+				}
+				else
+				{
+					LegoGUI.getInstance().showErrorDialog("Unknown Concept", "Can't lookup an invalid concept", "");
+				}
+			}
+		});
+		mi.setGraphic(Images.ROOT.createImageView());
+		cm.getItems().add(mi);
+		
 		mi = new MenuItem("Copy Text");
 		mi.setOnAction(new EventHandler<ActionEvent>()
 		{
