@@ -243,6 +243,12 @@ public class PendingConceptsPaneController implements Initializable
 		
 		search();
 	}
+	
+	public void searchFor(String searchString)
+	{
+		filterText.setText(searchString);
+		search();
+	}
 
 	private synchronized void search()
 	{

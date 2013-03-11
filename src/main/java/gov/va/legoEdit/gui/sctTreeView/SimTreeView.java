@@ -3,6 +3,7 @@ package gov.va.legoEdit.gui.sctTreeView;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.storage.wb.WBDataStore;
+import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
 import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
 import org.ihtsdo.helper.uuid.Type3UuidFactory;
 import org.ihtsdo.tk.api.TerminologyStoreDI;
+import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 	Logger logger = LoggerFactory.getLogger(SimTreeView.class);
 	private TerminologyStoreDI ts_;
 	SimTreeItem visibleRootItem;
-	
+
 	protected static volatile boolean shutdownRequested = false;
 
 	public SimTreeView(FxConcept rootFxConcept, TerminologyStoreDI ts)
@@ -69,13 +71,13 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 		// }
 		// });
 
-		//connect to 
+		// connect to
 
 		FxTaxonomyReferenceWithConcept hiddenRootConcept = new FxTaxonomyReferenceWithConcept();
 		SimTreeItem hiddenRootItem = new SimTreeItem(hiddenRootConcept, ts_);
 		setShowRoot(false);
 		setRoot(hiddenRootItem);
-		
+
 		FxTaxonomyReferenceWithConcept visibleRootConcept = new FxTaxonomyReferenceWithConcept();
 		visibleRootConcept.setConcept(rootFxConcept);
 
@@ -85,7 +87,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 		visibleRootItem.addChildren();
 
 		// put this event handler on the root
-		visibleRootItem.addEventHandler(TreeItem.branchCollapsedEvent(), new EventHandler<TreeItem.TreeModificationEvent<Object>>() 
+		visibleRootItem.addEventHandler(TreeItem.branchCollapsedEvent(), new EventHandler<TreeItem.TreeModificationEvent<Object>>()
 		{
 			@Override
 			public void handle(TreeItem.TreeModificationEvent<Object> t)
@@ -95,7 +97,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 				sourceTreeItem.removeGrandchildren();
 			}
 		});
-		
+
 		visibleRootItem.addEventHandler(TreeItem.branchExpandedEvent(), new EventHandler<TreeItem.TreeModificationEvent<Object>>()
 		{
 			@Override
@@ -112,7 +114,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 				sourceTreeItem.addChildrenConceptsAndGrandchildrenItems(p2);
 			}
 		});
-		
+
 		setOnDragDetected(new EventHandler<MouseEvent>()
 		{
 			public void handle(MouseEvent event)
@@ -125,7 +127,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 				TreeItem<FxTaxonomyReferenceWithConcept> dragItem = getSelectionModel().getSelectedItem();
 				if (dragItem == null)
 				{
-					//Don't know why, but I've seen this happen...
+					// Don't know why, but I've seen this happen...
 					return;
 				}
 
@@ -145,7 +147,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 			}
 		});
 	}
-	
+
 	public void showConcept(final UUID uuid, final BooleanProperty setFalseWhenDone)
 	{
 		Runnable r = new Runnable()
@@ -161,14 +163,26 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 					
 					while (true)
 					{
-						FxConcept fxc = WBDataStore.Ts().getFxConcept(current,
-								StandardViewCoordinates.getSnomedLatest(), VersionPolicy.ACTIVE_VERSIONS,
-								RefexPolicy.REFEX_MEMBERS,
-								RelationshipPolicy.ORIGINATING_RELATIONSHIPS);
-						if (fxc == null)
+						//FX API is broken if you ask for a concept that doesn't exist, need to  handle it ourselves...
+						ConceptVersionBI cv = WBUtility.lookupSnomedIdentifierAsCV(current.toString());
+						if (cv == null)
 						{
-							break;
+							//Must be a pending concept. 
+							Platform.runLater(new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									LegoGUI.getInstance().getLegoGUIController().findPendingConcept(uuid.toString());
+								}
+							});
+							
+							return;
 						}
+
+						FxConcept fxc = new FxConcept(WBDataStore.Ts().getSnapshot(StandardViewCoordinates.getSnomedLatest()), cv,
+								VersionPolicy.ACTIVE_VERSIONS, RefexPolicy.REFEX_MEMBERS, RelationshipPolicy.ORIGINATING_RELATIONSHIPS);
+
 						boolean found = false;
 						for (FxRelationshipChronicle rel : fxc.getOriginRelationships())
 						{
@@ -210,10 +224,6 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 							{
 								scrollTo(getRow(temp));
 								getSelectionModel().clearAndSelect(getRow(temp));
-								if (setFalseWhenDone != null)
-								{
-									setFalseWhenDone.set(false);
-								}
 							}
 						});
 					}
@@ -222,18 +232,33 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 				{
 					logger.error("Unexpected error trying to find concept in Tree", e);
 				}
+				finally
+				{
+					if (setFalseWhenDone != null)
+					{
+						Platform.runLater(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								setFalseWhenDone.set(false);
+							}
+						});
+					}
+				}
 			}
 		};
 		
 		Utility.tpe.execute(r);
 	}
-	
+
 	/**
-	 * Ugly nasty threading code to try to get a handle on waiting until children are populated before requesting them. 
+	 * Ugly nasty threading code to try to get a handle on waiting until children are populated before requesting them.
 	 * The first call you make to this should pass in the root node, and its children should already be populated.
 	 * After that you can call it repeatedly to walk down the tree.
-	 * @return the found child, or null, if not found.  found child will have already been told to expand and fetch
-	 * its children.
+	 * 
+	 * @return the found child, or null, if not found. found child will have already been told to expand and fetch
+	 *         its children.
 	 */
 	private SimTreeItem findChild(final SimTreeItem item, final UUID targetChild, final boolean isLast)
 	{
@@ -247,7 +272,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 				{
 					if (item.getValue().getConcept().getPrimordialUuid().equals(targetChild))
 					{
-						answer.add((SimTreeItem)item);
+						answer.add((SimTreeItem) item);
 					}
 					else
 					{
@@ -256,7 +281,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 							if (child != null && child.getValue() != null && child.getValue().getConcept() != null
 									&& child.getValue().getConcept().getPrimordialUuid().equals(targetChild))
 							{
-								answer.add((SimTreeItem)child);
+								answer.add((SimTreeItem) child);
 								break;
 							}
 						}
@@ -270,7 +295,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 						scrollTo(getRow(answer.get(0)));
 						if (!isLast)
 						{
-							//start fetching the next level.
+							// start fetching the next level.
 							answer.get(0).setExpanded(true);
 							answer.get(0).addChildren();
 						}
@@ -279,7 +304,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 				}
 			}
 		};
-		
+
 		item.blockUntilChildrenReady();
 		synchronized (answer)
 		{
@@ -298,21 +323,21 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 		}
 		return answer.get(0);
 	}
-	
+
 	/**
-	 * rebuild the tree from the root down.  Useful when the requested description type changes.
+	 * rebuild the tree from the root down. Useful when the requested description type changes.
 	 */
 	public void rebuild()
 	{
 		getRoot().getChildren().get(0).getChildren().clear();
-		((SimTreeItem)getRoot().getChildren().get(0)).addChildren();
+		((SimTreeItem) getRoot().getChildren().get(0)).addChildren();
 	}
-	
+
 	/**
 	 * Tell the sim tree to stop whatever threading operations it has running, as the application is exiting.
 	 */
 	public static void shutdown()
 	{
-	    shutdownRequested = true;
+		shutdownRequested = true;
 	}
 }

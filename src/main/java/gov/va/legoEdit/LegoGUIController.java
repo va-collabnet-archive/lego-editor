@@ -15,6 +15,7 @@ import gov.va.legoEdit.gui.util.LegoTab;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
+import gov.va.legoEdit.model.PendingConcepts;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
@@ -924,6 +925,20 @@ public class LegoGUIController implements Initializable
 		{
 			showSnomedBtn.selectedProperty().set(true);
 			showSnomedBtn.fireEvent(new ActionEvent());
+		}
+	}
+	
+	public void findPendingConcept(String conceptId)
+	{
+		Concept concept = PendingConcepts.getInstance().getConcept(conceptId);
+		if (concept != null)
+		{
+			pcpc.searchFor(concept.getDesc());
+			if (!showPendingBtn.selectedProperty().get())
+			{
+				showPendingBtn.selectedProperty().set(true);
+				showPendingBtn.fireEvent(new ActionEvent());
+			}
 		}
 	}
 

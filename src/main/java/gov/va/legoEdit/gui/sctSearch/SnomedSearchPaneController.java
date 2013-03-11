@@ -156,6 +156,18 @@ public class SnomedSearchPaneController implements Initializable
 							});
 							mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
 							cm.getItems().add(mi);
+							
+							mi = new MenuItem("Find Concept in Tree");
+							mi.setOnAction(new EventHandler<ActionEvent>()
+							{
+								@Override
+								public void handle(ActionEvent arg0)
+								{
+									LegoGUI.getInstance().getLegoGUIController().findConceptInTree(item.getConcept().getUUIDs().get(0));
+								}
+							});
+							mi.setGraphic(Images.ROOT.createImageView());
+							cm.getItems().add(mi);
 
 							mi = new MenuItem("Filter for Legos that use this Concept");
 							mi.setOnAction(new EventHandler<ActionEvent>()
