@@ -1,4 +1,6 @@
 Lego Editor Change Log
+2013/03/?? - 0.57
+
 2013/03/11 - 0.56
   *  <DB COMPATIBILITY BREAKAGE> Updated to the latest (and final?) version of the schema.  
 		This change makes it impossible to read the Lego database created with older editors.  Must 

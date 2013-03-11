@@ -3,7 +3,7 @@
 
 	<groupId>gov.va</groupId>
 	<artifactId>lego-editor</artifactId>
-	<version>0.56</version>
+	<version>0.57-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lego-editor</name>
