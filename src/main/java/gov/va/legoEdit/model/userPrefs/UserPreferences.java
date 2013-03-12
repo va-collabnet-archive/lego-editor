@@ -98,7 +98,12 @@ public class UserPreferences
 
 	public void setShowSummary(boolean showSummary)
 	{
+		boolean old = this.showSummary;
 		this.showSummary = showSummary;
+		if (old != this.showSummary)
+		{
+			LegoGUI.getInstance().getLegoGUIController().showLegoSummaryPrefChanged();
+		}
 	}
 	
 	public boolean getUseFSN()
@@ -108,10 +113,11 @@ public class UserPreferences
 
 	public void setUseFSN(boolean useFSN)
 	{
-		if (useFSN !=  this.useFSN)
+		boolean old = this.useFSN;
+		this.useFSN = useFSN;
+		if (old !=  this.useFSN)
 		{
 			LegoGUI.getInstance().getLegoGUIController().rebuildSCTTree();
 		}
-		this.useFSN = useFSN;
 	}
 }

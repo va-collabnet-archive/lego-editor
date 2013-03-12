@@ -1130,6 +1130,14 @@ public class LegoGUIController implements Initializable
 	{
 		return displayedLegos.get(uniqueLegoId);
 	}
+	
+	public void showLegoSummaryPrefChanged()
+	{
+		for (LegoTab l : displayedLegos.values())
+		{
+			l.updateForSummaryPrefChange();
+		}
+	}
 
 	private void beginLegoEdit(Lego lego, LegoTreeItem lti)
 	{

@@ -1,5 +1,8 @@
 Lego Editor Change Log
 2013/03/?? - 0.57
+  *  Fixed the summary view on/off switch so it takes effect on Legos that are already open.
+  *  artf227526 Add support for more advanced filtering - namely rel type and target filters, including
+  		child of concept X filters for rel destination.
 
 2013/03/11 - 0.56
   *  <DB COMPATIBILITY BREAKAGE> Updated to the latest (and final?) version of the schema.  
@@ -24,8 +27,6 @@ Lego Editor Change Log
   *  artf227506 Allow any combination of left panels to be shown at the same time.
   *  artf227505 Add ability to find a concept in the Taxonomy view
   *  artf227512 Make snomed concept view more compact, add a taxonomy view.
-  *  artf227526 Add support for more advanced filtering - namely rel type and target filters, including
-  		child of concept X filters for rel destination.
 
 2013/03/01 - 0.55
   *  Improve error handling when snomed DB is missing.

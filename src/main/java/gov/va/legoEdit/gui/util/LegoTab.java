@@ -55,6 +55,7 @@ public class LegoTab extends Tab
 	private ImageView openEdited = Images.LEGO_EDIT.createImageView();
 	private LegoTreeView legoTree;
 	private TextArea summary;
+	private VBox summaryVBox = null;
 	
 	private BooleanBinding canUndo = new BooleanBinding()
 	{
@@ -178,34 +179,15 @@ public class LegoTab extends Tab
 
 		legoTree = new LegoTreeView();
 		legoTree.setLegoTab(this);
-		
-		VBox summaryVBox = null;
-		if (LegoGUIModel.getInstance().getUserPreferences().getShowSummary())
-		{
-			summaryVBox = new VBox();
-			summaryVBox.getStyleClass().add("itemBorder");
-			Label l = new Label("Summary");
-			l.getStyleClass().add("boldLabel");
-			summaryVBox.getChildren().add(l);
-			summary = new TextArea();
-			summary.setEditable(false);
-			summary.setWrapText(false);
-			summary.setFocusTraversable(false);
-			updateSummary();
-			summaryVBox.getChildren().add(summary);
-			VBox.setVgrow(summary, Priority.ALWAYS);
-			summaryVBox.setMaxHeight(200.0);
-			summaryVBox.setMinHeight(200.0);
-		}
 
 		VBox tabContent = new VBox();
 		tabContent.getChildren().add(lip.getPane());
 		VBox.setVgrow(lip.getPane(), Priority.NEVER);
-		
-		if (summary != null)
+
+		if (LegoGUIModel.getInstance().getUserPreferences().getShowSummary())
 		{
+			setupSummary();
 			tabContent.getChildren().add(summaryVBox);
-			VBox.setVgrow(summaryVBox, Priority.NEVER);
 		}
 		
 		tabContent.getChildren().add(legoTree);
@@ -223,6 +205,40 @@ public class LegoTab extends Tab
 		legoTree.getRoot().getChildren().add(new LegoTreeItem(LegoTreeNodeType.blankLegoEndNode));
 		recursiveSort(legoTree.getRoot().getChildren());
 		legoTree.getRoot().setExpanded(true);
+	}
+	
+	private void setupSummary()
+	{
+		summaryVBox = new VBox();
+		summaryVBox.getStyleClass().add("itemBorder");
+		Label l = new Label("Summary");
+		l.getStyleClass().add("boldLabel");
+		summaryVBox.getChildren().add(l);
+		summary = new TextArea();
+		summary.setEditable(false);
+		summary.setWrapText(false);
+		summary.setFocusTraversable(false);
+		updateSummary();
+		summaryVBox.getChildren().add(summary);
+		VBox.setVgrow(summary, Priority.ALWAYS);
+		summaryVBox.setMaxHeight(200.0);
+		summaryVBox.setMinHeight(200.0);
+		VBox.setVgrow(summaryVBox, Priority.NEVER);
+	}
+	
+	public void updateForSummaryPrefChange()
+	{
+		if (LegoGUIModel.getInstance().getUserPreferences().getShowSummary() && summaryVBox == null)
+		{
+			setupSummary();
+			((VBox)this.getContent()).getChildren().add(1, summaryVBox);
+		}
+		else if (!LegoGUIModel.getInstance().getUserPreferences().getShowSummary() && summaryVBox != null)
+		{
+			((VBox)this.getContent()).getChildren().remove(summaryVBox);
+			summaryVBox = null;
+			summary = null;
+		}
 	}
 
 	public String getDisplayedLegoID()
