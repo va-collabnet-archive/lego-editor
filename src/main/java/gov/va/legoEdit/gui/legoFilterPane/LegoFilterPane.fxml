@@ -10,6 +10,18 @@
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
 <BorderPane fx:id="borderPane" minWidth="210.0" prefWidth="432.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController">
+  <center>
+    <StackPane prefHeight="150.0" prefWidth="200.0">
+      <children>
+        <Label fx:id="labelNoResults" text="No Legos were found which matched the filter" StackPane.alignment="TOP_LEFT">
+          <StackPane.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+          </StackPane.margin>
+        </Label>
+        <ProgressIndicator fx:id="listUpdatePI" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="50.0" prefWidth="50.0" />
+      </children>
+    </StackPane>
+  </center>
   <top>
     <VBox fx:id="borderPaneTopVbox" styleClass="itemBorder">
       <children>
@@ -55,7 +67,7 @@
               <children>
                 <Label fx:id="labelRelLocation" styleClass="boldLabel" text="Rel Location" GridPane.columnIndex="0" GridPane.rowIndex="2">
                   <GridPane.margin>
-                    <Insets left="5.0" fx:id="x2" />
+                    <Insets left="5.0" fx:id="x6" />
                   </GridPane.margin>
                 </Label>
                 <ComboBox fx:id="advancedTypeLegoPart" maxWidth="1.7976931348623157E308" visibleRowCount="6" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
@@ -66,7 +78,7 @@
                 </StackPane>
                 <Label id="labelAdvancedRelType" styleClass="boldLabel" text="Rel Type Is" GridPane.columnIndex="0" GridPane.rowIndex="0">
                   <GridPane.margin>
-                    <Insets fx:id="x3" />
+                    <Insets fx:id="x7" />
                   </GridPane.margin>
                 </Label>
                 <StackPane id="StackPane" fx:id="advancedDestConceptStack" GridPane.columnIndex="1" GridPane.rowIndex="1">
@@ -74,7 +86,7 @@
                     <TextField id="snomedId" fx:id="advancedDestConcept" maxWidth="1.7976931348623157E308" promptText="Drop or Paste Concept" />
                   </children>
                 </StackPane>
-                <HBox id="HBox" alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="0" GridPane.margin="$x3" GridPane.rowIndex="1">
+                <HBox id="HBox" alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
                   <children>
                     <Label id="labelAdvancedDestMatchType" styleClass="boldLabel" text="Rel Dest">
                       <HBox.margin>
@@ -83,6 +95,9 @@
                     </Label>
                     <ComboBox fx:id="advancedDestMatchType" maxWidth="1.7976931348623157E308" prefWidth="67.0" visibleRowCount="5" HBox.hgrow="ALWAYS" />
                   </children>
+                  <GridPane.margin>
+                    <Insets fx:id="x3" />
+                  </GridPane.margin>
                 </HBox>
               </children>
               <columnConstraints>
@@ -99,9 +114,10 @@
         </VBox>
         <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" spacing="5.0">
           <children>
+            <Label fx:id="labelAdvancedActive" text="*" />
             <ToggleButton fx:id="advancedButton" mnemonicParsing="false" text="Advanced">
               <HBox.margin>
-                <Insets fx:id="x7" />
+                <Insets fx:id="x9" />
               </HBox.margin>
             </ToggleButton>
             <Button fx:id="clearButton" mnemonicParsing="false" text="Clear Filter">

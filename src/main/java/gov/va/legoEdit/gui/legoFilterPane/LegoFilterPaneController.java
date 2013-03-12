@@ -4,9 +4,8 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
-import gov.va.legoEdit.gui.util.ExpandedNode;
 import gov.va.legoEdit.gui.util.Images;
-import gov.va.legoEdit.gui.util.Utility;
+import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
@@ -20,6 +19,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -98,12 +99,19 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	private Label labelPncsValue; // Value injected by FXMLLoader
 	@FXML// fx:id="labelRelLocation"
 	private Label labelRelLocation; // Value injected by FXMLLoader
+	@FXML// fx:id="labelAdvancedActive"
+	private Label labelAdvancedActive; // Value injected by FXMLLoader
+	@FXML// fx:id="labelNoResults"
+	private Label labelNoResults; // Value injected by FXMLLoader
+	@FXML //  fx:id="listUpdatePI"
+    private ProgressIndicator listUpdatePI; // Value injected by FXMLLoader
 
 	private LegoTreeView ltv;
 	
 	private ConceptGUIInfo[] conceptInfo_ = new ConceptGUIInfo[3]; 
 
 	private volatile AtomicInteger updateDisabled = new AtomicInteger(0);  // Update will only run when this is 0
+	private BooleanProperty updateRunning = new SimpleBooleanProperty(false);
 
 	Logger logger = LoggerFactory.getLogger(LegoFilterPaneController.class);
 	
@@ -164,7 +172,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		// initialize your logic here: all @FXML variables will have been injected
 
 		ltv = new LegoTreeView();
-		borderPane.setCenter(ltv);
+		((StackPane)borderPane.getCenter()).getChildren().add(0, ltv);
 		AnchorPane.setBottomAnchor(borderPane, 0.0);
 		AnchorPane.setTopAnchor(borderPane, 0.0);
 		AnchorPane.setLeftAnchor(borderPane, 0.0);
@@ -315,7 +323,30 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 
 		labelRelLocation.disableProperty().bind(enableAdvancedLegoRelLocation.not());
 		advancedTypeLegoPart.disableProperty().bind(enableAdvancedLegoRelLocation.not());
+		listUpdatePI.visibleProperty().bind(updateRunning);
+		labelAdvancedActive.setText(SchemaToString.rightArrow);
+		labelAdvancedActive.visibleProperty().bind(enableAdvancedLegoRelLocation);
 
+		updateRunning.addListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				if (updateRunning.get())
+				{
+					labelNoResults.setVisible(false);
+				}
+				else if (ltv.getRoot().getChildren().size() == 1) //there is always a blank node tacked on the end
+				{
+					labelNoResults.setVisible(true);
+				}
+				else
+				{
+					labelNoResults.setVisible(false);
+				}
+			}
+		});
+		
 		updateLegoList();
 	}
 	
@@ -421,6 +452,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			return;
 		}
 
+		updateRunning.set(true);
 		Integer pncsFilterId = null;
 		String pncsFilterValue = null;
 		if (!pncsItem.getSelectionModel().getSelectedItem().getName().equals(ANY))
@@ -439,11 +471,10 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		}
 		String advancedDestMatchTypePart = advancedDestMatchType.getSelectionModel().getSelectedItem();
 
-		ExpandedNode before = Utility.buildExpandedNodeHierarchy(ltv.getRoot());
-		LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot().getChildren(), pncsFilterId, pncsFilterValue, conceptInfo_[CONCEPT_LOOKUP].concept, 
-				advancedRelFilterLegoPart, conceptInfo_[CONCEPT_REL_TYPE_LOOKUP].concept, advancedDestMatchTypePart, conceptInfo_[CONCEPT_REL_DEST_LOOKUP].concept);
-		Utility.setExpandedStates(before, ltv.getRoot());
 		ltv.getSelectionModel().clearSelection();
+		LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot(), pncsFilterId, pncsFilterValue, conceptInfo_[CONCEPT_LOOKUP].concept, 
+				advancedRelFilterLegoPart, conceptInfo_[CONCEPT_REL_TYPE_LOOKUP].concept, advancedDestMatchTypePart, conceptInfo_[CONCEPT_REL_DEST_LOOKUP].concept,
+				updateRunning);
 	}
 
 	public BorderPane getBorderPane()

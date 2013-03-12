@@ -31,6 +31,7 @@ import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
 import org.ihtsdo.fxmodel.concept.component.refex.FxRefexChronicle;
 import org.ihtsdo.fxmodel.concept.component.refex.type_comp.FxRefexCompVersion;
 import org.ihtsdo.helper.uuid.UuidFactory;
+import org.ihtsdo.tk.api.concept.ConceptChronicleBI;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.ihtsdo.tk.api.description.DescriptionChronicleBI;
@@ -108,7 +109,7 @@ public class WBUtility
 		return convertConcept(result);
 	}
 
-	public static Concept convertConcept(ConceptVersionBI concept)
+	public static Concept convertConcept(ConceptChronicleBI concept)
 	{
 		Concept c = null;
 		if (concept != null && concept.getUUIDs() != null && concept.getUUIDs().size() > 0)
@@ -269,11 +270,29 @@ public class WBUtility
 		}
 		return ActiveValueTypeNid;
 	}
+	
+	public static Concept getConceptForNid(Integer nid)
+	{
+		if (nid == null)
+		{
+			return null;
+		}
+		try
+		{
+			ConceptChronicleBI cc = WBDataStore.Ts().getConcept(nid);
+			return convertConcept(cc);
+		}
+		catch (Exception e)
+		{
+			logger.error("Error during nid lookup", e);
+		}
+		return null;
+	}
 
 	/**
 	 * Note, this method isn't smart enough to work with multiple versions properly.... assumes you only pass in a concept with current values
 	 */
-	public static String getDescription(ConceptVersionBI concept)
+	public static String getDescription(ConceptChronicleBI concept)
 	{
 		String fsn = null;
 		String preferred = null;
