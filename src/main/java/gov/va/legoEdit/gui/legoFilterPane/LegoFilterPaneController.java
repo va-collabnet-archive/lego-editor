@@ -36,20 +36,54 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LegoFilterPaneController implements Initializable, ConceptLookupCallback
 {
+	public static String ANY = "-ANY-";
+	public static String DISCERNIBLE = "Discernible";
+	public static String QUALIFIER = "Qualifier";
+	public static String VALUE = "Value";
+	public static String IS = "is";
+	public static String CHILD_OF = "Child of";
+	
+	private final Integer CONCEPT_LOOKUP = 0;
+	private final Integer CONCEPT_REL_TYPE_LOOKUP = 1;
+	private final Integer CONCEPT_REL_DEST_LOOKUP = 2;
+	
+	@FXML// fx:id="advancedButton"
+	private ToggleButton advancedButton; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedDestConcept"
+	private TextField advancedDestConcept; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedDestConceptStack"
+	private StackPane advancedDestConceptStack; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedDestMatchType"
+	private ComboBox<String> advancedDestMatchType; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedPanel"
+	private VBox advancedPanel; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedRelType"
+	private TextField advancedRelType; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedRelTypeStack"
+	private StackPane advancedRelTypeStack; // Value injected by FXMLLoader
+	@FXML// fx:id="advancedTypeLegoPart"
+	private ComboBox<String> advancedTypeLegoPart; // Value injected by FXMLLoader
 	@FXML// fx:id="borderPane"
 	private BorderPane borderPane; // Value injected by FXMLLoader
+	@FXML// fx:id="borderPaneTopVbox"
+	private VBox borderPaneTopVbox; // Value injected by FXMLLoader
+	@FXML// fx:id="clearButton"
+	private Button clearButton; // Value injected by FXMLLoader
 	@FXML// fx:id="pncsItem"
 	private ComboBox<PncsItem> pncsItem; // Value injected by FXMLLoader
 	@FXML// fx:id="pncsNameOrId"
@@ -58,32 +92,39 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	private ComboBox<String> pncsValue; // Value injected by FXMLLoader
 	@FXML// fx:id="snomedId"
 	private TextField snomedId; // Value injected by FXMLLoader
-	@FXML //  fx:id="snomedIdStack"
+	@FXML// fx:id="snomedIdStack"
 	private StackPane snomedIdStack; // Value injected by FXMLLoader
-	@FXML// fx:id="clearButton"
-	private Button clearButton; // Value injected by FXMLLoader
-	@FXML// fx:id="advancedButton"
-	private Button advancedButton; // Value injected by FXMLLoader
+	@FXML// fx:id="labelPncsValue"
+	private Label labelPncsValue; // Value injected by FXMLLoader
+	@FXML// fx:id="labelRelLocation"
+	private Label labelRelLocation; // Value injected by FXMLLoader
 
 	private LegoTreeView ltv;
-	private volatile AtomicInteger updateDisabled = new AtomicInteger(0);  // Update will only run when this is 0
-	private Concept concept_;
-	private Tooltip conceptInvalidTooltip_;
+	
+	private ConceptGUIInfo[] conceptInfo_ = new ConceptGUIInfo[3]; 
 
-	private ProgressIndicator pi_;
-	BooleanProperty snomedIdValid = new SimpleBooleanProperty(true);
-	private volatile long lookupUpdateTime_ = 0;
-	private AtomicInteger lookupsInProgress_ = new AtomicInteger();
-	private BooleanBinding lookupInProgress = new BooleanBinding()
-	{
-		@Override
-		protected boolean computeValue()
-		{
-			return lookupsInProgress_.get() > 0;
-		}
-	};
+	private volatile AtomicInteger updateDisabled = new AtomicInteger(0);  // Update will only run when this is 0
 
 	Logger logger = LoggerFactory.getLogger(LegoFilterPaneController.class);
+	
+	private class ConceptGUIInfo
+	{
+		TextField tf;
+		Concept concept;
+		Tooltip tooltip;
+		BooleanProperty isValid;
+		ProgressIndicator pi;
+		volatile long lookupUpdateTime;
+		AtomicInteger lookupsInProgress = new AtomicInteger();
+		BooleanBinding isLookupInProgress = new BooleanBinding()
+		{
+			@Override
+			protected boolean computeValue()
+			{
+				return lookupsInProgress.get() > 0;
+			}
+		};
+	}
 
 	public static LegoFilterPaneController init()
 	{
@@ -103,10 +144,22 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	// This method is called by the FXMLLoader when initialization is complete
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources)
 	{
-		assert borderPane != null : "fx:id=\"borderPane\" was not injected: check your FXML file 'Untitled 1'.";
-		assert pncsItem != null : "fx:id=\"pncsItem\" was not injected: check your FXML file 'Untitled 1'.";
-		assert pncsNameOrId != null : "fx:id=\"pncsNameOrId\" was not injected: check your FXML file 'Untitled 1'.";
-		assert pncsValue != null : "fx:id=\"pncsValue\" was not injected: check your FXML file 'Untitled 1'.";
+		assert advancedButton != null : "fx:id=\"advancedButton\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert advancedDestConcept != null : "fx:id=\"advancedDestConcept\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert advancedDestConceptStack != null : "fx:id=\"advancedDestConceptStack\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert advancedDestMatchType != null : "fx:id=\"advancedDestMatchType\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert advancedPanel != null : "fx:id=\"advancedPanel\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert advancedRelType != null : "fx:id=\"advancedRelType\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert advancedRelTypeStack != null : "fx:id=\"advancedRelTypeStack\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert advancedTypeLegoPart != null : "fx:id=\"advancedTypeLegoPart\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert borderPane != null : "fx:id=\"borderPane\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert borderPaneTopVbox != null : "fx:id=\"borderPaneTopVbox\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert clearButton != null : "fx:id=\"clearButton\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert pncsItem != null : "fx:id=\"pncsItem\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert pncsNameOrId != null : "fx:id=\"pncsNameOrId\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert pncsValue != null : "fx:id=\"pncsValue\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert snomedId != null : "fx:id=\"snomedId\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
+		assert snomedIdStack != null : "fx:id=\"snomedIdStack\" was not injected: check your FXML file 'LegoFilterPane.fxml'.";
 
 		// initialize your logic here: all @FXML variables will have been injected
 
@@ -118,6 +171,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		AnchorPane.setRightAnchor(borderPane, 0.0);
 
 		pncsValue.setDisable(true);
+		labelPncsValue.setDisable(true);
 
 		pncsNameOrId.getItems().add("Name");
 		pncsNameOrId.getItems().add("Id");
@@ -152,13 +206,15 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 				if (item != null)
 				{
 					updateDisabled.incrementAndGet();
-					if (item.getName().equals(PncsItem.ANY))
+					if (item.getName().equals(ANY))
 					{
+						labelPncsValue.setDisable(true);
 						pncsValue.setDisable(true);
 						pncsValue.getItems().clear();
 					}
 					else
 					{
+						labelPncsValue.setDisable(false);
 						pncsValue.setDisable(false);
 						pncsValue.getItems().clear();
 						List<Pncs> items = BDBDataStoreImpl.getInstance().getPncs(pncsItem.getValue().getId());
@@ -167,7 +223,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 							pncsValue.getItems().add(pncs.getValue());
 						}
 						FXCollections.sort(pncsValue.getItems(), new AlphanumComparator(true));
-						pncsValue.getItems().add(0, PncsItem.ANY);
+						pncsValue.getItems().add(0, ANY);
 						pncsValue.getSelectionModel().select(0);
 					}
 					updateDisabled.decrementAndGet();
@@ -185,38 +241,9 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			}
 		});
 
-		ImageView lookupFailImage = Images.EXCLAMATION.createImageView();
-		lookupFailImage.visibleProperty().bind(snomedIdValid.not());
-		conceptInvalidTooltip_ = new Tooltip("The specified concept was not found in the Snomed Database.");
-		Tooltip.install(lookupFailImage, conceptInvalidTooltip_);
-
-		snomedId.textProperty().addListener(new ChangeListener<String>()
-		{
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-			{
-				if (oldValue.length() > 0 && newValue.length() == 0)
-				{
-					snomedIdValid.set(true);
-					snomedId.setTooltip(null);
-					concept_ = null;
-					updateLegoList();
-				}
-
-				if (newValue.length() > 0)
-				{
-					if (updateDisabled.get() > 0)
-					{
-						return;
-					}
-					lookupsInProgress_.incrementAndGet();
-					lookupInProgress.invalidate();
-					WBUtility.lookupSnomedIdentifier(newValue, LegoFilterPaneController.this);
-				}
-			}
-		});
-
-		LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(snomedId);
+		setupConceptField(snomedId, snomedIdStack, CONCEPT_LOOKUP);
+		setupConceptField(advancedRelType, advancedRelTypeStack, CONCEPT_REL_TYPE_LOOKUP);
+		setupConceptField(advancedDestConcept, advancedDestConceptStack, CONCEPT_REL_DEST_LOOKUP);		
 
 		clearButton.setOnAction(new EventHandler<ActionEvent>()
 		{
@@ -226,24 +253,142 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 				clearFilter();
 			}
 		});
+	
+		advancedButton.setSelected(false);
+		advancedButton.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				toggleAdvanced();
+			}
+		});
+		toggleAdvanced();
 		
-		pi_ = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
-		pi_.visibleProperty().bind(lookupInProgress);
-		pi_.setPrefHeight(16.0);
-		pi_.setPrefWidth(16.0);
-		pi_.setMaxWidth(16.0);
-		pi_.setMaxHeight(16.0);
+		advancedTypeLegoPart.getItems().add(ANY);
+		advancedTypeLegoPart.getItems().add(DISCERNIBLE);
+		advancedTypeLegoPart.getItems().add(QUALIFIER);
+		advancedTypeLegoPart.getItems().add(VALUE);
+		advancedTypeLegoPart.getSelectionModel().select(0);
 		
-		snomedIdStack.getChildren().add(pi_);
-		StackPane.setAlignment(pi_, Pos.CENTER_RIGHT);
-		StackPane.setMargin(pi_, new Insets(0.0, 5.0, 0.0, 0.0));
-		snomedIdStack.getChildren().add(lookupFailImage);
+		advancedDestMatchType.getItems().add(IS);
+		advancedDestMatchType.getItems().add(CHILD_OF);
+		advancedDestMatchType.getSelectionModel().select(0);
+		
+		BooleanBinding enableAdvancedLegoRelLocation = new BooleanBinding()
+		{
+			{
+				bind(advancedDestConcept.textProperty(), advancedRelType.textProperty());
+			}
+			
+			@Override
+			protected boolean computeValue()
+			{
+				if (advancedDestConcept.textProperty().get().length() > 0 || advancedRelType.textProperty().get().length() > 0)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		};
+
+		advancedDestMatchType.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				updateLegoList();
+			}
+		});
+		
+		advancedTypeLegoPart.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				updateLegoList();
+			}
+		});
+
+		labelRelLocation.disableProperty().bind(enableAdvancedLegoRelLocation.not());
+		advancedTypeLegoPart.disableProperty().bind(enableAdvancedLegoRelLocation.not());
+
+		updateLegoList();
+	}
+	
+	private void setupConceptField(final TextField textField, StackPane stack, final Integer conceptId)
+	{
+		final ConceptGUIInfo info = new ConceptGUIInfo();
+		conceptInfo_[conceptId] = info;
+		
+		info.concept = null;
+		info.isValid = new SimpleBooleanProperty(true);
+		info.lookupUpdateTime = 0;
+		info.pi = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+		info.pi.visibleProperty().bind(info.isLookupInProgress);
+		info.pi.setPrefHeight(16.0);
+		info.pi.setPrefWidth(16.0);
+		info.pi.setMaxWidth(16.0);
+		info.pi.setMaxHeight(16.0);
+		info.tf = textField;
+		info.tooltip = new Tooltip("The specified concept was not found in the Snomed Database.");
+		
+		ImageView lookupFailImage = Images.EXCLAMATION.createImageView();
+		lookupFailImage.visibleProperty().bind(info.isValid.not());
+		Tooltip.install(lookupFailImage, info.tooltip);
+		
+		stack.getChildren().add(info.pi);
+		StackPane.setAlignment(info.pi, Pos.CENTER_RIGHT);
+		StackPane.setMargin(info.pi, new Insets(0.0, 5.0, 0.0, 0.0));
+		stack.getChildren().add(lookupFailImage);
 		StackPane.setAlignment(lookupFailImage, Pos.CENTER_RIGHT);
 		StackPane.setMargin(lookupFailImage, new Insets(0.0, 5.0, 0.0, 0.0));
 		
-		advancedButton.setDisable(true);
+		LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(textField);
+		
+		textField.textProperty().addListener(new ChangeListener<String>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				if (oldValue.length() > 0 && newValue.length() == 0)
+				{
+					info.isValid.set(true);
+					info.tf.setTooltip(null);
+					info.concept = null;
+					updateLegoList();
+				}
 
-		updateLegoList();
+				if (newValue.length() > 0)
+				{
+					if (updateDisabled.get() > 0)
+					{
+						return;
+					}
+					info.lookupsInProgress.incrementAndGet();
+					info.isLookupInProgress.invalidate();
+					WBUtility.lookupSnomedIdentifier(newValue, LegoFilterPaneController.this, conceptId);
+				}
+			}
+		});
+	}
+
+	private void toggleAdvanced()
+	{
+		if (advancedButton.isSelected())
+		{
+			if (borderPaneTopVbox.getChildren().get(1) != advancedPanel)
+			{
+				borderPaneTopVbox.getChildren().add(1, advancedPanel);
+			}
+		}
+		else if (borderPaneTopVbox.getChildren().get(1) == advancedPanel)
+		{
+			borderPaneTopVbox.getChildren().remove(1);
+		}
 	}
 
 	public synchronized void filterOnConcept(String conceptId)
@@ -254,13 +399,17 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		snomedId.setText(conceptId);
 		LegoGUI.getInstance().getLegoGUIController().showLegoLists();
 	}
-	
+
 	private void clearFilter()
 	{
 		updateDisabled.incrementAndGet();
 		pncsItem.getSelectionModel().select(0);
 		snomedId.setText("");
 		snomedId.setTooltip(null);
+		advancedTypeLegoPart.getSelectionModel().select(0);
+		advancedDestMatchType.getSelectionModel().select(0);
+		advancedRelType.setText("");
+		advancedDestConcept.setText("");
 		updateDisabled.decrementAndGet();
 		updateLegoList();
 	}
@@ -274,17 +423,25 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 
 		Integer pncsFilterId = null;
 		String pncsFilterValue = null;
-		if (!pncsItem.getSelectionModel().getSelectedItem().getName().equals(PncsItem.ANY))
+		if (!pncsItem.getSelectionModel().getSelectedItem().getName().equals(ANY))
 		{
 			pncsFilterId = pncsItem.getSelectionModel().getSelectedItem().getId();
 		}
-		if (!pncsValue.isDisable() && !pncsValue.getSelectionModel().getSelectedItem().equals(PncsItem.ANY))
+		if (!pncsValue.isDisable() && !pncsValue.getSelectionModel().getSelectedItem().equals(ANY))
 		{
 			pncsFilterValue = pncsValue.getSelectionModel().getSelectedItem();
 		}
+		
+		String advancedRelFilterLegoPart = null;
+		if (!advancedTypeLegoPart.getSelectionModel().getSelectedItem().equals(ANY))
+		{
+			advancedRelFilterLegoPart = advancedTypeLegoPart.getSelectionModel().getSelectedItem();
+		}
+		String advancedDestMatchTypePart = advancedDestMatchType.getSelectionModel().getSelectedItem();
 
 		ExpandedNode before = Utility.buildExpandedNodeHierarchy(ltv.getRoot());
-		LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot().getChildren(), pncsFilterId, pncsFilterValue, concept_);
+		LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot().getChildren(), pncsFilterId, pncsFilterValue, conceptInfo_[CONCEPT_LOOKUP].concept, 
+				advancedRelFilterLegoPart, conceptInfo_[CONCEPT_REL_TYPE_LOOKUP].concept, advancedDestMatchTypePart, conceptInfo_[CONCEPT_REL_DEST_LOOKUP].concept);
 		Utility.setExpandedStates(before, ltv.getRoot());
 		ltv.getSelectionModel().clearSelection();
 	}
@@ -312,24 +469,24 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			unique.put(pncs.getName() + pncs.getId(), new PncsItem(pncs, pncsNameOrId.valueProperty()));
 		}
 		pncsItem.getItems().clear();
-		pncsItem.getItems().addAll(new PncsItem(PncsItem.ANY, -1, pncsNameOrId.valueProperty()));
+		pncsItem.getItems().addAll(new PncsItem(ANY, -1, pncsNameOrId.valueProperty()));
 		pncsItem.getItems().addAll(unique.values());
 		FXCollections.sort(pncsItem.getItems(), new PncsItemComparator());
 		pncsItem.getSelectionModel().select(0);
 	}
 
 	@Override
-	public void lookupComplete(final Concept concept, final long submitTime)
+	public void lookupComplete(final Concept concept, final long submitTime, final Integer callId)
 	{
 		Platform.runLater(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				lookupsInProgress_.decrementAndGet();
-				lookupInProgress.invalidate();
+				conceptInfo_[callId].lookupsInProgress.decrementAndGet();
+				conceptInfo_[callId].isLookupInProgress.invalidate();
 
-				if (submitTime < lookupUpdateTime_)
+				if (submitTime < conceptInfo_[callId].lookupUpdateTime)
 				{
 					// Throw it away, we already got back a newer lookup.
 					logger.debug("throwing away a lookup");
@@ -337,25 +494,24 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 				}
 				else
 				{
-					lookupUpdateTime_ = submitTime;
+					conceptInfo_[callId].lookupUpdateTime = submitTime;
 				}
 
-				concept_ = concept;
-
-				if (concept_ != null)
+				conceptInfo_[callId].concept = concept;
+				
+				if (concept != null)
 				{
 					updateDisabled.incrementAndGet();
-					snomedId.setText(concept_.getDesc());
-					snomedId.setTooltip(new Tooltip(concept_.getDesc() + " " + (concept_.getSctid() != null ? concept_.getSctid() : "")));
+					conceptInfo_[callId].tf.setText(concept.getDesc());
+					conceptInfo_[callId].tf.setTooltip(new Tooltip(concept.getDesc() + " " + (concept.getSctid() != null ? concept.getSctid() : "")));
 					updateDisabled.decrementAndGet();
-					snomedIdValid.set(true);
+					conceptInfo_[callId].isValid.set(true);
 					updateLegoList();
 				}
 				else
 				{
-					concept_ = null;
-					snomedIdValid.set(false);
-					conceptInvalidTooltip_.setText("The specified concept was not found in the Snomed Database, and this value is not being used in the filter.");
+					conceptInfo_[callId].isValid.set(false);
+					conceptInfo_[callId].tooltip.setText("The specified concept was not found in the Snomed Database, and this value is not being used in the filter.");
 				}
 			}
 		});

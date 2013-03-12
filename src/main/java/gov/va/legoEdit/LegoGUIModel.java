@@ -11,6 +11,7 @@ import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.model.userPrefs.UserPreferences;
+import gov.va.legoEdit.storage.AdvancedLegoFilter;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
@@ -110,7 +111,8 @@ public class LegoGUIModel
 		return null;
 	}
 
-	public void initializeLegoListNames(ObservableList<TreeItem<String>> list, Integer pncsFilterId, String pncsFilterValue, Concept conceptFilter)
+	public void initializeLegoListNames(ObservableList<TreeItem<String>> list, Integer pncsFilterId, String pncsFilterValue, Concept conceptFilter, 
+			String relAppliesToLegoSection, Concept relTypeFilter, String destTypeFilter, Concept destFilter)
 	{
 		legoLists_ = list;
 		legoLists_.clear();
@@ -120,8 +122,8 @@ public class LegoGUIModel
 
 		if (pncsFilterId == null)
 		{
-			// no pncs filter
-			if (conceptFilter == null)
+			// no concept filter
+			if (conceptFilter == null && relTypeFilter == null && destFilter == null)
 			{
 				// No usable filter - get all - shortcircut the lego processing, just get the lists directly.
 				Iterator<LegoList> ll = BDBDataStoreImpl.getInstance().getLegoLists();
@@ -133,10 +135,29 @@ public class LegoGUIModel
 				}
 			}
 			else
-			// use the concept filter
 			{
-				legos.addAll(LegoReference.convert(BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(conceptFilter.getSctid() + "",
+				if (conceptFilter != null)
+				{
+					legos.addAll(LegoReference.convert(BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(conceptFilter.getSctid() + "",
 						conceptFilter.getUuid())));
+					
+				}
+				else if (relTypeFilter != null)
+				{
+					//start by matching legos anywhere, narrow down below.
+					legos.addAll(LegoReference.convert(BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(relTypeFilter.getSctid() + "",
+							relTypeFilter.getUuid())));
+				}
+				else
+				{
+					//start by matching legos anywhere, narrow down below.
+					legos.addAll(LegoReference.convert(BDBDataStoreImpl.getInstance().getLegosContainingConceptIdentifiers(destFilter.getSctid() + "",
+							destFilter.getUuid())));
+				}
+				
+				//Now apply each of the relation filters, removing things that don't match.
+				
+				AdvancedLegoFilter.removeNonMatchingRelType(legos, relTypeFilter, destFilter, destTypeFilter, relAppliesToLegoSection);
 			}
 		}
 		else
@@ -171,6 +192,8 @@ public class LegoGUIModel
 					}
 				}
 			}
+			
+			AdvancedLegoFilter.removeNonMatchingRelType(legos, relTypeFilter, destFilter, destTypeFilter, relAppliesToLegoSection);
 		}
 
 		// Don't filter unsaved legos - always include them.

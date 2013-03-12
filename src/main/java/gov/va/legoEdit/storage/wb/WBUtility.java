@@ -74,8 +74,9 @@ public class WBUtility
 
 	/**
 	 * Looks up the identifier (sctid or UUID).  Checks the pendingConcepts list if not found in Snomed.
+	 * @param callId is just an optional field that will be returned to the caller in the callback.
 	 */
-	public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback)
+	public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback, final Integer callId)
 	{
 		logger.debug("Threaded Lookup: '" + identifier + "'");
 		final long submitTime = System.currentTimeMillis();
@@ -85,7 +86,7 @@ public class WBUtility
 			public void run()
 			{
 				Concept c = lookupSnomedIdentifier(identifier);
-				callback.lookupComplete(c, submitTime);
+				callback.lookupComplete(c, submitTime, callId);
 			}
 		};
 		tpe.execute(r);

@@ -251,7 +251,7 @@ public class ConceptNode implements ConceptLookupCallback
 		
 		lookupsInProgress_.incrementAndGet();
 		lookupInProgress.invalidate();
-		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this);
+		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this, null);
 	}
 
 	public Node getNode()
@@ -280,7 +280,7 @@ public class ConceptNode implements ConceptLookupCallback
 	}
 
 	@Override
-	public void lookupComplete(final Concept concept, final long submitTime)
+	public void lookupComplete(final Concept concept, final long submitTime, Integer callId)
 	{
 		Platform.runLater(new Runnable()
 		{
