@@ -22,7 +22,7 @@ import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.storage.util.BDBIterator;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -814,13 +814,13 @@ public class BDBDataStoreTest
 	}
 
 	@Test
-	public void testStoreRetreive() throws WriteException, FileNotFoundException, JAXBException
+	public void testStoreRetreive() throws WriteException, JAXBException, IOException
 	{
-		LegoList initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("/badDay.xml").getFile()));
+		LegoList initial = LegoXMLUtils.readLegoList(BDBDataStoreTest.class.getResource("/badDay.xml").openStream());
 		BDBDataStoreImpl.getInstance().importLegoList(initial);
 
 		// reread, just incase
-		initial = LegoXMLUtils.readLegoList(new File(BDBDataStoreTest.class.getResource("/badDay.xml").getFile()));
+		initial = LegoXMLUtils.readLegoList(BDBDataStoreTest.class.getResource("/badDay.xml").openStream());
 		LegoList readBack = BDBDataStoreImpl.getInstance().getLegoListByID(initial.getLegoListUUID());
 
 		assertTrue(SchemaEquals.equals(initial, readBack));
