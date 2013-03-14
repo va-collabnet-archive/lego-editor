@@ -303,10 +303,10 @@ public class LegoGUIController implements Initializable
 			public void handle(WindowEvent event)
 			{
 				// Note - this is broke with javafx < 2.2.6 (which isn't released yet - currently beta - with the 1.7.0_12 early access release)
+				//double note - it seems broken again in 2.2.7.  Sigh.  Supposedly only impacts linux, so, no herorics are being done here.
 				// http://javafx-jira.kenai.com/browse/RT-25528
 				shutdown();
 				event.consume();
-
 			}
 		});
 
