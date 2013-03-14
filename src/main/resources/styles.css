@@ -1,42 +1,33 @@
-
 .boldLabel {
-    -fx-font-weight: bold;
+	-fx-font-weight: bold;
 }
 
 .titleLabel {
-    -fx-font-weight: bold;
-    -fx-font-size: 16;
+	-fx-font-weight: bold;
+	-fx-font-size: 16;
 }
 
 .headerBackground {
-    -fx-background-color: linear-gradient(#98a8bd 0%, #8195af 25%, #6d86a4 100%);
+	-fx-background-color: linear-gradient(#98a8bd 0%, #8195af 25%, #6d86a4 100%);
 }
 
 .tab-pane *.tab-header-background {
-    -fx-background-color: linear-gradient(#98a8bd 0%, #8195af 25%, #6d86a4 100%);
+	-fx-background-color: linear-gradient(#98a8bd 0%, #8195af 25%, #6d86a4 100%);
 }
 
-.menu .label
-{
-    -fx-text-fill: black;
+.menu .label {
+	-fx-text-fill: black;
 }
 
 .menu-bar {
-    -fx-background-color: lightgrey;
+	-fx-background-color: lightgrey;
 }
 
-.selectedLego
-{
-    -fx-effect: innershadow(two-pass-box , deepskyblue , 15, 0.0 , 0 , 0);
+.dialogBackground {
+	-fx-background-color: linear-gradient(lightGrey, darkGrey);
 }
 
-.dialogBackground
-{
-	-fx-background-color: linear-gradient(lightGrey,darkGrey);
-}
-
-.itemBorder
-{
+.itemBorder {
 	-fx-border-color: grey;
 	-fx-border-width: 2;
 	-fx-border-insets: 4;
@@ -45,5 +36,9 @@
 }
 
 .tree-cell {
-    -fx-indent: 20;
+	-fx-indent: 20;
+}
+
+.label {
+	-fx-font-size: 14;
 }
