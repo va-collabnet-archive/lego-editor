@@ -59,6 +59,7 @@ public class ConceptNode implements ConceptLookupCallback
 
 	private HBox hbox_;
 	private ComboBox<ComboBoxConcept> cb_;
+	private LookAheadConceptPopup popup;
 	private Label typeLabel_;
 	private ProgressIndicator pi_;
 	private ImageView lookupFailImage_;
@@ -81,6 +82,7 @@ public class ConceptNode implements ConceptLookupCallback
 
 	public ConceptNode(String typeLabel, Concept c, ConceptUsageType cut, LegoTreeItem lti, LegoTreeView legoTreeView)
 	{
+		popup = new LookAheadConceptPopup();
 		c_ = c;
 		legoTreeView_ = legoTreeView;
 		lti_ = lti;
@@ -158,6 +160,18 @@ public class ConceptNode implements ConceptLookupCallback
 		{
 			isValid.set(false);
 		}
+
+		cb_.addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
+			public void handle(KeyEvent event) {
+				if (!event.isAltDown()
+					|| !event.isControlDown()
+					|| !event.isMetaDown()
+					|| !event.isShiftDown()
+					|| !event.isShortcutDown()) {
+					showPopup();
+				}
+			}
+		});
 
 		cb_.valueProperty().addListener(new ChangeListener<ComboBoxConcept>()
 		{
@@ -388,5 +402,9 @@ public class ConceptNode implements ConceptLookupCallback
 				updateGUI();
 			}
 		});
+	}
+
+	private void showPopup() {
+		popup.showPopup(cb_);
 	}
 }

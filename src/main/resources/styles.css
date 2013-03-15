@@ -41,4 +41,31 @@
 
 .label {
 	-fx-font-size: 14;
+
+.lookupSearchResultsStyle-A {
+	-fx-background-color: white;
+	-fx-border-color: black;
+	-fx-border-width: 2;
+	-fx-border-insets: 4;
+	-fx-border-radius: 5;
+	-fx-padding: 1;
+}
+
+.lookupSearchResultsStyle-B {
+	-fx-background-color: lightgrey;
+	-fx-border-color: black;
+	-fx-border-width: 2;
+	-fx-border-insets: 4;
+	-fx-border-radius: 5;
+	-fx-padding: 1;
+}
+
+.lookupSearchResultsStyle-Selected {
+	-fx-background-color: HoneyDew;
+	-fx-border-color: black;
+	-fx-border-width: 2;
+	-fx-border-insets: 4;
+	-fx-border-radius: 5;
+	-fx-padding: 1;
+}
 }
