@@ -1,5 +1,7 @@
 package gov.va.legoEdit;
 
+import edu.stanford.ejalbert.BrowserLauncher;
+import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.formats.UserPrefsXMLUtils;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
@@ -19,6 +21,8 @@ import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.util.UnsavedLegos;
 import gov.va.legoEdit.util.Utility;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,8 +34,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.sun.javafx.scene.control.skin.TreeViewSkin;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 
 /**
  * 
@@ -121,14 +131,30 @@ public class LegoGUIModel
 	 * Assumed to be called on the FXThread, but does the work in the background.  Pass in a boolean property
 	 * (which will be set to false) when the background thread completes its work.
 	 */
-	public void initializeLegoListNames(final TreeItem<String> treeRoot, final Integer pncsFilterId, final String pncsFilterValue, final Concept conceptFilter, 
+	public void initializeLegoListNames(final TreeView<String> treeView, final Integer pncsFilterId, final String pncsFilterValue, final Concept conceptFilter, 
 			final String relAppliesToLegoSection, final Concept relTypeFilter, final String destTypeFilter, final Concept destFilter, 
 			final BooleanProperty setFalseWhenFinished)
 	{
-		final ExpandedNode before = gov.va.legoEdit.gui.util.Utility.buildExpandedNodeHierarchy(treeRoot);
-		legoLists_ = treeRoot.getChildren();
+		final ExpandedNode before = gov.va.legoEdit.gui.util.Utility.buildExpandedNodeHierarchy(treeView.getRoot());
+		legoLists_ =  treeView.getRoot().getChildren();
 		legoLists_.clear();
-
+		
+		
+		int targetScrollPos = 0;
+		//Now this is a hack....
+		if (treeView.getChildrenUnmodifiable().size() > 0)
+		{
+			TreeViewSkin<?> tks = ((TreeViewSkin<?>)treeView.getChildrenUnmodifiable().get(0));
+			if (tks.getChildrenUnmodifiable().size() > 0)
+			{
+				VirtualFlow vf = (VirtualFlow)tks.getChildrenUnmodifiable().get(0);
+				targetScrollPos = vf.getFirstVisibleCell().getIndex() 
+						+ (int)Math.floor(((double)(vf.getLastVisibleCell().getIndex() - vf.getFirstVisibleCell().getIndex())) / 2.0);
+			}
+		}
+		
+		final int scrollTo = (targetScrollPos > 0 ? targetScrollPos : 0);
+		
 		Runnable r = new Runnable()
 		{
 			@Override
@@ -275,7 +301,11 @@ public class LegoGUIModel
 						{
 							setFalseWhenFinished.set(false);
 						}
-						gov.va.legoEdit.gui.util.Utility.setExpandedStates(before, treeRoot);
+						gov.va.legoEdit.gui.util.Utility.setExpandedStates(before, treeView.getRoot());
+						//For some reason, scroll to doesn't work unless you select first
+						treeView.getSelectionModel().clearAndSelect(scrollTo);
+						treeView.scrollTo(scrollTo);
+						treeView.getSelectionModel().clearSelection();
 					}
 				});
 			}
@@ -328,5 +358,80 @@ public class LegoGUIModel
 		LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().rebuildDBStats();
 		LegoGUI.getInstance().getLegoGUIController().removeNewLego(legoReference.getUniqueId());
 		updateLegoLists();
+	}
+	
+	
+	public void viewLegoListInBrowser(final String legoListUUID)
+	{
+		Runnable r = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					LegoList ll = BDBDataStoreImpl.getInstance().getLegoListByID(legoListUUID);
+					File f = File.createTempFile(ll.getGroupName() + "-", ".html");
+					FileOutputStream fos = new FileOutputStream(f);
+					
+					TransformerFactory tf = TransformerFactory.newInstance();
+					Transformer transformer = tf.newTransformer(new StreamSource(LegoXMLUtils.class.getResourceAsStream("/xslTransforms/LegoListToXHTML.xslt")));
+					
+					LegoXMLUtils.transform(ll, fos, transformer, true);
+					
+					BrowserLauncher bl = new BrowserLauncher();
+					bl.openURLinBrowser(f.toURI().toURL().toString());
+					
+					//This is the sun way... but it spews crap all over the console.
+					//Desktop.getDesktop().browse(f.toURI());
+					
+					Thread.sleep(10000);
+					
+					f.delete();
+				}
+				catch (Exception e)
+				{
+					logger.error("Error launching web browser", e);
+				}
+			}
+		};
+		Utility.tpe.execute(r);
+	}
+	
+	public void viewLegoInBrowser(final String legoUUID, final String stampUUID)
+	{
+		Runnable r = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					Lego l = BDBDataStoreImpl.getInstance().getLego(legoUUID, stampUUID);
+					File f = File.createTempFile(l.getLegoUUID() + "-", ".html");
+					FileOutputStream fos = new FileOutputStream(f);
+					
+					TransformerFactory tf = TransformerFactory.newInstance();
+					Transformer transformer = tf.newTransformer(new StreamSource(LegoXMLUtils.class.getResourceAsStream("/xslTransforms/LegoToXHTML.xslt")));
+					
+					LegoXMLUtils.transform(l, fos, transformer, true);
+					
+					BrowserLauncher bl = new BrowserLauncher();
+					bl.openURLinBrowser(f.toURI().toURL().toString());
+					
+					//This is the sun way... but it spews crap all over the console.
+					//Desktop.getDesktop().browse(f.toURI());
+					
+					Thread.sleep(10000);
+					
+					f.delete();
+				}
+				catch (Exception e)
+				{
+					logger.error("Error launching web browser", e);
+				}
+			}
+		};
+		Utility.tpe.execute(r);
 	}
 }

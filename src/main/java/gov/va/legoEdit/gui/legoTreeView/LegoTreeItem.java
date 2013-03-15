@@ -202,7 +202,7 @@ public class LegoTreeItem extends TreeItem<String>
 
 		if (a.getTiming() != null)
 		{
-			getChildren().add(new LegoTreeItem(a.getTiming(), LegoTreeNodeType.timingMeasurement));
+			getChildren().add(new LegoTreeItem(a.getTiming(), "Timing"));
 		}
 		if (a.getValue() == null)
 		{
@@ -223,7 +223,7 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		else if (value.getMeasurement() != null)
 		{
-			getChildren().add(new LegoTreeItem(value.getMeasurement(), LegoTreeNodeType.measurement));
+			getChildren().add(new LegoTreeItem(value.getMeasurement(), "Measurement"));
 		}
 		else if (value.getText() != null)
 		{
@@ -235,48 +235,26 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 	}
 
-	public LegoTreeItem(Measurement measurement, LegoTreeNodeType type)
+	public LegoTreeItem(Measurement measurement, String label)
 	{
-		if (type == LegoTreeNodeType.point)
+		extraData_ = measurement;
+		setValue(label);  //Expected to be Timing or Measurement
+		
+		if (measurement.getPoint() != null)
 		{
-			setValue("Point");
-			ltnt_ = LegoTreeNodeType.point;
-			extraData_ = measurement;
+			ltnt_ = LegoTreeNodeType.measurementPoint;
 		}
-		else if (type == LegoTreeNodeType.bound)
+		else if (measurement.getInterval() != null)
 		{
-			setValue("Bound");
-			ltnt_ = LegoTreeNodeType.bound;
-			extraData_ = measurement;
+			ltnt_ = LegoTreeNodeType.measurementInterval;
 		}
-		else if (type == LegoTreeNodeType.interval)
+		else if (measurement.getBound() != null)
 		{
-			setValue("Interval");
-			ltnt_ = LegoTreeNodeType.interval;
-			extraData_ = measurement;
+			ltnt_ = LegoTreeNodeType.measurementBound;
 		}
 		else
 		{
-			setValue(type == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement");
-			ltnt_ = type;
-			extraData_ = measurement;
-
-			if (measurement.getUnits() != null && measurement.getUnits().getConcept() != null)
-			{
-				getChildren().add(new LegoTreeItem(measurement.getUnits().getConcept(), LegoTreeNodeType.conceptOptional));
-			}
-			if (measurement.getInterval() != null)
-			{
-				getChildren().add(new LegoTreeItem(measurement, LegoTreeNodeType.interval));
-			}
-			else if (measurement.getPoint() != null)
-			{
-				getChildren().add(new LegoTreeItem(measurement, LegoTreeNodeType.point));
-			}
-			else if (measurement.getBound() != null)
-			{
-				getChildren().add(new LegoTreeItem(measurement, LegoTreeNodeType.bound));
-			}
+			ltnt_ = LegoTreeNodeType.measurementEmpty;
 		}
 	}
 
@@ -301,7 +279,7 @@ public class LegoTreeItem extends TreeItem<String>
 			t.setConcept(c);
 		}
 
-		getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.concept));
+		//no node for type, it is rendered on the asssertion component line
 		extraData_ = ac;
 	}
 
@@ -322,11 +300,8 @@ public class LegoTreeItem extends TreeItem<String>
 			Concept c = new Concept();
 			expression.setConcept(c);
 		}
-
-		if (expression.getConcept() != null)
-		{
-			getChildren().add(new LegoTreeItem(expression.getConcept(), LegoTreeNodeType.concept));
-		}
+		
+		//no node for single concept, that is rendered on the expression line
 
 		if (expression.getExpression().size() > 0)
 		{
@@ -395,8 +370,9 @@ public class LegoTreeItem extends TreeItem<String>
 			c = new Concept();
 			t.setConcept(c);
 		}
-		getChildren().add(new LegoTreeItem(c, LegoTreeNodeType.concept));
 
+		//No node for type, it is rendered on the Relation line
+		
 		Destination d = r.getDestination();
 		if (d == null)
 		{
@@ -410,7 +386,7 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		else if (d.getMeasurement() != null)
 		{
-			getChildren().add(new LegoTreeItem(d.getMeasurement(), LegoTreeNodeType.measurement));
+			getChildren().add(new LegoTreeItem(d.getMeasurement(), "Measurement"));
 		}
 		else if (d.getText() != null)
 		{
@@ -441,6 +417,14 @@ public class LegoTreeItem extends TreeItem<String>
 		return ltnt_;
 	}
 
+	/**
+	 * use caution changing this... only here for measurement support.
+	 */
+	protected void setNodeType(LegoTreeNodeType type)
+	{
+		ltnt_ = type;
+	}
+	
 	public Object getExtraData()
 	{
 		return extraData_;
@@ -482,7 +466,6 @@ public class LegoTreeItem extends TreeItem<String>
 	{
 		if (LegoTreeNodeType.pncsName  == ltnt_ || LegoTreeNodeType.pncsValue == ltnt_ || LegoTreeNodeType.legoListByReference == ltnt_
 				|| LegoTreeNodeType.blankLegoEndNode == ltnt_ || LegoTreeNodeType.blankLegoListEndNode == ltnt_ 
-				|| LegoTreeNodeType.point == ltnt_ || LegoTreeNodeType.interval == ltnt_ || LegoTreeNodeType.bound == ltnt_
 				|| LegoTreeNodeType.legoReference == ltnt_ || LegoTreeNodeType.status == ltnt_ || LegoTreeNodeType.comment == ltnt_)
 		{
 			invalidReason_ = null;
@@ -535,11 +518,10 @@ public class LegoTreeItem extends TreeItem<String>
 	protected void updateValidityImage()
 	{
 		//add the exclamation - but not on nodes that handle it themselves
-		if (treeNodeGraphic != null && LegoTreeNodeType.concept != ltnt_ && LegoTreeNodeType.conceptOptional != ltnt_
-				&& LegoTreeNodeType.assertionUUID != ltnt_ && LegoTreeNodeType.text != ltnt_)
+		if (treeNodeGraphic != null && LegoTreeNodeType.concept != ltnt_ && LegoTreeNodeType.assertionUUID != ltnt_ && LegoTreeNodeType.text != ltnt_)
 		{
 			if (isValid() && areChildrenValid())
-			{
+ 			{
 				if (treeNodeGraphic.getChildren().size() > 0 && treeNodeGraphic.getChildren().get(0) instanceof InvalidNode)
 				{
 					treeNodeGraphic.getChildren().remove(0);

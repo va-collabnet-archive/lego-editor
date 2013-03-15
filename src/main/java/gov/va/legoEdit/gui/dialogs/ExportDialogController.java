@@ -5,8 +5,6 @@ import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.util.Utility;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,11 +39,9 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.tidy.Tidy;
 
 public class ExportDialogController implements Initializable
 {
@@ -202,7 +198,7 @@ public class ExportDialogController implements Initializable
 					}
 					else if (exportType.getSelectionModel().getSelectedIndex() == 1)
 					{
-						ss = new StreamSource(LegoXMLUtils.class.getResourceAsStream("/xslTransforms/toXHTML.xslt"));
+						ss = new StreamSource(LegoXMLUtils.class.getResourceAsStream("/xslTransforms/LegoListToXHTML.xslt"));
 					}
 					else if (exportType.getSelectionModel().getSelectedIndex() == 2)
 					{
@@ -330,7 +326,7 @@ public class ExportDialogController implements Initializable
 		private StreamSource xslExportTransform;
 		String fileExtension;
 		Transformer transformer = null;
-		Tidy tidy = null;
+		boolean useTidy = false;
 
 		public ExportRunnable(File exportTo, StreamSource xslExportTransform, String fileExtension)
 		{
@@ -358,13 +354,7 @@ public class ExportDialogController implements Initializable
 				}
 				if (exportType.getSelectionModel().getSelectedIndex() == 1)
 				{
-					tidy = new Tidy();
-					tidy.setXHTML(true);
-					tidy.setIndentContent(true);
-					tidy.setSmartIndent(true);
-					tidy.setXmlTags(true);
-					tidy.setWraplen(150);
-					tidy.setQuiet(true);
+					useTidy = true;
 				}
 
 				if (legoListsToExport == null)
@@ -453,26 +443,8 @@ public class ExportDialogController implements Initializable
 			FileOutputStream fos = null;
 			try
 			{
-				String legoListAsXML = LegoXMLUtils.toXML(ll);
 				fos = new FileOutputStream(new File(exportTo, ll.getGroupName() + fileExtension));
-				if (transformer != null)
-				{
-					ByteArrayInputStream bais = new ByteArrayInputStream(legoListAsXML.getBytes());
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					transformer.transform(new StreamSource(bais), new StreamResult(baos));
-					if (tidy != null)
-					{
-						tidy.parse(new ByteArrayInputStream(baos.toByteArray()), fos);
-					}
-					else
-					{
-						fos.write(baos.toByteArray());
-					}
-				}
-				else
-				{
-					fos.write(legoListAsXML.getBytes());
-				}
+				LegoXMLUtils.transform(ll, fos, transformer, useTidy);
 			}
 			catch (Exception e)
 			{

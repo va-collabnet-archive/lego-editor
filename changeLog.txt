@@ -1,6 +1,27 @@
 Lego Editor Change Log
-2013/03/?? - 0.57
+2013/03/14 - 0.57
   *  Fixed the summary view on/off switch so it takes effect on Legos that are already open.
+  *  Fixed the behavior of the left arrow key in the concept combo-box editors
+  *  Changed the behavior of the concept combo-box editors so that you don't lose the entire entry if 
+  		the lookup fails. 
+  *  Fixed a null pointer that could happen during certain copy operations
+  *  Fixed a null pointer in the interval validator that could happen after a particular sequence
+  		of add and remove operations.
+  *  Fixed the LegoList tree so that you don't lose the scroll position everytime the filter is reapplied
+  		(after adding a new Lego, or saving changes to a lego, for example)
+  *  Fixed the auto-sizing of the error display dialog.
+  *  Fixed a bug that would cause the editor to not display relations and relation groups properly after 
+  		an expression was removed from a conjunction which only contained 2 expressions.
+  *  Various spacing and alignment fixes for various nodes in the editor area.
+  *  Add the ability to view Lego Lists and Legos in the system web browser.
+  *  artf227502 Reworked parts of the lego editor so some fields take up less vertical space.
+  		AssertionComponents now put the type editor on the same line as the label.
+  		Expressions that are simple (only one concept) are now displayed on a single line.
+  		The Relation Type field is now displayed on the first Relation line, rather than on a line by itself.
+  		The Measurement editor now displays on a single line for the Point case, and the Units field
+  		was moved up to the first line for the interval and bounds cases.  Also, the Interval and Bound
+  		editor is no longer a distinct tree node, they are part of the Measurement tree node, so less
+  		nodes to expand.
   *  artf227526 Add support for more advanced filtering - namely rel type and target filters, including
   		child of concept X filters for rel destination.
 

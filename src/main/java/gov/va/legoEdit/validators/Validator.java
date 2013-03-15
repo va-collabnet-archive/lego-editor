@@ -97,12 +97,20 @@ public class Validator
 		try
 		{
 			UUID.fromString(ac.getAssertionUUID());
-			return null;
+			
+			//Also validate the type, since there is no longer a special node for type.
+			if (ac.getType() == null)
+			{
+				return "Assertion Components are required to have a type";
+			}
+			
+			return validate(ac.getType().getConcept(), lti);
 		}
 		catch (Exception e)
 		{
 			return "The provided value is not a valid UUID";
 		}
+		
 	}
 
 	public static String validate(Value value, LegoTreeItem lti)
@@ -192,8 +200,10 @@ public class Validator
 		}
 		else if (measurement.getInterval() != null)
 		{
-			if (!hasValue(measurement.getInterval().getLowerBound().getLowerPoint()) && !hasValue(measurement.getInterval().getLowerBound().getUpperPoint())
-					&& !hasValue(measurement.getInterval().getUpperBound().getLowerPoint()) && !hasValue(measurement.getInterval().getUpperBound().getUpperPoint()))
+			if ((measurement.getInterval().getLowerBound() == null || 
+					!hasValue(measurement.getInterval().getLowerBound().getLowerPoint()) && !hasValue(measurement.getInterval().getLowerBound().getUpperPoint()))
+					&& (measurement.getInterval().getUpperBound() == null || 
+					!hasValue(measurement.getInterval().getUpperBound().getLowerPoint()) && !hasValue(measurement.getInterval().getUpperBound().getUpperPoint())))
 			{
 				return "At least one value must be specified";
 			}
@@ -256,6 +266,12 @@ public class Validator
 		{
 			return "An expression must contain 1 or more concepts";
 		}
+		if (e.getConcept() != null && e.getExpression().size() == 0)
+		{
+			//The concept is displayed on the expression node in these cases.
+			//also need to validate the concept
+			return validate(e.getConcept(), lti);
+		}
 
 		return null;
 	}
@@ -272,7 +288,8 @@ public class Validator
 		{
 			return "A Relationship must have a Destination";
 		}
-		return null;
+		//also validate the type concept, because it doesn't have its own node anymore.
+		return validate(r.getType().getConcept(), lti);
 	}
 	
 	public static String validate(RelationGroup rg, LegoTreeItem lti)

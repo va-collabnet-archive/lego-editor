@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +37,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.tidy.Tidy;
 import org.xml.sax.SAXException;
 
 /**
@@ -48,6 +50,7 @@ public class LegoXMLUtils
 	static Schema schema;
 	static JAXBContext jc;
 	static Transformer xmlToHTMLTransformer;
+	static Tidy htmlTidy = null;
 
 	static
 	{
@@ -238,5 +241,66 @@ public class LegoXMLUtils
 			}
 		};
 		Utility.tpe.execute(r);
+	}
+	
+	public static Tidy getTidy()
+	{
+		if (htmlTidy == null)
+		{
+			htmlTidy = new Tidy();
+			htmlTidy.setXHTML(true);
+			htmlTidy.setIndentContent(true);
+			htmlTidy.setSmartIndent(true);
+			htmlTidy.setXmlTags(true);
+			htmlTidy.setWraplen(150);
+			htmlTidy.setQuiet(true);
+		}
+		return htmlTidy;
+	}
+	
+	public static void transform(LegoList ll, FileOutputStream target, Transformer transformer, boolean tidyHtml ) throws IOException, TransformerException, PropertyException, JAXBException
+	{
+		String legoListAsXML = toXML(ll);
+		if (transformer != null)
+		{
+			ByteArrayInputStream bais = new ByteArrayInputStream(legoListAsXML.getBytes());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			transformer.transform(new StreamSource(bais), new StreamResult(baos));
+			if (tidyHtml)
+			{
+				getTidy().parse(new ByteArrayInputStream(baos.toByteArray()), target);
+			}
+			else
+			{
+				target.write(baos.toByteArray());
+			}
+		}
+		else
+		{
+			target.write(legoListAsXML.getBytes());
+		}
+	}
+	
+	public static void transform(Lego l, FileOutputStream target, Transformer transformer, boolean tidyHtml ) throws IOException, TransformerException, PropertyException, JAXBException
+	{
+		String legoAsXML = toXML(l);
+		if (transformer != null)
+		{
+			ByteArrayInputStream bais = new ByteArrayInputStream(legoAsXML.getBytes());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			transformer.transform(new StreamSource(bais), new StreamResult(baos));
+			if (tidyHtml)
+			{
+				getTidy().parse(new ByteArrayInputStream(baos.toByteArray()), target);
+			}
+			else
+			{
+				target.write(baos.toByteArray());
+			}
+		}
+		else
+		{
+			target.write(legoAsXML.getBytes());
+		}
 	}
 }

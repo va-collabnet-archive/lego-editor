@@ -62,6 +62,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -259,7 +260,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				{
 					HBox hbox = new HBox();
 					hbox.setSpacing(10.0);
-					hbox.setAlignment(Pos.CENTER_LEFT);
 
 					Label status = new Label("Status");
 					hbox.getChildren().add(status);
@@ -340,7 +340,25 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.assertionComponent)
 				{
+					AssertionComponent ac = (AssertionComponent)treeItem.getExtraData();
 					addMenus((AssertionComponent) treeItem.getExtraData(), treeItem, cm);
+					if (treeItem.isExpanded())
+					{
+						final ConceptNode cn = new ConceptNode("Type", ac.getType().getConcept(), ConceptUsageType.TYPE, treeItem, treeView);
+						final ContextMenu typeMenu = new ContextMenu();
+						addMenus(ac.getType().getConcept(), cn, treeItem, typeMenu);
+						cn.getNode().setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
+						{
+							@Override
+							public void handle(ContextMenuEvent event)
+							{
+								typeMenu.show(cn.getNode(), event.getScreenX(), event.getScreenY());
+								event.consume(); //prevent the node menu - also see hack code inside ConceptNode which suppresses lower down menus
+							}
+						});
+						nodeBox.getChildren().add(Utility.prependLabel(treeItem.getValue(), cn.getNode(), 5.0));
+						HBox.setHgrow(cn.getNode(), Priority.SOMETIMES);
+					}
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.comment)
 				{
@@ -357,7 +375,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 							treeView.contentChanged(null);
 						}
 					});
-					nodeBox.getChildren().add(Utility.prependLabel(treeItem.getValue(), tf));
+					nodeBox.getChildren().add(Utility.prependLabel(treeItem.getValue(), tf, 5.0));
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.assertionUUID)
 				{
@@ -392,26 +410,156 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					StackPane.setAlignment(invalidImage, Pos.CENTER_RIGHT);
 					StackPane.setMargin(invalidImage, new Insets(0.0, 5.0, 0.0, 0.0));
 					
-					nodeBox.getChildren().add(Utility.prependLabel("Assertion UUID", sp));
+					nodeBox.getChildren().add(Utility.prependLabel("Assertion UUID", sp, 5.0));
 					addMenus(LegoTreeNodeType.assertionUUID, ac, cm, treeItem);
 				}
-				else if (treeItem.getNodeType() == LegoTreeNodeType.measurement || treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement)
+				else if (treeItem.getNodeType() == LegoTreeNodeType.measurementEmpty|| treeItem.getNodeType() == LegoTreeNodeType.measurementBound
+						|| treeItem.getNodeType() == LegoTreeNodeType.measurementInterval || treeItem.getNodeType() == LegoTreeNodeType.measurementPoint)
 				{
-					DropTargetLabel dtl;
-					if (!treeItem.isExpanded())
+					final Measurement m = (Measurement) treeItem.getExtraData();
+					Node editor = null;
+					
+					if (treeItem.getNodeType() == LegoTreeNodeType.measurementPoint)
 					{
-						dtl = new DropTargetLabel(treeItem.getValue() + sep + SchemaSummary.summary((Measurement) treeItem.getExtraData()), cm);
-						nodeBox.getChildren().add(dtl);
+						PointNode pn = new PointNode(m, PointNode.PointNodeType.point, treeView, treeItem);
+						editor = pn.getNode();
+					}
+					else if (treeItem.getNodeType() == LegoTreeNodeType.measurementBound)
+					{
+						if (m.getBound() == null)
+						{
+							m.setBound(new Bound());
+						}
+						
+						PointNode low = new PointNode(m, PointNodeType.boundLow, treeView, treeItem);
+						PointNode high = new PointNode(m, PointNodeType.boundHigh, treeView, treeItem);
+						low.setPartnerNodes(high);
+						high.setPartnerNodes(low);
+						editor = makeBoundNode("Bound", m.getBound(), low, high);
+					}
+					else if (treeItem.getNodeType() == LegoTreeNodeType.measurementInterval)
+					{
+						if (m.getInterval() == null)
+						{
+							m.setInterval(new Interval());
+						}
+						if (m.getInterval().getLowerBound() == null)
+						{
+							m.getInterval().setLowerBound(new Bound());
+						}
+						if (m.getInterval().getUpperBound() == null)
+						{
+							m.getInterval().setUpperBound(new Bound());
+						}
+						
+						PointNode lowLow = new PointNode(m, PointNodeType.intervalLowBoundLow, treeView, treeItem);
+						PointNode lowHigh = new PointNode(m, PointNodeType.intervalLowBoundHigh, treeView, treeItem);
+						PointNode highLow = new PointNode(m, PointNodeType.intervalHighBoundLow, treeView, treeItem);
+						PointNode highHigh = new PointNode(m, PointNodeType.intervalHighBoundHigh, treeView, treeItem);
+
+						lowLow.setPartnerNodes(lowHigh, highLow, highHigh);
+						lowHigh.setPartnerNodes(lowLow, highLow, highHigh);
+						highLow.setPartnerNodes(lowLow, lowHigh, highHigh);
+						highHigh.setPartnerNodes(lowLow, lowHigh, highLow);
+						
+						Node boundLow = makeBoundNode("Lower Bound", m.getInterval().getLowerBound(), lowLow, lowHigh);
+						Node boundHigh = makeBoundNode("Upper Bound", m.getInterval().getUpperBound(), highLow, highHigh);
+
+						VBox vbox = new VBox();
+						vbox.setSpacing(5.0);
+						vbox.getChildren().add(boundLow);
+						vbox.getChildren().add(boundHigh);
+						editor = vbox;
 					}
 					else
 					{
-						dtl = new DropTargetLabel(treeItem.getValue(), cm);
-						nodeBox.getChildren().add(dtl);
+						//no editor
 					}
-
-					addMenus((Measurement) treeItem.getExtraData(), treeItem, cm, dtl);
+					
+					Node units = null;
+					
+					if (m.getUnits() != null && m.getUnits().getConcept() != null)
+					{
+						ConceptUsageType cut = ConceptUsageType.UNITS;
+						ConceptNode cn = new ConceptNode("Units", m.getUnits().getConcept(), cut, treeItem, treeView);
+						final Node localUnits = cn.getNode();
+						units = localUnits;
+						final ContextMenu unitsMenu = new ContextMenu();
+						addMenus(m.getUnits().getConcept(), cn, treeItem, unitsMenu);
+						units.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
+						{
+							@Override
+							public void handle(ContextMenuEvent event)
+							{
+								unitsMenu.show(localUnits, event.getScreenX(), event.getScreenY());
+								event.consume(); //prevent the node menu - also see hack code inside ConceptNode which suppresses lower down menus
+							}
+						});
+					}
+					
+					if (editor != null)
+					{
+						final Node localEditor = editor;
+						final ContextMenu editorMenu = new ContextMenu();
+						addMenus(m, treeItem, editorMenu);
+						editor.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
+						{
+							@Override
+							public void handle(ContextMenuEvent event)
+							{
+								editorMenu.show(localEditor, event.getScreenX(), event.getScreenY());
+								event.consume(); //prevent the node menu
+							}
+						});
+					}
+					
+					DropTargetLabel dtl = new DropTargetLabel(treeItem.getValue(), cm);
+					addMenus(m, treeItem, cm, dtl);
 					LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), dtl);
-
+					
+					VBox vBox = new VBox();
+					vBox.setSpacing(5.0);
+					
+					
+					HBox firstRow = new HBox();
+					firstRow.setFillHeight(true);
+					firstRow.setSpacing(5.0);
+					firstRow.getChildren().add(dtl);
+					dtl.setMaxHeight(Double.MAX_VALUE);
+					dtl.setAlignment(Pos.CENTER_LEFT);
+					
+					if (editor != null)
+					{
+						if (treeItem.getNodeType() == LegoTreeNodeType.measurementEmpty|| treeItem.getNodeType() == LegoTreeNodeType.measurementPoint)
+						{
+							firstRow.getChildren().add(editor);
+							HBox.setHgrow(editor, Priority.SOMETIMES);
+						}
+					}
+					else
+					{
+						Label l = new Label("<null measurement>");
+						firstRow.getChildren().add(l);
+						l.setMaxHeight(Double.MAX_VALUE);
+						l.setAlignment(Pos.CENTER_LEFT);
+					}
+					
+					if (units != null)
+					{
+						firstRow.getChildren().add(units);
+						HBox.setHgrow(units, Priority.SOMETIMES);
+					}
+					
+					vBox.getChildren().add(firstRow);
+					
+					if (editor != null 
+							&& treeItem.getNodeType() == LegoTreeNodeType.measurementInterval || treeItem.getNodeType() == LegoTreeNodeType.measurementBound)
+					{
+						vBox.getChildren().add(editor);
+						VBox.setMargin(editor, new Insets(0, 0, 0, 10.0));
+					}
+					
+					nodeBox.getChildren().add(vBox);
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.expressionValue
 						|| treeItem.getNodeType() == LegoTreeNodeType.expressionDestination
@@ -420,7 +568,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
 						|| treeItem.getNodeType() == LegoTreeNodeType.expressionOptional)
 				{
 					Expression e = (Expression) treeItem.getExtraData();
-					DropTargetLabel label = new DropTargetLabel("", cm);
 
 					String descriptionAddition = "";
 					if (treeItem.getNodeType() == LegoTreeNodeType.expressionDestination)
@@ -435,22 +582,42 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					{
 						descriptionAddition = "Qualifier ";
 					}
-					label.setText(descriptionAddition + treeItem.getValue());
-
+					DropTargetLabel label = new DropTargetLabel(descriptionAddition + treeItem.getValue(), cm);
 					addMenus(e, treeItem, cm, label, descriptionAddition);
 
 					HBox hbox = new HBox();
+					hbox.setSpacing(5.0);
 					hbox.getChildren().add(label);
-
-					if (!treeItem.isExpanded())
+					hbox.setFillHeight(true);
+					label.setMaxHeight(Double.MAX_VALUE);
+					label.setAlignment(Pos.CENTER_LEFT);
+					
+					//putting the single expression on the same line.
+					if (e.getConcept() != null)
 					{
-						hbox.getChildren().add(new Label(sep + SchemaSummary.summary((Expression) treeItem.getExtraData())));
+						ConceptUsageType cut = findType(treeItem);
+						final ConceptNode cn = new ConceptNode("", e.getConcept(), cut, treeItem, treeView);
+						final ContextMenu conceptContextMenu = new ContextMenu();
+						addMenus(e.getConcept(), cn, treeItem, conceptContextMenu);
+
+						cn.getNode().setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
+						{
+							@Override
+							public void handle(ContextMenuEvent event)
+							{
+								conceptContextMenu.show(cn.getNode(), event.getScreenX(), event.getScreenY());
+								event.consume(); //prevent the node menu - also see hack code inside ConceptNode which suppresses lower down menus
+							}
+						});
+						hbox.getChildren().add(cn.getNode());
+						HBox.setHgrow(cn.getNode(), Priority.SOMETIMES);
 					}
 
 					nodeBox.getChildren().add(hbox);
+					HBox.setHgrow(hbox, Priority.SOMETIMES);
 					LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), label);
 				}
-				else if (treeItem.getNodeType() == LegoTreeNodeType.concept || treeItem.getNodeType() == LegoTreeNodeType.conceptOptional)
+				else if (treeItem.getNodeType() == LegoTreeNodeType.concept)
 				{
 					Concept c = (Concept) treeItem.getExtraData();
 
@@ -472,13 +639,37 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				else if (treeItem.getNodeType() == LegoTreeNodeType.relation)
 				{
 					DropTargetLabel relLabel = new DropTargetLabel(treeItem.getValue(), cm);
-					addMenus((Relation) treeItem.getExtraData(), treeItem, cm, relLabel);
+					relLabel.setAlignment(Pos.CENTER_LEFT);
+					relLabel.setMaxHeight(Double.MAX_VALUE);
+					Relation r = (Relation) treeItem.getExtraData();
+					addMenus(r, treeItem, cm, relLabel);
 
 					HBox hbox = new HBox();
 					hbox.getChildren().add(relLabel);
-					if (!treeItem.isExpanded())
+					if (treeItem.isExpanded())
 					{
-						hbox.getChildren().add(new Label(sep + SchemaSummary.summary((Relation) treeItem.getExtraData())));
+						final ConceptNode cn = new ConceptNode("Type", r.getType().getConcept(), ConceptUsageType.TYPE, treeItem, treeView);
+						final ContextMenu typeMenu = new ContextMenu();
+						addMenus(r.getType().getConcept(), cn, treeItem, typeMenu);
+						cn.getNode().setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
+						{
+							@Override
+							public void handle(ContextMenuEvent event)
+							{
+								typeMenu.show(cn.getNode(), event.getScreenX(), event.getScreenY());
+								event.consume(); //prevent the node menu - also see hack code inside ConceptNode which suppresses lower down menus
+							}
+						});
+						hbox.getChildren().add(cn.getNode());
+						HBox.setHgrow(cn.getNode(), Priority.SOMETIMES);
+						HBox.setMargin(cn.getNode(), new Insets(0,0,0,5.0));
+					}
+					else
+					{
+						Label l = new Label(sep + SchemaSummary.summary((Relation) treeItem.getExtraData()));
+						l.setMaxHeight(Double.MAX_VALUE);
+						l.setAlignment(Pos.CENTER_LEFT);
+						hbox.getChildren().add(l);
 					}
 					nodeBox.getChildren().add(hbox);
 					LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), relLabel);
@@ -494,69 +685,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					nodeBox.getChildren().add(hbox);
 					addMenus((RelationGroup) treeItem.getExtraData(), treeItem, cm);
 				}
-				else if (treeItem.getNodeType() == LegoTreeNodeType.point)
-				{
-					// odd, yes - on the point, we pass in the measurement.
-					final Measurement m = (Measurement) treeItem.getExtraData();
-					PointNode pn = new PointNode(m, PointNode.PointNodeType.point, treeView, treeItem);
-					addMenus(m, treeItem, cm, null);
-					nodeBox.getChildren().add(pn.getNode());
-				}
-				else if (treeItem.getNodeType() == LegoTreeNodeType.interval)
-				{
-					// odd, yes - on the interval, we pass in the measurement.
-					final Measurement m = (Measurement) treeItem.getExtraData();
-					if (m.getInterval() == null)
-					{
-						m.setInterval(new Interval());
-					}
-					if (m.getInterval().getLowerBound() == null)
-					{
-						m.getInterval().setLowerBound(new Bound());
-					}
-					if (m.getInterval().getUpperBound() == null)
-					{
-						m.getInterval().setUpperBound(new Bound());
-					}
-					
-					PointNode lowLow = new PointNode(m, PointNodeType.intervalLowBoundLow, treeView, treeItem);
-					PointNode lowHigh = new PointNode(m, PointNodeType.intervalLowBoundHigh, treeView, treeItem);
-					PointNode highLow = new PointNode(m, PointNodeType.intervalHighBoundLow, treeView, treeItem);
-					PointNode highHigh = new PointNode(m, PointNodeType.intervalHighBoundHigh, treeView, treeItem);
-
-					lowLow.setPartnerNodes(lowHigh, highLow, highHigh);
-					lowHigh.setPartnerNodes(lowLow, highLow, highHigh);
-					highLow.setPartnerNodes(lowLow, lowHigh, highHigh);
-					highHigh.setPartnerNodes(lowLow, lowHigh, highLow);
-					
-					Node boundLow = makeBoundNode("Lower", m.getInterval().getLowerBound(), lowLow, lowHigh);
-					Node boundHigh = makeBoundNode("Upper", m.getInterval().getUpperBound(), highLow, highHigh);
-
-					VBox vbox = new VBox();
-					vbox.setSpacing(5.0);
-					vbox.getChildren().add(boundLow);
-					vbox.getChildren().add(boundHigh);
-
-					addMenus(m, treeItem, cm, null);
-					nodeBox.getChildren().add(vbox);
-				}
-				else if (treeItem.getNodeType() == LegoTreeNodeType.bound)
-				{
-					// odd, yes - on the bound, we pass in the measurement.
-					final Measurement m = (Measurement) treeItem.getExtraData();
-					addMenus(m, treeItem, cm, null);
-					if (m.getBound() == null)
-					{
-						m.setBound(new Bound());
-					}
-					
-					PointNode low = new PointNode(m, PointNodeType.boundLow, treeView, treeItem);
-					PointNode high = new PointNode(m, PointNodeType.boundHigh, treeView, treeItem);
-					low.setPartnerNodes(high);
-					high.setPartnerNodes(low);
-					
-					nodeBox.getChildren().add(makeBoundNode(null, m.getBound(), low, high));
-				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.value)
 				{
 					DropTargetLabel valueLabel = new DropTargetLabel(treeItem.getValue(), cm);
@@ -564,10 +692,15 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
 					HBox hbox = new HBox();
 					hbox.getChildren().add(valueLabel);
+					valueLabel.setMaxHeight(Double.MAX_VALUE);
+					valueLabel.setAlignment(Pos.CENTER_LEFT);
 
 					if (!treeItem.isExpanded())
 					{
-						hbox.getChildren().add(new Label(sep + SchemaSummary.summary((Value) treeItem.getExtraData())));
+						Label l = new Label(sep + SchemaSummary.summary((Value) treeItem.getExtraData()));
+						l.setMaxHeight(Double.MAX_VALUE);
+						l.setAlignment(Pos.CENTER_LEFT);
+						hbox.getChildren().add(l);
 					}
 					nodeBox.getChildren().add(hbox);
 					LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(treeView.getLego(), valueLabel);
@@ -581,6 +714,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					if (parent instanceof Value)
 					{
 						text = ((Value) parent).getText();
+						prefixLabel = "Text";
 					}
 					else if (parent instanceof Destination)
 					{
@@ -628,7 +762,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					StackPane.setAlignment(invalidImage, Pos.CENTER_RIGHT);
 					StackPane.setMargin(invalidImage, new Insets(0.0, 5.0, 0.0, 0.0));
 					
-					nodeBox.getChildren().add((prefixLabel.length() > 0 ? Utility.prependLabel(prefixLabel, sp) : sp));
+					nodeBox.getChildren().add((prefixLabel.length() > 0 ? Utility.prependLabel(prefixLabel, sp, 10.0) : sp));
 					addMenus(treeItem.getNodeType(), parent, cm, treeItem);
 				}
 				else if (treeItem.getNodeType() == LegoTreeNodeType.bool)
@@ -675,7 +809,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 							treeView.contentChanged(null);
 						}
 					});
-					nodeBox.getChildren().add((prefixLabel.length() > 0 ? Utility.prependLabel(prefixLabel, cb) : cb));
+					nodeBox.getChildren().add((prefixLabel.length() > 0 ? Utility.prependLabel(prefixLabel, cb, 10.0) : cb));
 					addMenus(treeItem.getNodeType(), parent, cm, treeItem);
 				}
 			}
@@ -703,7 +837,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			}
 			if (nodeBox.getChildren().size() > 0)
 			{
-				HBox.setHgrow(nodeBox.getChildren().get(0), Priority.ALWAYS);
+				HBox.setHgrow(nodeBox.getChildren().get(nodeBox.getChildren().size() - 1), Priority.SOMETIMES);
 			}
 			setGraphic(nodeBox);
 		}
@@ -723,8 +857,11 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		if (labelText != null && labelText.length() > 0)
 		{
 			Label label = new Label(labelText);
+			label.setMaxHeight(Double.MAX_VALUE);
+			label.setAlignment(Pos.CENTER_LEFT);
+			label.setMinWidth(Label.USE_PREF_SIZE);
 			hbox.getChildren().add(label);
-			HBox.setMargin(label, new Insets(4.0, 4.0, 0.0, 0.0));
+			HBox.setMargin(label, new Insets(0.0, 4.0, 0.0, 0.0));
 		}
 		hbox.getChildren().add(low.getNode());
 		HBox.setHgrow(low.getNode(), Priority.SOMETIMES);
@@ -743,7 +880,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		hbox.getChildren().add(cbLow);
 		Label middle = new Label(" X ");
 		middle.getStyleClass().add("boldLabel");
-		HBox.setMargin(middle, new Insets(4.0, 0.0, 0.0, 0.0));
+		middle.setMinWidth(Label.USE_PREF_SIZE);
+		middle.setMaxHeight(Double.MAX_VALUE);
+		middle.setAlignment(Pos.CENTER_LEFT);
 		hbox.getChildren().add(middle);
 		final ComboBox<String> cbHigh = new ComboBox<>(inclusiveChoices_);
 		cbHigh.setMaxWidth(10.0);
@@ -800,9 +939,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		}
 		u.setConcept(c);
 		m.setUnits(u);
-		LegoTreeItem lti = new LegoTreeItem(c, LegoTreeNodeType.conceptOptional);
-		ti.getChildren().add(lti);
-		Utility.expandAll(ti);
+		//Units are displayed on the measurement constant, so no node to add.
 		treeView.contentChanged(ti);
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
@@ -815,67 +952,63 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		i.setLowerBound(low);
 		i.setUpperBound(high);
 		m.setInterval(i);
-		LegoTreeItem lti = new LegoTreeItem(m, LegoTreeNodeType.interval);
-		ti.getChildren().add(lti);
-		FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
-		Utility.expandAll(ti);
+		ti.setNodeType(LegoTreeNodeType.measurementInterval);
+		//interval is displayed on the measurement concept, so no node to add.
 		treeView.contentChanged(ti);
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
 
 	private void removeInterval(Measurement m, LegoTreeItem ti)
 	{
-		LegoTreeItem treeParent = ti.getLegoParent();
 		m.setInterval(null);
-		Event.fireEvent(treeParent, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), treeParent));
-		treeParent.getChildren().remove(ti);
-		treeView.contentChanged(treeParent);
+		ti.setNodeType(LegoTreeNodeType.measurementEmpty);
+		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+		//interval doesn't have its own node, so nothing to remove.
+		treeView.contentChanged(ti);
 	}
 
 	private void addPoint(Measurement m, LegoTreeItem ti)
 	{
-		LegoTreeItem lti = new LegoTreeItem(m, LegoTreeNodeType.point);
-		ti.getChildren().add(lti);
-		FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
-		Utility.expandAll(ti);
+		m.setPoint(new PointMeasurementConstant());
+		ti.setNodeType(LegoTreeNodeType.measurementPoint);
 		treeView.contentChanged(ti);
+		//point doesn't have its own node, so nothing to add
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
 
 	private void removePoint(Measurement m, LegoTreeItem ti)
 	{
-		LegoTreeItem treeParent = ti.getLegoParent();
 		m.setPoint(null);
-		Event.fireEvent(treeParent, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), treeParent));
-		treeParent.getChildren().remove(ti);
-		treeView.contentChanged(treeParent);
+		ti.setNodeType(LegoTreeNodeType.measurementEmpty);
+		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+		//No point node to remove
+		treeView.contentChanged(ti);
 	}
 
 	private void addBound(Measurement m, LegoTreeItem ti)
 	{
 		Bound b = new Bound();
 		m.setBound(b);
-		LegoTreeItem lti = new LegoTreeItem(m, LegoTreeNodeType.bound);
-		ti.getChildren().add(lti);
-		FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
-		Utility.expandAll(ti);
-		treeView.contentChanged(lti);
+		ti.setNodeType(LegoTreeNodeType.measurementBound);
+		treeView.contentChanged(ti);
+		//no bound node to add
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
 
 	private void removeBound(Measurement m, LegoTreeItem ti)
 	{
-		LegoTreeItem treeParent = ti.getLegoParent();
 		m.setBound(null);
-		Event.fireEvent(treeParent, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), treeParent));
-		treeParent.getChildren().remove(ti);
-		treeView.contentChanged(treeParent);
+		ti.setNodeType(LegoTreeNodeType.measurementEmpty);
+		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+		//no bound node to remove
+		treeView.contentChanged(ti);
 	}
 
 	private void addMeasurement(Object parent, LegoTreeNodeType pointBoundOrInterval, String unitsSCTID, LegoTreeItem ti)
 	{
 		Measurement m = new Measurement();
-		LegoTreeNodeType type = LegoTreeNodeType.measurement;
+		String label = "Measurement";
+
 		if (parent instanceof Relation)
 		{
 			((Relation) parent).getDestination().setMeasurement(m);
@@ -887,7 +1020,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		else if (parent instanceof Assertion)
 		{
 			((Assertion) parent).setTiming(m);
-			type = LegoTreeNodeType.timingMeasurement;
+			label = "Timing";
 		}
 		else
 		{
@@ -906,21 +1039,21 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
 		if (pointBoundOrInterval != null)
 		{
-			if (LegoTreeNodeType.point == pointBoundOrInterval)
+			if (LegoTreeNodeType.measurementPoint == pointBoundOrInterval)
 			{
 				m.setPoint(new PointMeasurementConstant()); // purposefully don't set a value inside this
 			}
-			else if (LegoTreeNodeType.bound == pointBoundOrInterval)
+			else if (LegoTreeNodeType.measurementBound == pointBoundOrInterval)
 			{
 				m.setBound(new Bound());
 			}
-			else if (LegoTreeNodeType.interval == pointBoundOrInterval)
+			else if (LegoTreeNodeType.measurementInterval == pointBoundOrInterval)
 			{
 				m.setInterval(new Interval());
 			}
 		}
 
-		LegoTreeItem lti = new LegoTreeItem(m, type);
+		LegoTreeItem lti = new LegoTreeItem(m, label);
 		ti.getChildren().add(lti);
 
 		FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
@@ -938,7 +1071,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		boolean addExpression = false;
 
 		LegoTreeNodeType type = ti.getNodeType();
-		LegoTreeItem lti;
+		LegoTreeItem lti = null;
 		
 		if (object instanceof Value)
 		{
@@ -988,12 +1121,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				lti = new LegoTreeItem(expression, type);
 				ti.getChildren().add(lti);
 			}
-			else
-			{
-				lti = new LegoTreeItem(c, LegoTreeNodeType.concept);
-				ti.getChildren().add(lti);
-			}
-			Utility.expandAll(lti);
+			//No new tree item for just a single concept - it is rendered on the expression node.
+			//The tree modification event fired below should take care of it.
 		}
 		else // We know it has a concept
 		{
@@ -1009,32 +1138,16 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				// need to convert to a conjunction
 				Concept currentConcept = expression.getConcept();
 
-				LegoTreeItem currentConceptTreeItem = null;
-				for (TreeItem<String> childItem : ti.getChildren())
-				{
-					LegoTreeItem child = (LegoTreeItem) childItem;
-					if (child.getExtraData() instanceof Concept)
-					{
-						currentConceptTreeItem = child;
-						break;
-					}
-				}
-				if (currentConceptTreeItem == null)
-				{
-					logger.error("Couldn't find the tree item!");
-				}
-				else
-				{
-					Expression e = new Expression();
-					e.setConcept(currentConcept);
-					expression.setConcept(null);
-					expression.getExpression().add(e);
+				//A single concept has no tree item, it is rendered on the expression node.
 
-					LegoTreeItem conjunction = new LegoTreeItem(e, type);
-					ti.getChildren().add(conjunction);
-					ti.getChildren().remove(currentConceptTreeItem);
-					Utility.expandAll(conjunction);
-				}
+				Expression e = new Expression();
+				e.setConcept(currentConcept);
+				expression.setConcept(null);
+				expression.getExpression().add(e);
+
+				LegoTreeItem conjunction = new LegoTreeItem(e, type);
+				ti.getChildren().add(conjunction);
+				Utility.expandAll(conjunction);
 			}
 
 			// Add to the conjunction
@@ -1047,26 +1160,23 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		}
 		FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
 		ti.setExpanded(true);
-		treeView.contentChanged(lti);
+		treeView.contentChanged(lti == null ? ti : lti);
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
 
 	private void removeConcept(LegoTreeItem ti)
 	{
-		LegoTreeItem treeParent = ti.getLegoParent();
-		Object parent = ti.getLegoParent().getExtraData();
-		if (parent instanceof Measurement)
+		if (ti.getExtraData() instanceof Measurement)
 		{
-			((Measurement) parent).setUnits(null);
+			((Measurement)ti.getExtraData()).setUnits(null);
+			Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
+			treeView.contentChanged(ti);
 		}
 		else
 		{
-			logger.error("Unhandled concept remove request: " + parent);
+			logger.error("Unhandled concept remove request: " + ti.getExtraData());
 			return;
 		}
-		Event.fireEvent(treeParent, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), treeParent));
-		treeParent.getChildren().remove(ti);
-		treeView.contentChanged(treeParent);
 	}
 
 	private void pasteExpression(Expression oldExpression, LegoTreeItem oldTreeItem)
@@ -1169,9 +1279,19 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				Expression conjunctionExpression = parentExpression.getExpression().get(0);
 				parentExpression.getExpression().clear();
 				parentExpression.setConcept(conjunctionExpression.getConcept());
+				//Don't need to build a node for this - it will be displayed on the expression node
+				
+				//Move up the relations from the sibling expression
 				parentExpression.getRelation().addAll(conjunctionExpression.getRelation());
+				for (Relation r : conjunctionExpression.getRelation())
+				{
+					treeParent.getChildren().add(new LegoTreeItem(r));
+				}
 				parentExpression.getRelationGroup().addAll(conjunctionExpression.getRelationGroup());
-				treeParent.getChildren().add(new LegoTreeItem(conjunctionExpression.getConcept(), LegoTreeNodeType.concept));
+				for (RelationGroup rg : conjunctionExpression.getRelationGroup())
+				{
+					treeParent.getChildren().add(new LegoTreeItem(rg));
+				}
 
 				for (TreeItem<String> sibling : treeParent.getChildren())
 				{
@@ -1356,44 +1476,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
 
-	private void addTiming(Assertion a, LegoTreeNodeType pointBoundOrInterval, String sctUUID, LegoTreeItem ti)
-	{
-		Measurement m = new Measurement();
-		if (sctUUID != null)
-		{
-			Units u = new Units();
-			Concept c = new Concept();
-			c.setUuid(sctUUID);
-			u.setConcept(c);
-			m.setUnits(u);
-		}
-		a.setTiming(m);
-
-		if (pointBoundOrInterval != null)
-		{
-			if (LegoTreeNodeType.point == pointBoundOrInterval)
-			{
-				m.setPoint(new PointMeasurementConstant()); // purposefully don't set a value inside this
-			}
-			else if (LegoTreeNodeType.bound == pointBoundOrInterval)
-			{
-				m.setBound(new Bound());
-			}
-			else if (LegoTreeNodeType.interval == pointBoundOrInterval)
-			{
-				m.setInterval(new Interval());
-			}
-		}
-
-		LegoTreeItem lti = new LegoTreeItem(m, LegoTreeNodeType.timingMeasurement);
-		ti.getChildren().add(lti);
-		FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
-		Utility.expandAll(lti);
-		ti.setExpanded(true);
-		treeView.contentChanged(lti);
-		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
-	}
-
 	private void addAssertionComponent(Assertion a, LegoTreeItem ti)
 	{
 		AssertionComponent ac = new AssertionComponent();
@@ -1453,7 +1535,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		}
 		ti.getChildren().add(lti);
 		treeView.contentChanged(lti);
-		Utility.expandAll(lti);
+		Utility.expandAll(ti);
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
 
@@ -1498,7 +1580,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		ti.getChildren().add(lti);
 		treeView.contentChanged(lti);
 		FXCollections.sort(ti.getChildren(), new LegoTreeItemComparator(true));
-		Utility.expandAll(lti);
+		Utility.expandAll(ti);
 		Event.fireEvent(ti, new TreeItem.TreeModificationEvent<String>(TreeItem.valueChangedEvent(), ti));
 	}
 
@@ -1681,6 +1763,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		mi.visibleProperty().bind(CustomClipboard.containsLego);
 		mi.setGraphic(Images.PASTE.createImageView());
 		cm.getItems().add(mi);
+		
+		mi = new MenuItem("View in Web Browser");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				LegoGUIModel.getInstance().viewLegoListInBrowser(llbr.getLegoListUUID());
+			}
+		});
+		mi.setGraphic(Images.HTML_VIEW_16.createImageView());
+		cm.getItems().add(mi);
 
 		mi = new MenuItem("Show XML View");
 		mi.setOnAction(new EventHandler<ActionEvent>()
@@ -1746,7 +1840,18 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
 	private void addMenus(final LegoReference legoReference, final LegoTreeItem lti, ContextMenu cm)
 	{
-		MenuItem mi;
+		MenuItem mi = new MenuItem("View in Web Browser");
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				LegoGUIModel.getInstance().viewLegoInBrowser(legoReference.getLegoUUID(), legoReference.getStampUUID());
+			}
+		});
+		mi.setGraphic(Images.HTML_VIEW_16.createImageView());
+		cm.getItems().add(mi);
+		
 		mi = new MenuItem("Delete Lego");
 		mi.setOnAction(new EventHandler<ActionEvent>()
 		{
@@ -2011,7 +2116,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addTiming(a, LegoTreeNodeType.point, null, treeItem);
+					addMeasurement(a, LegoTreeNodeType.measurementPoint, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2023,7 +2128,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addTiming(a, LegoTreeNodeType.bound, null, treeItem);
+					addMeasurement(a, LegoTreeNodeType.measurementBound, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2035,7 +2140,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addTiming(a, LegoTreeNodeType.interval, null, treeItem);
+					addMeasurement(a, LegoTreeNodeType.measurementInterval, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2047,7 +2152,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addTiming(a, null, label.getDroppedValue(), treeItem);
+					addMeasurement(a, null, label.getDroppedValue(), treeItem);
 					label.setDroppedValue(null);
 				}
 			});
@@ -2119,10 +2224,101 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		cm.getItems().add(mi);
 	}
 
+	/**
+	 * This is for the node menu, while the other addMenus(Measurement...) is for the point value boxes.
+	 */
 	private void addMenus(final Measurement m, final LegoTreeItem treeItem, ContextMenu cm, final DropTargetLabel label)
 	{
 		MenuItem mi;
-		if (treeItem.getNodeType() == LegoTreeNodeType.point)
+		if (treeItem.getNodeType() == LegoTreeNodeType.measurementEmpty)
+		{
+			mi = new MenuItem("Add Point");
+			mi.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					addPoint(m, treeItem);
+				}
+			});
+			mi.setGraphic(Images.ADD.createImageView());
+			cm.getItems().add(mi);
+
+			mi = new MenuItem("Add Bound");
+			mi.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					addBound(m, treeItem);
+				}
+			});
+			mi.setGraphic(Images.ADD.createImageView());
+			cm.getItems().add(mi);
+
+			mi = new MenuItem("Add Interval");
+			mi.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					addInterval(m, treeItem);
+				}
+			});
+			mi.setGraphic(Images.ADD.createImageView());
+			cm.getItems().add(mi);
+		}
+
+		if (m.getUnits() == null || m.getUnits().getConcept() == null)
+		{
+			mi = new MenuItem("Add Units");
+			mi.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					addUnits(m, null, treeItem);
+				}
+			});
+			mi.setGraphic(Images.ADD.createImageView());
+			cm.getItems().add(mi);
+			
+			//Timing or Measurement is what value is...
+			mi = new MenuItem("Drop as a " + treeItem.getValue() + " Unit");
+			mi.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					addUnits(m, label.getDroppedValue(), treeItem);
+					label.setDroppedValue(null);
+				}
+			});
+			mi.setGraphic(Images.ADD.createImageView());
+			label.getDropContextMenu().getItems().add(mi);
+		}
+		
+		//Says Timing or Value
+		mi = new MenuItem("Remove " + treeItem.getValue());
+		mi.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				removeMeasurement(m, treeItem);
+			}
+		});
+		mi.setGraphic(Images.DELETE.createImageView());
+		cm.getItems().add(mi);
+	}
+	
+	/**
+	 * This is for the value boxes, while the other addMenus(Measurement...) is for the node menu.
+	 */
+	private void addMenus(final Measurement m, final LegoTreeItem treeItem, ContextMenu cm)
+	{
+		MenuItem mi;
+		if (treeItem.getNodeType() == LegoTreeNodeType.measurementPoint)
 		{
 			mi = new MenuItem("Remove Point");
 			mi.setOnAction(new EventHandler<ActionEvent>()
@@ -2136,7 +2332,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			mi.setGraphic(Images.DELETE.createImageView());
 			cm.getItems().add(mi);
 		}
-		else if (treeItem.getNodeType() == LegoTreeNodeType.bound)
+		else if (treeItem.getNodeType() == LegoTreeNodeType.measurementBound)
 		{
 			mi = new MenuItem("Remove Bound");
 			mi.setOnAction(new EventHandler<ActionEvent>()
@@ -2150,7 +2346,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			mi.setGraphic(Images.DELETE.createImageView());
 			cm.getItems().add(mi);
 		}
-		else if (treeItem.getNodeType() == LegoTreeNodeType.interval)
+		else if (treeItem.getNodeType() == LegoTreeNodeType.measurementInterval)
 		{
 			mi = new MenuItem("Remove Interval");
 			mi.setOnAction(new EventHandler<ActionEvent>()
@@ -2164,87 +2360,8 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			mi.setGraphic(Images.DELETE.createImageView());
 			cm.getItems().add(mi);
 		}
-		else
-		{
-			if (m.getUnits() == null || m.getUnits().getConcept() == null)
-			{
-				mi = new MenuItem("Add Units");
-				mi.setOnAction(new EventHandler<ActionEvent>()
-				{
-					@Override
-					public void handle(ActionEvent arg0)
-					{
-						addUnits(m, null, treeItem);
-					}
-				});
-				mi.setGraphic(Images.ADD.createImageView());
-				cm.getItems().add(mi);
-				
-				mi = new MenuItem("Drop as a " + (treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement") + " Unit");
-				mi.setOnAction(new EventHandler<ActionEvent>()
-				{
-					@Override
-					public void handle(ActionEvent arg0)
-					{
-						addUnits(m, label.getDroppedValue(), treeItem);
-						label.setDroppedValue(null);
-					}
-				});
-				mi.setGraphic(Images.ADD.createImageView());
-				label.getDropContextMenu().getItems().add(mi);
-			}
-			if (m.getInterval() == null && m.getPoint() == null && m.getBound() == null)
-			{
-				mi = new MenuItem("Add Point");
-				mi.setOnAction(new EventHandler<ActionEvent>()
-				{
-					@Override
-					public void handle(ActionEvent arg0)
-					{
-						addPoint(m, treeItem);
-					}
-				});
-				mi.setGraphic(Images.ADD.createImageView());
-				cm.getItems().add(mi);
-
-				mi = new MenuItem("Add Bound");
-				mi.setOnAction(new EventHandler<ActionEvent>()
-				{
-					@Override
-					public void handle(ActionEvent arg0)
-					{
-						addBound(m, treeItem);
-					}
-				});
-				mi.setGraphic(Images.ADD.createImageView());
-				cm.getItems().add(mi);
-
-				mi = new MenuItem("Add Interval");
-				mi.setOnAction(new EventHandler<ActionEvent>()
-				{
-					@Override
-					public void handle(ActionEvent arg0)
-					{
-						addInterval(m, treeItem);
-					}
-				});
-				mi.setGraphic(Images.ADD.createImageView());
-				cm.getItems().add(mi);
-			}
-
-			mi = new MenuItem("Remove " + (treeItem.getNodeType() == LegoTreeNodeType.timingMeasurement ? "Timing" : "Measurement"));
-			mi.setOnAction(new EventHandler<ActionEvent>()
-			{
-				@Override
-				public void handle(ActionEvent arg0)
-				{
-					removeMeasurement(m, treeItem);
-				}
-			});
-			mi.setGraphic(Images.DELETE.createImageView());
-			cm.getItems().add(mi);
-		}
 	}
+
 
 	private void addMenus(final Expression e, final LegoTreeItem treeItem, ContextMenu cm, final DropTargetLabel label, String descriptionAddition)
 	{
@@ -2405,22 +2522,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
 	private void addMenus(final Concept c, final ConceptNode cn, final LegoTreeItem treeItem, ContextMenu cm)
 	{
-		if (treeItem.getNodeType() == LegoTreeNodeType.conceptOptional)
-		{
-			MenuItem mi = new MenuItem("Remove Concept");
-			mi.setOnAction(new EventHandler<ActionEvent>()
-			{
-
-				@Override
-				public void handle(ActionEvent arg0)
-				{
-					removeConcept(treeItem);
-				}
-			});
-			mi.setGraphic(Images.DELETE.createImageView());
-			cm.getItems().add(mi);
-		}
-
 		MenuItem mi = new MenuItem("View Concept");
 		mi.setOnAction(new EventHandler<ActionEvent>()
 		{
@@ -2433,7 +2534,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				}
 				else
 				{
-					LegoGUI.getInstance().showErrorDialog("Unknown Concept", "Can't lookup an invalid concept", "");
+					LegoGUI.getInstance().showErrorDialog("Unknown Concept", "Can't lookup an invalid concept", null);
 				}
 			}
 		});
@@ -2506,7 +2607,21 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		});
 		mi.setGraphic(Images.PASTE.createImageView());
 		cm.getItems().add(mi);
-
+		
+		if (treeItem.getExtraData() instanceof Measurement)
+		{
+			mi = new MenuItem("Remove Concept");
+			mi.setOnAction(new EventHandler<ActionEvent>()
+			{
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					removeConcept(treeItem);
+				}
+			});
+			mi.setGraphic(Images.DELETE.createImageView());
+			cm.getItems().add(mi);
+		}
 	}
 
 	private void addMenus(final Relation r, final LegoTreeItem treeItem, ContextMenu cm, final DropTargetLabel label)
@@ -2547,7 +2662,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addMeasurement(r, LegoTreeNodeType.point, null, treeItem);
+					addMeasurement(r, LegoTreeNodeType.measurementPoint, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2559,7 +2674,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addMeasurement(r, LegoTreeNodeType.bound, null, treeItem);
+					addMeasurement(r, LegoTreeNodeType.measurementBound, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2571,7 +2686,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addMeasurement(r, LegoTreeNodeType.interval, null, treeItem);
+					addMeasurement(r, LegoTreeNodeType.measurementInterval, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2664,7 +2779,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addMeasurement(v, LegoTreeNodeType.point, null, treeItem);
+					addMeasurement(v, LegoTreeNodeType.measurementPoint, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2676,7 +2791,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addMeasurement(v, LegoTreeNodeType.bound, null, treeItem);
+					addMeasurement(v, LegoTreeNodeType.measurementBound, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());
@@ -2688,7 +2803,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				@Override
 				public void handle(ActionEvent arg0)
 				{
-					addMeasurement(v, LegoTreeNodeType.interval, null, treeItem);
+					addMeasurement(v, LegoTreeNodeType.measurementInterval, null, treeItem);
 				}
 			});
 			mi.setGraphic(Images.ADD.createImageView());

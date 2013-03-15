@@ -130,6 +130,10 @@ public class CustomClipboard
 
 	public static void set(String s)
 	{
+		if (s == null)
+		{
+			return;
+		}
 		object_ = null;
 		ClipboardContent cc = new ClipboardContent();
 		cc.putString(s);

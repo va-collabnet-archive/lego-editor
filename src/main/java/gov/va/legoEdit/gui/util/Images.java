@@ -35,6 +35,7 @@ public enum Images
 	EXCLAMATION(setupImage("/icons/fugue/16x16/icons-shadowless/exclamation-red.png")),
 	XML_VIEW_16(setupImage("/icons/text-xml-icon-16x16.png")),
 	XML_VIEW_32(setupImage("/icons/text-xml-icon-32x32.png")),
+	HTML_VIEW_16(setupImage("/icons/xhtml-icon-16x16.png")),
 	PROPERTIES(setupImage("/icons/document-properties-icon.png")),
 	PREFERENCES(setupImage("/icons/fugue/16x16/icons-shadowless/application-task.png")),
 	APPLICATION(setupImage("/icons/fugue/16x16/icons-shadowless/application-block.png")),

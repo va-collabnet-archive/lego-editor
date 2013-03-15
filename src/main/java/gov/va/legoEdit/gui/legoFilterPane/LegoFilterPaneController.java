@@ -472,7 +472,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		String advancedDestMatchTypePart = advancedDestMatchType.getSelectionModel().getSelectedItem();
 
 		ltv.getSelectionModel().clearSelection();
-		LegoGUIModel.getInstance().initializeLegoListNames(ltv.getRoot(), pncsFilterId, pncsFilterValue, conceptInfo_[CONCEPT_LOOKUP].concept, 
+		LegoGUIModel.getInstance().initializeLegoListNames(ltv, pncsFilterId, pncsFilterValue, conceptInfo_[CONCEPT_LOOKUP].concept, 
 				advancedRelFilterLegoPart, conceptInfo_[CONCEPT_REL_TYPE_LOOKUP].concept, advancedDestMatchTypePart, conceptInfo_[CONCEPT_REL_DEST_LOOKUP].concept,
 				updateRunning);
 	}

@@ -12,17 +12,16 @@ public enum LegoTreeNodeType
 	assertion(3),
 	expressionDiscernible(0),
 	expressionQualifier(1),
-	timingMeasurement(2),
+	measurementEmpty(2), measurementPoint(2), measurementInterval(2), measurementBound(2), 
 	value(3),
 	assertionComponent(4),
 	
-	concept(0), conceptOptional(1),
+	concept(0),
 	
 	expressionValue(2), expressionDestination(2), expressionOptional(2), 
 	relation(3),
 	relationshipGroup(4),
-	
-	measurement(0), point(0), interval(0), bound(0), 
+
 	assertionUUID(0),
 	
 	text(0), bool(0),

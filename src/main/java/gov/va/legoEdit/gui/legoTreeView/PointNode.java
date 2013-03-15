@@ -61,11 +61,11 @@ public class PointNode
 		{
 			cb_.getItems().add(s.value());
 		}
-		cb_.setPromptText("Number or select item");
+		cb_.setPromptText("Number or select");
 		cb_.setVisibleRowCount(MeasurementConstant.values().length + 2);
 		cb_.setMaxWidth(Double.MAX_VALUE);
-		cb_.setMinWidth(200.0);
-		cb_.setPrefWidth(200.0);
+		cb_.setMinWidth(220.0);
+		cb_.setPrefWidth(220.0);
 
 		BooleanBinding valid = new BooleanBinding()
 		{
@@ -106,52 +106,52 @@ public class PointNode
 		
 		//Add the listeners after setting the values, to prevent extra setChanged calls.
 		cb_.valueProperty().addListener(new ChangeListener<String>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				try
 				{
-					@Override
-					public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+					if (newValue.contains("."))
 					{
-						try
+						PointDouble p = new PointDouble();
+						p.setValue(Double.parseDouble(newValue.trim()));
+						setPoint(p);
+					}
+					else
+					{
+						PointLong p = new PointLong();
+						p.setValue(Long.parseLong(newValue.trim()));
+						setPoint(p);
+					}
+					localInvalidMessage_.set(null);
+				}
+				catch (NumberFormatException e)
+				{
+					try
+					{
+						MeasurementConstant ms = MeasurementConstant.fromValue(newValue);
+						PointMeasurementConstant p = new PointMeasurementConstant();
+						p.setValue(ms);
+						setPoint(p);
+						localInvalidMessage_.set(null);
+					}
+					catch (IllegalArgumentException ex)
+					{
+						setPoint(null);
+						if (newValue.length() > 0)
 						{
-							if (newValue.contains("."))
-							{
-								PointDouble p = new PointDouble();
-								p.setValue(Double.parseDouble(newValue.trim()));
-								setPoint(p);
-							}
-							else
-							{
-								PointLong p = new PointLong();
-								p.setValue(Long.parseLong(newValue.trim()));
-								setPoint(p);
-							}
+							localInvalidMessage_.set("The value must be a number, or an item from the drop down");
+						}
+						else
+						{
+							// blank might be ok, but we can't tell without more info - needs to happen in group validation
 							localInvalidMessage_.set(null);
 						}
-						catch (NumberFormatException e)
-						{
-							try
-							{
-								MeasurementConstant ms = MeasurementConstant.fromValue(newValue);
-								PointMeasurementConstant p = new PointMeasurementConstant();
-								p.setValue(ms);
-								setPoint(p);
-								localInvalidMessage_.set(null);
-							}
-							catch (IllegalArgumentException ex)
-							{
-								setPoint(null);
-								if (newValue.length() > 0)
-								{
-									localInvalidMessage_.set("The value must be a number, or an item from the drop down");
-								}
-								else
-								{
-									// blank might be ok, but we can't tell without more info - needs to happen in group validation
-									localInvalidMessage_.set(null);
-								}
-							}
-						}
 					}
-				});
+				}
+			}
+		});
 
 
 		invalidImage_ = Images.EXCLAMATION.createImageView();
@@ -269,7 +269,7 @@ public class PointNode
 			default:
 				logger.error("bad type?  Save not processed");
 		}
-		ltv_.contentChanged(lti_.getLegoParent());
+		ltv_.contentChanged(lti_);
 		checkGroupMessage();
 		if (partnerNodes_ != null)
 		{

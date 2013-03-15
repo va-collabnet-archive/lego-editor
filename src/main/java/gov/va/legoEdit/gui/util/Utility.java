@@ -26,12 +26,15 @@ public class Utility
 		lightGreenDropShadow.setColor(Color.LIGHTGREEN);
 	}
 
-	public static Node prependLabel(String label, Node node)
+	public static Node prependLabel(String label, Node node, double spacing)
 	{
 		HBox hbox = new HBox();
-		hbox.setSpacing(10.0);
+		hbox.setSpacing(spacing);
 		hbox.setAlignment(Pos.CENTER_LEFT);
 		Label l = new Label(label);
+		l.setAlignment(Pos.CENTER_LEFT);
+		l.setMaxHeight(Double.MAX_VALUE);
+		l.setMinWidth(Label.USE_PREF_SIZE);
 		hbox.getChildren().add(l);
 		hbox.getChildren().add(node);
 		HBox.setHgrow(node, Priority.ALWAYS);
