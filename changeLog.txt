@@ -1,4 +1,6 @@
 Lego Editor Change Log
+2013/03/?? - 0.58
+
 2013/03/14 - 0.57
   *  Fixed the summary view on/off switch so it takes effect on Legos that are already open.
   *  Fixed the behavior of the left arrow key in the concept combo-box editors
