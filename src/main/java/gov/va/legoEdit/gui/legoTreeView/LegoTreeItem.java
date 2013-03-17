@@ -480,7 +480,19 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		isValid = invalidReason_ == null;
 	}
-	
+        
+    public void invalideDroolsRule(String reason) {
+        invalidReason_ = reason;
+
+        isValid = false;
+
+        if (treeNodeGraphic.getChildren().size() == 0 || !(treeNodeGraphic.getChildren().get(0) instanceof InvalidNode)) {
+            treeNodeGraphic.getChildren().add(0, new InvalidNode(isValid() ? "Error in child" : invalidReason_));
+        } else {
+            ((InvalidNode) treeNodeGraphic.getChildren().get(0)).setInvalidReason(isValid() ? "Error in child" : invalidReason_);
+        }
+    }
+
 	private void validateChildren()
 	{
 		boolean newValue = true;

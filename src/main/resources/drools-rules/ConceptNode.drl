@@ -1,0 +1,35 @@
+#created on: March 17, 2013
+package gov.va.lgeoEdit.drools.rules
+
+#list any import classes here.
+import java.io.File;
+import java.lang.String;
+import java.util.Collection;
+
+import org.ihtsdo.tk.api.coordinate.ViewCoordinate;
+import org.ihtsdo.tk.binding.Snomed;
+import gov.va.legoEdit.drools.actions.FailValidatorAction;
+import gov.va.legoEdit.drools.facts.AssertionFact;
+import gov.va.legoEdit.drools.facts.ConceptFact;
+import gov.va.legoEdit.gui.legoTreeView.ConceptUsageType;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
+
+
+
+#declare any global variables here
+
+global Collection actions;
+global ViewCoordinate vc;
+global LegoTreeItem item;
+
+
+
+rule "Discernible IS Observible Entity"
+	when
+		 (and
+			(AssertionFact(getType() == ConceptUsageType.DISCERNIBLE))
+			 ($dropObject: ConceptFact(this not isKindOf Snomed.OBSERVABLE_ENTITY))
+		  )
+	then
+		actions.add(new FailValidatorAction(item, FailValidatorAction.ReasonFailed.DISCERNIBLE_OBSERVABLE));
+end

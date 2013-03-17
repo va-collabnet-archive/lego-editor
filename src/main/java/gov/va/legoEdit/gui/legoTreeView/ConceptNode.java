@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.drools.ConceptNodeDroolsHandler;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.model.SchemaClone;
 import gov.va.legoEdit.model.SchemaEquals;
@@ -43,6 +44,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
+import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +69,8 @@ public class ConceptNode implements ConceptLookupCallback
 	private LegoTreeView legoTreeView_;
 	private LegoTreeItem lti_;
 	private ComboBoxConcept codeSetComboBoxConcept_ = null;
+        private ConceptUsageType usageType = null;
+        private ConceptNodeDroolsHandler handler = new ConceptNodeDroolsHandler();
 
 	private BooleanProperty isValid = new SimpleBooleanProperty(true);
 	private volatile long lookupUpdateTime_ = 0;
@@ -83,7 +87,8 @@ public class ConceptNode implements ConceptLookupCallback
 	public ConceptNode(String typeLabel, Concept c, ConceptUsageType cut, LegoTreeItem lti, LegoTreeView legoTreeView)
 	{
 		popup = new LookAheadConceptPopup();
-		c_ = c;
+                c_ = c;
+                usageType = cut;
 		legoTreeView_ = legoTreeView;
 		lti_ = lti;
 		cb_ = new ComboBox<>();
@@ -161,17 +166,19 @@ public class ConceptNode implements ConceptLookupCallback
 			isValid.set(false);
 		}
 
-		cb_.addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
-			public void handle(KeyEvent event) {
-				if (!event.isAltDown()
-					|| !event.isControlDown()
-					|| !event.isMetaDown()
-					|| !event.isShiftDown()
-					|| !event.isShortcutDown()) {
-					showPopup();
-				}
-			}
-		});
+            cb_.addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
+                public void handle(KeyEvent event) {
+                    if (!event.isAltDown()
+                            || !event.isControlDown()
+                            || !event.isMetaDown()
+                            || !event.isShiftDown()
+                            || !event.isShortcutDown()) {
+                        if (event.getText().trim().length() > 0) {
+                            showPopup();
+                        }
+                    }
+                }
+            });
 
 		cb_.valueProperty().addListener(new ChangeListener<ComboBoxConcept>()
 		{
@@ -190,6 +197,7 @@ public class ConceptNode implements ConceptLookupCallback
 				}
 				lookup();
 			}
+
 		});
 
 		LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(legoTreeView_.getLego(), cb_);
@@ -267,6 +275,8 @@ public class ConceptNode implements ConceptLookupCallback
 				LegoGUI.getInstance().getLegoGUIController().snomedDragCompleted();
 			}
 		});
+
+            fireDroolsRule();
 	}
 
 	private void updateGUI()
@@ -398,6 +408,7 @@ public class ConceptNode implements ConceptLookupCallback
 				{
 					//only notify changed if actually changed, otherwise we mess up the undo/redo history with concepts that fail lookup
 					legoTreeView_.contentChanged(lti_);
+                                    fireDroolsRule();
 				}
 				updateGUI();
 			}
@@ -407,4 +418,15 @@ public class ConceptNode implements ConceptLookupCallback
 	private void showPopup() {
 		popup.showPopup(cb_);
 	}
+        
+    private void fireDroolsRule() {
+        if (c_ != null) {
+            ConceptVersionBI concept = WBUtility.lookupSnomedIdentifierAsCV(c_.getUuid());
+
+            if (concept != null) {
+                handler.processConceptNodeRule(concept, usageType, lti_);
+            }
+        }
+    }
+
 }
