@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import org.ihtsdo.bdb.temp.AceLog;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
@@ -36,12 +38,17 @@ public class ConceptNodeDroolsHandler {
     public ConceptNodeDroolsHandler() {
         File f = new File("src/main/resources/drools-rules/ConceptNode.drl");
         this.kbFiles.add(f);
+        
+        try {
+            DroolsExecutionManager.setup(ConceptNodeDroolsHandler.class.getCanonicalName(), kbFiles);
+        } catch (IOException ex) {
+            Logger.getLogger(ConceptNodeDroolsHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void processConceptNodeRule(ConceptVersionBI concept, ConceptUsageType usageType, LegoTreeItem lti) {
 
         try {
-            DroolsExecutionManager.setup(ConceptNodeDroolsHandler.class.getCanonicalName(), kbFiles);
             ArrayList<Action> actions = new ArrayList<Action>();
             globals.put("actions", actions);
             globals.put("item", lti);

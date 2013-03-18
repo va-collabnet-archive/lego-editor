@@ -71,8 +71,7 @@ public class ConceptNode implements ConceptLookupCallback
 	private ComboBoxConcept codeSetComboBoxConcept_ = null;
         private ConceptUsageType usageType = null;
         private ConceptNodeDroolsHandler handler = new ConceptNodeDroolsHandler();
-
-	private BooleanProperty isValid = new SimpleBooleanProperty(true);
+        private BooleanProperty isValid = new SimpleBooleanProperty(true);
 	private volatile long lookupUpdateTime_ = 0;
 	private AtomicInteger lookupsInProgress_ = new AtomicInteger();
 	private BooleanBinding lookupInProgress = new BooleanBinding()
@@ -115,7 +114,18 @@ public class ConceptNode implements ConceptLookupCallback
 		cb_.setVisibleRowCount(11);
 		
 		//Another hack to fix strange behavior in javafx... left arrow key in the combobox editor doesn't work as expected unless you filter it..
-		cb_.addEventFilter(KeyEvent.ANY, new EventHandler<KeyEvent>()
+		cb_.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>()
+		{
+			@Override
+			public void handle(KeyEvent event)
+			{
+				if (event.isAltDown()) {
+                                    event.consume();
+                                }
+                        }
+                });
+                
+		cb_.addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>()
 		{
 			@Override
 			public void handle(KeyEvent event)
@@ -124,6 +134,25 @@ public class ConceptNode implements ConceptLookupCallback
 				{
 					event.consume();
 				}
+                                if (event.getCode() == KeyCode.UP
+                                        || event.getCode() == KeyCode.DOWN
+                                        || event.getCode() == KeyCode.ENTER) {
+                                    popup.handleScroll(event);
+                                    event.consume();
+                                } else if (event.isAltDown()
+                                        || event.isControlDown()
+                                        || event.isMetaDown()
+                                        || event.isShiftDown()
+                                        || event.isShortcutDown()) {
+                                    event.consume();
+                                } else {
+                                    if (cb_.getEditor().getText().length() != 36 || Utility.isLong(cb_.getEditor().getText())) {
+                                        showPopup();
+                                    }
+
+                                    event.consume();
+                                }
+                              
 			}
 		});
 
@@ -166,19 +195,7 @@ public class ConceptNode implements ConceptLookupCallback
 			isValid.set(false);
 		}
 
-            cb_.addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
-                public void handle(KeyEvent event) {
-                    if (!event.isAltDown()
-                            || !event.isControlDown()
-                            || !event.isMetaDown()
-                            || !event.isShiftDown()
-                            || !event.isShortcutDown()) {
-                        if (event.getText().trim().length() > 0) {
-                            showPopup();
-                        }
-                    }
-                }
-            });
+            
 
 		cb_.valueProperty().addListener(new ChangeListener<ComboBoxConcept>()
 		{
@@ -195,6 +212,7 @@ public class ConceptNode implements ConceptLookupCallback
 				{
 					return;
 				}
+
 				lookup();
 			}
 
@@ -277,7 +295,7 @@ public class ConceptNode implements ConceptLookupCallback
 		});
 
             fireDroolsRule();
-	}
+        }
 
 	private void updateGUI()
 	{
@@ -312,9 +330,9 @@ public class ConceptNode implements ConceptLookupCallback
 					(up.getUseFSN() && c_.getDesc().indexOf("(") > 0 && c_.getDesc().indexOf(")") > 0)
 					|| (!up.getUseFSN() && c_.getDesc().indexOf("(") == -1 && c_.getDesc().indexOf(")") == -1)))
 		{
-			return;
-		}
-		
+                    return;
+                    }
+                       
 		lookupsInProgress_.incrementAndGet();
 		lookupInProgress.invalidate();
 		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this, null);
@@ -428,5 +446,4 @@ public class ConceptNode implements ConceptLookupCallback
             }
         }
     }
-
 }

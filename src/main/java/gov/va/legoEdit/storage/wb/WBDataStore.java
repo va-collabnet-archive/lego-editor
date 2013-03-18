@@ -128,45 +128,49 @@ public class WBDataStore {
      * otherwise, returns the list of descriptions that matched.
      */
     public List<ComponentChroncileBI<?>> prefixSearch(String query) throws IOException {
-        query = query.trim();
-        if (query.length() == 0) {
-            int a = 3;
+        SearchResult result = search(query.trim() + "*");
+
+        if (result == null) {
             return new ArrayList<ComponentChroncileBI<?>>();
         }
+        
+        if (!(dataStore_ instanceof BdbTerminologyStore)) {
+            return null;
+        } else {
+            BdbTerminologyStore bts = (BdbTerminologyStore) dataStore_;
+            ArrayList<ComponentChroncileBI<?>> resultToReturn = new ArrayList<>(result.topDocs.totalHits);
+            Set<Integer> conceptsToReturn = new HashSet();
 
-        SearchResult result = search(query + "*");
+            for (int i = 0; i < result.topDocs.totalHits; i++) {
+                Document doc = result.searcher.doc(result.topDocs.scoreDocs[i].doc);
+                ComponentChroncileBI<?> cc = bts.getComponent(Integer.parseInt(doc.get("dnid")));
+                String desc = ((DescriptionAnalogBI<?>) cc).getText();
 
-        BdbTerminologyStore bts = (BdbTerminologyStore) dataStore_;
+                if (!desc.toLowerCase().startsWith(query.toLowerCase())) {
+                    continue;
+                }
+                resultToReturn.add(cc);
+                conceptsToReturn.add(cc.getConceptNid());
 
-        ArrayList<ComponentChroncileBI<?>> resultToReturn = new ArrayList<>(result.topDocs.totalHits);
-        Set<Integer> conceptsToReturn = new HashSet();
-
-        for (int i = 0; i < result.topDocs.totalHits; i++) {
-            Document doc = result.searcher.doc(result.topDocs.scoreDocs[i].doc);
-            ComponentChroncileBI<?> cc = bts.getComponent(Integer.parseInt(doc.get("dnid")));
-            String desc = ((DescriptionAnalogBI<?>) cc).getText();
-
-            if (!desc.toLowerCase().startsWith(query.toLowerCase())) {
-                continue;
+                if (conceptsToReturn.size() >= 5) {
+                    break;
+                }
             }
-            resultToReturn.add(cc);
-            conceptsToReturn.add(cc.getConceptNid());
 
-            if (conceptsToReturn.size() >= 5) {
-                break;
-            }
+            return resultToReturn;
         }
-
-        return resultToReturn;
     }
-
+    
     /**
      * Returns null if search not available (only works with local DBs) -
      * otherwise, returns the list of descriptions that matched.
      */
     public List<ComponentChroncileBI<?>> descriptionSearch(String query) throws IOException {
-        SearchResult result = search(query);
+        SearchResult result = search(query.trim());
 
+        if (result == null) {
+            return new ArrayList<ComponentChroncileBI<?>>();
+        }
 
         if (!(dataStore_ instanceof BdbTerminologyStore)) {
             return null;
@@ -192,13 +196,29 @@ public class WBDataStore {
 
     private SearchResult search(String query) {
         try {
+
+            String filteredQuery = "";
+            for (int i = 0; i < query.length(); i++) {
+                if (Character.isLetterOrDigit(query.charAt(i)) ||
+                    query.charAt(i) == '-' ||
+                    Character.isWhitespace(query.charAt(i)) ||
+                    query.charAt(i) == '*' && (i == query.length() - 1)) {
+                    filteredQuery = filteredQuery + query.charAt(i);
+                }
+            }
+
+            if (filteredQuery.length() == 0 || filteredQuery.equals("*")) {
+                return  null;
+            }
+            
+            
             // sort of copied from Termstore.searchLucene(...)
             // because that API throws away the scores, and returns the results in random order... which is rather useless.
-            Query q = new QueryParser(Version.LUCENE_40, "desc", new StandardAnalyzer(Version.LUCENE_40)).parse(query);
+            Query q = new QueryParser(Version.LUCENE_40, "desc", new StandardAnalyzer(Version.LUCENE_40)).parse(filteredQuery);
             SearchResult result = LuceneManager.search(q);
 
             if (result.topDocs.totalHits == 0) {
-                q = new QueryParser(Version.LUCENE_40, "desc", new WhitespaceAnalyzer(Version.LUCENE_40)).parse(query);
+                q = new QueryParser(Version.LUCENE_40, "desc", new WhitespaceAnalyzer(Version.LUCENE_40)).parse(filteredQuery);
                 result = LuceneManager.search(q);
             }
 

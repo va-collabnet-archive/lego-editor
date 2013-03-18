@@ -13,6 +13,7 @@ import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.SortedSet;
@@ -27,6 +28,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
@@ -51,31 +54,41 @@ class LookAheadConceptPopup extends Popup {
     private double layoutX;
     private boolean cancelSearch = false;
     private BooleanProperty searchRunning = new SimpleBooleanProperty(false);
+    private List<String> prefTermArray = new ArrayList();
+    private List<String> uuidArray = new ArrayList();
+    private int currentSelection;
+    private boolean isDisplaying = false;
 
     public LookAheadConceptPopup() {
         setAutoFix(false);
         setAutoHide(true);
         searchResults.setMaxWidth(Double.MAX_VALUE);
+        //Another hack to fix strange behavior in javafx... left arrow key in the combobox editor doesn't work as expected unless you filter it..
+
+        searchResults.addEventHandler(KeyEvent.ANY, new LookAheadScrollEvent());
     }
 
     private void search(String searchText) throws IOException, IOException, ContradictionException {
+        currentSelection = -1;
+
         if (searchRunning.get()) {
             cancelSearch = true;
         } else {
             searchResults.setPrefWidth(comboBox.getWidth());
-            searchResults.getChildren().clear();
-            anchorpane.getChildren().clear();
-            anchorpane.getStyleClass().clear();
-            getContent().clear();
-            hide();
 
             if (searchText.trim().length() > 0) {
                 searchRunning.set(true);
                 Utility.tpe.submit(new LookAheadConceptPopup.Searcher(searchText));
+            } else {
+                searchResults.getChildren().clear();
+                anchorpane.getChildren().clear();
+                anchorpane.getStyleClass().clear();
+                hide();
+                isDisplaying = false;
             }
         }
     }
-    
+
     void showPopup(ComboBox<ComboBoxConcept> callingComboBox) {
         comboBox = callingComboBox;
 
@@ -97,8 +110,8 @@ class LookAheadConceptPopup extends Popup {
 
     }
 
-    void hidePopup() {
-        hide();
+    void handleScroll(KeyEvent event) {
+        searchResults.fireEvent(event);
     }
 
     private class Searcher implements Runnable {
@@ -151,26 +164,26 @@ class LookAheadConceptPopup extends Popup {
                     public void run() {
                         if (!cancelSearch) {
                             SortedSet<SearchResult> sortedResults = new TreeSet<SearchResult>(new SearchResultComparator());
-                            
+
                             for (SearchResult result : viewableResult.values()) {
                                 if (cancelSearch) {
                                     break;
                                 }
                                 sortedResults.add(result);
                             }
+                            searchResults.getChildren().clear();
+                            anchorpane.getChildren().clear();
+                            anchorpane.getStyleClass().clear();
 
                             if (!cancelSearch) {
                                 for (SearchResult result : sortedResults) {
                                     if (cancelSearch) {
                                         break;
                                     }
-                                    VBox box = processResult(result);
+                                    int idx = searchResults.getChildren().size();
 
-                                    if (searchResults.getChildren().size() == 0 || searchResults.getChildren().size() % 2 == 0) {
-                                        box.getStyleClass().add("lookupSearchResultsStyle-A");
-                                    } else {
-                                        box.getStyleClass().add("lookupSearchResultsStyle-B");
-                                    }
+                                    VBox box = processResult(result, idx);
+                                    setBoxStyle(box, idx);
 
                                     box.setOnMouseEntered(new LookAheadConceptPopup.LookAheadEnterHandler(box, true));
                                     box.setOnMouseExited(new LookAheadConceptPopup.LookAheadEnterHandler(box, false));
@@ -179,7 +192,7 @@ class LookAheadConceptPopup extends Popup {
                                     searchResults.getChildren().add(box);
                                 }
                             }
-                            
+
                             if (!cancelSearch) {
                                 anchorpane.getChildren().add(searchResults);
                                 anchorpane.getStyleClass().add("lookupSearchResultsStyle-A");
@@ -188,7 +201,8 @@ class LookAheadConceptPopup extends Popup {
                                 AnchorPane.setBottomAnchor(searchResults, 0.0);
                                 AnchorPane.setLeftAnchor(searchResults, 0.0);
                                 AnchorPane.setRightAnchor(searchResults, 0.0);
-
+                                
+                                getContent().clear();
                                 getContent().add(anchorpane);
 
                                 setAutoFix(false);
@@ -204,12 +218,16 @@ class LookAheadConceptPopup extends Popup {
                     public void run() {
                         if (!cancelSearch) {
                             Parent p = comboBox.getParent();
+
                             while (p.getParent() != null) {
                                 p = p.getParent();
                             }
 
                             if (searchResults.getChildren().size() > 0) {
-                                show(comboBox, layoutX, layoutY);
+                                if (!isDisplaying) {
+                                    show(comboBox, layoutX, layoutY);
+                                    isDisplaying = true;
+                                } 
 
                                 if (layoutY + anchorpane.getHeight()
                                         >= p.getLayoutBounds().getHeight() + comboBox.getParent().getScene().getWindow().getY()) {
@@ -219,7 +237,7 @@ class LookAheadConceptPopup extends Popup {
                                 }
                             }
                         }
-                        
+
                         cancelSearch = false;
                         searchRunning.set(false);
                     }
@@ -228,7 +246,7 @@ class LookAheadConceptPopup extends Popup {
         }
     }
 
-    private VBox processResult(SearchResult result) {
+    private VBox processResult(SearchResult result, int idx) {
         VBox box = new VBox();
 
         final ConceptVersionBI wbConcept = result.getConcept();
@@ -236,8 +254,6 @@ class LookAheadConceptPopup extends Popup {
 
         Label concept = new Label(preferredText);
         concept.getStyleClass().add("boldLabel");
-        double a = concept.getLayoutBounds().getHeight();
-        double aa = concept.getHeight();
         box.getChildren().add(concept);
 
 
@@ -251,9 +267,20 @@ class LookAheadConceptPopup extends Popup {
 
         }
 
-        box.setOnMouseClicked(new LookAheadConceptPopup.LookAheadSelectHandler(preferredText, wbConcept.getUUIDs().get(0).toString()));
+        String uuid = wbConcept.getUUIDs().get(0).toString();
+        prefTermArray.add(idx, preferredText);
+        uuidArray.add(idx, uuid);
+        box.setOnMouseClicked(new LookAheadConceptPopup.LookAheadSelectHandler(preferredText, uuid));
 
         return box;
+    }
+
+    private void setBoxStyle(VBox box, int index) {
+        if (index == 0 || index % 2 == 0) {
+            box.getStyleClass().add("lookupSearchResultsStyle-A");
+        } else {
+            box.getStyleClass().add("lookupSearchResultsStyle-B");
+        }
     }
 
     private class LookAheadSelectHandler implements EventHandler {
@@ -276,6 +303,50 @@ class LookAheadConceptPopup extends Popup {
 
             comboBox.setValue(con);
             hide();
+        }
+    }
+
+    private class LookAheadScrollEvent implements EventHandler {
+
+        @Override
+        public void handle(Event t) {
+            KeyEvent event = (KeyEvent) t;
+            int oldSelection = currentSelection;
+            boolean noAction = false;
+
+            if (event.getCode() == KeyCode.ENTER) {
+                if (currentSelection >= 0 && currentSelection < searchResults.getChildren().size()) {
+                    ComboBoxConcept con = new ComboBoxConcept(prefTermArray.get(currentSelection), uuidArray.get(currentSelection));
+
+                    comboBox.getEditor().setText(uuidArray.get(currentSelection));
+                    hide();
+                }
+            }
+            if (event.getCode() == KeyCode.UP) {
+                if (currentSelection > 0) {
+                    currentSelection--;
+                }
+            } else if (event.getCode() == KeyCode.DOWN) {
+                if (currentSelection < searchResults.getChildren().size() - 1) {
+                    currentSelection++;
+                } else {
+                    noAction = true;
+                }
+            }
+
+            if (!noAction) {
+                if (oldSelection >= 0) {
+                    VBox oldBox = (VBox) searchResults.getChildren().get(oldSelection);
+                    oldBox.getStyleClass().clear();
+                    setBoxStyle(oldBox, oldSelection);
+                }
+
+                VBox newBox = (VBox) searchResults.getChildren().get(currentSelection);
+                newBox.getStyleClass().clear();
+                newBox.getStyleClass().add("lookupSearchResultsStyle-Selected");
+            }
+
+            event.consume();
         }
     }
 
