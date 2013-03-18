@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
+
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.cem.CimiImportViewController">
+  <children>
+    <SplitPane dividerPositions="0.5012531328320802" focusTraversable="true" prefHeight="400.0" prefWidth="347.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <items>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="144.0" styleClass="dialogBackground, itemBorder">
+          <children>
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <children>
+                <HBox VBox.vgrow="NEVER">
+                  <children>
+                    <Label maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="Valueset Spreadsheet" HBox.hgrow="ALWAYS" />
+                    <Button id="chooseValueSetFile" fx:id="chooseValuesetFile" mnemonicParsing="false" text="Choose" HBox.hgrow="NEVER" />
+                  </children>
+                </HBox>
+                <Label id="cimiFileName" fx:id="valuesetFileName" text="&lt;no file selected&gt;" />
+                <HBox maxWidth="1.7976931348623157E308" VBox.vgrow="NEVER">
+                  <children>
+                    <Label maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="CIMI XML File" HBox.hgrow="ALWAYS">
+                      <HBox.margin>
+                        <Insets fx:id="x1" />
+                      </HBox.margin>
+                    </Label>
+                    <Button fx:id="chooseCimiFile" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" text="Choose" HBox.hgrow="NEVER" HBox.margin="$x1" />
+                  </children>
+                </HBox>
+                <Label fx:id="cimiFileName" text="&lt;no file selected&gt;" />
+                <ScrollPane fx:id="cimiFilePreview" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
+              </children>
+            </VBox>
+          </children>
+        </AnchorPane>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="450.0" styleClass="dialogBackground, itemBorder">
+          <children>
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <children>
+                <Label styleClass="boldLabel" text="Valuesets in CIMI file" />
+                <ListView fx:id="valueSetList" maxWidth="1.7976931348623157E308" prefHeight="200.0" VBox.vgrow="SOMETIMES" />
+                <Label styleClass="boldLabel" text="Valueset Members" />
+                <ListView fx:id="valuesetMembers" maxWidth="1.7976931348623157E308" prefHeight="200.0" VBox.vgrow="SOMETIMES" />
+                <BorderPane maxWidth="1.7976931348623157E308">
+                  <left>
+                    <Button fx:id="findLego" mnemonicParsing="false" text="Find Lego">
+                      <BorderPane.margin>
+                        <Insets left="10.0" />
+                      </BorderPane.margin>
+                    </Button>
+                  </left>
+                  <padding>
+                    <Insets bottom="5.0" />
+                  </padding>
+                  <right>
+                    <Button fx:id="createLego" mnemonicParsing="false" text="Create Lego">
+                      <BorderPane.margin>
+                        <Insets right="10.0" />
+                      </BorderPane.margin>
+                    </Button>
+                  </right>
+                </BorderPane>
+              </children>
+            </VBox>
+          </children>
+        </AnchorPane>
+      </items>
+    </SplitPane>
+  </children>
+</AnchorPane>

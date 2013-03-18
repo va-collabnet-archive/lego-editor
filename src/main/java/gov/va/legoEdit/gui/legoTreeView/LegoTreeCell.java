@@ -1840,17 +1840,22 @@ public class LegoTreeCell<T> extends TreeCell<T>
 
 	private void addMenus(final LegoReference legoReference, final LegoTreeItem lti, ContextMenu cm)
 	{
-		MenuItem mi = new MenuItem("View in Web Browser");
-		mi.setOnAction(new EventHandler<ActionEvent>()
+		MenuItem mi;
+		
+		if (!legoReference.isNew())
 		{
-			@Override
-			public void handle(ActionEvent arg0)
+			mi = new MenuItem("View in Web Browser");
+			mi.setOnAction(new EventHandler<ActionEvent>()
 			{
-				LegoGUIModel.getInstance().viewLegoInBrowser(legoReference.getLegoUUID(), legoReference.getStampUUID());
-			}
-		});
-		mi.setGraphic(Images.HTML_VIEW_16.createImageView());
-		cm.getItems().add(mi);
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					LegoGUIModel.getInstance().viewLegoInBrowser(legoReference.getLegoUUID(), legoReference.getStampUUID());
+				}
+			});
+			mi.setGraphic(Images.HTML_VIEW_16.createImageView());
+			cm.getItems().add(mi);
+		}
 		
 		mi = new MenuItem("Delete Lego");
 		mi.setOnAction(new EventHandler<ActionEvent>()

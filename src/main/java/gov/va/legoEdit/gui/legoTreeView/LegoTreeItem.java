@@ -67,6 +67,13 @@ public class LegoTreeItem extends TreeItem<String>
 		this.ltnt_ = tct;
 		setValue(value);
 	}
+	
+	public LegoTreeItem(String value, LegoTreeNodeType tct, Object extraData)
+	{
+		this.ltnt_ = tct;
+		setValue(value);
+		this.extraData_ = extraData;
+	}
 
 	public LegoTreeItem(Stamp value, LegoTreeNodeType tct)
 	{
@@ -124,7 +131,13 @@ public class LegoTreeItem extends TreeItem<String>
 
 		for (Entry<String, Hashtable<String, List<LegoReference>>> items : pncsHier.entrySet())
 		{
-			LegoTreeItem pncsNameTI = new LegoTreeItem(items.getKey(), LegoTreeNodeType.pncsName);
+			Integer pncsId = null;
+			if (items.getValue().values().size() > 0)
+			{
+				pncsId = items.getValue().values().iterator().next().get(0).getPncs().getId();
+			}
+			
+			LegoTreeItem pncsNameTI = new LegoTreeItem(items.getKey(), LegoTreeNodeType.pncsName, pncsId);
 			getChildren().add(pncsNameTI);
 			for (Entry<String, List<LegoReference>> nestedItems : items.getValue().entrySet())
 			{
@@ -480,7 +493,7 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		isValid = invalidReason_ == null;
 	}
-        
+	
     public void invalideDroolsRule(String reason) {
         invalidReason_ = reason;
 

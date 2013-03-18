@@ -299,7 +299,7 @@ public class CreateLegoController implements Initializable
 				{
 					logger.error("Couldn't find new item in tree?");
 				}
-				
+
 				llbr = null;
 				legoTreeItem = null;
 				((Stage) rootPane.getScene().getWindow()).close();
@@ -365,14 +365,28 @@ public class CreateLegoController implements Initializable
 		}
 		
 		String defaultName = "";
+		Integer defaultId = null;
 		if (lti.getNodeType() == LegoTreeNodeType.pncsName)
 		{
 			defaultName = lti.getValue();
+			defaultId = (Integer)lti.getExtraData();
 			this.legoTreeItem = (LegoTreeItem)lti.getParent();
 		}
 		
-		pncsID.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getId() + "");
+		pncsID.setText(legoFromPaste == null ? (defaultId != null ? defaultId.toString() : "") : legoFromPaste.getPncs().getId() + "");
 		pncsName.setText(legoFromPaste == null ? defaultName : legoFromPaste.getPncs().getName());
 		pncsValue.setText(legoFromPaste == null ? "" : legoFromPaste.getPncs().getValue());
+	}
+	
+	public void init(LegoListByReference llbr, LegoTreeItem lti, String suggestedName, String suggestedValue)
+	{
+		this.llbr = llbr;
+		this.legoTreeItem = lti;
+		legoListName.setText(llbr.getGroupDescription());
+		legoFromPaste = null;
+		
+		pncsID.setText("");
+		pncsName.setText(suggestedName == null ? "" : suggestedName);
+		pncsValue.setText(suggestedValue == null ? "" : suggestedValue);
 	}
 }

@@ -1,6 +1,7 @@
 package gov.va.legoEdit;
 
 import gov.va.legoEdit.formats.LegoXMLUtils;
+import gov.va.legoEdit.gui.cem.CimiImportViewController;
 import gov.va.legoEdit.gui.dialogs.AboutDialogController;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.CreateTemplateController;
@@ -31,6 +32,7 @@ import javafx.scene.control.TreeItem;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
 import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
@@ -173,8 +175,13 @@ public class LegoGUI extends Application
 	{
 		return lgc_;
 	}
-
+	
 	public void showErrorDialog(final String title, final String errorMessage, final String detailedErrorMessage)
+	{
+		showErrorDialog(title, errorMessage, detailedErrorMessage, null);
+	}
+
+	public void showErrorDialog(final String title, final String errorMessage, final String detailedErrorMessage, final Window owner)
 	{
 		while (edc_ == null)
 		{
@@ -194,6 +201,7 @@ public class LegoGUI extends Application
 			Toolkit.getToolkit().checkFxUserThread();
 			edc_.setVariables(errorMessage, detailedErrorMessage);
 			errorDialogStage_.setTitle(title);
+			errorDialogStage_.initOwner(owner == null ? mainStage_ : owner);
 			errorDialogStage_.show();
 		}
 		catch (IllegalStateException e)
@@ -206,6 +214,7 @@ public class LegoGUI extends Application
 				{
 					edc_.setVariables(errorMessage, detailedErrorMessage);
 					errorDialogStage_.setTitle(title);
+					errorDialogStage_.initOwner(owner == null ? mainStage_ : owner);
 					errorDialogStage_.show();
 				}
 			});
@@ -240,10 +249,21 @@ public class LegoGUI extends Application
 		clc_.init(llbr, ti, fromPaste);
 		createLegoStage_.show();
 	}
+	
+	public void showCreateLegoDialog(LegoListByReference llbr, LegoTreeItem ti, String suggestedName, String suggestedValue)
+	{
+		clc_.init(llbr, ti, suggestedName, suggestedValue);
+		createLegoStage_.show();
+	}
 
 	public void showUserPreferences()
 	{
 		userPrefsStage_.show();
+	}
+	
+	public void showCimiTool()
+	{
+		CimiImportViewController.show(mainStage_);
 	}
 
 	public YesNoDialogController.Answer showYesNoDialog(String title, String question)

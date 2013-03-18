@@ -46,4 +46,18 @@ public class PncsItem
 	{
 		return id;
 	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof PncsItem)
+		{
+			PncsItem other = (PncsItem) obj;
+			if (this.id == other.id && this.name.equals(other.name))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -150,6 +150,8 @@ public class LegoGUIController implements Initializable
 	private MenuItem menuEditAddPending; // Value injected by FXMLLoader
 	@FXML// fx:id="menuEditPreferences"
 	private MenuItem menuEditPreferences; // Value injected by FXMLLoader
+	@FXML// fx:id="menuEditCimiTool"
+	private MenuItem menuEditCimiTool; // Value injected by FXMLLoader
 	@FXML// fx:id="menuFile"
 	private Menu menuFile; // Value injected by FXMLLoader
 	@FXML// fx:id="menuFileCreateLego"
@@ -500,10 +502,12 @@ public class LegoGUIController implements Initializable
 					}
 				}
 
+				boolean wasNew = false;
 				if (legoListUUIDtoUse == null)
 				{
 					// try to get it from the newLegos list
 					legoListUUIDtoUse = getUnsavedLegos().getLegoListIdForLego(oldId);
+					wasNew = true;
 				}
 
 				if (legoListUUIDtoUse == null)
@@ -519,6 +523,7 @@ public class LegoGUIController implements Initializable
 					lego.setStamp(updatedStamp);
 					String newId = ModelUtil.makeUniqueLegoID(lego);
 					removeNewLego(oldId);
+					
 					displayedLegos.put(newId, lt);
 					displayedLegosStyleInfo.put(newId, style);
 					snomedCodeDropTargets.put(newId, dropTargets);
@@ -526,6 +531,12 @@ public class LegoGUIController implements Initializable
 					lt.hasUnsavedChangesProperty().invalidate();
 					lt.updateForSave(updatedStamp);
 					cut.legoCommitted(lego);
+					
+					if (wasNew)
+					{
+						//If it was a new lego, we will need to refresh the PNCS filter options.
+						LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
+					}
 				}
 				catch (DataStoreException | WriteException e)
 				{
@@ -1069,6 +1080,16 @@ public class LegoGUIController implements Initializable
 			public void handle(ActionEvent event)
 			{
 				LegoGUI.getInstance().showAddPendingConcept();
+			}
+		});
+		
+		menuEditCimiTool.setGraphic(Images.XML_VIEW_16.createImageView());
+		menuEditCimiTool.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent event)
+			{
+				LegoGUI.getInstance().showCimiTool();
 			}
 		});
 

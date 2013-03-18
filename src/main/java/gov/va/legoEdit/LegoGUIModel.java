@@ -8,6 +8,7 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.ExpandedNode;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
+import gov.va.legoEdit.gui.util.TaskCompleteCallback;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
@@ -29,10 +30,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.scene.control.IndexedCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javax.xml.transform.Transformer;
@@ -133,12 +134,12 @@ public class LegoGUIModel
 	 */
 	public void initializeLegoListNames(final TreeView<String> treeView, final Integer pncsFilterId, final String pncsFilterValue, final Concept conceptFilter, 
 			final String relAppliesToLegoSection, final Concept relTypeFilter, final String destTypeFilter, final Concept destFilter, 
-			final BooleanProperty setFalseWhenFinished)
+			final TaskCompleteCallback callback)
 	{
+		final long startTime = System.currentTimeMillis();
 		final ExpandedNode before = gov.va.legoEdit.gui.util.Utility.buildExpandedNodeHierarchy(treeView.getRoot());
 		legoLists_ =  treeView.getRoot().getChildren();
 		legoLists_.clear();
-		
 		
 		int targetScrollPos = 0;
 		//Now this is a hack....
@@ -148,8 +149,12 @@ public class LegoGUIModel
 			if (tks.getChildrenUnmodifiable().size() > 0)
 			{
 				VirtualFlow vf = (VirtualFlow)tks.getChildrenUnmodifiable().get(0);
-				targetScrollPos = vf.getFirstVisibleCell().getIndex() 
-						+ (int)Math.floor(((double)(vf.getLastVisibleCell().getIndex() - vf.getFirstVisibleCell().getIndex())) / 2.0);
+				IndexedCell<?> first = vf.getFirstVisibleCell();
+				IndexedCell<?> last = vf.getLastVisibleCell();
+				if (first != null && last != null)
+				{
+					targetScrollPos = first.getIndex() + (int)Math.floor(((double)(last.getIndex() - first.getIndex())) / 2.0);
+				}
 			}
 		}
 		
@@ -297,9 +302,9 @@ public class LegoGUIModel
 						legoLists_.add(new LegoTreeItem(LegoTreeNodeType.blankLegoListEndNode));
 						FXCollections.sort(legoLists_, new LegoTreeItemComparator(true));
 						LegoGUI.getInstance().getLegoGUIController().showLegosForAllOpenTabs();
-						if (setFalseWhenFinished != null)
+						if (callback != null)
 						{
-							setFalseWhenFinished.set(false);
+							callback.taskComplete(startTime);
 						}
 						gov.va.legoEdit.gui.util.Utility.setExpandedStates(before, treeView.getRoot());
 						//For some reason, scroll to doesn't work unless you select first
@@ -317,6 +322,7 @@ public class LegoGUIModel
 	{
 		// Long way around to get back to the method above... but I need the filter params.
 		LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().reloadOptions();
+		LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController().updateLegoList();
 	}
 
 	public void importLegoList(LegoList ll) throws WriteException
@@ -419,7 +425,7 @@ public class LegoGUIModel
 					BrowserLauncher bl = new BrowserLauncher();
 					bl.openURLinBrowser(f.toURI().toURL().toString());
 					
-					//This is the sun way... but it spews crap all over the console.
+					//This is the sun way... but it spews crap all over the console - so I used the BrowserLauncher instead.
 					//Desktop.getDesktop().browse(f.toURI());
 					
 					Thread.sleep(10000);
@@ -428,6 +434,7 @@ public class LegoGUIModel
 				}
 				catch (Exception e)
 				{
+					LegoGUI.getInstance().showErrorDialog("Error launching browser", "There was an error launching the web browser", e.toString());
 					logger.error("Error launching web browser", e);
 				}
 			}

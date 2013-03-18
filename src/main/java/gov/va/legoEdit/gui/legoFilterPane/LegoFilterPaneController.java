@@ -2,9 +2,11 @@ package gov.va.legoEdit.gui.legoFilterPane;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
 import gov.va.legoEdit.gui.util.Images;
+import gov.va.legoEdit.gui.util.TaskCompleteCallback;
 import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;
@@ -50,7 +52,7 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LegoFilterPaneController implements Initializable, ConceptLookupCallback
+public class LegoFilterPaneController implements Initializable, ConceptLookupCallback, TaskCompleteCallback
 {
 	public static String ANY = "-ANY-";
 	public static String DISCERNIBLE = "Discernible";
@@ -111,7 +113,15 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	private ConceptGUIInfo[] conceptInfo_ = new ConceptGUIInfo[3]; 
 
 	private volatile AtomicInteger updateDisabled = new AtomicInteger(0);  // Update will only run when this is 0
-	private BooleanProperty updateRunning = new SimpleBooleanProperty(false);
+	private AtomicInteger updateRunningCount = new AtomicInteger(0);
+	private BooleanBinding isUpdateRunning = new BooleanBinding()
+	{
+		@Override
+		protected boolean computeValue()
+		{
+			return updateRunningCount.get() > 0;
+		}
+	};
 
 	Logger logger = LoggerFactory.getLogger(LegoFilterPaneController.class);
 	
@@ -323,16 +333,16 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 
 		labelRelLocation.disableProperty().bind(enableAdvancedLegoRelLocation.not());
 		advancedTypeLegoPart.disableProperty().bind(enableAdvancedLegoRelLocation.not());
-		listUpdatePI.visibleProperty().bind(updateRunning);
+		listUpdatePI.visibleProperty().bind(isUpdateRunning);
 		labelAdvancedActive.setText(SchemaToString.rightArrow);
 		labelAdvancedActive.visibleProperty().bind(enableAdvancedLegoRelLocation);
 
-		updateRunning.addListener(new InvalidationListener()
+		isUpdateRunning.addListener(new InvalidationListener()
 		{
 			@Override
 			public void invalidated(Observable observable)
 			{
-				if (updateRunning.get())
+				if (isUpdateRunning.get())
 				{
 					labelNoResults.setVisible(false);
 				}
@@ -430,6 +440,35 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		snomedId.setText(conceptId);
 		LegoGUI.getInstance().getLegoGUIController().showLegoLists();
 	}
+	
+	public synchronized void filterOnPncs(String pncsName, String pncsValue)
+	{
+		updateDisabled.incrementAndGet();
+		clearFilter();
+		pncsNameOrId.getSelectionModel().select(0);
+		for (PncsItem item : pncsItem.getItems())
+		{
+			if (item.name.equals(pncsName))
+			{
+				pncsItem.getSelectionModel().select(item);
+				break;
+			}
+		}
+		if (pncsValue != null && !this.pncsValue.isDisable())
+		{
+			for (String s : this.pncsValue.getItems())
+			{
+				if (s.equals(pncsValue))
+				{
+					this.pncsValue.getSelectionModel().select(s);
+					break;
+				}
+			}
+		}
+		updateDisabled.decrementAndGet();
+		updateLegoList();
+		LegoGUI.getInstance().getLegoGUIController().showLegoLists();
+	}
 
 	private void clearFilter()
 	{
@@ -452,7 +491,8 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			return;
 		}
 
-		updateRunning.set(true);
+		updateRunningCount.incrementAndGet();
+		isUpdateRunning.invalidate();
 		Integer pncsFilterId = null;
 		String pncsFilterValue = null;
 		if (!pncsItem.getSelectionModel().getSelectedItem().getName().equals(ANY))
@@ -474,7 +514,12 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		ltv.getSelectionModel().clearSelection();
 		LegoGUIModel.getInstance().initializeLegoListNames(ltv, pncsFilterId, pncsFilterValue, conceptInfo_[CONCEPT_LOOKUP].concept, 
 				advancedRelFilterLegoPart, conceptInfo_[CONCEPT_REL_TYPE_LOOKUP].concept, advancedDestMatchTypePart, conceptInfo_[CONCEPT_REL_DEST_LOOKUP].concept,
-				updateRunning);
+				this);
+	}
+	
+	public LegoTreeItem getCurrentSelection()
+	{
+		return (LegoTreeItem)ltv.getSelectionModel().getSelectedItem();
 	}
 
 	public BorderPane getBorderPane()
@@ -487,7 +532,6 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 		updateDisabled.incrementAndGet();
 		loadPncs();
 		updateDisabled.decrementAndGet();
-		clearFilter();
 	}
 
 	private void loadPncs()
@@ -499,11 +543,24 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			Pncs pncs = iterator.next();
 			unique.put(pncs.getName() + pncs.getId(), new PncsItem(pncs, pncsNameOrId.valueProperty()));
 		}
+		PncsItem selectedName = pncsItem.getSelectionModel().getSelectedItem();
+		String selectedValue = pncsValue.getSelectionModel().getSelectedItem();
 		pncsItem.getItems().clear();
 		pncsItem.getItems().addAll(new PncsItem(ANY, -1, pncsNameOrId.valueProperty()));
 		pncsItem.getItems().addAll(unique.values());
 		FXCollections.sort(pncsItem.getItems(), new PncsItemComparator());
-		pncsItem.getSelectionModel().select(0);
+		if (selectedName != null)
+		{
+			pncsItem.getSelectionModel().select(selectedName);
+			if (selectedValue != null)
+			{
+				pncsValue.getSelectionModel().select(selectedValue);
+			}
+		}
+		else
+		{
+			pncsItem.getSelectionModel().select(0);
+		}
 	}
 
 	@Override
@@ -546,5 +603,12 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 				}
 			}
 		});
+	}
+
+	@Override
+	public void taskComplete(long startTime)
+	{
+		updateRunningCount.decrementAndGet();
+		isUpdateRunning.invalidate();
 	}
 }

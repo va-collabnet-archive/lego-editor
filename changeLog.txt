@@ -1,5 +1,10 @@
 Lego Editor Change Log
 2013/03/?? - 0.58
+  *  Fixed a bug where the PNCS filter drop down wasn't being updated after a new lego was created
+  *  Fixed a bug where rapid changes to the lego list filters could cause strange behavior
+  *  Fixed a null pointer that could happen in certain situations within the filter update.
+  *  Fixed a null pointer that happened if you tried to view a new (unsaved) lego in the web browser
+  *  artf227644 - Add CIMI import / viewer tool.
 
 2013/03/14 - 0.57
   *  Fixed the summary view on/off switch so it takes effect on Legos that are already open.
