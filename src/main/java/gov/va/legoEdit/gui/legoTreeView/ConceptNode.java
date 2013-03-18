@@ -121,6 +121,11 @@ public class ConceptNode implements ConceptLookupCallback
 			{
 				if (event.isAltDown()) {
                                     event.consume();
+                                } else if (event.getCode() == KeyCode.UP ||
+                                           event.getCode() == KeyCode.DOWN ||
+                                           event.getCode() == KeyCode.ENTER) {
+                                    popup.handleScroll(event);
+                                    event.consume();
                                 }
                         }
                 });
@@ -132,18 +137,16 @@ public class ConceptNode implements ConceptLookupCallback
 			{
 				if (event.getCode() == KeyCode.LEFT)
 				{
-					event.consume();
-				}
-                                if (event.getCode() == KeyCode.UP
-                                        || event.getCode() == KeyCode.DOWN
-                                        || event.getCode() == KeyCode.ENTER) {
-                                    popup.handleScroll(event);
                                     event.consume();
-                                } else if (event.isAltDown()
-                                        || event.isControlDown()
-                                        || event.isMetaDown()
-                                        || event.isShiftDown()
-                                        || event.isShortcutDown()) {
+				} else if (event.getCode() == KeyCode.UP ||
+                                           event.getCode() == KeyCode.DOWN ||
+                                           event.getCode() == KeyCode.ENTER) {
+                                    event.consume();
+                                } else if (event.isAltDown() ||
+                                           event.isControlDown() ||
+                                           event.isMetaDown() ||
+                                           event.isShiftDown() ||
+                                           event.isShortcutDown()) {
                                     event.consume();
                                 } else {
                                     if (cb_.getEditor().getText().length() != 36 || Utility.isLong(cb_.getEditor().getText())) {
