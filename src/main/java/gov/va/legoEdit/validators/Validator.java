@@ -1,5 +1,7 @@
 package gov.va.legoEdit.validators;
 
+import gov.va.legoEdit.drools.ConceptNodeDroolsHandler;
+import gov.va.legoEdit.drools.actions.DroolsLegoAction;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
@@ -17,7 +19,10 @@ import gov.va.legoEdit.model.schemaModel.Qualifier;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Value;
+import gov.va.legoEdit.storage.wb.WBUtility;
+import java.util.List;
 import java.util.UUID;
+import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,6 +182,22 @@ public class Validator
 		}
 		else
 		{
+			try
+			{
+				ConceptVersionBI cv = WBUtility.lookupSnomedIdentifierAsCV(concept.getUuid());
+				if (cv != null)
+				{
+					List<DroolsLegoAction> actions = ConceptNodeDroolsHandler.getInstance().processConceptNodeRules(cv, lti.getConceptUsageType());
+					if (actions.size() > 0)
+					{
+						return actions.get(0).getFailureReason();
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				logger.error("Drools validation failed!", e);
+			}
 			return null;
 		}
 	}

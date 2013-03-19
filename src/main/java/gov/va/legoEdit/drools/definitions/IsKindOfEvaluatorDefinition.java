@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gov.va.legoEdit.drools.definitions;
 
 
@@ -50,9 +46,6 @@ public class IsKindOfEvaluatorDefinition implements EvaluatorDefinition {
 
     public static class IsKindOfEvaluator extends BaseEvaluator {
 
-        /**
-         * 
-         */
         private static final long serialVersionUID = 1L;
         private static final int dataVersion = 1;
 
@@ -110,7 +103,7 @@ public class IsKindOfEvaluatorDefinition implements EvaluatorDefinition {
                 } else if (ConceptFact.class.isAssignableFrom(value1.getClass())) {
                     possibleKind = ((ConceptFact) value1).getConcept();
                 } else if (DescFact.class.isAssignableFrom(value1.getClass())) {
-                    DescriptionVersionBI dv = ((DescFact)value1).getDesc();
+                    DescriptionVersionBI<?> dv = ((DescFact)value1).getDesc();
                     ViewCoordinate vc = ((DescFact)value1).getVc();
                     possibleKind = Ts.get().getConceptVersion(vc, dv.getConceptNid());
                 }else {

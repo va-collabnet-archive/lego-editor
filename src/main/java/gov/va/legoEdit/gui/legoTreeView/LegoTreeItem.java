@@ -35,6 +35,7 @@ import javafx.scene.layout.HBox;
 public class LegoTreeItem extends TreeItem<String>
 {
 	private LegoTreeNodeType ltnt_ = null;
+	private ConceptUsageType cut_ = null; //This is a cache
 	private Object extraData_ = null;
 	private Boolean isValid = null;
 	private Boolean areChildrenValid = null;
@@ -436,6 +437,7 @@ public class LegoTreeItem extends TreeItem<String>
 	protected void setNodeType(LegoTreeNodeType type)
 	{
 		ltnt_ = type;
+		cut_ = null;
 	}
 	
 	public Object getExtraData()
@@ -493,18 +495,6 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 		isValid = invalidReason_ == null;
 	}
-	
-    public void invalideDroolsRule(String reason) {
-        invalidReason_ = reason;
-
-        isValid = false;
-
-        if (treeNodeGraphic.getChildren().size() == 0 || !(treeNodeGraphic.getChildren().get(0) instanceof InvalidNode)) {
-            treeNodeGraphic.getChildren().add(0, new InvalidNode(isValid() ? "Error in child" : invalidReason_));
-        } else {
-            ((InvalidNode) treeNodeGraphic.getChildren().get(0)).setInvalidReason(isValid() ? "Error in child" : invalidReason_);
-        }
-    }
 
 	private void validateChildren()
 	{
@@ -564,5 +554,53 @@ public class LegoTreeItem extends TreeItem<String>
 				}
 			}
 		}
+	}
+	
+	public ConceptUsageType getConceptUsageType()
+	{
+		if (cut_ != null)
+		{
+			return cut_;
+		}
+		if (LegoTreeNodeType.expressionDestination == ltnt_)
+		{
+			cut_ = ConceptUsageType.REL_DESTINATION;
+		}
+		else if (extraData_ != null)
+		{
+			if (extraData_ instanceof Relation || extraData_ instanceof AssertionComponent)
+			{
+				cut_ = ConceptUsageType.TYPE;
+			}
+			else if (extraData_ instanceof Measurement)
+			{
+				cut_ = ConceptUsageType.UNITS;
+			}
+			else if (extraData_ instanceof Expression)
+			{
+				if (LegoTreeNodeType.expressionDiscernible == ltnt_)
+				{
+					cut_ = ConceptUsageType.DISCERNIBLE;
+				}
+				else if (LegoTreeNodeType.expressionQualifier == ltnt_)
+				{
+					cut_ = ConceptUsageType.QUALIFIER;
+				}
+			}
+			else if (extraData_ instanceof Value)
+			{
+				cut_ = ConceptUsageType.VALUE;
+			}
+		}
+		if (cut_ == null)
+		{
+			// Didn't find it... recurse...
+			LegoTreeItem parent = getLegoParent();
+			if (parent != null)
+			{
+				cut_ = parent.getConceptUsageType();
+			}
+		}
+		return cut_;
 	}
 }

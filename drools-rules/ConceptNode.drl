@@ -1,5 +1,5 @@
 #created on: March 17, 2013
-package gov.va.lgeoEdit.drools.rules
+package gov.va.legoEdit.drools.rules
 
 #list any import classes here.
 import java.io.File;
@@ -12,24 +12,18 @@ import gov.va.legoEdit.drools.actions.FailValidatorAction;
 import gov.va.legoEdit.drools.facts.AssertionFact;
 import gov.va.legoEdit.drools.facts.ConceptFact;
 import gov.va.legoEdit.gui.legoTreeView.ConceptUsageType;
-import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
-
 
 
 #declare any global variables here
 
 global Collection actions;
-global ViewCoordinate vc;
-global LegoTreeItem item;
 
-
-
-rule "Discernible IS Observible Entity"
+rule "Discernible IS Observable Entity"
 	when
 		 (and
 			(AssertionFact(getType() == ConceptUsageType.DISCERNIBLE))
 			 ($dropObject: ConceptFact(this not isKindOf Snomed.OBSERVABLE_ENTITY))
 		  )
 	then
-		actions.add(new FailValidatorAction(item, FailValidatorAction.ReasonFailed.DISCERNIBLE_OBSERVABLE));
+		actions.add(new FailValidatorAction(FailValidatorAction.ReasonFailed.DISCERNIBLE_OBSERVABLE));
 end

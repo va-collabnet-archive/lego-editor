@@ -595,7 +595,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					//putting the single expression on the same line.
 					if (e.getConcept() != null)
 					{
-						ConceptUsageType cut = findType(treeItem);
+						ConceptUsageType cut = treeItem.getConceptUsageType();
 						final ConceptNode cn = new ConceptNode("", e.getConcept(), cut, treeItem, treeView);
 						final ContextMenu conceptContextMenu = new ContextMenu();
 						addMenus(e.getConcept(), cn, treeItem, conceptContextMenu);
@@ -622,7 +622,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					Concept c = (Concept) treeItem.getExtraData();
 
 					String label = "";
-					ConceptUsageType cut = findType(treeItem);
+					ConceptUsageType cut = treeItem.getConceptUsageType();
 					if (ConceptUsageType.TYPE == cut)
 					{
 						label = "Type";
@@ -2901,49 +2901,6 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		mi.setGraphic(Images.PASTE.createImageView());
 		cm.getItems().add(mi);
 
-	}
-
-	private ConceptUsageType findType(LegoTreeItem lti)
-	{
-		if (LegoTreeNodeType.expressionDestination == lti.getNodeType())
-		{
-			return ConceptUsageType.REL_DESTINATION;
-		}
-		Object data = lti.getExtraData();
-		if (data != null)
-		{
-			if (data instanceof Relation || data instanceof AssertionComponent)
-			{
-				return ConceptUsageType.TYPE;
-			}
-			else if (data instanceof Measurement)
-			{
-				return ConceptUsageType.UNITS;
-			}
-			else if (data instanceof Expression)
-			{
-				if (LegoTreeNodeType.expressionDiscernible == lti.getNodeType())
-				{
-					return ConceptUsageType.DISCERNIBLE;
-				}
-				else if (LegoTreeNodeType.expressionQualifier == lti.getNodeType())
-				{
-					return ConceptUsageType.QUALIFIER;
-				}
-			}
-			else if (data instanceof Value)
-			{
-				return ConceptUsageType.VALUE;
-			}
-		}
-
-		// Didn't find it... recurse...
-		LegoTreeItem parent = lti.getLegoParent();
-		if (parent != null)
-		{
-			return findType(parent);
-		}
-		return null;
 	}
 
 	@Override

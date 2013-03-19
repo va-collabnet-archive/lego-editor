@@ -1,21 +1,38 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gov.va.legoEdit.drools.actions;
 
-import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 
 /**
- *
+ * 
  * @author jefron
+ * @author darmbrust
  */
-public class FailValidatorAction {
-    public enum ReasonFailed  { DISCERNIBLE_OBSERVABLE};
+public class FailValidatorAction extends DroolsLegoAction
+{
+	public enum ReasonFailed
+	{
+		DISCERNIBLE_OBSERVABLE("Discernible Concept must be an Observable");
+		
+		private String reason;
+		private ReasonFailed(String reason)
+		{
+			this.reason = reason;
+		}
+		
+		public String getReason()
+		{
+			return reason;
+		}
+	};
 
-    public FailValidatorAction(LegoTreeItem legoTreeItem, ReasonFailed reason) {
-        if (reason == ReasonFailed.DISCERNIBLE_OBSERVABLE) {
-            legoTreeItem.invalideDroolsRule("Discernible Concept must be an Observable");
-        }
-    }
+	private ReasonFailed reasonFailed;
+	
+	public FailValidatorAction(ReasonFailed reason)
+	{
+		this.reasonFailed = reason;
+	}
+	
+	public String getFailureReason()
+	{
+		return reasonFailed.getReason();
+	}
 }

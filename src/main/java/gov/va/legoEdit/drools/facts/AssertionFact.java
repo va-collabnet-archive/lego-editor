@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gov.va.legoEdit.drools.facts;
 
 /**
@@ -11,7 +7,7 @@ package gov.va.legoEdit.drools.facts;
 
 import gov.va.legoEdit.gui.legoTreeView.ConceptUsageType;
 
-public class AssertionFact <T extends ConceptUsageType> extends Fact<T>{
+public class AssertionFact extends Fact<ConceptUsageType>{
     private ConceptUsageType type;
     
     public AssertionFact(ConceptUsageType type) {
