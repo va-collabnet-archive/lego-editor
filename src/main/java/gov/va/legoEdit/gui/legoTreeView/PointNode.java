@@ -7,7 +7,9 @@ import gov.va.legoEdit.model.schemaModel.Point;
 import gov.va.legoEdit.model.schemaModel.PointDouble;
 import gov.va.legoEdit.model.schemaModel.PointLong;
 import gov.va.legoEdit.model.schemaModel.PointMeasurementConstant;
+import gov.va.legoEdit.util.Utility;
 import gov.va.legoEdit.validators.Validator;
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -164,7 +166,14 @@ public class PointNode
 		sp_.getChildren().add(invalidImage_);
 		StackPane.setAlignment(invalidImage_, Pos.CENTER_RIGHT);
 		StackPane.setMargin(invalidImage_, new Insets(0.0, 20.0, 0.0, 0.0));
-		checkGroupMessage();
+		Utility.tpe.execute(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				checkGroupMessage(0);
+			}
+		});
 	}
 	
 	protected void setPartnerNodes(PointNode ... pointNodes)
@@ -172,9 +181,30 @@ public class PointNode
 		partnerNodes_ = pointNodes;
 	}
 	
-	protected void checkGroupMessage()
+	/**
+	 * Caution - this blocks until validation is complete!
+	 */
+	private void checkGroupMessage(long validationShouldBeNewerThan)
 	{
-		String groupInvalidReason = lti_.getLegoParent().getInvalidReason();
+		long limit = System.currentTimeMillis() + (10 * 1000);
+		while (lti_.getValidationTimestamp() < validationShouldBeNewerThan)
+		{
+			//Ugly, yes, I know  Doesn't seem worth putting the sync / notify stuff in place..
+			try
+			{
+				Thread.sleep(50);
+			}
+			catch (InterruptedException e)
+			{
+				// noop
+			}
+			if (System.currentTimeMillis() > limit)
+			{
+				logger.error("PointNode validator thread blocked for more than 10 seconds!");
+				break;
+			}
+		}
+		String groupInvalidReason = lti_.getInvalidReason();
 		if (groupInvalidReason != null && groupInvalidReason.length() > 0)
 		{
 			//there are a couple of these that we ignore.
@@ -189,7 +219,16 @@ public class PointNode
 				groupInvalidReason = null;
 			}
 		}
-		groupInvalidMessage_.set(groupInvalidReason);
+		
+		final String finalMessage = groupInvalidReason;
+		Platform.runLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				groupInvalidMessage_.set(finalMessage);
+			}
+		});
 	}
 
 	public Node getNode()
@@ -269,14 +308,24 @@ public class PointNode
 			default:
 				logger.error("bad type?  Save not processed");
 		}
+		//The contentChanged method kicks off the validator in a background thread.  We need to make sure that our updates wait for that
+		//thread to complete, before using the new validation status.
+		final long now = System.currentTimeMillis();
 		ltv_.contentChanged(lti_);
-		checkGroupMessage();
-		if (partnerNodes_ != null)
+		Utility.tpe.execute(new Runnable()
 		{
-			for (PointNode pn : partnerNodes_)
+			@Override
+			public void run()
 			{
-				pn.checkGroupMessage();
+				checkGroupMessage(now);
+				if (partnerNodes_ != null)
+				{
+					for (PointNode pn : partnerNodes_)
+					{
+						pn.checkGroupMessage(now);
+					}
+				}
 			}
-		}
+		});
 	}
 }

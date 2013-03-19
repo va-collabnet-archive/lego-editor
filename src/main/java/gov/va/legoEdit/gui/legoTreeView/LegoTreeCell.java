@@ -41,6 +41,7 @@ import gov.va.legoEdit.util.TimeConvert;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -141,7 +142,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			if (treeItem != null)
 			{
 				treeItem.setTreeNodeGraphic(nodeBox);
-				treeItem.updateValidityImage();
+				treeItem.updateValidityImageThreaded();
 				if (!treeItem.isLeaf())
 				{
 					MenuItem mi = new MenuItem("Expand All");
@@ -383,10 +384,28 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					final AssertionComponent ac = (AssertionComponent) treeItem.getLegoParent().getExtraData();
 					TextField tf = new TextField();
 					final ImageView invalidImage = Images.EXCLAMATION.createImageView();
-					invalidImage.setVisible(!treeItem.getLegoParent().isValid());
+					invalidImage.setVisible(false);
 					invalidImage.setFitHeight(16.0);
 					invalidImage.setFitWidth(16.0);
-					final Tooltip tt = new Tooltip(treeItem.getLegoParent().getInvalidReason());
+					final Tooltip tt = new Tooltip("");
+					
+					treeItem.getLegoParent().isValidThreaded(new BooleanCallback()
+					{
+						@Override
+						public void sendResult(final boolean result)
+						{
+							Platform.runLater(new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									invalidImage.setVisible(!result);
+									tt.setText(treeItem.getLegoParent().getInvalidReason());
+								}
+							});
+						}
+					});
+					
 					
 					tf.setText(value == null ? "" : value);
 					tf.setPromptText("UUID of another Assertion");
@@ -397,8 +416,23 @@ public class LegoTreeCell<T> extends TreeCell<T>
 						{
 							ac.setAssertionUUID(newValue);
 							treeView.contentChanged(treeItem.getLegoParent());
-							invalidImage.setVisible(!treeItem.getLegoParent().isValid());
-							tt.setText(treeItem.getLegoParent().getInvalidReason());
+							treeItem.getLegoParent().isValidThreaded(new BooleanCallback()
+							{
+								@Override
+								public void sendResult(final boolean result)
+								{
+									Platform.runLater(new Runnable()
+									{
+										
+										@Override
+										public void run()
+										{
+											invalidImage.setVisible(!result);
+											tt.setText(treeItem.getLegoParent().getInvalidReason());
+										}
+									});
+								}
+							});
 						}
 					});
 
@@ -727,10 +761,28 @@ public class LegoTreeCell<T> extends TreeCell<T>
 					}
 					
 					final ImageView invalidImage = Images.EXCLAMATION.createImageView();
-					invalidImage.setVisible(!treeItem.isValid());
+					invalidImage.setVisible(false);
 					invalidImage.setFitHeight(16.0);
 					invalidImage.setFitWidth(16.0);
-					final Tooltip tt = new Tooltip(treeItem.getInvalidReason());
+					final Tooltip tt = new Tooltip("");
+					
+					treeItem.isValidThreaded(new BooleanCallback()
+					{
+						@Override
+						public void sendResult(final boolean result)
+						{
+							Platform.runLater(new Runnable()
+							{
+								
+								@Override
+								public void run()
+								{
+									invalidImage.setVisible(!result);
+									tt.setText(treeItem.getInvalidReason());
+								}
+							});
+						}
+					});
 					
 					TextField tf = new TextField();
 					tf.setText(text);
@@ -749,8 +801,23 @@ public class LegoTreeCell<T> extends TreeCell<T>
 								((Destination) parent).setText(newValue);
 							}
 							treeView.contentChanged(treeItem);
-							invalidImage.setVisible(!treeItem.isValid());
-							tt.setText(treeItem.getInvalidReason());
+							treeItem.isValidThreaded(new BooleanCallback()
+							{
+								@Override
+								public void sendResult(final boolean result)
+								{
+									Platform.runLater(new Runnable()
+									{
+										
+										@Override
+										public void run()
+										{
+											invalidImage.setVisible(!result);
+											tt.setText(treeItem.getInvalidReason());
+										}
+									});
+								}
+							});
 						}
 					});
 					

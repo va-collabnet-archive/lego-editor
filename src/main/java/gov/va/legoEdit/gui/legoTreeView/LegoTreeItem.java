@@ -17,11 +17,13 @@ import gov.va.legoEdit.model.schemaModel.RelationGroup;
 import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.model.schemaModel.Type;
 import gov.va.legoEdit.model.schemaModel.Value;
+import gov.va.legoEdit.util.Utility;
 import gov.va.legoEdit.validators.Validator;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.HBox;
@@ -41,6 +43,7 @@ public class LegoTreeItem extends TreeItem<String>
 	private Boolean areChildrenValid = null;
 	private String invalidReason_ = null;
 	private HBox treeNodeGraphic = null;
+	private long validationTimestamp = -1;
 	
 	public LegoTreeItem getLegoParent()
 	{
@@ -454,25 +457,59 @@ public class LegoTreeItem extends TreeItem<String>
 		return 0;
 	}
 	
-	public String getInvalidReason()
+	/**
+	 * Callers responsibility to ensure the validator has run before calling this to get current results.
+	 */
+	protected String getInvalidReason()
 	{
 		return invalidReason_;
 	}
 	
-	public boolean isValid()
+	public void isValidThreaded(final BooleanCallback callback)
+	{
+		Utility.tpe.execute(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				callback.sendResult(isValid());
+			}
+		});
+	}
+	
+	protected long getValidationTimestamp()
+	{
+		return validationTimestamp;
+	}
+	
+	private boolean isValid()
 	{
 		if (isValid == null)
 		{
-			validate();
+			//prevent multiple threads from duplicating work
+			synchronized (this)
+			{
+				if (isValid == null)
+				{
+					validate();
+				}
+			}
 		}
 		return isValid;
 	}
 	
-	public boolean areChildrenValid()
+	private boolean areChildrenValid()
 	{
 		if (areChildrenValid == null)
 		{
-			validateChildren();
+			synchronized (this)
+			{
+				//prevent multiple threads from duplicating work
+				if (areChildrenValid == null)
+				{
+					validateChildren();
+				}
+			}
 		}
 		return areChildrenValid;
 	}
@@ -494,6 +531,7 @@ public class LegoTreeItem extends TreeItem<String>
 			invalidReason_ = Validator.isValid(extraData_, this);
 		}
 		isValid = invalidReason_ == null;
+		validationTimestamp = System.currentTimeMillis();
 	}
 
 	private void validateChildren()
@@ -517,7 +555,19 @@ public class LegoTreeItem extends TreeItem<String>
 		this.treeNodeGraphic = node;
 	}
 	
-	public void revalidateToRoot()
+	public void revalidateToRootThreaded()
+	{
+		Utility.tpe.execute(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				revalidateToRoot();
+			}
+		});
+	}
+	
+	private void revalidateToRoot()
 	{
 		validate();
 		validateChildren();
@@ -530,29 +580,53 @@ public class LegoTreeItem extends TreeItem<String>
 		}
 	}
 	
-	protected void updateValidityImage()
+	protected void updateValidityImageThreaded()
 	{
-		//add the exclamation - but not on nodes that handle it themselves
-		if (treeNodeGraphic != null && LegoTreeNodeType.concept != ltnt_ && LegoTreeNodeType.assertionUUID != ltnt_ && LegoTreeNodeType.text != ltnt_)
+		Utility.tpe.execute(new Runnable()
 		{
-			if (isValid() && areChildrenValid())
- 			{
-				if (treeNodeGraphic.getChildren().size() > 0 && treeNodeGraphic.getChildren().get(0) instanceof InvalidNode)
-				{
-					treeNodeGraphic.getChildren().remove(0);
-				}
-			}
-			else
+			@Override
+			public void run()
 			{
-				if (treeNodeGraphic.getChildren().size() == 0 || !(treeNodeGraphic.getChildren().get(0) instanceof InvalidNode))
-				{
-					treeNodeGraphic.getChildren().add(0, new InvalidNode(isValid() ? "Error in child" : invalidReason_));
-				}
-				else
-				{
-					((InvalidNode)treeNodeGraphic.getChildren().get(0)).setInvalidReason(isValid() ? "Error in child" : invalidReason_);
-				}
+				updateValidityImage();
 			}
+		});
+	}
+	
+	private void updateValidityImage()
+	{
+		final HBox localTreeNodeGraphic = treeNodeGraphic;
+		//add the exclamation - but not on nodes that handle it themselves
+		if (localTreeNodeGraphic != null && LegoTreeNodeType.concept != ltnt_ && LegoTreeNodeType.assertionUUID != ltnt_ && LegoTreeNodeType.text != ltnt_)
+		{
+			//run both of these in the thread that called us (probably a background thread)
+			final boolean isValid = isValid(); 
+			final boolean areChildrenValid = areChildrenValid();
+
+			Platform.runLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if (isValid && areChildrenValid)
+		 			{
+						if (localTreeNodeGraphic.getChildren().size() > 0 && localTreeNodeGraphic.getChildren().get(0) instanceof InvalidNode)
+						{
+							localTreeNodeGraphic.getChildren().remove(0);
+						}
+					}
+					else
+					{
+						if (localTreeNodeGraphic.getChildren().size() == 0 || !(localTreeNodeGraphic.getChildren().get(0) instanceof InvalidNode))
+						{
+							localTreeNodeGraphic.getChildren().add(0, new InvalidNode(isValid ? "Error in child" : invalidReason_));
+						}
+						else
+						{
+							((InvalidNode)localTreeNodeGraphic.getChildren().get(0)).setInvalidReason(isValid ? "Error in child" : invalidReason_);
+						}
+					}
+				}
+			});
 		}
 	}
 	

@@ -39,22 +39,41 @@ import org.slf4j.LoggerFactory;
  */
 public class ConceptNodeDroolsHandler
 {
-	private static volatile ConceptNodeDroolsHandler instance_;
 	public static String drools_dialect_java_compiler;
 	public static File droolsRootFolder = new File("drools-rules");
+	
+	private static Boolean initFailed = null;
+	private static volatile ConceptNodeDroolsHandler instance_;
+	
 	private KnowledgeBase kbase;
 	private KnowledgeBaseConfiguration kBaseConfig;
 	private static Logger logger = LoggerFactory.getLogger(ConceptNodeDroolsHandler.class);
 
+	/**
+	 * Check for null from this return - returns null if init fails
+	 */
 	public static ConceptNodeDroolsHandler getInstance()
 	{
 		if (instance_ == null)
 		{
+			if (initFailed != null && initFailed)
+			{
+				return null;
+			}
 			synchronized (ConceptNodeDroolsHandler.class)
 			{
-				if (instance_ == null)
+				try
 				{
-					instance_ = new ConceptNodeDroolsHandler();
+					if (instance_ == null)
+					{
+						instance_ = new ConceptNodeDroolsHandler();
+						initFailed = false;
+					}
+				}
+				catch (Exception e)
+				{
+					logger.error("Drools Init failed!", e);
+					initFailed = true;
 				}
 			}
 		}
@@ -115,6 +134,8 @@ public class ConceptNodeDroolsHandler
 
 		kbase = KnowledgeBaseFactory.newKnowledgeBase(kBaseConfig);
 		kbase.addKnowledgePackages(kbuilder.getKnowledgePackages());
+		
+		logger.debug("Drools Initialization Complete");
 	}
 
 	public List<DroolsLegoAction> processConceptNodeRules(ConceptVersionBI concept, ConceptUsageType usageType) throws IOException

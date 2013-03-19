@@ -61,7 +61,7 @@ public class LegoTreeView extends TreeView<String>
 		}
 		if (lti != null)
 		{
-			lti.revalidateToRoot();
+			lti.revalidateToRootThreaded();
 		}
 	}
 }

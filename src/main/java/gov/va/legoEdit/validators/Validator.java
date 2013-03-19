@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
  * Validators should return null if there is no problem.  They should return a user-friendly string error message if something is wrong.
  * The error message will be displayed in the Lego tree.
  * 
+ * Validators run in a background (non GUI) thread.
+ * 
  * @author Dan Armbrust 
  * Copyright 2013
  */
@@ -187,10 +189,18 @@ public class Validator
 				ConceptVersionBI cv = WBUtility.lookupSnomedIdentifierAsCV(concept.getUuid());
 				if (cv != null)
 				{
-					List<DroolsLegoAction> actions = ConceptNodeDroolsHandler.getInstance().processConceptNodeRules(cv, lti.getConceptUsageType());
-					if (actions.size() > 0)
+					ConceptNodeDroolsHandler cndh = ConceptNodeDroolsHandler.getInstance();
+					if (cndh != null)
 					{
-						return actions.get(0).getFailureReason();
+						List<DroolsLegoAction> actions = cndh.processConceptNodeRules(cv, lti.getConceptUsageType());
+						if (actions.size() > 0)
+						{
+							return actions.get(0).getFailureReason();
+						}
+					}
+					else
+					{
+						logger.warn("Drools validation is not available due to previous failures");
 					}
 				}
 			}
