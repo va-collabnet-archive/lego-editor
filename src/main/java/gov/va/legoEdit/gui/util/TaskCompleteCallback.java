@@ -9,5 +9,5 @@ package gov.va.legoEdit.gui.util;
  */
 public interface TaskCompleteCallback
 {
-	public void taskComplete(long startTime);
+	public void taskComplete(long taskStartTime, Integer taskId);
 }

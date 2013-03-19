@@ -3,14 +3,12 @@ package gov.va.legoEdit.gui.sctSearch;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.gui.util.Images;
-import gov.va.legoEdit.storage.DataStoreException;
+import gov.va.legoEdit.gui.util.TaskCompleteCallback;
+import gov.va.legoEdit.storage.wb.SnomedSearchHandle;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
-import gov.va.legoEdit.util.Utility;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -42,17 +40,15 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import org.ihtsdo.tk.api.ComponentChroncileBI;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
-import org.ihtsdo.tk.api.description.DescriptionAnalogBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SnomedSearchPaneController implements Initializable
+public class SnomedSearchPaneController implements Initializable, TaskCompleteCallback
 {
 	Logger logger = LoggerFactory.getLogger(SnomedSearchPaneController.class);
-	private boolean cancelSearch = false;
 	private BooleanProperty searchRunning = new SimpleBooleanProperty(false);
+	private SnomedSearchHandle ssh = null;
 
 	@FXML // fx:id="searchButton"
 	private Button searchButton; // Value injected by FXMLLoader
@@ -61,7 +57,7 @@ public class SnomedSearchPaneController implements Initializable
 	@FXML // fx:id="searchText"
 	private TextField searchText; // Value injected by FXMLLoader
 	@FXML // fx:id="searchResults"
-	private ListView<SearchResult> searchResults; // Value injected by FXMLLoader
+	private ListView<SnomedSearchResult> searchResults; // Value injected by FXMLLoader
 	@FXML // fx:id="borderPane"
 	private BorderPane borderPane; // Value injected by FXMLLoader
 
@@ -94,15 +90,15 @@ public class SnomedSearchPaneController implements Initializable
 		AnchorPane.setLeftAnchor(borderPane, 0.0);
 		AnchorPane.setRightAnchor(borderPane, 0.0);
 
-		searchResults.setCellFactory(new Callback<ListView<SearchResult>, ListCell<SearchResult>>()
+		searchResults.setCellFactory(new Callback<ListView<SnomedSearchResult>, ListCell<SnomedSearchResult>>()
 		{
 			@Override
-			public ListCell<SearchResult> call(ListView<SearchResult> arg0)
+			public ListCell<SnomedSearchResult> call(ListView<SnomedSearchResult> arg0)
 			{
-				return new ListCell<SearchResult>()
+				return new ListCell<SnomedSearchResult>()
 				{
 					@Override
-					protected void updateItem(final SearchResult item, boolean empty)
+					protected void updateItem(final SnomedSearchResult item, boolean empty)
 					{
 						super.updateItem(item, empty);
 						if (!empty)
@@ -217,7 +213,7 @@ public class SnomedSearchPaneController implements Initializable
 				Dragboard db = searchResults.startDragAndDrop(TransferMode.COPY);
 
 				/* Put a string on a dragboard */
-				SearchResult dragItem = searchResults.getSelectionModel().getSelectedItem();
+				SnomedSearchResult dragItem = searchResults.getSelectionModel().getSelectedItem();
 
 				if (dragItem.getConcept() != null)
 				{
@@ -247,9 +243,9 @@ public class SnomedSearchPaneController implements Initializable
 			@Override
 			public void handle(ActionEvent e)
 			{
-				if (searchRunning.get())
+				if (searchRunning.get() && ssh != null)
 				{
-					cancelSearch = true;
+					ssh.cancel();
 				}
 				else
 				{
@@ -280,7 +276,7 @@ public class SnomedSearchPaneController implements Initializable
 			@Override
 			public void handle(ActionEvent e)
 			{
-				if (searchTextValid.getValue())
+				if (searchTextValid.getValue() && !searchRunning.get())
 				{
 					search();
 				}
@@ -306,94 +302,14 @@ public class SnomedSearchPaneController implements Initializable
 
 	private synchronized void search()
 	{
+		if (searchRunning.get())
+		{
+			return;
+		}
 		searchRunning.set(true);
 		searchResults.getItems().clear();
-		Utility.tpe.submit(new Searcher(searchText.getText()));
-	}
-
-	private class Searcher implements Runnable
-	{
-		private String searchString_;
-
-		public Searcher(String searchText)
-		{
-			searchString_ = searchText;
-		}
-
-		@Override
-		public void run()
-		{
-			try
-			{
-				cancelSearch = false;
-				List<ComponentChroncileBI<?>> result = WBDataStore.getInstance().descriptionSearch(searchString_);
-
-				final HashMap<Integer, SearchResult> viewableResult = new HashMap<>();
-
-				if (result == null)
-				{
-					LegoGUI.getInstance().showErrorDialog("Search Not Supported", "Search not yet supported", "Search currently only works with a local database.");
-					logger.error("Search not yet supported with FxConcept API");
-					return;
-				}
-
-				for (ComponentChroncileBI<?> cc : result)
-				{
-					if (cancelSearch)
-					{
-						break;
-					}
-					SearchResult sr = viewableResult.get(cc.getConceptNid());
-					if (sr == null)
-					{
-						sr = new SearchResult(cc.getConceptNid());
-						viewableResult.put(cc.getConceptNid(), sr);
-					}
-					if (cc instanceof DescriptionAnalogBI)
-					{
-						sr.addMatchingString(((DescriptionAnalogBI<?>) cc).getText());
-					}
-					else if (cc instanceof ConceptVersionBI)
-					{
-						//This is the type returned when the do a UUID or SCTID search
-						sr.addMatchingString(searchString_.trim());
-					}
-					else
-					{
-						logger.error("Unexpected type returned from search: " + cc.getClass().getName());
-						sr.addMatchingString("oops");
-					}
-				}
-
-				Platform.runLater(new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-						searchResults.getItems().addAll(viewableResult.values());
-						FXCollections.sort(searchResults.getItems(), new SearchResultComparator());
-					}
-				});
-			}
-			catch (DataStoreException | IOException e)
-			{
-				logger.error("Unexpected Search Error", e);
-			}
-			finally
-			{
-				Platform.runLater(new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-						searchRunning.set(false);
-
-					}
-				});
-			}
-		}
+		//we get called back when the results are ready.
+		ssh = WBDataStore.getInstance().descriptionSearch(searchText.getText(), this);
 	}
 
 	public BorderPane getBorderPane()
@@ -401,4 +317,34 @@ public class SnomedSearchPaneController implements Initializable
 		return borderPane;
 	}
 
+	@Override
+	public void taskComplete(long taskStartTime, Integer taskId)
+	{
+		Platform.runLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					if (!ssh.isCancelled())
+					{
+						searchResults.getItems().addAll(ssh.getResults());
+						FXCollections.sort(searchResults.getItems(), new SnomedSearchResultComparator());
+					}
+				}
+				catch (Exception e)
+				{
+					LegoGUI.getInstance().showErrorDialog("Search Error", "There was an unexpected error running the search", e.toString());
+					logger.error("Unexpected Search Error", e);
+					searchResults.getItems().clear();
+				}
+				finally
+				{
+					searchRunning.set(false);
+				}
+			}
+		});
+		
+	}
 }

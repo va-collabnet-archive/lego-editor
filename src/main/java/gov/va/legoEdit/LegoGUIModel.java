@@ -304,7 +304,7 @@ public class LegoGUIModel
 						LegoGUI.getInstance().getLegoGUIController().showLegosForAllOpenTabs();
 						if (callback != null)
 						{
-							callback.taskComplete(startTime);
+							callback.taskComplete(startTime, null);
 						}
 						gov.va.legoEdit.gui.util.Utility.setExpandedStates(before, treeView.getRoot());
 						//For some reason, scroll to doesn't work unless you select first

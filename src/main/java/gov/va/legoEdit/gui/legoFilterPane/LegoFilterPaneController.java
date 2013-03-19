@@ -606,7 +606,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 	}
 
 	@Override
-	public void taskComplete(long startTime)
+	public void taskComplete(long startTime, Integer taskId)
 	{
 		updateRunningCount.decrementAndGet();
 		isUpdateRunning.invalidate();
