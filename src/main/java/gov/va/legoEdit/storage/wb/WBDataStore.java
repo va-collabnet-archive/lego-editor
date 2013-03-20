@@ -174,6 +174,7 @@ public class WBDataStore
 		// Strip out parens, which are common in FSNs, but also lucene search operators (which are users likely won't use)
 		query = query.replaceAll("\\(", "");
 		query = query.replaceAll("\\)", "");
+		query = query.replaceAll("\\/", "");
 		query = query.trim();
 		
 		if (prefixSearch)

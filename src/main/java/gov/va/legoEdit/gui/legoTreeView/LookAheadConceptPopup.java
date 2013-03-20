@@ -90,11 +90,7 @@ class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
                 runningSearches.put(id, ssh);
             }
         } else {
-            searchResults.getChildren().clear();
-            anchorpane.getChildren().clear();
-            anchorpane.getStyleClass().clear();
-            hide();
-            isDisplaying = false;
+            closeLookAheadPanel();
         }
     }
 
@@ -155,6 +151,14 @@ class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
         }
     }
 
+    private void closeLookAheadPanel() {
+        searchResults.getChildren().clear();
+        anchorpane.getChildren().clear();
+        anchorpane.getStyleClass().clear();
+        hide();
+        isDisplaying = false;
+    }
+
     private class LookAheadSelectHandler implements EventHandler<MouseEvent> {
         String uuid;
 
@@ -168,7 +172,7 @@ class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
                 return;
             }
             comboBox.getEditor().setText(uuid);
-            hide();
+            closeLookAheadPanel();
         }
     }
 
@@ -182,19 +186,19 @@ class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
             if (event.getCode() == KeyCode.ENTER) {
                 if (currentSelection >= 0 && currentSelection < searchResults.getChildren().size()) {
                     comboBox.getEditor().setText(uuidArray.get(currentSelection));
-                    hide();
+                    closeLookAheadPanel();
+                    noAction = true;
                 }
-            }
-            if (event.getCode() == KeyCode.UP) {
+            } else if (event.getCode() == KeyCode.UP) {
                 if (currentSelection > 0) {
                     currentSelection--;
                 }
             } else if (event.getCode() == KeyCode.DOWN) {
                 if (currentSelection < searchResults.getChildren().size() - 1) {
                     currentSelection++;
-                } else {
-                    noAction = true;
                 }
+            } else {
+                noAction = true;
             }
 
             if (!noAction) {
@@ -204,7 +208,7 @@ class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
                     setBoxStyle(oldBox, oldSelection);
                 }
 
-                if (currentSelection > 0)
+                if (currentSelection >= 0)
                 {
 	                VBox newBox = (VBox) searchResults.getChildren().get(currentSelection);
 	                newBox.getStyleClass().clear();
@@ -324,6 +328,8 @@ class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
                                         layoutY = layoutY - comboBox.getHeight() - anchorpane.getHeight();
                                         setY(layoutY);
                                     }
+                                } else {
+                                    closeLookAheadPanel();
                                 }
                             }
                         }
