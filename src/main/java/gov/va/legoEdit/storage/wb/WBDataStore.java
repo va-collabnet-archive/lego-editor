@@ -170,15 +170,19 @@ public class WBDataStore
 	private SnomedSearchHandle search(String query, final int resultLimit, final boolean prefixSearch, final TaskCompleteCallback callback, final Integer taskId)
 	{
 		final SnomedSearchHandle ssh = new SnomedSearchHandle();
-		// Strip out parens, which are common in FSNs, but also lucene search operators (which are users likely won't use)
-		query = query.replaceAll("\\(", "");
-		query = query.replaceAll("\\)", "");
 		query = query.trim();
 		
 		if (prefixSearch)
 		{
-                    query = filterSpecialChars(query);
-                    query += "*";
+			//escape all special characters so they don't cause parser failures
+			query = escapeSpecialChars(query);
+			query += "*";
+		}
+		else
+		{
+			// Just strip out parens, which are common in FSNs, but also lucene search operators (which our users likely won't use)
+			query = query.replaceAll("\\(", "");
+			query = query.replaceAll("\\)", "");
 		}
 		
 		final String localQuery = query;
@@ -283,27 +287,28 @@ public class WBDataStore
 		return ssh;
 	}
 
-    private String filterSpecialChars(String query) {
-        query = query.replace("\\", "\\" + "\\");
-        query = query.replace("+", "\\" + "+");
-        query = query.replace("-", "\\" + "-");
-        query = query.replace("&", "\\" + "&");
-        query = query.replace("|", "\\" + "|");
-        query = query.replace("!", "\\" + "!");
-        query = query.replace("(", "\\" + "(");
-        query = query.replace(")", "\\" + ")");
-        query = query.replace("{", "\\" + "{");
-        query = query.replace("}", "\\" + "}");
-        query = query.replace("[", "\\" + "[");
-        query = query.replace("]", "\\" + "]");
-        query = query.replace("^", "\\" + "^");
-        query = query.replace("\"", "\\" + "\"");
-        query = query.replace("~", "\\" + "~");
-        query = query.replace("*", "\\" + "*");
-        query = query.replace("?", "\\" + "?");
-        query = query.replace(":", "\\" + ":");
-        query = query.replace("/", "\\" + "/");
- 
-        return query;
-    }
+	private String escapeSpecialChars(String query)
+	{
+		query = query.replace("\\", "\\" + "\\");
+		query = query.replace("+", "\\" + "+");
+		query = query.replace("-", "\\" + "-");
+		query = query.replace("&", "\\" + "&");
+		query = query.replace("|", "\\" + "|");
+		query = query.replace("!", "\\" + "!");
+		query = query.replace("(", "\\" + "(");
+		query = query.replace(")", "\\" + ")");
+		query = query.replace("{", "\\" + "{");
+		query = query.replace("}", "\\" + "}");
+		query = query.replace("[", "\\" + "[");
+		query = query.replace("]", "\\" + "]");
+		query = query.replace("^", "\\" + "^");
+		query = query.replace("\"", "\\" + "\"");
+		query = query.replace("~", "\\" + "~");
+		query = query.replace("*", "\\" + "*");
+		query = query.replace("?", "\\" + "?");
+		query = query.replace(":", "\\" + ":");
+		query = query.replace("/", "\\" + "/");
+
+		return query;
+	}
 }
