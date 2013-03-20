@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class Utility
 {
 	private static BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
-	public static ThreadPoolExecutor tpe = new ThreadPoolExecutor(1, 5, 60, TimeUnit.SECONDS, workQueue, new ThreadFactory()
+	public static ThreadPoolExecutor tpe = new ThreadPoolExecutor(10, 30, 60, TimeUnit.SECONDS, workQueue, new ThreadFactory()
 	{
 		@Override
 		public Thread newThread(Runnable r)
