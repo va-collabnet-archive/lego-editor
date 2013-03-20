@@ -173,12 +173,12 @@ public class WBDataStore
 		// Strip out parens, which are common in FSNs, but also lucene search operators (which are users likely won't use)
 		query = query.replaceAll("\\(", "");
 		query = query.replaceAll("\\)", "");
-		query = query.replaceAll("\\/", "");
 		query = query.trim();
 		
 		if (prefixSearch)
 		{
-			query += "*";
+                    query = filterSpecialChars(query);
+                    query += "*";
 		}
 		
 		final String localQuery = query;
@@ -282,4 +282,28 @@ public class WBDataStore
 		Utility.tpe.execute(r);
 		return ssh;
 	}
+
+    private String filterSpecialChars(String query) {
+        query = query.replace("\\", "\\" + "\\");
+        query = query.replace("+", "\\" + "+");
+        query = query.replace("-", "\\" + "-");
+        query = query.replace("&", "\\" + "&");
+        query = query.replace("|", "\\" + "|");
+        query = query.replace("!", "\\" + "!");
+        query = query.replace("(", "\\" + "(");
+        query = query.replace(")", "\\" + ")");
+        query = query.replace("{", "\\" + "{");
+        query = query.replace("}", "\\" + "}");
+        query = query.replace("[", "\\" + "[");
+        query = query.replace("]", "\\" + "]");
+        query = query.replace("^", "\\" + "^");
+        query = query.replace("\"", "\\" + "\"");
+        query = query.replace("~", "\\" + "~");
+        query = query.replace("*", "\\" + "*");
+        query = query.replace("?", "\\" + "?");
+        query = query.replace(":", "\\" + ":");
+        query = query.replace("/", "\\" + "/");
+ 
+        return query;
+    }
 }
