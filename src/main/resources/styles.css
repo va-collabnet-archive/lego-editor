@@ -39,7 +39,7 @@
 	-fx-indent: 20;
 }
 
-.label {
+.tree-cell .label {
 	-fx-font-size: 14;
 }
 .lookupSearchResultsStyle-A {
