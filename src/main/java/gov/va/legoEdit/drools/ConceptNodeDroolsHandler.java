@@ -7,6 +7,7 @@ import gov.va.legoEdit.drools.facts.ConceptFact;
 import gov.va.legoEdit.drools.facts.Context;
 import gov.va.legoEdit.drools.manager.DroolsExceptionHandler;
 import gov.va.legoEdit.gui.legoTreeView.ConceptUsageType;
+import gov.va.legoEdit.storage.wb.WBDataStore;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.rule.ConsequenceExceptionHandler;
+import org.ihtsdo.bdb.BdbTerminologyStore;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
@@ -83,6 +85,12 @@ public class ConceptNodeDroolsHandler
 	private ConceptNodeDroolsHandler()
 	{
 		logger.debug("Initializing Drools Knowledgebase");
+		
+		if (!(WBDataStore.Ts() instanceof BdbTerminologyStore))
+		{
+			throw new RuntimeException("Drools is only supported with local datastores");
+		}
+		
 		HashMap<Resource, ResourceType> resources = new HashMap<Resource, ResourceType>();
 		if (droolsRootFolder.exists())
 		{
