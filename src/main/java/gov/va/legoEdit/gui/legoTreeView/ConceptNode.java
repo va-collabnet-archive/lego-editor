@@ -114,7 +114,7 @@ public class ConceptNode implements ConceptLookupCallback
 			@Override
 			public void handle(KeyEvent event)
 			{
-                            if (event.getCode() == KeyCode.LEFT && event.isAltDown()) {
+                            if (event.getCode() == KeyCode.LEFT) {
                                 event.consume();
                             } else if (event.getCode() == KeyCode.UP ||
                                        event.getCode() == KeyCode.DOWN ||
