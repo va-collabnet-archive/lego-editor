@@ -9,33 +9,33 @@
 
 # Relationships from the Style Guide or Observation Results presentation
 #
-36	INHERES IN (attribute)	410662002	Concept model attribute
-38	INHERENT LOCATION (attribute)	410662002	Concept model attribute
-39	PROPERTY TYPE (attribute)	410662002	Concept model attribute
-40	INHERENT INGREDIENT (attribute)	410662002	Concept model attribute
-41	CHARACTERIZES (attribute)	410662002	Concept model attribute
-42	PROCESS AGENT (attribute)	410662002	Concept model attribute
-43	PROCESS DURATION (attribute)	410662002	Concept model attribute
-44	PROCESS OUTPUT (attribute)	410662002	Concept model attribute
-45	TOWARD (attribute)	410662002	Concept model attribute
-46	RELATIVE TO (attribute)	410662002	Concept model attribute
-47	REL TO PART OF (attribute)	410662002	Concept model attribute
-48	PRECONDITION (attribute)	410662002	Concept model attribute
-49	SCALE TYPE (attribute)	410662002	Concept model attribute
-50	UNITS (attribute)	410662002	Concept model attribute
-51	TECHNIQUE (attribute)	410662002	Concept model attribute
-52	DIRECT SITE (attribute)	410662002	Concept model attribute
-53	IS ABOUT (attribute)	410662002	Concept model attribute
-54	HAS VALUE (attribute)	410662002	Concept model attribute
-55	DISPOSITION TYPE (attribute)	410662002	Concept model attribute
-56	INCLUDES (attribute)	410662002	Concept model attribute
-57	HAS LOCATION (attribute)	410662002	Concept model attribute
+36	INHERES IN (attribute)	410662002	Concept model attribute (attribute)
+38	INHERENT LOCATION (attribute)	410662002	Concept model attribute (attribute)
+39	PROPERTY TYPE (attribute)	410662002	Concept model attribute (attribute)
+40	INHERENT INGREDIENT (attribute)	410662002	Concept model attribute (attribute)
+41	CHARACTERIZES (attribute)	410662002	Concept model attribute (attribute)
+42	PROCESS AGENT (attribute)	410662002	Concept model attribute (attribute)
+43	PROCESS DURATION (attribute)	410662002	Concept model attribute (attribute)
+44	PROCESS OUTPUT (attribute)	410662002	Concept model attribute (attribute)
+45	TOWARD (attribute)	410662002	Concept model attribute (attribute)
+46	RELATIVE TO (attribute)	410662002	Concept model attribute (attribute)
+47	REL TO PART OF (attribute)	410662002	Concept model attribute (attribute)
+48	PRECONDITION (attribute)	410662002	Concept model attribute (attribute)
+49	SCALE TYPE (attribute)	410662002	Concept model attribute (attribute)
+50	UNITS (attribute)	410662002	Concept model attribute (attribute)
+51	TECHNIQUE (attribute)	410662002	Concept model attribute (attribute)
+52	DIRECT SITE (attribute)	410662002	Concept model attribute (attribute)
+53	IS ABOUT (attribute)	410662002	Concept model attribute (attribute)
+54	HAS VALUE (attribute)	410662002	Concept model attribute (attribute)
+55	DISPOSITION TYPE (attribute)	410662002	Concept model attribute (attribute)
+56	INCLUDES (attribute)	410662002	Concept model attribute (attribute)
+57	HAS LOCATION (attribute)	410662002	Concept model attribute (attribute)
 
 # New allowable value concept from Style Guide
-901	PropertyType	362981000	Qualifier value
+901	PropertyType	362981000	Qualifier value (qualifier value)
 #
 # All of these are currently in use in the data I have to import
-1001	Periwound observable (observable entity)	364528001	Skin observable
+1001	Periwound observable (observable entity)	364528001	Skin observable (observable entity)
 
 620	Undermined
 621	Attached
@@ -49,10 +49,32 @@
 637	Intrawound
 639	Slough
 640	Skin structure of ischial tuberosity
-1002	Suicide attempt (process)	415178003	Process
-1003	Suicidal ideation (process)	285231000	Mental functions
+1002	Suicide attempt (process)	415178003	Process (observable entity)
+1003	Suicidal ideation (process)	285231000	Mental function (observable entity)
 1004	Odor (property)
-1005	Smell of wound (observable entity)	364554009	Wound observable
+1005	Smell of wound (observable entity)	364554009	Wound observable (observable entity)
 1006	Foul smell of wound (observable entity)
-1007	Wound edge observable (observable entity)	364554009	Wound observable
-1008	Suicidal ideation	415178003	Process
+1007	Wound edge observable (observable entity)	364554009	Wound observable (observable entity)
+1008	Suicidal ideation	415178003	Process (observable entity)
+1009	Crackles (observable entitiy)	52653008	Respiratory sounds (observable entity)
+1013	Loudness (property)	118598001	Property of measurement (qualifier value)
+1014	Pleural rub (observable entity)	52653008	Respiratory sounds (observable entity)
+1015	Pleural rub (observable entity)	52653008	Respiratory sounds (observable entity)
+1016	Prolonged time (qualifier value)	7389001	Time frame (qualifier value)
+1017	rhonchi (observable entity)	52653008	Respiratory sounds (observable entity)
+1019	Stridor (observable entity)	52653008	Respiratory sounds (observable entity)
+1020	Wheezing (observable entity)	52653008	Respiratory sounds (observable entity)
+1021	Size (property)	118598001	Property of measurement (qualifier value)
+1023	Irregularly irregular heart rhythm (observable entity)	364074009	Regularity of heart rhythm (observable entity)
+1024	Regular heart rhythm (observable entity)	364074009	Regularity of heart rhythm (observable entity)
+1025	Regularly irregular heart rhythm (observable entity)	364074009	Regularity of heart rhythm (observable entity)
+1026	Temperature (property)	118598001	Property of measurement (qualifier value)
+1028	Nutrition Delivery Device (device)	49062001	Device (physical object)
+1029	Occupational Therapy Device (device	49062001	Device (physical object)
+1030	Physical Therapy Device (device)	49062001	Device (physical object)
+1031	Speech Language Pathology Device (device)	49062001	Device (physical object)
+1032	Therapy Device (device)	49062001	Device (physical object)
+1034	Raised Toilet Seat (device)	49062001	Device (physical object)
+1035	Sock Aid (device)	49062001	Device (physical object)
+1036	Condition (condition)	138875005	SNOMED CT Concept (SNOMED RT+CTV3)
+1037	Congestive heart failure (condition)	1036	Condition (condition)
