@@ -2,8 +2,6 @@ package gov.va.legoEdit.validators;
 
 import gov.va.legoEdit.drools.ConceptNodeDroolsHandler;
 import gov.va.legoEdit.drools.actions.DroolsLegoAction;
-import gov.va.legoEdit.drools.actions.FailValidatorAction;
-import gov.va.legoEdit.gui.legoTreeView.ConceptUsageType;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.model.schemaModel.Assertion;
 import gov.va.legoEdit.model.schemaModel.AssertionComponent;
@@ -204,9 +202,11 @@ public class Validator
 					{
 						logger.warn("Drools validation is not available due to previous failures");
 					}
-				} else if (lti.getConceptUsageType() == ConceptUsageType.DISCERNIBLE) {
-                                    return FailValidatorAction.ReasonFailed.DISCERNIBLE_OBSERVABLE.getReason();
-                                }
+				} 
+				else 
+				{
+					logger.debug("Can't run drools validation on pending concept");
+				}
 			}
 			catch (Exception e)
 			{
