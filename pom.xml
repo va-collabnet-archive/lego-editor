@@ -184,8 +184,9 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-						<shadedArtifactAttached>false</shadedArtifactAttached>
-						<finalName>legoEditor-jar-with-dependencies</finalName>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<finalName>legoEditor-jar-with-dependencies</finalName>
 							<artifactSet>
 								<excludes>
 									<exclude>gov.va:lego-editor-snomed-db</exclude>
