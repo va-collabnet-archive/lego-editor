@@ -123,10 +123,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			super.updateItem(item, empty);
 			final LegoTreeItem treeItem = (LegoTreeItem) getTreeItem();
 			ContextMenu cm = new ContextMenu();
-			HBox nodeBox = new HBox();
-			nodeBox.setSpacing(0.0);
-			nodeBox.setMaxWidth(Double.MAX_VALUE);
-			nodeBox.setAlignment(Pos.TOP_LEFT);
+			LegoTreeNodeGraphic nodeBox = new LegoTreeNodeGraphic();
 			
 			// This is the first time I really don't understand the JavaFX API. It appears to reuse the item values, when scrolling up and down...
 			// So if the item type changes from one position to another, and you don't unset (or reset) all of the same properties that were set
@@ -895,7 +892,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 				setContextMenu(cm);
 			}
 			
-			if (nodeBox.getChildren().size() == 0 || (nodeBox.getChildren().size() == 1 && nodeBox.getChildren().get(0) instanceof InvalidNode))
+			if (nodeBox.getChildren().size() == 0 )
 			{
 				if (item != null)
 				{
@@ -906,7 +903,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 			{
 				HBox.setHgrow(nodeBox.getChildren().get(nodeBox.getChildren().size() - 1), Priority.SOMETIMES);
 			}
-			setGraphic(nodeBox);
+			setGraphic(nodeBox.getNode());
 		}
 		catch (Exception e)
 		{
