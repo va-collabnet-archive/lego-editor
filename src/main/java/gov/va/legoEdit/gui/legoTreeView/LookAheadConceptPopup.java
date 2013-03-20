@@ -318,7 +318,7 @@ class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
                                 }
 
                                 if (searchResults.getChildren().size() > 0) {
-                                    if (!isDisplaying) {
+                                    if (!isDisplaying || !isShowing()) {
                                         show(comboBox, layoutX, layoutY);
                                         isDisplaying = true;
                                     }

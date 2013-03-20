@@ -114,17 +114,17 @@ public class ConceptNode implements ConceptLookupCallback
 			@Override
 			public void handle(KeyEvent event)
 			{
-				if (event.isAltDown()) {
-                                    event.consume();
-                                } else if (event.getCode() == KeyCode.UP ||
-                                           event.getCode() == KeyCode.DOWN ||
-                                           event.getCode() == KeyCode.ENTER) {
-                                    popup.handleScroll(event);
-                                    event.consume();
-                                }
+                            if (event.getCode() == KeyCode.LEFT && event.isAltDown()) {
+                                event.consume();
+                            } else if (event.getCode() == KeyCode.UP ||
+                                       event.getCode() == KeyCode.DOWN ||
+                                       event.getCode() == KeyCode.ENTER) {
+                                popup.handleScroll(event);
+                                event.consume();
+                            }
                         }
                 });
-                
+
 		cb_.addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>()
 		{
 			@Override
@@ -134,22 +134,22 @@ public class ConceptNode implements ConceptLookupCallback
 				{
                                     event.consume();
 				} else if (event.getCode() == KeyCode.UP ||
-                                           event.getCode() == KeyCode.DOWN ||
+                                event.getCode() == KeyCode.DOWN ||
                                            event.getCode() == KeyCode.ENTER) {
-                                    event.consume();
-                                } else if (event.isAltDown() ||
-                                           event.isControlDown() ||
-                                           event.isMetaDown() ||
-                                           event.isShiftDown() ||
+                                event.consume();
+                            } else if (event.isAltDown() ||
+                                       event.isControlDown() ||
+                                       event.isMetaDown() ||
+                                       event.isShiftDown() ||
                                            event.isShortcutDown()) {
-                                    event.consume();
-                                } else {
-                                    if (cb_.getEditor().getText().length() != 36 || Utility.isLong(cb_.getEditor().getText())) {
-                                        showPopup();
-                                    }
-
-                                    event.consume();
+                                 event.consume();
+                            } else {
+                                if (cb_.getEditor().getText().length() != 36 || Utility.isLong(cb_.getEditor().getText())) {
+                                    showPopup();
                                 }
+
+                                event.consume();
+                            }
                               
 			}
 		});
