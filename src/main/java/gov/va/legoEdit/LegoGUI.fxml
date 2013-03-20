@@ -109,7 +109,7 @@
     </SplitPane>
     <MenuBar fx:id="menu" prefHeight="24.0" useSystemMenuBar="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
       <menus>
-        <Menu text="_File" fx:id="menuFile">
+        <Menu mnemonicParsing="false" text="File" fx:id="menuFile">
           <items>
             <MenuItem mnemonicParsing="false" style="" text="Import Lego Lists..." fx:id="menuFileImport" />
             <MenuItem mnemonicParsing="false" style="" text="Create New Lego List..." fx:id="menuFileCreateLego" />
@@ -117,14 +117,14 @@
             <MenuItem mnemonicParsing="false" text="Exit" fx:id="menuFileExit" />
           </items>
         </Menu>
-        <Menu id="menuEdit" text="_Edit" fx:id="menuEdit">
+        <Menu id="menuEdit" mnemonicParsing="false" text="Edit" fx:id="menuEdit">
           <items>
             <MenuItem mnemonicParsing="false" text="Preferences..." fx:id="menuEditPreferences" />
             <MenuItem mnemonicParsing="false" text="Add Pending Concept..." fx:id="menuEditAddPending" />
             <MenuItem mnemonicParsing="false" text="Cimi Utility" fx:id="menuEditCimiTool" />
           </items>
         </Menu>
-        <Menu id="menuHelp" text="_Help" fx:id="menuHelp">
+        <Menu id="menuHelp" mnemonicParsing="false" text="Help" fx:id="menuHelp">
           <items>
             <MenuItem id="menuHelpAbout" mnemonicParsing="false" text="About" fx:id="menuHelpAbout" />
           </items>
