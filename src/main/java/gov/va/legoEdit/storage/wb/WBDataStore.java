@@ -170,13 +170,21 @@ public class WBDataStore
 	private SnomedSearchHandle search(String query, final int resultLimit, final boolean prefixSearch, final TaskCompleteCallback callback, final Integer taskId)
 	{
 		final SnomedSearchHandle ssh = new SnomedSearchHandle();
+		boolean abnormalPrefixSearch = false;
 		query = query.trim();
-		
+                
 		if (prefixSearch)
 		{
+			if (query.startsWith("*")) {
+				abnormalPrefixSearch = true;
+				query = query.substring(1);
+			} 
+                        
 			//escape all special characters so they don't cause parser failures
 			query = escapeSpecialChars(query);
-			query += "*";
+			if (query.length() > 0 ) {
+				query += "*";
+			}
 		}
 		else
 		{
@@ -186,6 +194,7 @@ public class WBDataStore
 		}
 		
 		final String localQuery = query;
+		final boolean localAnnormalPrefixSearch = abnormalPrefixSearch;
 		Runnable r = new Runnable()
 		{
 			@Override
@@ -193,48 +202,52 @@ public class WBDataStore
 			{
 				try
 				{
-					ArrayList<ComponentChroncileBI<?>> resultTemp = new ArrayList<>();
+                                        String prefixSearchMatch = null;
+                                        ArrayList<ComponentChroncileBI<?>> resultTemp = new ArrayList<>();
+                                        
+                                        if (localQuery.length() > 0) {
+                                            if (Utility.isUUID(localQuery) || Utility.isLong(localQuery))
+                                            {
+                                                    ConceptVersionBI temp = WBUtility.lookupSnomedIdentifierAsCV(localQuery);
+                                                    if (temp != null)
+                                                    {
+                                                            resultTemp.add(temp);
+                                                    }
+                                            }
 
-					if (Utility.isUUID(localQuery) || Utility.isLong(localQuery))
-					{
-						ConceptVersionBI temp = WBUtility.lookupSnomedIdentifierAsCV(localQuery);
-						if (temp != null)
-						{
-							resultTemp.add(temp);
-						}
-					}
+                                            if (dataStore_ instanceof BdbTerminologyStore)
+                                            {
+                                                    logger.debug("Lucene Search: '" + localQuery + "'");
+                                                    // sort of copied from Termstore.searchLucene(...)
+                                                    // because that API throws away the scores, and returns the results in random order... which is rather useless.
+                                                    Query q = new QueryParser(Version.LUCENE_40, "desc", new StandardAnalyzer(Version.LUCENE_40)).parse(localQuery);
+                                                    SearchResult searchResults = LuceneManager.search(q);
 
-					if (dataStore_ instanceof BdbTerminologyStore)
-					{
-						logger.debug("Lucene Search: '" + localQuery + "'");
-						// sort of copied from Termstore.searchLucene(...)
-						// because that API throws away the scores, and returns the results in random order... which is rather useless.
-						Query q = new QueryParser(Version.LUCENE_40, "desc", new StandardAnalyzer(Version.LUCENE_40)).parse(localQuery);
-						SearchResult searchResults = LuceneManager.search(q);
+                                                    if (searchResults.topDocs.totalHits == 0)
+                                                    {
+                                                            q = new QueryParser(Version.LUCENE_40, "desc", new WhitespaceAnalyzer(Version.LUCENE_40)).parse(localQuery);
+                                                            searchResults = LuceneManager.search(q);
+                                                    }
 
-						if (searchResults.topDocs.totalHits == 0)
-						{
-							q = new QueryParser(Version.LUCENE_40, "desc", new WhitespaceAnalyzer(Version.LUCENE_40)).parse(localQuery);
-							searchResults = LuceneManager.search(q);
-						}
+                                                    BdbTerminologyStore bts = (BdbTerminologyStore) dataStore_;
+                                                    for (int i = 0; i < searchResults.topDocs.totalHits; i++)
+                                                    {
+                                                            if (ssh.isCancelled())
+                                                            {
+                                                                    break;
+                                                            }
+                                                            Document doc = searchResults.searcher.doc(searchResults.topDocs.scoreDocs[i].doc);
+                                                            resultTemp.add(bts.getComponent(Integer.parseInt(doc.get("dnid"))));
+                                                    }
+                                            }
+                                            else
+                                            {
+                                                    logger.warn("Lucene search is not available - no local database!");
+                                            }
 
-						BdbTerminologyStore bts = (BdbTerminologyStore) dataStore_;
-						for (int i = 0; i < searchResults.topDocs.totalHits; i++)
-						{
-							if (ssh.isCancelled())
-							{
-								break;
-							}
-							Document doc = searchResults.searcher.doc(searchResults.topDocs.scoreDocs[i].doc);
-							resultTemp.add(bts.getComponent(Integer.parseInt(doc.get("dnid"))));
-						}
-					}
-					else
-					{
-						logger.warn("Lucene search is not available - no local database!");
-					}
-
-					String prefixSearchMatch = localQuery.toLowerCase().substring(0, localQuery.length() - 1);
+                                            prefixSearchMatch = localQuery.toLowerCase().substring(0, localQuery.length() - 1);
+                                        }
+                                
 					HashMap<Integer, SnomedSearchResult> userResults = new HashMap<>();
 					for (ComponentChroncileBI<?> cc : resultTemp)
 					{
@@ -247,9 +260,9 @@ public class WBDataStore
 							break;
 						}
 						//Still not sure we actually want to do this...
-						if (prefixSearch && cc instanceof DescriptionAnalogBI && 
-								!((DescriptionAnalogBI<?>)cc).getText().toLowerCase().startsWith(prefixSearchMatch))
-						{
+						if (prefixSearch && (cc instanceof DescriptionAnalogBI) &&
+						    ((!localAnnormalPrefixSearch && !((DescriptionAnalogBI<?>)cc).getText().toLowerCase().startsWith(prefixSearchMatch)) ||
+						     (localAnnormalPrefixSearch && !((DescriptionAnalogBI<?>)cc).getText().toLowerCase().contains(prefixSearchMatch)))) {
 							continue;
 						}
 						SnomedSearchResult sr = userResults.get(cc.getConceptNid());
