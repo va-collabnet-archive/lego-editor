@@ -8,7 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="300.0" prefHeight="220.0" prefWidth="550.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.CreateLegoController">
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="300.0" prefHeight="230.0" prefWidth="550.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.CreateLegoController">
   <children>
     <Label alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Create New Lego" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" />
     <GridPane styleClass="itemBorder" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
