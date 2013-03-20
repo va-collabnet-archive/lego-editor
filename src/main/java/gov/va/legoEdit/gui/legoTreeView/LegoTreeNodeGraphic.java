@@ -80,7 +80,7 @@ public class LegoTreeNodeGraphic
 				}
 				else
 				{
-					StackPane.setMargin(errorImage, new Insets(1.0, 0, 0, 0));
+					StackPane.setMargin(errorImage, new Insets(2.0, 0, 0, 0));
 					pi.setTranslateY(-3.0);
 				}
 				

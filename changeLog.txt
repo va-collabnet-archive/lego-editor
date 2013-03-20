@@ -6,6 +6,7 @@ Lego Editor Change Log
   *  Fixed a null pointer that could happen in certain situations within the filter update.
   *  Fixed a null pointer that happened if you tried to view a new (unsaved) lego in the web browser
   *  Moved the validator calls into a background (non-GUI) thread
+  *  Added progress indicators for node validation-in-progress.
   *  Fixed a bug in the PointNode validation error reporting for intervals and bounds that was a 
      a regression in the 0.57 release. 
   *  artf227644 - Add CIMI import / viewer tool.
