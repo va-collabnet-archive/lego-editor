@@ -174,26 +174,35 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.0</version>
 				<executions>
 					<execution>
-						<id>jarDepend</id>
-						<goals>
-							<goal>attached</goal>
-						</goals>
 						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
 						<configuration>
-							<archive>
-								<manifest>
+						<shadedArtifactAttached>false</shadedArtifactAttached>
+						<finalName>legoEditor-jar-with-dependencies</finalName>
+							<artifactSet>
+								<excludes>
+									<exclude>gov.va:lego-editor-snomed-db</exclude>
+								</excludes>
+							</artifactSet>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>gov.va.legoEdit.LegoGUI</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-							<finalName>legoEditor</finalName>
+								</transformer>
+							</transformers>
 						</configuration>
 					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
 					<execution>
 						<id>zip</id>
 						<goals>
@@ -246,8 +255,38 @@
 	<profiles>
 		<profile>
 			<id>installer</id>
+			<dependencies>
+				<dependency>
+					<groupId>gov.va</groupId>
+					<artifactId>lego-editor-snomed-db</artifactId>
+					<version>2012.07.31-build-6</version>
+					<classifier>latest</classifier>
+					<type>zip</type>
+				</dependency>
+			</dependencies>
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<id>unpack-snomedDB</id>
+								<phase>package</phase>
+								<goals>
+									<goal>unpack-dependencies</goal>
+								</goals>
+								<configuration>
+									<includeGroupIds>gov.va</includeGroupIds>
+									<includeArtifactIds>lego-editor-snomed-db</includeArtifactIds>
+									<outputDirectory>
+										${project.build.directory}/snomedDB
+									</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>com.google.code.maven-install4j</groupId>
 						<artifactId>maven-install4j-plugin</artifactId>

@@ -13,6 +13,13 @@
 			</includes>
 		</fileSet-->
 		<fileSet>
+			<directory>${basedir}/drools-rules/</directory>
+			<outputDirectory>drools-rules/</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+		</fileSet>
+		<fileSet>
 			<directory>${basedir}/scripts/</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
