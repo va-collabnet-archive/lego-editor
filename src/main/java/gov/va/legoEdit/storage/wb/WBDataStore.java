@@ -3,7 +3,6 @@ package gov.va.legoEdit.storage.wb;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchResult;
 import gov.va.legoEdit.gui.util.TaskCompleteCallback;
-import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.util.Utility;
 import java.io.File;
@@ -41,7 +40,7 @@ public class WBDataStore
 	{
 		if (instance_ == null)
 		{
-			synchronized (BDBDataStoreImpl.class)
+			synchronized (WBDataStore.class)
 			{
 				if (instance_ == null)
 				{
