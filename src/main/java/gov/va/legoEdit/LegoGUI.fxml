@@ -107,7 +107,7 @@
         </AnchorPane>
       </items>
     </SplitPane>
-    <MenuBar fx:id="menu" prefHeight="24.0" useSystemMenuBar="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+    <MenuBar fx:id="menu" prefHeight="24.0" useSystemMenuBar="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
       <menus>
         <Menu text="_File" fx:id="menuFile">
           <items>
