@@ -395,15 +395,15 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
 			{
-				if (oldValue.length() > 0 && newValue.length() == 0)
+				if (newValue.length() == 0)
 				{
 					info.isValid.set(true);
 					info.tf.setTooltip(null);
 					info.concept = null;
+					info.lookupUpdateTime = System.currentTimeMillis();
 					updateLegoList();
 				}
-
-				if (newValue.length() > 0)
+				else if (newValue.length() > 0)
 				{
 					if (updateDisabled.get() > 0)
 					{

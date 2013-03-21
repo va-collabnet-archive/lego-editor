@@ -9,7 +9,8 @@ Lego Editor Change Log
   *  Added progress indicators for node validation-in-progress.
   *  Fixed a bug in the PointNode validation error reporting for intervals and bounds that was a 
      a regression in the 0.57 release. 
-  *  artf227644 - Add CIMI import / viewer tool.
+  *  Fixed a bug where the Lego filter could flag an blank concept field as invalid.
+  *  artf227644 - Add CEM import / viewer tool.
   *  artf227406 - Add support for drools rule processing.
 
 2013/03/14 - 0.57
