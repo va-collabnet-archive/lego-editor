@@ -18,5 +18,8 @@ public class ConceptFact extends ComponentFact<ConceptVersionBI> {
 		return component;
 	}
 	
+	public String getUUID() {
+		return component.getUUIDs().get(0).toString();
+	}
 }
 
