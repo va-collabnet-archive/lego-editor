@@ -171,6 +171,7 @@ public class WBDataStore
 	{
 		final SnomedSearchHandle ssh = new SnomedSearchHandle();
 		boolean abnormalPrefixSearch = false;
+		boolean normalLucenePrefixSearch = false;
 		query = query.trim();
 
 		if (prefixSearch)
@@ -178,9 +179,12 @@ public class WBDataStore
 			if (query.startsWith("*")) {
 				abnormalPrefixSearch = true;
 				query = query.substring(1);
+			} else if (query.startsWith("~")) {
+				normalLucenePrefixSearch = true;
+				query = query.substring(1);
 			} 
 
-			//escape all special characters so they don't cause parser failures
+                        //escape all special characters so they don't cause parser failures
 			query = escapeSpecialChars(query);
 			if (query.length() > 0 ) {
 				query += "*";
@@ -195,6 +199,7 @@ public class WBDataStore
 		
 		final String localQuery = query;
 		final boolean localAnnormalPrefixSearch = abnormalPrefixSearch;
+                final boolean localNormalLucenePrefixSearch = normalLucenePrefixSearch;
 		Runnable r = new Runnable()
 		{
 			@Override
@@ -261,10 +266,10 @@ public class WBDataStore
 							break;
 						}
 						// Still not sure we actually want to do this...
-						if (prefixSearch
-								&& (cc instanceof DescriptionAnalogBI)
-								&& ((!localAnnormalPrefixSearch && !((DescriptionAnalogBI<?>) cc).getText().toLowerCase().startsWith(prefixSearchMatch)) 
-										|| (localAnnormalPrefixSearch && !((DescriptionAnalogBI<?>) cc).getText().toLowerCase().contains(prefixSearchMatch))))
+						if (prefixSearch && !localNormalLucenePrefixSearch && 
+                                                   (cc instanceof DescriptionAnalogBI)&& 
+                                                    ((!localAnnormalPrefixSearch && !((DescriptionAnalogBI<?>) cc).getText().toLowerCase().startsWith(prefixSearchMatch)) || 
+                                                     (localAnnormalPrefixSearch && !((DescriptionAnalogBI<?>) cc).getText().toLowerCase().contains(prefixSearchMatch))))
 						{
 							continue;
 						}
