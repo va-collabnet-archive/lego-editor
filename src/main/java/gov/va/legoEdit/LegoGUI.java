@@ -34,6 +34,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TreeItem;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -103,6 +104,18 @@ public class LegoGUI extends Application
 		mainStage_.getIcons().add(Images.APPLICATION.getImage());
 		mainStage_.setTitle("Lego Editor");
 		lgc_.finishInit();
+		
+		Screen screen = Screen.getPrimary();
+		if (mainStage_.getWidth() > screen.getBounds().getWidth())
+		{
+			mainStage_.setWidth(screen.getBounds().getWidth());
+		}
+		
+		if (mainStage_.getHeight() > screen.getBounds().getHeight())
+		{
+			mainStage_.setHeight(screen.getBounds().getHeight());
+		}
+		
 		mainStage_.show();
 
 		// Init error dialog
