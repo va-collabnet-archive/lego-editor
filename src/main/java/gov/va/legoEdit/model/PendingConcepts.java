@@ -189,7 +189,7 @@ public class PendingConcepts implements Observable
 		HashSet<String> unstoredConcepts = new HashSet<>();
 		unstoredConcepts.addAll(pendingConcepts.keySet());
 		
-		List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.US_ASCII);
+		List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.UTF_8);
 		StringBuilder replacement = new StringBuilder();
 		String eol = System.getProperty("line.separator");
 		for (String line : lines)
@@ -288,7 +288,7 @@ public class PendingConcepts implements Observable
 			{
 				if (pendingConceptsFile.exists())
 				{
-					List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.US_ASCII);
+					List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.UTF_8);
 					for (String s : lines)
 					{
 						if (s.startsWith("#") || s.length() == 0)
@@ -318,11 +318,16 @@ public class PendingConcepts implements Observable
 								long parentSCTID = Long.parseLong(parts[2]);
 								//Use this lookup, since it doesn't loop back to pending.
 								ConceptVersionBI wbParentConcept =  WBUtility.lookupSnomedIdentifierAsCV(parentSCTID + "");
-								if (wbParentConcept != null)
+								if (wbParentConcept == null)
+								{
+									//See if it is a different pending concept (must be higher in the file, for this to work)
+									parent = pendingConcepts.get(UUID.nameUUIDFromBytes((parentSCTID + "").getBytes()).toString());
+								}
+								else if (wbParentConcept != null)
 								{
 									parent = WBUtility.convertConcept(wbParentConcept);
 								}
-								else
+								if (parent == null)
 								{
 									logger.error("The specified parent concept for " + c.getSctid() + " doesn't exist and will be ignored");
 								}
