@@ -1079,7 +1079,7 @@ public class LegoGUIController implements Initializable
 			@Override
 			public void handle(ActionEvent event)
 			{
-				LegoGUI.getInstance().showAddPendingConcept();
+				LegoGUI.getInstance().showAddPendingConcept(null);
 			}
 		});
 		

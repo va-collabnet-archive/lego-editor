@@ -23,7 +23,7 @@ public class PendingConcepts implements Observable
 {
 	public static File pendingConceptsFile = new File("pendingConcepts.tsv");
 	private static Logger logger = LoggerFactory.getLogger(PendingConcepts.class);
-	private HashMap<String, Concept> pendingConcepts = new HashMap<>();  //UUID to concept
+	private HashMap<String, PendingConcept> pendingConcepts = new HashMap<>();  //UUID to concept
 	private HashMap<Long, Concept> parentConcepts = new HashMap<>();
 	private long highestInUseId = 0;
 	private static volatile PendingConcepts instance_;
@@ -71,10 +71,10 @@ public class PendingConcepts implements Observable
 		}
 	}
 	
-	public List<Concept> getPendingConcepts()
+	public List<PendingConcept> getPendingConcepts()
 	{
 		loadCheck();
-		ArrayList<Concept> results = new ArrayList<>(pendingConcepts.size());
+		ArrayList<PendingConcept> results = new ArrayList<>(pendingConcepts.size());
 		results.addAll(pendingConcepts.values());
 		return results;
 	}
@@ -101,7 +101,7 @@ public class PendingConcepts implements Observable
 	public void addConcept(long id, String description, Long parent) throws IllegalArgumentException
 	{
 		loadCheck();
-		Concept c = new Concept();
+		PendingConcept c = new PendingConcept();
 		c.setSctid(id);
 		c.setDesc(description);
 		c.setUuid(UUID.nameUUIDFromBytes((c.getSctid() + "").getBytes()).toString());
@@ -147,7 +147,7 @@ public class PendingConcepts implements Observable
 	public void deleteConcept(long id) throws IllegalArgumentException
 	{
 		loadCheck();
-		Concept pending = pendingConcepts.remove(UUID.nameUUIDFromBytes((id + "").getBytes()).toString());
+		PendingConcept pending = pendingConcepts.remove(UUID.nameUUIDFromBytes((id + "").getBytes()).toString());
 		Concept parent = parentConcepts.remove(id);
 		try
 		{
@@ -172,7 +172,7 @@ public class PendingConcepts implements Observable
 		while (true)
 		{
 			long temp = ++highestInUseId;
-			Concept possible = new Concept();
+			Concept possible = new PendingConcept();
 			possible.setSctid(temp);
 			if (areIdentifiersUnique(possible))
 			{
@@ -237,14 +237,14 @@ public class PendingConcepts implements Observable
 		return c.getSctid() + "\t" + c.getDesc() + (parent == null ? "" : "\t" + parent.getSctid() + "\t" + parent.getDesc());
 	}
 
-	public Concept getConcept(String sctIdOrUUID)
+	public PendingConcept getConcept(String sctIdOrUUID)
 	{
 		if (sctIdOrUUID == null)
 		{
 			return null;
 		}
 		loadCheck();
-		Concept temp = pendingConcepts.get(sctIdOrUUID.trim());
+		PendingConcept temp = pendingConcepts.get(sctIdOrUUID.trim());
 		if (temp == null)
 		{
 			temp = pendingConcepts.get(UUID.nameUUIDFromBytes((sctIdOrUUID.trim() + "").getBytes()).toString()); 
@@ -252,6 +252,19 @@ public class PendingConcepts implements Observable
 		return temp;
 	}
 	
+	/**
+	 * Two warnings about this method:
+	 * It only accepts UUIDs, not SCTIDs.  SCTIDs will always return false.
+	 * It doesn't check if the load is complete - if called before the load completes, it may return false when it should return true.
+	 */
+	public boolean hasConcept(String conceptUUIDIdentifier)
+	{
+		return pendingConcepts.containsKey(conceptUUIDIdentifier);
+	}
+	
+	/**
+	 * May be a PendingConcept instead of Concept, but you will have to check
+	 */
 	public Concept getParentConcept(long pendingConceptId)
 	{
 		loadCheck();
@@ -298,7 +311,7 @@ public class PendingConcepts implements Observable
 						String[] parts = s.split("\t");
 						if (parts.length > 1)
 						{
-							Concept c = new Concept();
+							PendingConcept c = new PendingConcept();
 							try
 							{
 								c.setSctid(Long.parseLong(parts[0]));

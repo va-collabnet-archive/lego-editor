@@ -2610,7 +2610,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
 		cm.getItems().add(mi);
 		
-		mi = new MenuItem("Find Concept in Tree");
+		mi = new MenuItem("Find Concept in Tree or Pending");
 		mi.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override

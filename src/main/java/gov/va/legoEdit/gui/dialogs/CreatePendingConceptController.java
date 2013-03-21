@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.Utility;
+import gov.va.legoEdit.model.PendingConcept;
 import gov.va.legoEdit.model.PendingConcepts;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.WBUtility;
@@ -15,6 +16,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
@@ -45,6 +47,8 @@ public class CreatePendingConceptController implements Initializable
 	private StackPane parentConceptStack; // Value injected by FXMLLoader
 	@FXML// fx:id="rootPane"
 	private AnchorPane rootPane; // Value injected by FXMLLoader
+	@FXML //  fx:id="label"
+	private Label label; // Value injected by FXMLLoader
 
 	private Tooltip conceptDescriptionInvalidReason = new Tooltip();
 	private Tooltip conceptIdInvalidReason = new Tooltip();
@@ -52,6 +56,7 @@ public class CreatePendingConceptController implements Initializable
 	
 	private BooleanBinding conceptDescriptionValid, conceptIdValid, parentConceptValid;
 	private Concept selectedParentConcept = null;
+	private boolean viewOnly = false;
 
 	@Override
 	// This method is called by the FXMLLoader when initialization is complete
@@ -89,6 +94,10 @@ public class CreatePendingConceptController implements Initializable
 			@Override
 			protected boolean computeValue()
 			{
+				if (viewOnly)
+				{
+					return true;
+				}
 				if (conceptId.getText().length() > 0)
 				{
 					try
@@ -123,6 +132,10 @@ public class CreatePendingConceptController implements Initializable
 			@Override
 			protected boolean computeValue()
 			{
+				if (viewOnly)
+				{
+					return true;
+				}
 				if (parentConcept.getText().length() > 0)
 				{
 					if (selectedParentConcept != null && parentConcept.getText().equals(selectedParentConcept.getDesc()))
@@ -199,23 +212,43 @@ public class CreatePendingConceptController implements Initializable
 			@Override
 			public void handle(ActionEvent event)
 			{
-				try
+				if (!viewOnly)
 				{
-					PendingConcepts.getInstance().addConcept(Long.parseLong(conceptId.getText()), conceptDescription.getText(), 
-							(null == selectedParentConcept ? null : selectedParentConcept.getSctid()));
-					((Stage) rootPane.getScene().getWindow()).close();
+					try
+					{
+						PendingConcepts.getInstance().addConcept(Long.parseLong(conceptId.getText()), conceptDescription.getText(), 
+								(null == selectedParentConcept ? null : selectedParentConcept.getSctid()));
+					}
+					catch (Exception e)
+					{
+						logger.error("Unexpected error", e);
+						LegoGUI.getInstance().showErrorDialog("Unexpected Error", "Error storing Pending Concept", e.toString());
+					}
 				}
-				catch (Exception e)
-				{
-					logger.error("Unexpected error", e);
-					LegoGUI.getInstance().showErrorDialog("Unexpected Error", "Error storing Pending Concept", e.toString());
-				}
-				
+				((Stage) rootPane.getScene().getWindow()).close();
 			}
 		});
 		
 		conceptId.setText(PendingConcepts.getInstance().getUnusedId() + "");
 
 		okButton.disableProperty().bind(conceptIdValid.not().or(conceptDescriptionValid.not()).or(parentConceptValid.not()));
+	}
+	
+	public void setForViewOnly(PendingConcept concept)
+	{
+		viewOnly = true;
+		conceptId.setEditable(false);
+		conceptId.setText(concept.getSctid() + "");
+		conceptDescription.setEditable(false);
+		okButton.disableProperty().unbind();
+		okButton.setDisable(false);
+		conceptDescription.setText(concept.getDesc());
+		parentConcept.setEditable(false);
+		Concept parent = PendingConcepts.getInstance().getParentConcept(concept.getSctid());
+		if (parent != null)
+		{
+			parentConcept.setText(parent.getDesc());
+		}
+		label.setText("View Pending Concept");
 	}
 }

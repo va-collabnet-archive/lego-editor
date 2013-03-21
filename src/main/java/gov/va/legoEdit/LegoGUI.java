@@ -4,6 +4,7 @@ import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.cem.CemImportViewController;
 import gov.va.legoEdit.gui.dialogs.AboutDialogController;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
+import gov.va.legoEdit.gui.dialogs.CreatePendingConceptController;
 import gov.va.legoEdit.gui.dialogs.CreateTemplateController;
 import gov.va.legoEdit.gui.dialogs.ErrorDialogController;
 import gov.va.legoEdit.gui.dialogs.ExportDialogController;
@@ -16,8 +17,11 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.xmlView.XMLDisplayWindow;
 import gov.va.legoEdit.model.LegoListByReference;
+import gov.va.legoEdit.model.PendingConcept;
+import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.wb.WBDataStore;
+import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +41,6 @@ import org.ihtsdo.fxmodel.concept.FxConcept;
 import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
 import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
 import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
-import org.ihtsdo.tk.api.ContradictionException;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -276,15 +279,28 @@ public class LegoGUI extends Application
 
 	public void showSnomedConceptDialog(UUID conceptUUID)
 	{
-		try
+		Concept c = WBUtility.lookupSnomedIdentifier(conceptUUID.toString());
+		
+		if (c == null)
 		{
-			showSnomedConceptDialog(WBDataStore.Ts().getFxConcept(conceptUUID, StandardViewCoordinates.getSnomedLatest(), VersionPolicy.LAST_VERSIONS,
-					RefexPolicy.REFEX_MEMBERS, RelationshipPolicy.ORIGINATING_RELATIONSHIPS));
+			showErrorDialog("Can't display the requested concept", "Didn't find the requested concept in the DB", null);
 		}
-		catch (IOException | ContradictionException e)
+		else if (c instanceof PendingConcept)
 		{
-			logger.error("Unexpected error displaying snomed concept view", e);
-			showErrorDialog("Unexpected Error", "Unexpected Error displaying snomed concept view", e.toString());
+			showAddPendingConcept((PendingConcept)c);
+		}
+		else
+		{
+			try
+			{
+				showSnomedConceptDialog(WBDataStore.Ts().getFxConcept(conceptUUID, StandardViewCoordinates.getSnomedLatest(), 
+						VersionPolicy.LAST_VERSIONS, RefexPolicy.REFEX_MEMBERS, RelationshipPolicy.ORIGINATING_RELATIONSHIPS));
+			}
+			catch (Exception e)
+			{
+				logger.error("Unexpected error displaying snomed concept view", e);
+				showErrorDialog("Unexpected Error", "Unexpected Error displaying snomed concept view", e.toString());
+			}
 		}
 	}
 
@@ -313,7 +329,10 @@ public class LegoGUI extends Application
 		}
 	}
 	
-	public void showAddPendingConcept()
+	/**
+	 * Pass null for create new concept
+	 */
+	public void showAddPendingConcept(PendingConcept concept)
 	{
 		try
 		{
@@ -326,7 +345,15 @@ public class LegoGUI extends Application
 			Scene scene = new Scene((Parent) loader.load(ImportDialogController.class.getResourceAsStream("CreatePendingConcept.fxml")));
 			scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
 			stage.setScene(scene);
-			stage.setTitle("Add Pending Concept");
+			if (concept == null)
+			{
+				stage.setTitle("Add Pending Concept");
+			}
+			else
+			{
+				stage.setTitle("View Pending Concept");
+				((CreatePendingConceptController)loader.getController()).setForViewOnly(concept);
+			}
 			stage.getIcons().add(Images.CONCEPT_VIEW.getImage());
 			stage.show();
 		}

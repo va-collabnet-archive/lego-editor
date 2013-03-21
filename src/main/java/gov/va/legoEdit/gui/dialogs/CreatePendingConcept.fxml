@@ -10,7 +10,7 @@
 
 <AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="300.0" prefHeight="188.0" prefWidth="652.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.CreatePendingConceptController">
   <children>
-    <Label alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Create Pending Concept" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" />
+    <Label fx:id="label" alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Create Pending Concept" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0" />
     <GridPane styleClass="itemBorder" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
       <children>
         <Label styleClass="boldLabel" text="Concept ID" GridPane.columnIndex="0" GridPane.rowIndex="0" />

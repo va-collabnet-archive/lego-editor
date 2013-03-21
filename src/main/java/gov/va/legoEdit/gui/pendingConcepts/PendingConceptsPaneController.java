@@ -4,6 +4,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.dialogs.YesNoDialogController.Answer;
 import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.gui.util.Images;
+import gov.va.legoEdit.model.PendingConcept;
 import gov.va.legoEdit.model.PendingConcepts;
 import gov.va.legoEdit.model.SchemaConceptComparator;
 import gov.va.legoEdit.model.schemaModel.Concept;
@@ -58,7 +59,7 @@ public class PendingConceptsPaneController implements Initializable
 	@FXML // fx:id="filterText"
 	private TextField filterText; // Value injected by FXMLLoader
 	@FXML // fx:id="searchResults"
-	private ListView<Concept> filterResults; // Value injected by FXMLLoader
+	private ListView<PendingConcept> filterResults; // Value injected by FXMLLoader
 	@FXML // fx:id="borderPane"
 	private BorderPane borderPane; // Value injected by FXMLLoader
 
@@ -86,15 +87,15 @@ public class PendingConceptsPaneController implements Initializable
 		AnchorPane.setLeftAnchor(borderPane, 0.0);
 		AnchorPane.setRightAnchor(borderPane, 0.0);
 
-		filterResults.setCellFactory(new Callback<ListView<Concept>, ListCell<Concept>>()
+		filterResults.setCellFactory(new Callback<ListView<PendingConcept>, ListCell<PendingConcept>>()
 		{
 			@Override
-			public ListCell<Concept> call(ListView<Concept> arg0)
+			public ListCell<PendingConcept> call(ListView<PendingConcept> arg0)
 			{
-				return new ListCell<Concept>()
+				return new ListCell<PendingConcept>()
 				{
 					@Override
-					protected void updateItem(final Concept item, boolean empty)
+					protected void updateItem(final PendingConcept item, boolean empty)
 					{
 						super.updateItem(item, empty);
 						if (!empty)
@@ -115,6 +116,18 @@ public class PendingConceptsPaneController implements Initializable
 								}
 							});
 							mi.setGraphic(Images.COPY.createImageView());
+							cm.getItems().add(mi);
+							
+							mi = new MenuItem("View Concept");
+							mi.setOnAction(new EventHandler<ActionEvent>()
+							{
+								@Override
+								public void handle(ActionEvent event)
+								{
+									LegoGUI.getInstance().showAddPendingConcept(item);
+								}
+							});
+							mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
 							cm.getItems().add(mi);
 							
 							
@@ -284,13 +297,13 @@ public class PendingConceptsPaneController implements Initializable
 			try
 			{
 				cancelSearch = false;
-				final ArrayList<Concept> results = new ArrayList<>();
-				List<Concept> concepts = PendingConcepts.getInstance().getPendingConcepts();
+				final ArrayList<PendingConcept> results = new ArrayList<>();
+				List<PendingConcept> concepts = PendingConcepts.getInstance().getPendingConcepts();
 				Collections.sort(concepts, new SchemaConceptComparator());
 				
 				if (searchString_.length() > 0)
 				{
-					for (Concept c : concepts )
+					for (PendingConcept c : concepts )
 					{
 						if (c.getDesc().toLowerCase().indexOf(searchString_.toLowerCase()) >= 0)
 						{

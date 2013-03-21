@@ -3,6 +3,8 @@ package gov.va.legoEdit.gui.legoTreeView;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.util.Images;
+import gov.va.legoEdit.model.PendingConcept;
+import gov.va.legoEdit.model.PendingConcepts;
 import gov.va.legoEdit.model.SchemaClone;
 import gov.va.legoEdit.model.SchemaEquals;
 import gov.va.legoEdit.model.schemaModel.Concept;
@@ -68,6 +70,7 @@ public class ConceptNode implements ConceptLookupCallback
 	private LegoTreeItem lti_;
 	private ComboBoxConcept codeSetComboBoxConcept_ = null;
 	private BooleanProperty isValid = new SimpleBooleanProperty(true);
+	private BooleanProperty isPending = new SimpleBooleanProperty(false);
 	private volatile long lookupUpdateTime_ = 0;
 	private AtomicInteger lookupsInProgress_ = new AtomicInteger();
 	private BooleanBinding lookupInProgress = new BooleanBinding()
@@ -186,7 +189,11 @@ public class ConceptNode implements ConceptLookupCallback
 		//don't force lookup on load for blank items
 		if (cb_.getValue().getId().length() > 0)
 		{
-			lookup();
+			if (!lookup() && PendingConcepts.getInstance().hasConcept(c_.getUuid()))
+			{
+				//set pending if necessary if no lookup happens, otherwise, let the lookup deal with it.
+				isPending.set(true);
+			}
 		}
 		else
 		{
@@ -226,13 +233,20 @@ public class ConceptNode implements ConceptLookupCallback
 		lookupFailImage_.visibleProperty().bind(isValid.not());
 		Tooltip t = new Tooltip("The specified concept was not found in the Snomed Database.");
 		Tooltip.install(lookupFailImage_, t);
+		
+		ImageView pending = Images.PENDING.createImageView();
+		pending.visibleProperty().bind(isPending);
+		Tooltip.install(pending,  new Tooltip("Pending Concept"));
 
 		StackPane sp = new StackPane();
 		sp.setMaxWidth(Double.MAX_VALUE);
 		sp.getChildren().add(cb_);
+		sp.getChildren().add(pending);
 		sp.getChildren().add(lookupFailImage_);
 		sp.getChildren().add(pi_);
 		StackPane.setAlignment(cb_, Pos.CENTER_LEFT);
+		StackPane.setAlignment(pending, Pos.CENTER_RIGHT);
+		StackPane.setMargin(pending, new Insets(2.0, 20.0, 0.0, 0.0));
 		StackPane.setAlignment(lookupFailImage_, Pos.CENTER_RIGHT);
 		StackPane.setMargin(lookupFailImage_, new Insets(0.0, 20.0, 0.0, 0.0));
 		StackPane.setAlignment(pi_, Pos.CENTER_RIGHT);
@@ -311,7 +325,10 @@ public class ConceptNode implements ConceptLookupCallback
 
 	}
 
-	private synchronized void lookup()
+	/**
+	 * returns true if launched, false if skipped because it decided it wasn't necessary
+	 */
+	private synchronized boolean lookup()
 	{
 		// If the concept is fully populated, and the id matches one of the proper IDs
 		// don't bother doing the lookup (conceptNodes are created whenever a tree expand/collapse takes place - most of the time
@@ -323,12 +340,13 @@ public class ConceptNode implements ConceptLookupCallback
 					(up.getUseFSN() && c_.getDesc().indexOf("(") > 0 && c_.getDesc().indexOf(")") > 0)
 					|| (!up.getUseFSN() && c_.getDesc().indexOf("(") == -1 && c_.getDesc().indexOf(")") == -1)))
 		{
-			return;
+			return false;
 		}
 
 		lookupsInProgress_.incrementAndGet();
 		lookupInProgress.invalidate();
 		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this, null);
+		return true;
 	}
 
 	public Node getNode()
@@ -366,6 +384,7 @@ public class ConceptNode implements ConceptLookupCallback
 			{
 				lookupsInProgress_.decrementAndGet();
 				lookupInProgress.invalidate();
+				isPending.set(false);
 
 				if (submitTime < lookupUpdateTime_)
 				{
@@ -386,6 +405,10 @@ public class ConceptNode implements ConceptLookupCallback
 					c_.setUuid(concept.getUuid());
 					LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(c_);
 					isValid.set(true);
+					if (concept instanceof PendingConcept)
+					{
+						isPending.set(true);
+					}
 				}
 				else
 				{
