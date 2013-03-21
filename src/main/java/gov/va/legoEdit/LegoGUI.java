@@ -1,7 +1,7 @@
 package gov.va.legoEdit;
 
 import gov.va.legoEdit.formats.LegoXMLUtils;
-import gov.va.legoEdit.gui.cem.CimiImportViewController;
+import gov.va.legoEdit.gui.cem.CemImportViewController;
 import gov.va.legoEdit.gui.dialogs.AboutDialogController;
 import gov.va.legoEdit.gui.dialogs.CreateLegoController;
 import gov.va.legoEdit.gui.dialogs.CreateTemplateController;
@@ -261,9 +261,9 @@ public class LegoGUI extends Application
 		userPrefsStage_.show();
 	}
 	
-	public void showCimiTool()
+	public void showCemTool()
 	{
-		CimiImportViewController.show(mainStage_);
+		CemImportViewController.show(mainStage_);
 	}
 
 	public YesNoDialogController.Answer showYesNoDialog(String title, String question)

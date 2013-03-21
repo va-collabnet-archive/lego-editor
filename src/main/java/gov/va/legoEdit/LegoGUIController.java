@@ -150,8 +150,8 @@ public class LegoGUIController implements Initializable
 	private MenuItem menuEditAddPending; // Value injected by FXMLLoader
 	@FXML// fx:id="menuEditPreferences"
 	private MenuItem menuEditPreferences; // Value injected by FXMLLoader
-	@FXML// fx:id="menuEditCimiTool"
-	private MenuItem menuEditCimiTool; // Value injected by FXMLLoader
+	@FXML// fx:id="menuEditCemTool"
+	private MenuItem menuEditCemTool; // Value injected by FXMLLoader
 	@FXML// fx:id="menuFile"
 	private Menu menuFile; // Value injected by FXMLLoader
 	@FXML// fx:id="menuFileCreateLego"
@@ -1083,13 +1083,13 @@ public class LegoGUIController implements Initializable
 			}
 		});
 		
-		menuEditCimiTool.setGraphic(Images.XML_VIEW_16.createImageView());
-		menuEditCimiTool.setOnAction(new EventHandler<ActionEvent>()
+		menuEditCemTool.setGraphic(Images.XML_VIEW_16.createImageView());
+		menuEditCemTool.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent event)
 			{
-				LegoGUI.getInstance().showCimiTool();
+				LegoGUI.getInstance().showCemTool();
 			}
 		});
 

@@ -28,11 +28,11 @@ import javax.xml.stream.events.XMLEvent;
  *         Copyright 2013
  * 
  */
-public class CIMIXmlReader
+public class CemXmlReader
 {
-	public static CIMIXML buildNode(File file) throws XMLStreamException, FileNotFoundException
+	public static CemXML buildNode(File file) throws XMLStreamException, FileNotFoundException
 	{
-		CIMIXML result = new CIMIXML();
+		CemXML result = new CemXML();
 		VBox dataHolder = new VBox();
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		InputStream in = new FileInputStream(file);
@@ -98,12 +98,12 @@ public class CIMIXmlReader
 		return hbox;
 	}
 	
-	public static class CIMIXML
+	public static class CemXML
 	{
 		Node node;
 		List<String> valuesetIDs;
 	
-		public CIMIXML()
+		public CemXML()
 		{
 			valuesetIDs = new ArrayList<>();
 		}

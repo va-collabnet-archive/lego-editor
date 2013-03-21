@@ -8,7 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.cem.CimiImportViewController">
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.cem.CemImportViewController">
   <children>
     <SplitPane dividerPositions="0.5012531328320802" focusTraversable="true" prefHeight="400.0" prefWidth="347.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <items>
@@ -22,19 +22,19 @@
                     <Button id="chooseValueSetFile" fx:id="chooseValuesetFile" mnemonicParsing="false" text="Choose" HBox.hgrow="NEVER" />
                   </children>
                 </HBox>
-                <Label id="cimiFileName" fx:id="valuesetFileName" text="&lt;no file selected&gt;" />
+                <Label id="cemFileName" fx:id="valuesetFileName" text="&lt;no file selected&gt;" />
                 <HBox maxWidth="1.7976931348623157E308" VBox.vgrow="NEVER">
                   <children>
-                    <Label maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="CIMI XML File" HBox.hgrow="ALWAYS">
+                    <Label maxWidth="1.7976931348623157E308" styleClass="boldLabel" text="CEM XML File" HBox.hgrow="ALWAYS">
                       <HBox.margin>
                         <Insets fx:id="x1" />
                       </HBox.margin>
                     </Label>
-                    <Button fx:id="chooseCimiFile" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" text="Choose" HBox.hgrow="NEVER" HBox.margin="$x1" />
+                    <Button fx:id="chooseCemFile" alignment="CENTER" contentDisplay="TOP" mnemonicParsing="false" text="Choose" HBox.hgrow="NEVER" HBox.margin="$x1" />
                   </children>
                 </HBox>
-                <Label fx:id="cimiFileName" text="&lt;no file selected&gt;" />
-                <ScrollPane fx:id="cimiFilePreview" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
+                <Label fx:id="cemFileName" text="&lt;no file selected&gt;" />
+                <ScrollPane fx:id="cemFilePreview" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
               </children>
             </VBox>
           </children>
@@ -43,7 +43,7 @@
           <children>
             <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <children>
-                <Label styleClass="boldLabel" text="Valuesets in CIMI file" />
+                <Label styleClass="boldLabel" text="Valuesets in CEM file" />
                 <ListView fx:id="valueSetList" maxWidth="1.7976931348623157E308" prefHeight="200.0" VBox.vgrow="SOMETIMES" />
                 <Label styleClass="boldLabel" text="Valueset Members" />
                 <ListView fx:id="valuesetMembers" maxWidth="1.7976931348623157E308" prefHeight="200.0" VBox.vgrow="SOMETIMES" />

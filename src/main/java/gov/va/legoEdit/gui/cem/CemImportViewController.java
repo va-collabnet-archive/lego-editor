@@ -1,7 +1,7 @@
 package gov.va.legoEdit.gui.cem;
 
 import gov.va.legoEdit.LegoGUI;
-import gov.va.legoEdit.gui.cem.CIMIXmlReader.CIMIXML;
+import gov.va.legoEdit.gui.cem.CemXmlReader.CemXML;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.Images;
@@ -33,18 +33,18 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CimiImportViewController implements Initializable
+public class CemImportViewController implements Initializable
 {
-	private static Logger logger = LoggerFactory.getLogger(CimiImportViewController.class);
+	private static Logger logger = LoggerFactory.getLogger(CemImportViewController.class);
 
-	@FXML// fx:id="chooseCimiFile"
-	private Button chooseCimiFile; // Value injected by FXMLLoader
+	@FXML// fx:id="chooseCemFile"
+	private Button chooseCemFile; // Value injected by FXMLLoader
 	@FXML// fx:id="chooseValuesetFile"
 	private Button chooseValuesetFile; // Value injected by FXMLLoader
-	@FXML// fx:id="cimiFileName"
-	private Label cimiFileName; // Value injected by FXMLLoader
-	@FXML// fx:id="cimiFilePreview"
-	private ScrollPane cimiFilePreview; // Value injected by FXMLLoader
+	@FXML// fx:id="cemFileName"
+	private Label cemFileName; // Value injected by FXMLLoader
+	@FXML// fx:id="cemFilePreview"
+	private ScrollPane cemFilePreview; // Value injected by FXMLLoader
 	@FXML// fx:id="createLego"
 	private Button createLego; // Value injected by FXMLLoader
 	@FXML// fx:id="findLego"
@@ -59,10 +59,10 @@ public class CimiImportViewController implements Initializable
 	private AnchorPane rootPane; // Value injected by FXMLLoader
 
 	private Stage stage;
-	private File cimiXMLFile = null;
+	private File cemXMLFile = null;
 	private File valuesetFile = null;
 	private HashMap<String, ValueSet> valuesets = null;
-	private CIMIXML cimiXML = null;
+	private CemXML cemXML = null;
 
 	private BooleanProperty enableButtons = new SimpleBooleanProperty(false);
 
@@ -70,31 +70,31 @@ public class CimiImportViewController implements Initializable
 	// This method is called by the FXMLLoader when initialization is complete
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources)
 	{
-		assert chooseCimiFile != null : "fx:id=\"chooseCimiFile\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert chooseValuesetFile != null : "fx:id=\"chooseValuesetFile\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert cimiFileName != null : "fx:id=\"cimiFileName\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert cimiFilePreview != null : "fx:id=\"cimiFilePreview\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert createLego != null : "fx:id=\"createLego\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert findLego != null : "fx:id=\"findLego\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert valueSetList != null : "fx:id=\"valueSetList\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert valuesetFileName != null : "fx:id=\"valuesetFileName\" was not injected: check your FXML file 'cimiImport.fxml'.";
-		assert valuesetMembers != null : "fx:id=\"valuesetMembers\" was not injected: check your FXML file 'cimiImport.fxml'.";
+		assert chooseCemFile != null : "fx:id=\"chooseCemFile\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert chooseValuesetFile != null : "fx:id=\"chooseValuesetFile\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert cemFileName != null : "fx:id=\"cemFileName\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert cemFilePreview != null : "fx:id=\"cemFilePreview\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert createLego != null : "fx:id=\"createLego\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert findLego != null : "fx:id=\"findLego\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert valueSetList != null : "fx:id=\"valueSetList\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert valuesetFileName != null : "fx:id=\"valuesetFileName\" was not injected: check your FXML file 'cemImport.fxml'.";
+		assert valuesetMembers != null : "fx:id=\"valuesetMembers\" was not injected: check your FXML file 'cemImport.fxml'.";
 
-		chooseCimiFile.setOnAction(new EventHandler<ActionEvent>()
+		chooseCemFile.setOnAction(new EventHandler<ActionEvent>()
 		{
 			@Override
 			public void handle(ActionEvent t)
 			{
 				FileChooser fc = new FileChooser();
-				fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cimi xml Files (*.xml)", "*.xml"));
+				fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Cem xml Files (*.xml)", "*.xml"));
 				fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files (*.*)", "*"));
-				cimiXMLFile = fc.showOpenDialog(rootPane.getScene().getWindow());
-				if (cimiXMLFile != null)
+				cemXMLFile = fc.showOpenDialog(rootPane.getScene().getWindow());
+				if (cemXMLFile != null)
 				{
-					cimiFileName.setText(cimiXMLFile.getName());
+					cemFileName.setText(cemXMLFile.getName());
 					valueSetList.getItems().clear();
 					valuesetMembers.getItems().clear();
-					processCIMI();
+					processCem();
 				}
 				stage.toFront();
 			}
@@ -124,7 +124,7 @@ public class CimiImportViewController implements Initializable
 						valuesetFile = null;
 						valuesets = null;
 					}
-					processCIMI();
+					processCem();
 				}
 				stage.toFront();
 			}
@@ -174,7 +174,7 @@ public class CimiImportViewController implements Initializable
 		});
 		findLego.disableProperty().bind(enableButtons.not());
 
-		cimiFilePreview.setFitToWidth(true);
+		cemFilePreview.setFitToWidth(true);
 
 		valueSetList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
 		{
@@ -202,16 +202,16 @@ public class CimiImportViewController implements Initializable
 		});
 	}
 
-	private void processCIMI()
+	private void processCem()
 	{
 		valueSetList.getItems().clear();
-		if (cimiXMLFile != null && valuesetFile != null)
+		if (cemXMLFile != null && valuesetFile != null)
 		{
 			try
 			{
-				cimiXML = CIMIXmlReader.buildNode(cimiXMLFile);
-				cimiFilePreview.setContent(cimiXML.node);
-				for (String s : cimiXML.valuesetIDs)
+				cemXML = CemXmlReader.buildNode(cemXMLFile);
+				cemFilePreview.setContent(cemXML.node);
+				for (String s : cemXML.valuesetIDs)
 				{
 					ValueSet vs = valuesets.get(s.toLowerCase());
 					if (vs != null)
@@ -223,15 +223,15 @@ public class CimiImportViewController implements Initializable
 			catch (Exception e)
 			{
 				LegoGUI.getInstance().showErrorDialog("Error reading file", "Error processing the XML file", e.toString(), stage);
-				cimiFilePreview.setContent(new Label(""));
-				cimiFileName.setText("<no file selected>");
-				cimiXMLFile = null;
+				cemFilePreview.setContent(new Label(""));
+				cemFileName.setText("<no file selected>");
+				cemXMLFile = null;
 				valueSetList.getItems().clear();
 			}
 		}
 		else
 		{
-			cimiFilePreview.setContent(new Label(""));
+			cemFilePreview.setContent(new Label(""));
 		}
 	}
 
@@ -249,14 +249,14 @@ public class CimiImportViewController implements Initializable
 			stage.initOwner(mainStage);
 			stage.initStyle(StageStyle.DECORATED);
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(CimiImportViewController.class.getResource("CimiImport.fxml"));
-			Scene scene = new Scene((Parent) loader.load(CimiImportViewController.class.getResourceAsStream("CimiImport.fxml")));
-			scene.getStylesheets().add(CimiImportViewController.class.getResource("/styles.css").toString());
+			loader.setLocation(CemImportViewController.class.getResource("CemImport.fxml"));
+			Scene scene = new Scene((Parent) loader.load(CemImportViewController.class.getResourceAsStream("CemImport.fxml")));
+			scene.getStylesheets().add(CemImportViewController.class.getResource("/styles.css").toString());
 			stage.setScene(scene);
-			stage.setTitle("CIMI Import/Search Tool");
+			stage.setTitle("CEM Import/Search Tool");
 			stage.getIcons().add(Images.XML_VIEW_32.getImage());
 			stage.show();
-			((CimiImportViewController) loader.getController()).setStage(stage);
+			((CemImportViewController) loader.getController()).setStage(stage);
 		}
 		catch (Exception e)
 		{
