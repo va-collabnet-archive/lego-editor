@@ -8,7 +8,7 @@ import org.ihtsdo.tk.api.coordinate.ViewCoordinate;
  * @author jefron
  */
 public class ComponentFact <T extends ComponentVersionBI> extends Fact<T>{
-    
+
 
 	private ViewCoordinate vc;
 	

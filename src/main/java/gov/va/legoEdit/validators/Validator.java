@@ -198,32 +198,29 @@ public class Validator
 						{
 							return actions.get(0).getFailureReason();
 						}
+						
+						if ((lti.getConceptUsageType() == ConceptUsageType.DISCERNIBLE 
+								|| lti.getConceptUsageType() == ConceptUsageType.QUALIFIER
+								|| lti.getConceptUsageType() == ConceptUsageType.VALUE 
+								|| lti.getConceptUsageType() == ConceptUsageType.REL_DESTINATION)
+								&& lti.getExtraData() != null && lti.getExtraData() instanceof Expression)
+						{
+							Expression exp = (Expression) lti.getExtraData();
+							//Note - this implementation doesn't yet handle concept rel groups 
+							for (Relation rel : exp.getRelation())
+							{
+								actions = cndh.processConceptNodeRelationshipRules(cv, rel);
+								if (actions.size() > 0)
+								{
+									return actions.get(0).getFailureReason();
+								}
+							}
+						}
 					}
 					else
 					{
 						logger.warn("Drools validation is not available due to previous failures");
 					}
-                                        if (lti.getConceptUsageType() == ConceptUsageType.DISCERNIBLE ||
-                                            lti.getConceptUsageType() == ConceptUsageType.REL_DESTINATION) 
-                                        {
-                                            Expression exp = null;
-                                            try {
-                                                exp = (Expression)lti.getExtraData();
-                                            } catch (Exception e) {
-
-                                            }
-
-                                            if (exp != null) {
-                                                for (Relation rel : exp.getRelation()) {
-                                                    List<DroolsLegoAction> actions = cndh.processConceptNodeRelationshipRules(cv, rel);
-
-                                                    if (actions.size() > 0)
-                                                    {
-                                                            return actions.get(0).getFailureReason();
-                                                    }
-                                                }
-                                            }
-                                    }
 				} 
 				else 
 				{

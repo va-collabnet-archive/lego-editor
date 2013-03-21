@@ -8,12 +8,11 @@ import gov.va.legoEdit.drools.facts.Context;
 import gov.va.legoEdit.drools.facts.PendingConceptFact;
 import gov.va.legoEdit.drools.manager.DroolsExceptionHandler;
 import gov.va.legoEdit.gui.legoTreeView.ConceptUsageType;
-import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.model.schemaModel.Concept;
-import gov.va.legoEdit.model.schemaModel.Expression;
 import gov.va.legoEdit.model.schemaModel.Relation;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
+import gov.va.legoEdit.util.Utility;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -172,47 +171,54 @@ public class ConceptNodeDroolsHandler
 		}
 	}
 
-    public List<DroolsLegoAction> processConceptNodeRelationshipRules(ConceptVersionBI cv, Relation r) {
-            ArrayList<DroolsLegoAction> actions = new ArrayList<>();
+	public List<DroolsLegoAction> processConceptNodeRelationshipRules(ConceptVersionBI cv, Relation r) throws IOException
+	{
+		ArrayList<DroolsLegoAction> actions = new ArrayList<>();
 
-            StatefulKnowledgeSession ksession = kbase.newStatefulKnowledgeSession();
-            try
-            {
-                if (r.getType() == null || r.getType().getConcept() == null ||
-                    r.getDestination() == null || r.getDestination().getExpression() == null ||
-                    r.getDestination().getExpression().getConcept() == null) {
-                    return actions;
-                }
-                
-                Concept type = r.getType().getConcept();
-                Concept dest = r.getDestination().getExpression().getConcept();
+		StatefulKnowledgeSession ksession = kbase.newStatefulKnowledgeSession();
+		try
+		{
+			if (r == null || r.getType() == null || r.getType().getConcept() == null || Utility.isEmpty(r.getType().getConcept().getUuid()) 
+					|| r.getDestination() == null || r.getDestination().getExpression() == null || r.getDestination().getExpression().getConcept() == null 
+					|| Utility.isEmpty(r.getDestination().getExpression().getConcept().getUuid()))
+			{
+				//Not enough info yet to run the drools validator. 
+				return actions;
+			}
 
-                ConceptVersionBI typeConcept = WBUtility.lookupSnomedIdentifierAsCV(type.getUuid());
-                ConceptVersionBI destConcept = WBUtility.lookupSnomedIdentifierAsCV(dest.getUuid());
+			Concept type = r.getType().getConcept();
+			Concept dest = r.getDestination().getExpression().getConcept();
 
-                ksession.insert(new ConceptFact(Context.SOURCE_CONCEPT, cv, StandardViewCoordinates.getSnomedLatest()));
+			ConceptVersionBI typeConcept = WBUtility.lookupSnomedIdentifierAsCV(type.getUuid());
+			ConceptVersionBI destConcept = WBUtility.lookupSnomedIdentifierAsCV(dest.getUuid());
 
-                if (typeConcept != null) {
-                    ksession.insert(new ConceptFact(Context.TYPE_CONCEPT, typeConcept, StandardViewCoordinates.getSnomedLatest()));
-                } else {
-                    ksession.insert(new PendingConceptFact(Context.TYPE_CONCEPT, type));
-                }
-                if (destConcept != null) {
-                    ksession.insert(new ConceptFact(Context.DESTINATION_CONCEPT, destConcept, StandardViewCoordinates.getSnomedLatest()));
-                } else {
-                    ksession.insert(new PendingConceptFact(Context.DESTINATION_CONCEPT, dest));
-                }
+			ksession.insert(new ConceptFact(Context.SOURCE_CONCEPT, cv, StandardViewCoordinates.getSnomedLatest()));
 
-                ksession.setGlobal("actions", actions);
-                ksession.fireAllRules();
-                
-                return actions;
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                ksession.dispose();
-            }
+			if (typeConcept != null)
+			{
+				ksession.insert(new ConceptFact(Context.TYPE_CONCEPT, typeConcept, StandardViewCoordinates.getSnomedLatest()));
+			}
+			else
+			{
+				ksession.insert(new PendingConceptFact(Context.TYPE_CONCEPT, type));
+			}
+			if (destConcept != null)
+			{
+				ksession.insert(new ConceptFact(Context.DESTINATION_CONCEPT, destConcept, StandardViewCoordinates.getSnomedLatest()));
+			}
+			else
+			{
+				ksession.insert(new PendingConceptFact(Context.DESTINATION_CONCEPT, dest));
+			}
 
-            return actions;
-	}    
-    }
+			ksession.setGlobal("actions", actions);
+			ksession.fireAllRules();
+
+			return actions;
+		}
+		finally
+		{
+			ksession.dispose();
+		}
+	}
+}

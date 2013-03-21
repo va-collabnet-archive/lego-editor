@@ -21,47 +21,49 @@ import gov.va.legoEdit.drools.facts.Context;
 
 global Collection actions;
 
-rule "Discernible IS Observable Entity"
+rule "Discernible IS 'Observable entity (observable entity)'"
 	when
-		 (and
+		(and
 			(AssertionFact(getType() == ConceptUsageType.DISCERNIBLE))
-			 ($dropObject: ConceptFact(this not isKindOf Snomed.OBSERVABLE_ENTITY, context == Context.DROP_OBJECT))
-		  )
+			($dropObject: ConceptFact(this not isKindOf Snomed.OBSERVABLE_ENTITY, context == Context.DROP_OBJECT))
+		)
 	then
 		actions.add(new FailValidatorAction(FailValidatorAction.ReasonFailed.DISCERNIBLE_OBSERVABLE));
 end
 
-rule "Observervible Source Rel with CHARACTERIZES Rel Type must have Process (or descendents) Target-Characterizes is Pending Concept"
+#Temp rule for pending concept fact
+rule "'Observable entity (observable entity)' Source Rel with 'CHARACTERIZES (attribute)' Rel Type must have 'Process (observable entity)' (or descendents)"
 	when
-		 (and
-			 ($sourceConcept: ConceptFact(this  isKindOf Snomed.OBSERVABLE_ENTITY, context == Context.SOURCE_CONCEPT))
-			 ($typeConcept: PendingConceptFact(getId().equals("3416a75f-4cea-3109-907c-acd8e2f2aefc"), context == Context.TYPE_CONCEPT))
-			 ($destinationConcept: ConceptFact(this not isKindOf LegoSpec.PROCESS_TYPE, context == Context.DESTINATION_CONCEPT))
-		  )
+		(and
+			($sourceConcept: ConceptFact(this  isKindOf Snomed.OBSERVABLE_ENTITY, context == Context.SOURCE_CONCEPT))
+			($typeConcept: PendingConceptFact(getId().equals("3416a75f-4cea-3109-907c-acd8e2f2aefc"), context == Context.TYPE_CONCEPT))
+			($destinationConcept: ConceptFact(this not isKindOf LegoSpec.PROCESS_TYPE, context == Context.DESTINATION_CONCEPT))
+		)
 	then
 		actions.add(new FailValidatorAction(FailValidatorAction.ReasonFailed.OBSERVABLE_CHARACTERIZES_PROCESS_REL_MESSAGE));
 end
 
-rule "Observervible Source Rel with CHARACTERIZES Rel Type must have Process (or descendents) Target-Characterizes is in SCT Database"
+#This rule, with a UUID change, is what will be needed after "CHARACTERIZES" becomes a real concept, instead of a pending concept.
+#rule "Observable Source Rel with CHARACTERIZES Rel Type must have Process (or descendents) Target-Characterizes is in SCT Database"
+#	when
+#		 (and
+#			($sourceConcept: ConceptFact(this  isKindOf Snomed.OBSERVABLE_ENTITY, context == Context.SOURCE_CONCEPT))
+#			($typeConcept: ConceptFact(getUUID().equals("3416a75f-4cea-3109-907c-acd8e2f2aefc"), context == Context.TYPE_CONCEPT))
+#			($destinationConcept: ConceptFact(this not isKindOf LegoSpec.PROCESS_TYPE, context == Context.DESTINATION_CONCEPT))
+#		)
+#	then
+#		actions.add(new FailValidatorAction(FailValidatorAction.ReasonFailed.OBSERVABLE_CHARACTERIZES_PROCESS_REL_MESSAGE));
+#end
+
+
+
+rule "'Procedure (procedure)' Source Rel with 'Method (Attribute)' Rel Type must have 'Action (qualifier value)' (or descendant)"
 	when
-		 (and
-			 ($sourceConcept: ConceptFact(this  isKindOf Snomed.OBSERVABLE_ENTITY, context == Context.SOURCE_CONCEPT))
-			 ($typeConcept: ConceptFact(getUUID().equals("3416a75f-4cea-3109-907c-acd8e2f2aefc"), context == Context.TYPE_CONCEPT))
-			 ($destinationConcept: ConceptFact(this not isKindOf LegoSpec.PROCESS_TYPE, context == Context.DESTINATION_CONCEPT))
-		  )
-	then
-		actions.add(new FailValidatorAction(FailValidatorAction.ReasonFailed.OBSERVABLE_CHARACTERIZES_PROCESS_REL_MESSAGE));
-end
-
-
-
-rule "Procedure Source Rel with Method Rel Type must have Action (or descendents) Target-Characterizes"
-	when
-		 (and 
-			 ($sourceConcept: ConceptFact(this  isKindOf Snomed.PROCEDURE, context == Context.SOURCE_CONCEPT))
-			 ($typeConcept: ConceptFact(getUUID().equals("d0f9e3b1-29e4-399f-b129-36693ba4acbc"), context == Context.TYPE_CONCEPT))
-			 ($destinationConcept: ConceptFact(this not isKindOf LegoSpec.ACTION_TYPE, context == Context.DESTINATION_CONCEPT))
-		  )
+		(and
+			($sourceConcept: ConceptFact(this  isKindOf Snomed.PROCEDURE, context == Context.SOURCE_CONCEPT))
+			($typeConcept: ConceptFact(getUUID().equals("d0f9e3b1-29e4-399f-b129-36693ba4acbc"), context == Context.TYPE_CONCEPT))
+			($destinationConcept: ConceptFact(this not isKindOf LegoSpec.ACTION_TYPE, context == Context.DESTINATION_CONCEPT))
+		)
 	then
 		actions.add(new FailValidatorAction(FailValidatorAction.ReasonFailed.PROCEDURE_METHOD_ACTION_REL_MESSAGE));
 end

@@ -13,8 +13,8 @@ public class Fact <T extends Object> {
 		this.context = context;
 		this.component = component;
 	}
-        
-        protected Fact() {
+
+	protected Fact() {
 		super();
 	}
 	
@@ -30,6 +30,5 @@ public class Fact <T extends Object> {
 	public String toString() {
 		return "Fact context: " + context + " object: " + component;
 	}
-
 }
 

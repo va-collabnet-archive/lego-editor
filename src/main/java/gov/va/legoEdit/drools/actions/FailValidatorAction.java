@@ -1,6 +1,5 @@
 package gov.va.legoEdit.drools.actions;
 
-
 /**
  * 
  * @author jefron
@@ -10,17 +9,19 @@ public class FailValidatorAction extends DroolsLegoAction
 {
 	public enum ReasonFailed
 	{
-		DISCERNIBLE_OBSERVABLE("Discernible Concept must be an Observable"),
-		OBSERVABLE_CHARACTERIZES_PROCESS_REL_MESSAGE("An Observable Source (or desc) with CHARACTERIZES (attribute) Rel Type must have Process (or desc) as Target"),
-                PROCEDURE_METHOD_ACTION_REL_MESSAGE("A Procedure Source (or desc) with Method (attribute) Rel Type must have Action (qualifier value) (or desc) as Target"),
-                TEST_CASE("TEST TEST TEST");
-		
+		DISCERNIBLE_OBSERVABLE("The Discernible Concept must be a descendant of 'Observable entity (observable entity)'"), 
+		OBSERVABLE_CHARACTERIZES_PROCESS_REL_MESSAGE("The Source of a Relationship which is a descendant of 'Observable entity (observable entity)'" 
+				+ " with a 'CHARACTERIZES (attribute)' Rel type must have a descendant of 'Process (observable entity)' as the Target"), 
+		PROCEDURE_METHOD_ACTION_REL_MESSAGE("The Source of a relationship which is a descendant of 'Procedure (procedure)'"
+				+ " with a 'Method (attribute)' rel type must have a descendant of 'Action (qualifier value)' as the Target");
+
 		private String reason;
+
 		private ReasonFailed(String reason)
 		{
 			this.reason = reason;
 		}
-		
+
 		public String getReason()
 		{
 			return reason;
@@ -28,12 +29,12 @@ public class FailValidatorAction extends DroolsLegoAction
 	};
 
 	private ReasonFailed reasonFailed;
-	
+
 	public FailValidatorAction(ReasonFailed reason)
 	{
 		this.reasonFailed = reason;
 	}
-	
+
 	public String getFailureReason()
 	{
 		return reasonFailed.getReason();
