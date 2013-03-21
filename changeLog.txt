@@ -10,6 +10,7 @@ Lego Editor Change Log
   *  Fixed a bug in the PointNode validation error reporting for intervals and bounds that was a 
      a regression in the 0.57 release. 
   *  Fixed a bug where the Lego filter could flag an blank concept field as invalid.
+  *  Allow pending concepts to have pending concept parents (without logging a warning at startup)
   *  artf227644 - Add CEM import / viewer tool.
   *  artf227406 - Add support for drools rule processing.
 
