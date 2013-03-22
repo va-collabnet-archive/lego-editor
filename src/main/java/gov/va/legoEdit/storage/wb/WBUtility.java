@@ -134,7 +134,7 @@ public class WBUtility
 			}
 			if (c.getSctid() == null)
 			{
-				logger.info("Couldn't find SCTID for concept " + c.getDesc() + " " + c.getUuid());
+				logger.debug("Couldn't find SCTID for concept " + c.getDesc() + " " + c.getUuid());
 			}
 		}
 		return c;
