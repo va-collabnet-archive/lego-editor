@@ -207,20 +207,19 @@ public class LegoGUI extends Application
 		try
 		{
 			// Init error dialog
-			final Stage errorDialogStage = new Stage();
-			errorDialogStage.initModality(Modality.WINDOW_MODAL);
-			errorDialogStage.initOwner(mainStage_);
-			errorDialogStage.initStyle(StageStyle.UTILITY);
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(ErrorDialogController.class.getResource("ErrorDialog.fxml"));
-			Scene scene = new Scene((Parent) loader.load(ErrorDialogController.class.getResourceAsStream("ErrorDialog.fxml")));
-			final ErrorDialogController edc = loader.getController();
-			scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
-			errorDialogStage.setScene(scene);
-			
 			try
 			{
 				Toolkit.getToolkit().checkFxUserThread();
+				Stage errorDialogStage = new Stage();
+				errorDialogStage.initModality(Modality.WINDOW_MODAL);
+				errorDialogStage.initOwner(mainStage_);
+				errorDialogStage.initStyle(StageStyle.UTILITY);
+				FXMLLoader loader = new FXMLLoader();
+				loader.setLocation(ErrorDialogController.class.getResource("ErrorDialog.fxml"));
+				Scene scene = new Scene((Parent) loader.load(ErrorDialogController.class.getResourceAsStream("ErrorDialog.fxml")));
+				final ErrorDialogController edc = loader.getController();
+				scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+				errorDialogStage.setScene(scene);
 				edc.setVariables(errorMessage, detailedErrorMessage);
 				errorDialogStage.setTitle(title);
 				errorDialogStage.initOwner(owner == null ? mainStage_ : owner);
@@ -233,10 +232,27 @@ public class LegoGUI extends Application
 					@Override
 					public void run()
 					{
-						edc.setVariables(errorMessage, detailedErrorMessage);
-						errorDialogStage.setTitle(title);
-						errorDialogStage.initOwner(owner == null ? mainStage_ : owner);
-						errorDialogStage.show();
+						try
+						{
+							Stage errorDialogStage = new Stage();
+							errorDialogStage.initModality(Modality.WINDOW_MODAL);
+							errorDialogStage.initOwner(mainStage_);
+							errorDialogStage.initStyle(StageStyle.UTILITY);
+							FXMLLoader loader = new FXMLLoader();
+							loader.setLocation(ErrorDialogController.class.getResource("ErrorDialog.fxml"));
+							Scene scene = new Scene((Parent) loader.load(ErrorDialogController.class.getResourceAsStream("ErrorDialog.fxml")));
+							final ErrorDialogController edc = loader.getController();
+							scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+							errorDialogStage.setScene(scene);
+							edc.setVariables(errorMessage, detailedErrorMessage);
+							errorDialogStage.setTitle(title);
+							errorDialogStage.initOwner(owner == null ? mainStage_ : owner);
+							errorDialogStage.show();
+						}
+						catch (Exception e)
+						{
+							logger.error("Unexpected error handling error", e);
+						}
 					}
 				});
 			}
