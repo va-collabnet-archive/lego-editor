@@ -54,14 +54,12 @@ public class LegoGUI extends Application
 	private static LegoGUI instance_;
 
 	private Stage mainStage_;
-	private Stage errorDialogStage_;
 	private Stage legoListPropertiesStage_;
 	private Stage createLegoStage_;
 	private Stage yesNoStage_;
 	private Stage userPrefsStage_;
 	private Stage templateStage_;
 
-	private ErrorDialogController edc_;
 	private LegoGUIController lgc_;
 	private LegoListPropertiesController llpc_;
 	private CreateLegoController clc_;
@@ -117,18 +115,6 @@ public class LegoGUI extends Application
 		}
 		
 		mainStage_.show();
-
-		// Init error dialog
-		errorDialogStage_ = new Stage();
-		errorDialogStage_.initModality(Modality.WINDOW_MODAL);
-		errorDialogStage_.initOwner(mainStage_);
-		errorDialogStage_.initStyle(StageStyle.UTILITY);
-		loader = new FXMLLoader();
-		loader.setLocation(ErrorDialogController.class.getResource("ErrorDialog.fxml"));
-		scene = new Scene((Parent) loader.load(ErrorDialogController.class.getResourceAsStream("ErrorDialog.fxml")));
-		edc_ = loader.getController();
-		scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
-		errorDialogStage_.setScene(scene);
 
 		// init legoPropertiesDialog
 		legoListPropertiesStage_ = new Stage();
@@ -199,7 +185,8 @@ public class LegoGUI extends Application
 
 	public void showErrorDialog(final String title, final String errorMessage, final String detailedErrorMessage, final Window owner)
 	{
-		while (edc_ == null)
+		long tryUntil = System.currentTimeMillis() + 5000;
+		while (mainStage_ == null)
 		{
 			//If we have an error during startup, the GUI might not be up yet.  Of course, it may never come up either... but 
 			//the app is so hosed at that point... not going to worry about it.
@@ -211,29 +198,52 @@ public class LegoGUI extends Application
 			{
 				//noop
 			}
+			if (System.currentTimeMillis() > tryUntil)
+			{
+				break;
+			}
 		}
+		
 		try
 		{
-			Toolkit.getToolkit().checkFxUserThread();
-			edc_.setVariables(errorMessage, detailedErrorMessage);
-			errorDialogStage_.setTitle(title);
-			errorDialogStage_.initOwner(owner == null ? mainStage_ : owner);
-			errorDialogStage_.show();
-		}
-		catch (IllegalStateException e)
-		{
-			Platform.runLater(new Runnable()
+			// Init error dialog
+			final Stage errorDialogStage = new Stage();
+			errorDialogStage.initModality(Modality.WINDOW_MODAL);
+			errorDialogStage.initOwner(mainStage_);
+			errorDialogStage.initStyle(StageStyle.UTILITY);
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(ErrorDialogController.class.getResource("ErrorDialog.fxml"));
+			Scene scene = new Scene((Parent) loader.load(ErrorDialogController.class.getResourceAsStream("ErrorDialog.fxml")));
+			final ErrorDialogController edc = loader.getController();
+			scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+			errorDialogStage.setScene(scene);
+			
+			try
 			{
-				
-				@Override
-				public void run()
+				Toolkit.getToolkit().checkFxUserThread();
+				edc.setVariables(errorMessage, detailedErrorMessage);
+				errorDialogStage.setTitle(title);
+				errorDialogStage.initOwner(owner == null ? mainStage_ : owner);
+				errorDialogStage.show();
+			}
+			catch (IllegalStateException e)
+			{
+				Platform.runLater(new Runnable()
 				{
-					edc_.setVariables(errorMessage, detailedErrorMessage);
-					errorDialogStage_.setTitle(title);
-					errorDialogStage_.initOwner(owner == null ? mainStage_ : owner);
-					errorDialogStage_.show();
-				}
-			});
+					@Override
+					public void run()
+					{
+						edc.setVariables(errorMessage, detailedErrorMessage);
+						errorDialogStage.setTitle(title);
+						errorDialogStage.initOwner(owner == null ? mainStage_ : owner);
+						errorDialogStage.show();
+					}
+				});
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Unexpected error handling error", e);
 		}
 	}
 
