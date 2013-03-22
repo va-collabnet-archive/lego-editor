@@ -22,6 +22,7 @@ import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.util.UnsavedLegos;
 import gov.va.legoEdit.util.Utility;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -411,10 +412,11 @@ public class LegoGUIModel
 			@Override
 			public void run()
 			{
+				File f = null;
 				try
 				{
 					Lego l = BDBDataStoreImpl.getInstance().getLego(legoUUID, stampUUID);
-					File f = File.createTempFile(l.getLegoUUID() + "-", ".html");
+					f = File.createTempFile(l.getLegoUUID() + "-", ".html");
 					FileOutputStream fos = new FileOutputStream(f);
 					
 					TransformerFactory tf = TransformerFactory.newInstance();
@@ -422,20 +424,33 @@ public class LegoGUIModel
 					
 					LegoXMLUtils.transform(l, fos, transformer, true);
 					
-					BrowserLauncher bl = new BrowserLauncher();
-					bl.openURLinBrowser(f.toURI().toURL().toString());
-					
-					//This is the sun way... but it spews crap all over the console - so I used the BrowserLauncher instead.
-					//Desktop.getDesktop().browse(f.toURI());
+					if (System.getProperty("os.name").toLowerCase().indexOf("mac") > 0 && Desktop.isDesktopSupported())
+					{
+						//This is the sun way... but it spews crap all over the console - so I used the BrowserLauncher instead.
+						//Except on Mac, where browser launcher didn't work.
+						Desktop.getDesktop().browse(f.toURI());
+					}
+					else
+					{
+						BrowserLauncher bl = new BrowserLauncher();
+						bl.openURLinBrowser(f.toURI().toURL().toString());
+					}
 					
 					Thread.sleep(10000);
 					
-					f.delete();
+					
 				}
 				catch (Exception e)
 				{
 					LegoGUI.getInstance().showErrorDialog("Error launching browser", "There was an error launching the web browser", e.toString());
 					logger.error("Error launching web browser", e);
+				}
+				finally
+				{
+					if (f != null)
+					{
+						f.delete();
+					}
 				}
 			}
 		};
