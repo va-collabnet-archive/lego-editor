@@ -6,13 +6,24 @@ import gov.va.legoEdit.gui.util.TaskCompleteCallback;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.util.Utility;
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.Version;
 import org.ihtsdo.bdb.BdbTerminologyStore;
 import org.ihtsdo.cc.lucene.LuceneManager;
@@ -170,39 +181,16 @@ public class WBDataStore
 	private SnomedSearchHandle search(String query, final int resultLimit, final boolean prefixSearch, final TaskCompleteCallback callback, final Integer taskId)
 	{
 		final SnomedSearchHandle ssh = new SnomedSearchHandle();
-		boolean abnormalPrefixSearch = false;
-		boolean normalLucenePrefixSearch = false;
 		query = query.trim();
 
-		if (prefixSearch)
-		{
-			if (query.startsWith("*"))
-			{
-				abnormalPrefixSearch = true;
-				query = query.substring(1);
-			}
-			else if (query.startsWith("~"))
-			{
-				normalLucenePrefixSearch = true;
-				query = query.substring(1);
-			}
-
-			// escape all special characters so they don't cause parser failures
-			query = escapeSpecialChars(query);
-			if (query.length() > 0 ) {
-				query += "*";
-			}
-		}
-		else
+		if (!prefixSearch)
 		{
 			// Just strip out parens, which are common in FSNs, but also lucene search operators (which our users likely won't use)
 			query = query.replaceAll("\\(", "");
 			query = query.replaceAll("\\)", "");
 		}
-		
+
 		final String localQuery = query;
-		final boolean localAbnormalPrefixSearch = abnormalPrefixSearch;
-		final boolean localNormalLucenePrefixSearch = normalLucenePrefixSearch;
 		Runnable r = new Runnable()
 		{
 			@Override
@@ -210,7 +198,6 @@ public class WBDataStore
 			{
 				try
 				{
-					String prefixSearchMatch = null;
 					ArrayList<ComponentChroncileBI<?>> resultTemp = new ArrayList<>();
 
 					if (localQuery.length() > 0)
@@ -229,12 +216,28 @@ public class WBDataStore
 							logger.debug("Lucene Search: '" + localQuery + "'");
 							// sort of copied from Termstore.searchLucene(...)
 							// because that API throws away the scores, and returns the results in random order... which is rather useless.
-							Query q = new QueryParser(Version.LUCENE_40, "desc", new StandardAnalyzer(Version.LUCENE_40)).parse(localQuery);
+							
+							Query q = null;
+							if (prefixSearch)
+							{
+								q = buildQuery(localQuery, new StandardAnalyzer(Version.LUCENE_40));
+							}
+							else
+							{
+								q = new QueryParser(Version.LUCENE_40, "desc", new StandardAnalyzer(Version.LUCENE_40)).parse(localQuery);
+							}
 							SearchResult searchResults = LuceneManager.search(q);
 
 							if (searchResults.topDocs.totalHits == 0)
 							{
-								q = new QueryParser(Version.LUCENE_40, "desc", new WhitespaceAnalyzer(Version.LUCENE_40)).parse(localQuery);
+								if (prefixSearch)
+								{
+									q = buildQuery(localQuery, new WhitespaceAnalyzer(Version.LUCENE_40));
+								}
+								else
+								{
+									q = new QueryParser(Version.LUCENE_40, "desc", new WhitespaceAnalyzer(Version.LUCENE_40)).parse(localQuery);
+								}
 								searchResults = LuceneManager.search(q);
 							}
 
@@ -253,8 +256,6 @@ public class WBDataStore
 						{
 							logger.warn("Lucene search is not available - no local database!");
 						}
-
-						prefixSearchMatch = localQuery.toLowerCase().substring(0, localQuery.length() - 1);
 					}
 
 					HashMap<Integer, SnomedSearchResult> userResults = new HashMap<>();
@@ -268,15 +269,7 @@ public class WBDataStore
 						{
 							break;
 						}
-						// Still not sure we actually want to do this...
-						if (prefixSearch
-								&& !localNormalLucenePrefixSearch
-								&& (cc instanceof DescriptionAnalogBI)
-								&& ((!localAbnormalPrefixSearch && !((DescriptionAnalogBI<?>) cc).getText().toLowerCase().startsWith(prefixSearchMatch)) 
-										|| (localAbnormalPrefixSearch && !((DescriptionAnalogBI<?>) cc).getText().toLowerCase().contains(prefixSearchMatch))))
-						{
-							continue;
-						}
+
 						SnomedSearchResult sr = userResults.get(cc.getConceptNid());
 						if (sr == null)
 						{
@@ -311,29 +304,34 @@ public class WBDataStore
 		Utility.tpe.execute(r);
 		return ssh;
 	}
-
-	private String escapeSpecialChars(String query)
+	
+	private Query buildQuery(String searchString, Analyzer analyzer) throws IOException
 	{
-		query = query.replace("\\", "\\" + "\\");
-		query = query.replace("+", "\\" + "+");
-		query = query.replace("-", "\\" + "-");
-		query = query.replace("&", "\\" + "&");
-		query = query.replace("|", "\\" + "|");
-		query = query.replace("!", "\\" + "!");
-		query = query.replace("(", "\\" + "(");
-		query = query.replace(")", "\\" + ")");
-		query = query.replace("{", "\\" + "{");
-		query = query.replace("}", "\\" + "}");
-		query = query.replace("[", "\\" + "[");
-		query = query.replace("]", "\\" + "]");
-		query = query.replace("^", "\\" + "^");
-		query = query.replace("\"", "\\" + "\"");
-		query = query.replace("~", "\\" + "~");
-		query = query.replace("*", "\\" + "*");
-		query = query.replace("?", "\\" + "?");
-		query = query.replace(":", "\\" + ":");
-		query = query.replace("/", "\\" + "/");
-
-		return query;
+		StringReader textReader = new StringReader(searchString);
+		TokenStream tokenStream = analyzer.tokenStream("desc", textReader);
+		tokenStream.reset();
+		List<String> terms = new ArrayList<>();
+		CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+		
+		while (tokenStream.incrementToken())
+		{
+			terms.add(charTermAttribute.toString());
+		}
+		textReader.close();
+		tokenStream.close();
+		analyzer.close();
+		
+		BooleanQuery bq = new BooleanQuery();
+		if (terms.size() > 0)
+		{
+			String last = terms.remove(terms.size() - 1);
+			bq.add(new WildcardQuery((new Term("desc", last + "*"))), Occur.MUST);
+		}
+		for (String s : terms)
+		{
+			bq.add(new TermQuery(new Term("desc", s)), Occur.MUST);
+		}
+		
+		return bq;
 	}
 }
