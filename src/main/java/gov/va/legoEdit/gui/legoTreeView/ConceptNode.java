@@ -61,7 +61,6 @@ public class ConceptNode implements ConceptLookupCallback
 
 	private HBox hbox_;
 	private ComboBox<ComboBoxConcept> cb_;
-	private LookAheadConceptPopup popup;
 	private Label typeLabel_;
 	private ProgressIndicator pi_;
 	private ImageView lookupFailImage_;
@@ -84,7 +83,6 @@ public class ConceptNode implements ConceptLookupCallback
 
 	public ConceptNode(String typeLabel, Concept c, ConceptUsageType cut, LegoTreeItem lti, LegoTreeView legoTreeView)
 	{
-		popup = new LookAheadConceptPopup();
 		c_ = c;
 		legoTreeView_ = legoTreeView;
 		lti_ = lti;
@@ -111,49 +109,16 @@ public class ConceptNode implements ConceptLookupCallback
 		cb_.setItems(FXCollections.observableArrayList(LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().getSuggestions(cut)));
 		cb_.setVisibleRowCount(11);
 		
-		//Another hack to fix strange behavior in javafx... left arrow key in the combobox editor doesn't work as expected unless you filter it..
+		// Another hack to fix strange behavior in javafx... left arrow key in the combobox editor doesn't work as expected unless you filter it..
 		cb_.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>()
-		{
-			@Override
-			public void handle(KeyEvent event)
-			{
-                            if (event.getCode() == KeyCode.LEFT) {
-                                event.consume();
-                            } else if (event.getCode() == KeyCode.UP ||
-                                       event.getCode() == KeyCode.DOWN ||
-                                       event.getCode() == KeyCode.ENTER) {
-                                popup.handleScroll(event);
-                                event.consume();
-                            }
-                        }
-                });
-
-		cb_.addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>()
 		{
 			@Override
 			public void handle(KeyEvent event)
 			{
 				if (event.getCode() == KeyCode.LEFT)
 				{
-                                    event.consume();
-				} else if (event.getCode() == KeyCode.UP ||
-                                event.getCode() == KeyCode.DOWN ||
-                                           event.getCode() == KeyCode.ENTER) {
-                                event.consume();
-                            } else if (event.isAltDown() ||
-                                       event.isControlDown() ||
-                                       event.isMetaDown() ||
-                                       event.isShiftDown() ||
-                                           event.isShortcutDown()) {
-                                 event.consume();
-                            } else {
-                                if (cb_.getEditor().getText().length() != 36 || Utility.isLong(cb_.getEditor().getText())) {
-                                    showPopup();
-                                }
-
-                                event.consume();
-                            }
-                              
+					event.consume();
+				}
 			}
 		});
 
@@ -184,6 +149,9 @@ public class ConceptNode implements ConceptLookupCallback
 			typeLabel_ = new Label(typeLabel);
 			typeLabel_.setMinWidth(Label.USE_PREF_SIZE);
 		}
+		
+		//Would be nice to have a single global one of these, but don't have time to deal with the memory-leak implications
+		new LookAheadConceptPopup(cb_);
 
 		updateGUI();
 		//don't force lookup on load for blank items
@@ -217,7 +185,6 @@ public class ConceptNode implements ConceptLookupCallback
 				}
 				lookup();
 			}
-
 		});
 
 		LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(legoTreeView_.getLego(), cb_);
@@ -322,7 +289,6 @@ public class ConceptNode implements ConceptLookupCallback
 			cb_.setTooltip(null);
 			cb_.getEditor().setTooltip(null);
 		}
-
 	}
 
 	/**
@@ -330,12 +296,13 @@ public class ConceptNode implements ConceptLookupCallback
 	 */
 	private synchronized boolean lookup()
 	{
-		// If the concept is fully populated, and the id matches one of the proper IDs
+		// If the concept is fully populated, and the id matches one of the proper IDs, and the description is not an ID
 		// don't bother doing the lookup (conceptNodes are created whenever a tree expand/collapse takes place - most of the time
 		// the value hasn't changed....
 		//However, check to see if the desc type has changed.... let the lookup happen if the description type has changed.
 		if (c_ != null && !Utility.isEmpty(c_.getDesc()) && !Utility.isEmpty(c_.getUuid()) && c_.getSctid() != null
 				&& (cb_.getValue().getId().equals(c_.getSctid() + "") || cb_.getValue().getId().equals(c_.getUuid()))
+				&& (!cb_.getValue().getDescription().equals(cb_.getValue().getId()))
 				&& (
 					(up.getUseFSN() && c_.getDesc().indexOf("(") > 0 && c_.getDesc().indexOf(")") > 0)
 					|| (!up.getUseFSN() && c_.getDesc().indexOf("(") == -1 && c_.getDesc().indexOf(")") == -1)))
@@ -446,9 +413,5 @@ public class ConceptNode implements ConceptLookupCallback
 				updateGUI();
 			}
 		});
-	}
-
-	private void showPopup() {
-		popup.showPopup(cb_);
 	}
 }

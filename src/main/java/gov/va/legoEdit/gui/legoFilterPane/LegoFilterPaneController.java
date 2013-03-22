@@ -4,6 +4,7 @@ import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
+import gov.va.legoEdit.gui.legoTreeView.LookAheadConceptPopup;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
 import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.gui.util.TaskCompleteCallback;
@@ -415,6 +416,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 				}
 			}
 		});
+		new LookAheadConceptPopup(textField);
 	}
 
 	private void toggleAdvanced()

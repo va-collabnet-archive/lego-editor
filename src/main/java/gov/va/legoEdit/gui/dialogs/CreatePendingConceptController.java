@@ -1,6 +1,7 @@
 package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.gui.legoTreeView.LookAheadConceptPopup;
 import gov.va.legoEdit.gui.util.Utility;
 import gov.va.legoEdit.model.PendingConcept;
 import gov.va.legoEdit.model.PendingConcepts;
@@ -195,6 +196,8 @@ public class CreatePendingConceptController implements Initializable
 				parentConceptValid.invalidate();
 			}
 		});
+		
+		new LookAheadConceptPopup(parentConcept);
 		
 		LegoGUI.getInstance().getLegoGUIController().addSnomedDropTarget(parentConcept);
 

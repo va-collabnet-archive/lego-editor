@@ -1,5 +1,3 @@
-//-javaagent:C:/Users/jefron/Desktop/ScenicView.jar -Xmx2g 
-
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchResult;
@@ -9,333 +7,463 @@ import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.SnomedSearchHandle;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
-
-import java.io.IOException;
+import gov.va.legoEdit.util.Utility;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
+import javafx.geometry.Point2D;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
-
-import org.ihtsdo.tk.api.ContradictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * 
  * @author jefron
+ * @author darmbrust
  */
-class LookAheadConceptPopup extends Popup implements TaskCompleteCallback {
+public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
+{
+	Logger logger = LoggerFactory.getLogger(LookAheadConceptPopup.class);
+	private TextField sourceTextField;
+	VBox popupContent = new VBox();
+	private VBox displayedSearchResults = new VBox();
+	private List<String> uuidArray = new ArrayList<>();
+	private int currentSelection = -1;
+	private boolean enableMouseHover = false;
 
-    Logger logger = LoggerFactory.getLogger(LookAheadConceptPopup.class);
-    private VBox searchResults = new VBox();
-    private ComboBox<ComboBoxConcept> comboBox;
-    private AnchorPane anchorpane = new AnchorPane();
-    private double layoutY;
-    private double layoutX;
-    private AtomicInteger activeSearchCount = new AtomicInteger(0);
-    private BooleanBinding searchRunning = new BooleanBinding()
-    {
-        @Override
-        protected boolean computeValue()
-        {
-            return activeSearchCount.get() > 0;
-        }
-    };
-    private int searchCounter = 0;
-    private HashMap<Integer, SnomedSearchHandle> runningSearches = new HashMap<>();
-    private List<String> uuidArray = new ArrayList<>();
-    private int currentSelection;
-    private boolean isDisplaying = false;
+	private AtomicInteger activeSearchCount = new AtomicInteger(0);
+	private BooleanBinding searchRunning = new BooleanBinding()
+	{
+		@Override
+		protected boolean computeValue()
+		{
+			return activeSearchCount.get() > 0;
+		}
+	};
+	private int searchCounter = 0;
+	private volatile int lastProcessedId = -1;
+	private HashMap<Integer, SnomedSearchHandle> runningSearches = new HashMap<>();
+	private boolean above = false;
 
-    public LookAheadConceptPopup() {
-        setAutoFix(false);
-        setAutoHide(true);
-        searchResults.setMaxWidth(Double.MAX_VALUE);
-        searchResults.addEventHandler(KeyEvent.ANY, new LookAheadScrollEvent());
-    }
+	public LookAheadConceptPopup(Control field)
+	{
+		if (field instanceof ComboBox)
+		{
+			this.sourceTextField = ((ComboBox<?>) field).getEditor();
+		}
+		else if (field instanceof TextField)
+		{
+			this.sourceTextField = (TextField) field;
+		}
+		else
+		{
+			throw new RuntimeException("Unsupported control type");
+		}
 
-    private void search(String searchText) throws IOException, IOException, ContradictionException {
-        currentSelection = -1;
+		setAutoFix(false);
+		setAutoHide(true);
+		displayedSearchResults.addEventHandler(KeyEvent.ANY, new LookAheadScrollEvent());
 
-        for (SnomedSearchHandle ssh : runningSearches.values())
-        {
-            ssh.cancel();
-        }
-        searchResults.setPrefWidth(comboBox.getWidth());
+		// Disable up/down if we are nested in a combobox - we intercept and deal with them ourselves.
+		// also intercept enter.
+		field.addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>()
+		{
+			KeyCode previous = null;
+			@Override
+			public void handle(KeyEvent event)
+			{
+				if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.ENTER)
+				{
+					handleScroll(event);
+					event.consume();
+				}
+				else if (event.getCode() == KeyCode.ESCAPE)
+				{
+					closeLookAheadPanel();
+				}
+				else if (event.getCode() == KeyCode.TAB || (event.getCode() == KeyCode.SHIFT && previous == KeyCode.TAB))
+				{
+					previous = event.getCode();
+					//If they arrived here via tab, do nothing
+					closeLookAheadPanel();
+				}
+				else
+				{
+					showOrHidePopupForTextChange();
+				}
+			}
+		});
+		field.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>()
+		{
+			@Override
+			public void handle(KeyEvent event)
+			{
+				if (event.getCode() == KeyCode.UP || event.getCode() == KeyCode.DOWN || event.getCode() == KeyCode.ENTER)
+				{
+					event.consume();
+				}
+				else if (event.getCode() == KeyCode.TAB)
+				{
+					//If they are leaving via tab, close the panel
+					closeLookAheadPanel();
+				}
+			}
+		});
+		
+		StackPane sp = new StackPane();
+		sp.getStyleClass().add("headerBackground");
+		
+		final Label header = new Label("");
+		header.setPrefHeight(24.0);
+		header.getStyleClass().add("boldLabel");
+		header.setPrefWidth(Double.MAX_VALUE);
+		sp.getChildren().add(header);
+		StackPane.setMargin(header, new Insets(3, 3, 3, 3));
+		
+		final ProgressBar pb = new ProgressBar(-1);
+		pb.setPrefWidth(Double.MAX_VALUE);
+		pb.setPrefHeight(18.0);
+		pb.visibleProperty().bind(searchRunning);
+		pb.setOpacity(0.5);
+		sp.getChildren().add(pb);
+		StackPane.setMargin(pb, new Insets(6, 3, 6, 3));
+		
+		popupContent.getChildren().add(sp);
+		
+		searchRunning.addListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				if (searchRunning.get())
+				{
+					header.setText("Searching...");
+				}
+				else
+				{
+					if (uuidArray.size() > 0)
+					{
+						header.setText("Suggested Concepts");
+					}
+					else
+					{
+						header.setText("No Suggestions");
+					}
+				}
+			}
+		});
 
-        if (searchText.trim().length() > 0) {
-            activeSearchCount.incrementAndGet();
-            searchRunning.invalidate();
-            synchronized (runningSearches)
-            {
-            	int id = searchCounter++;
-                SnomedSearchHandle ssh = WBDataStore.getInstance().prefixSearch(searchText, 5, this, id);
-                runningSearches.put(id, ssh);
-            }
-        } else {
-            closeLookAheadPanel();
-        }
-    }
+		popupContent.getChildren().add(displayedSearchResults);
+		popupContent.prefWidthProperty().bind(sourceTextField.widthProperty());
+		popupContent.getStyleClass().add("itemBorder");
+		popupContent.getStyleClass().add("dialogBackground");
+		this.getContent().add(popupContent);
+		
+		heightProperty().addListener(new InvalidationListener()
+		{
+			@Override
+			public void invalidated(Observable observable)
+			{
+				moveUpIfNecessary();
+			}
+		});
+		
+		//There is a nasty bug in javaFX, where, if we do a select on a drop down item, and then, later, 
+		//bring up an entirely new box - it will continue resending mouse_enter events on whatever the last 
+		//one was that was selected.  It even sends the complete wrong X and Y values with the mouse event.
+		//This workaround seems to work - disable our hover style code until the mouse actually moves over the popup.
+		//Note - I can't catch onMouseEntered here either, because it suffers the same problem.  It will randomly 
+		//fire mouse entered with the cordinates of the last click - even though the mouse is not being moved.
+		popupContent.setOnMouseMoved(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent event)
+			{
+				enableMouseHover = true;
+			}
+		});
+	}
 
-    void showPopup(ComboBox<ComboBoxConcept> callingComboBox) {
-        comboBox = callingComboBox;
+	private synchronized void showOrHidePopupForTextChange()
+	{
+		for (SnomedSearchHandle ssh : runningSearches.values())
+		{
+			ssh.cancel();
+		}
 
-        try {
-            search((callingComboBox.getEditor().getText()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		String text = sourceTextField.getText().trim();
+		if (text.length() > 0 && !Utility.isLong(text) && !Utility.isUUID(text))
+		{
+			try
+			{
+				activeSearchCount.incrementAndGet();
+				searchRunning.invalidate();
+				synchronized (runningSearches)
+				{
+					int id = searchCounter++;
+					SnomedSearchHandle ssh = WBDataStore.getInstance().prefixSearch(text, 5, this, id);
+					runningSearches.put(id, ssh);
+				}
+			}
+			catch (Exception e)
+			{
+				logger.error("Unexpected error during lookahead search", e);
+			}
+			if (!isShowing())
+			{
+				Point2D p = sourceTextField.localToScene(0.0, 0.0);
+				double layoutX = p.getX() + sourceTextField.getScene().getX() + sourceTextField.getScene().getWindow().getX();
+				double layoutY = p.getY() + sourceTextField.getHeight() + sourceTextField.getScene().getY() + sourceTextField.getScene().getWindow().getY();
+				above = false;
+				show(sourceTextField, layoutX, layoutY);
+			}
+		}
+		else
+		{
+			closeLookAheadPanel();
+		}
+	}
 
-        Parent parent = comboBox.getParent();
-        Bounds childBounds = comboBox.getBoundsInParent();
-        Bounds parentBounds = parent.localToScene(parent.getBoundsInLocal());
+	private void moveUpIfNecessary()
+	{
+		if (above || (getY() + getHeight()) > (sourceTextField.getScene().getWindow().getY() + sourceTextField.getScene().getWindow().getHeight()))
+		{
+			Point2D p = sourceTextField.localToScene(0.0, 0.0);
+			setY(p.getY() + sourceTextField.getScene().getY() + sourceTextField.getScene().getWindow().getY() - getHeight());
+			above = true;
+		}
+	}
 
-        layoutX = childBounds.getMinX() + parentBounds.getMinX()
-                + parent.getScene().getX() + parent.getScene().getWindow().getX();
+	private void handleScroll(KeyEvent event)
+	{
+		displayedSearchResults.fireEvent(event);
+	}
 
-        layoutY = childBounds.getMaxY() + parentBounds.getMinY()
-                + parent.getScene().getY() + parent.getScene().getWindow().getY();
+	private VBox processResult(SnomedSearchResult result, final int idx)
+	{
+		VBox box = new VBox();
 
-    }
+		Concept c = WBUtility.convertConcept(result.getConcept());
 
-    void handleScroll(KeyEvent event) {
-        searchResults.fireEvent(event);
-    }
+		Label concept = new Label(c.getDesc());
+		concept.getStyleClass().add("boldLabel");
+		box.getChildren().add(concept);
 
-    private VBox processResult(SnomedSearchResult result, int idx) {
-        VBox box = new VBox();
+		for (String s : result.getMatchStrings())
+		{
+			if (s.equals(c.getDesc()))
+			{
+				continue;
+			}
+			Label matchString = new Label(s);
+			VBox.setMargin(matchString, new Insets(0.0, 0.0, 0.0, 10.0));
+			box.getChildren().add(matchString);
+		}
 
-        Concept c = WBUtility.convertConcept(result.getConcept());
+		uuidArray.add(idx, c.getUuid());
+		box.setOnMouseClicked(new EventHandler<MouseEvent>()
+		{
+			@Override
+			public void handle(MouseEvent event)
+			{
+				sourceTextField.setText(uuidArray.get(idx));
+				sourceTextField.getParent().requestFocus();
+				closeLookAheadPanel();
+			}
+		});
 
-        Label concept = new Label(c.getDesc());
-        concept.getStyleClass().add("boldLabel");
-        box.getChildren().add(concept);
+		setBoxStyle(box, idx);
+		return box;
+	}
 
-        for (String s : result.getMatchStrings()) {
-            if (s.equals(c.getDesc())) {
-                continue;
-            }
-            Label matchString = new Label(s);
-            VBox.setMargin(matchString, new Insets(0.0, 0.0, 0.0, 10.0));
-            box.getChildren().add(matchString);
-        }
+	private void setBoxStyle(VBox box, int index)
+	{
+		if (index == 0 || index % 2 == 0)
+		{
+			box.getStyleClass().add("lookupSearchResultsStyle-A");
+			box.setOnMouseEntered(new LookAheadEnterHandler(box, "lookupSearchResultsStyle-Selected"));
+			box.setOnMouseExited(new LookAheadEnterHandler(box, "lookupSearchResultsStyle-A"));
+		}
+		else
+		{
+			box.getStyleClass().add("lookupSearchResultsStyle-B");
+			box.setOnMouseEntered(new LookAheadEnterHandler(box, "lookupSearchResultsStyle-Selected"));
+			box.setOnMouseExited(new LookAheadEnterHandler(box, "lookupSearchResultsStyle-B"));
+		}
+	}
 
-        uuidArray.add(idx, c.getUuid());
-        box.setOnMouseClicked(new LookAheadConceptPopup.LookAheadSelectHandler(c.getDesc(), c.getUuid()));
+	private void closeLookAheadPanel()
+	{
+		hide();
+		enableMouseHover = false;
+		displayedSearchResults.getChildren().clear();
+		uuidArray.clear();
+		currentSelection = -1;
+	}
 
-        return box;
-    }
+	private class LookAheadScrollEvent implements EventHandler<KeyEvent>
+	{
+		@Override
+		public void handle(KeyEvent event)
+		{
+			if (above && currentSelection == -1)
+			{
+				currentSelection = displayedSearchResults.getChildren().size();
+			}
+			int oldSelection = currentSelection;
 
-    private void setBoxStyle(VBox box, int index) {
-        if (index == 0 || index % 2 == 0) {
-            box.getStyleClass().add("lookupSearchResultsStyle-A");
-        } else {
-            box.getStyleClass().add("lookupSearchResultsStyle-B");
-        }
-    }
+			if (event.getCode() == KeyCode.ENTER)
+			{
+				if (currentSelection >= 0 && currentSelection < displayedSearchResults.getChildren().size())
+				{
+					//There is a bug in this mechanism - there doesn't seem to be any way to tell the combo box to ignore the enter key.
+					//It processes it even if it is consumed - firing the changelistener.  So, when we set the UUID like this, lookup gets 
+					//called twice.  Once with whatever letters they had typed before arrowing down, and once again when the UUID hits.
+					//In practice, its fairly harmless.
+					sourceTextField.setText(uuidArray.get(currentSelection));
+					sourceTextField.getParent().requestFocus();
+					closeLookAheadPanel();
+					return;
+				}
+			}
+			else if (event.getCode() == KeyCode.UP)
+			{
+				if (currentSelection > 0)
+				{
+					currentSelection--;
+				}
+			}
+			else if (event.getCode() == KeyCode.DOWN)
+			{
+				if (currentSelection < displayedSearchResults.getChildren().size() - 1)
+				{
+					currentSelection++;
+				}
+			}
+			else
+			{
+				logger.warn("Unexpected key event to lookahead scroll event");
+				return;
+			}
 
-    private void closeLookAheadPanel() {
-        searchResults.getChildren().clear();
-        anchorpane.getChildren().clear();
-        anchorpane.getStyleClass().clear();
-        hide();
-        isDisplaying = false;
-    }
+			if (oldSelection != currentSelection)
+			{
+				if (oldSelection >= 0 && oldSelection < displayedSearchResults.getChildren().size())
+				{
+					VBox oldBox = (VBox) displayedSearchResults.getChildren().get(oldSelection);
+					oldBox.getStyleClass().clear();
+					setBoxStyle(oldBox, oldSelection);
+				}
 
-    private class LookAheadSelectHandler implements EventHandler<MouseEvent> {
-        String uuid;
+				if (currentSelection >= 0)
+				{
+					VBox newBox = (VBox) displayedSearchResults.getChildren().get(currentSelection);
+					newBox.getStyleClass().clear();
+					newBox.getStyleClass().add("lookupSearchResultsStyle-Selected");
+				}
+			}
+			event.consume();
+		}
+	}
 
-        private LookAheadSelectHandler(String term, String id) {
-            uuid = id;
-        }
+	private class LookAheadEnterHandler implements EventHandler<MouseEvent>
+	{
+		private VBox box;
+		private String style;
 
-        @Override
-        public void handle(MouseEvent t) {
-            if (uuid == null) {
-                return;
-            }
-            comboBox.getEditor().setText(uuid);
-            closeLookAheadPanel();
-        }
-    }
+		private LookAheadEnterHandler(VBox b, String style)
+		{
+			this.box = b;
+			this.style = style;
+		}
 
-    private class LookAheadScrollEvent implements EventHandler<KeyEvent> {
+		@Override
+		public void handle(MouseEvent t)
+		{
+			if (enableMouseHover)
+			{
+				box.getStyleClass().clear();
+				box.getStyleClass().add(style);
+			}
+		}
+	}
 
-        @Override
-        public void handle(KeyEvent event) {
-            int oldSelection = currentSelection;
-            boolean noAction = false;
+	@Override
+	public void taskComplete(long taskStartTime, Integer taskId)
+	{
+		try
+		{
+			SnomedSearchHandle ssh = null;
+			synchronized (runningSearches)
+			{
+				ssh = runningSearches.remove(taskId);
+			}
 
-            if (event.getCode() == KeyCode.ENTER) {
-                if (currentSelection >= 0 && currentSelection < searchResults.getChildren().size()) {
-                    comboBox.getEditor().setText(uuidArray.get(currentSelection));
-                    closeLookAheadPanel();
-                    noAction = true;
-                }
-            } else if (event.getCode() == KeyCode.UP) {
-                if (currentSelection > 0) {
-                    currentSelection--;
-                }
-            } else if (event.getCode() == KeyCode.DOWN) {
-                if (currentSelection < searchResults.getChildren().size() - 1) {
-                    currentSelection++;
-                }
-            } else {
-                noAction = true;
-            }
+			if (ssh == null)
+			{
+				logger.error("Can't find the proper search handle!");
+				return;
+			}
 
-            if (!noAction) {
-                if (oldSelection >= 0) {
-                    VBox oldBox = (VBox) searchResults.getChildren().get(oldSelection);
-                    oldBox.getStyleClass().clear();
-                    setBoxStyle(oldBox, oldSelection);
-                }
-
-                if (currentSelection >= 0)
-                {
-	                VBox newBox = (VBox) searchResults.getChildren().get(currentSelection);
-	                newBox.getStyleClass().clear();
-	                newBox.getStyleClass().add("lookupSearchResultsStyle-Selected");
-                }
-            }
-
-            event.consume();
-        }
-    }
-
-    private class LookAheadEnterHandler implements EventHandler<MouseEvent> {
-
-        VBox box;
-        boolean isEnterCase;
-        private String originalCase;
-
-        private LookAheadEnterHandler(VBox b, boolean isEnter) {
-            box = b;
-            isEnterCase = isEnter;
-            originalCase = box.getStyleClass().get(0);
-        }
-
-        @Override
-        public void handle(MouseEvent t) {
-            if (box == null) {
-                return;
-            }
-
-            if (isEnterCase) {
-                box.getStyleClass().clear();
-                box.getStyleClass().add("lookupSearchResultsStyle-Selected");
-            } else {
-                box.getStyleClass().clear();
-                box.getStyleClass().add(originalCase);
-            }
-        }
-    }
-
-    @Override
-    public void taskComplete(long taskStartTime, Integer taskId) {
-        SnomedSearchHandle ssh = null;
-        synchronized (runningSearches) {
-            ssh = runningSearches.remove(taskId);
-        }
-
-        if (ssh == null) {
-            logger.error("Can't find the proper search handle!");
-            return;
-        }
-
-        final SnomedSearchHandle finalSSH = ssh;
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    SortedSet<SnomedSearchResult> sortedResults = new TreeSet<SnomedSearchResult>(new SnomedSearchResultComparator());
-                    if (!finalSSH.isCancelled()) {
-                        sortedResults.addAll(finalSSH.getResults());
-                    }
-
-                    searchResults.getChildren().clear();
-                    anchorpane.getChildren().clear();
-                    anchorpane.getStyleClass().clear();
-
-                    for (SnomedSearchResult result : sortedResults) {
-                        if (finalSSH.isCancelled()) {
-                            break;
-                        }
-                        int idx = searchResults.getChildren().size();
-
-                        VBox box = processResult(result, idx);
-                        setBoxStyle(box, idx);
-
-                        box.setOnMouseEntered(new LookAheadConceptPopup.LookAheadEnterHandler(box, true));
-                        box.setOnMouseExited(new LookAheadConceptPopup.LookAheadEnterHandler(box, false));
-
-                        searchResults.getChildren().add(box);
-                    }
-
-                    if (!finalSSH.isCancelled()) {
-                        anchorpane.getChildren().add(searchResults);
-                        anchorpane.getStyleClass().add("lookupSearchResultsStyle-A");
-
-                        AnchorPane.setTopAnchor(searchResults, 0.0);
-                        AnchorPane.setBottomAnchor(searchResults, 0.0);
-                        AnchorPane.setLeftAnchor(searchResults, 0.0);
-                        AnchorPane.setRightAnchor(searchResults, 0.0);
-
-                        getContent().clear();
-                        getContent().add(anchorpane);
-                    }
-                } catch (Exception e) {
-                    logger.error("Unexpected Search Error", e);
-                } finally {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            activeSearchCount.decrementAndGet();
-                            searchRunning.invalidate();
-                            if (!finalSSH.isCancelled()) {
-                                Parent p = comboBox.getParent();
-
-                                while (p.getParent() != null) {
-                                    p = p.getParent();
-                                }
-
-                                if (searchResults.getChildren().size() > 0) {
-                                    if (!isDisplaying || !isShowing()) {
-                                        show(comboBox, layoutX, layoutY);
-                                        isDisplaying = true;
-                                    }
-
-                                    if (layoutY + anchorpane.getHeight() >= p.getLayoutBounds().getHeight()
-                                            + comboBox.getParent().getScene().getWindow().getY()) {
-                                        layoutY = layoutY - comboBox.getHeight() - anchorpane.getHeight();
-                                        setY(layoutY);
-                                    }
-                                } else {
-                                    closeLookAheadPanel();
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }
+			if (ssh.isCancelled() || taskId <= lastProcessedId)
+			{
+				logger.debug("Skipping out of date search result");
+			}
+			else
+			{
+				final SortedSet<SnomedSearchResult> sortedResults = new TreeSet<SnomedSearchResult>(new SnomedSearchResultComparator());
+				sortedResults.addAll(ssh.getResults());
+				Platform.runLater(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						displayedSearchResults.getChildren().clear();
+						uuidArray.clear();
+						currentSelection = -1;
+						for (SnomedSearchResult result : sortedResults)
+						{
+							int idx = displayedSearchResults.getChildren().size();
+							displayedSearchResults.getChildren().add(processResult(result, idx));
+						}
+					}
+				});
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Unexpected error processing search result", e);
+		}
+		finally
+		{
+			Platform.runLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					activeSearchCount.decrementAndGet();
+					searchRunning.invalidate();
+				}
+			});
+		}
+	}
 }

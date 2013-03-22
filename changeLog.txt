@@ -13,8 +13,10 @@ Lego Editor Change Log
   *  Allow pending concepts to have pending concept parents (without logging a warning at startup)
   *  Fix bug on "View Concept" menu option when the concept in question was a pending concept.  Also allow
   		viewing of pending concepts, and show GUI indicator on pending concepts.
+  *  Fixed a bug with showing the error dialog.
   *  artf227644 - Add CEM import / viewer tool.
   *  artf227406 - Add support for drools rule processing.
+  *  artf227504 - Add type-ahead searching for all concept fields.
 
 2013/03/14 - 0.57
   *  Fixed the summary view on/off switch so it takes effect on Legos that are already open.
