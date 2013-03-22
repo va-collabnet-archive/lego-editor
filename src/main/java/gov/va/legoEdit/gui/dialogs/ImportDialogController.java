@@ -98,107 +98,119 @@ public class ImportDialogController implements Initializable
 		@Override
 		public void run()
 		{
-			for (final File f : files)
+			try
 			{
-				final String temp = status.toString();
-				status.setLength(0);
+				for (final File f : files)
+				{
+					final String temp = status.toString();
+					status.setLength(0);
+					Platform.runLater(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							((Stage) rootPane.getScene().getWindow()).show();
+							importName.setText("Importing " + f.getName() + "...");
+							progress.setProgress((double) count / (double) files.size());
+							if (temp.length() > 0)
+							{
+								detailedMessage.appendText(temp);
+							}
+						}
+					});
+	
+					if (f.exists() && f.isFile())
+					{
+						try
+						{
+							try
+							{
+								LegoXMLUtils.validate((f));
+							}
+							catch (Exception e)
+							{
+								status.append("Warning - The file '" + f.getName() + "' is not schema valid.  Will attempt to import, but may fail.");
+								status.append("  The schema error was: " + e.getMessage());
+								status.append(System.getProperty("line.separator"));
+								status.append(System.getProperty("line.separator"));
+							}
+							LegoList ll = LegoXMLUtils.readLegoList(f);
+							List<Concept> failures = WBUtility.lookupAllConcepts(ll);
+							BDBDataStoreImpl.getInstance().importLegoList(ll);
+							for (Concept c : failures)
+							{
+								if (c.getSctid() != null)
+								{
+									missingConcepts.put(c.getSctid() + "", c);
+								}
+								else if (c.getUuid() != null && c.getUuid().length() > 0)
+								{
+									missingConcepts.put(c.getUuid(), c);
+								}
+								else
+								{
+									missingConcepts.put(c.getDesc(), c);
+								}
+							}
+	
+							status.append("Loaded " + f.getName());
+						}
+						catch (Exception ex)
+						{
+							logger.info("Error loading file " + f.getName(), ex);
+							status.append("Error loading file " + f.getName() + ": ");
+							status.append((ex.getLocalizedMessage() == null ? ex.toString() : ex.getLocalizedMessage()));
+						}
+					}
+					else
+					{
+						status.append("Skipped " + f.getName());
+					}
+	
+					status.append(System.getProperty("line.separator"));
+					status.append(System.getProperty("line.separator"));
+					count++;
+				}
+				
+				LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().rebuildDBStats();
+				
 				Platform.runLater(new Runnable()
 				{
 					@Override
 					public void run()
 					{
-						((Stage) rootPane.getScene().getWindow()).show();
-						importName.setText("Importing " + f.getName() + "...");
-						progress.setProgress((double) count / (double) files.size());
-						if (temp.length() > 0)
+						detailedMessage.appendText(status.toString());
+						importName.setText("Updating Editor");
+						progress.setProgress(99.0);
+						LegoGUIModel.getInstance().updateLegoLists();
+						progress.setProgress(100.0);
+						importName.setText("Import Complete");
+	
+						if (missingConcepts.size() > 0)
 						{
-							detailedMessage.appendText(temp);
+							detailedMessage.appendText("Some concepts specified in the imported Legos do not exist in the SCT DB or the pending concepts file:");
+							detailedMessage.appendText(System.getProperty("line.separator"));
+							for (Concept c : missingConcepts.values())
+							{
+								detailedMessage.appendText(c.getSctid() + "\t" + c.getDesc() + (c.getUuid() != null ? "\t" + c.getUuid() : ""));
+								detailedMessage.appendText(System.getProperty("line.separator"));
+							}
 						}
 					}
 				});
-
-				if (f.exists() && f.isFile())
-				{
-					try
-					{
-						try
-						{
-							LegoXMLUtils.validate((f));
-						}
-						catch (Exception e)
-						{
-							status.append("Warning - The file '" + f.getName() + "' is not schema valid.  Will attempt to import, but may fail.");
-							status.append("  The schema error was: " + e.getMessage());
-							status.append(System.getProperty("line.separator"));
-							status.append(System.getProperty("line.separator"));
-						}
-						LegoList ll = LegoXMLUtils.readLegoList(f);
-						List<Concept> failures = WBUtility.lookupAllConcepts(ll);
-						BDBDataStoreImpl.getInstance().importLegoList(ll);
-						for (Concept c : failures)
-						{
-							if (c.getSctid() != null)
-							{
-								missingConcepts.put(c.getSctid() + "", c);
-							}
-							else if (c.getUuid() != null && c.getUuid().length() > 0)
-							{
-								missingConcepts.put(c.getUuid(), c);
-							}
-							else
-							{
-								missingConcepts.put(c.getDesc(), c);
-							}
-						}
-
-						status.append("Loaded " + f.getName());
-					}
-					catch (Exception ex)
-					{
-						logger.info("Error loading file " + f.getName(), ex);
-						status.append("Error loading file " + f.getName() + ": ");
-						status.append((ex.getLocalizedMessage() == null ? ex.toString() : ex.getLocalizedMessage()));
-					}
-				}
-				else
-				{
-					status.append("Skipped " + f.getName());
-				}
-
-				status.append(System.getProperty("line.separator"));
-				status.append(System.getProperty("line.separator"));
-				count++;
 			}
-			
-			LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().rebuildDBStats();
-
-			Platform.runLater(new Runnable()
+			finally
 			{
-				@Override
-				public void run()
+				Platform.runLater(new Runnable()
 				{
-					detailedMessage.appendText(status.toString());
-					importName.setText("Updating Editor");
-					progress.setProgress(99.0);
-					LegoGUIModel.getInstance().updateLegoLists();
-					progress.setProgress(100.0);
-					importName.setText("Import Complete");
-
-					if (missingConcepts.size() > 0)
+					@Override
+					public void run()
 					{
-						detailedMessage.appendText("Some concepts specified in the imported Legos do not exist in the SCT DB or the pending concepts file:");
-						detailedMessage.appendText(System.getProperty("line.separator"));
-						for (Concept c : missingConcepts.values())
-						{
-							detailedMessage.appendText(c.getSctid() + "\t" + c.getDesc() + (c.getUuid() != null ? "\t" + c.getUuid() : ""));
-							detailedMessage.appendText(System.getProperty("line.separator"));
-						}
+						okButton.setDisable(false);
+						okButton.requestFocus();
 					}
-
-					okButton.setDisable(false);
-					okButton.requestFocus();
-				}
-			});
+				});
+			}
 		}
 	}
 }
