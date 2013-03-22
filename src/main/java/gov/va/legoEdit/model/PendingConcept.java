@@ -1,5 +1,6 @@
 package gov.va.legoEdit.model;
 
+import com.sleepycat.persist.model.Persistent;
 import gov.va.legoEdit.model.schemaModel.Concept;
 
 /**
@@ -8,6 +9,7 @@ import gov.va.legoEdit.model.schemaModel.Concept;
  * Copyright 2013
  * 
  */
+@Persistent
 public class PendingConcept extends Concept
 {
 
