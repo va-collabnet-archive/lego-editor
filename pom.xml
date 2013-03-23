@@ -3,16 +3,16 @@
 
 	<groupId>gov.va</groupId>
 	<artifactId>lego-editor</artifactId>
-	<version>0.58-SNAPSHOT</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>lego-editor</name>
 	<url>http://maven.apache.org</url>
 
 	<scm>
-		<connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/lego-editor/trunk/lego-editor</connection>
-		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/lego-editor/trunk/lego-editor</developerConnection>
-		<url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/trunk/lego-editor/?root=lego-editor&amp;system=exsy1002</url>
+		<connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/lego-editor/tags/lego-editor/lego-editor-1.0</connection>
+		<developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/lego-editor/tags/lego-editor/lego-editor-1.0</developerConnection>
+		<url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/tags/lego-editor/lego-editor-1.0?root=lego-editor&amp;system=exsy1002</url>
 	</scm>
 
 	<properties>
@@ -233,8 +233,7 @@
 								<exec dir="${basedir}" executable="svn" failifexecutionfails="false" output="${basedir}/src/main/resources/svnVersion.txt" searchpath="true">
 									<arg line="info" />
 								</exec>
-								<exec dir="${basedir}" executable="svnversion" failifexecutionfails="false" output="${basedir}/src/main/resources/svnVersion.txt"
-									searchpath="true" append="true">
+								<exec dir="${basedir}" executable="svnversion" failifexecutionfails="false" output="${basedir}/src/main/resources/svnVersion.txt" searchpath="true" append="true">
 									<arg line="-n" />
 								</exec>
 							</tasks>
