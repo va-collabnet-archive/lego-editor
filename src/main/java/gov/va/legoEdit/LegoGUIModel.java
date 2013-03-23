@@ -375,10 +375,11 @@ public class LegoGUIModel
 			@Override
 			public void run()
 			{
+				File f = null;
 				try
 				{
 					LegoList ll = BDBDataStoreImpl.getInstance().getLegoListByID(legoListUUID);
-					File f = File.createTempFile(ll.getGroupName() + "-", ".html");
+					f = File.createTempFile(ll.getGroupName() + "-", ".html");
 					FileOutputStream fos = new FileOutputStream(f);
 					
 					TransformerFactory tf = TransformerFactory.newInstance();
@@ -386,19 +387,31 @@ public class LegoGUIModel
 					
 					LegoXMLUtils.transform(ll, fos, transformer, true);
 					
-					BrowserLauncher bl = new BrowserLauncher();
-					bl.openURLinBrowser(f.toURI().toURL().toString());
-					
-					//This is the sun way... but it spews crap all over the console.
-					//Desktop.getDesktop().browse(f.toURI());
+					try
+					{
+						BrowserLauncher bl = new BrowserLauncher();
+						bl.openURLinBrowser(f.toURI().toURL().toString());
+					}
+					catch (Exception e)
+					{
+						logger.debug("Error launching web browser with Browser Launcher, trying java native", e);
+						//This is the sun way... but it spews crap all over the console - so I used the BrowserLauncher instead (where it works).
+						Desktop.getDesktop().browse(f.toURI());
+					}
 					
 					Thread.sleep(10000);
-					
-					f.delete();
 				}
 				catch (Exception e)
 				{
+					LegoGUI.getInstance().showErrorDialog("Error launching browser", "There was an error launching the web browser", null);
 					logger.error("Error launching web browser", e);
+				}
+				finally
+				{
+					if (f != null)
+					{
+						f.delete();
+					}
 				}
 			}
 		};
@@ -424,25 +437,22 @@ public class LegoGUIModel
 					
 					LegoXMLUtils.transform(l, fos, transformer, true);
 					
-					if (System.getProperty("os.name").toLowerCase().indexOf("mac") > 0 && Desktop.isDesktopSupported())
-					{
-						//This is the sun way... but it spews crap all over the console - so I used the BrowserLauncher instead.
-						//Except on Mac, where browser launcher didn't work.
-						Desktop.getDesktop().browse(f.toURI());
-					}
-					else
+					try
 					{
 						BrowserLauncher bl = new BrowserLauncher();
 						bl.openURLinBrowser(f.toURI().toURL().toString());
 					}
-					
+					catch (Exception e)
+					{
+						logger.debug("Error launching web browser with Browser Launcher, trying java native", e);
+						//This is the sun way... but it spews crap all over the console - so I used the BrowserLauncher instead (where it works).
+						Desktop.getDesktop().browse(f.toURI());
+					}
 					Thread.sleep(10000);
-					
-					
 				}
 				catch (Exception e)
 				{
-					LegoGUI.getInstance().showErrorDialog("Error launching browser", "There was an error launching the web browser", e.toString());
+					LegoGUI.getInstance().showErrorDialog("Error launching browser", "There was an error launching the web browser", null);
 					logger.error("Error launching web browser", e);
 				}
 				finally

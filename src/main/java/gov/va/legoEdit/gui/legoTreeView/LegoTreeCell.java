@@ -85,6 +85,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 	public static ObservableList<String> statusChoices_ = FXCollections.observableArrayList(new String[] { "Active", "Inactive" });
 	public static ObservableList<String> booleanChoices_ = FXCollections.observableArrayList(new String[] { "True", "False" });
 	public static ObservableList<String> inclusiveChoices_ = FXCollections.observableArrayList(new String[] { "\u2264", "<" });
+	public static boolean isMac = (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0);
 
 	private LegoTreeView treeView;
 
@@ -1828,15 +1829,21 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		mi.setGraphic(Images.PASTE.createImageView());
 		cm.getItems().add(mi);
 		
-		mi = new MenuItem("View in Web Browser");
-		mi.setOnAction(new EventHandler<ActionEvent>()
+		
+		//Not supported yet on the Mac platform by OSX
+		//https://csfe.aceworkspace.net/sf/go/artf227798
+		if (!isMac)
 		{
-			@Override
-			public void handle(ActionEvent arg0)
+			mi = new MenuItem("View in Web Browser");
+			mi.setOnAction(new EventHandler<ActionEvent>()
 			{
-				LegoGUIModel.getInstance().viewLegoListInBrowser(llbr.getLegoListUUID());
-			}
-		});
+				@Override
+				public void handle(ActionEvent arg0)
+				{
+					LegoGUIModel.getInstance().viewLegoListInBrowser(llbr.getLegoListUUID());
+				}
+			});
+		}
 		mi.setGraphic(Images.HTML_VIEW_16.createImageView());
 		cm.getItems().add(mi);
 
@@ -1906,7 +1913,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
 	{
 		MenuItem mi;
 		
-		if (!legoReference.isNew())
+		//Not supported yet on the Mac platform by OSX
+		//https://csfe.aceworkspace.net/sf/go/artf227798
+		if (!isMac && !legoReference.isNew())
 		{
 			mi = new MenuItem("View in Web Browser");
 			mi.setOnAction(new EventHandler<ActionEvent>()
