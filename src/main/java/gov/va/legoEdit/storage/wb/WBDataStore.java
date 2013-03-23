@@ -165,7 +165,7 @@ public class WBDataStore
 	 * Returns null if search not available (only works with local DBs) -
 	 * otherwise, returns the list of descriptions that matched.
 	 */
-	public SnomedSearchHandle prefixSearch(String query, int sizeLimit, TaskCompleteCallback callback, Integer taskId)
+	public static SnomedSearchHandle prefixSearch(String query, int sizeLimit, TaskCompleteCallback callback, Integer taskId)
 	{
 		return search(query, sizeLimit, true, callback, taskId);
 	}
@@ -173,12 +173,12 @@ public class WBDataStore
 	/**
 	 * Logs an error and returns no results if a local database is not available.
 	 */
-	public SnomedSearchHandle descriptionSearch(String query, TaskCompleteCallback callback)
+	public static SnomedSearchHandle descriptionSearch(String query, TaskCompleteCallback callback)
 	{
 		return search(query, Integer.MAX_VALUE, false, callback, null);
 	}
 
-	private SnomedSearchHandle search(String query, final int resultLimit, final boolean prefixSearch, final TaskCompleteCallback callback, final Integer taskId)
+	private static SnomedSearchHandle search(String query, final int resultLimit, final boolean prefixSearch, final TaskCompleteCallback callback, final Integer taskId)
 	{
 		final SnomedSearchHandle ssh = new SnomedSearchHandle();
 		query = query.trim();
@@ -211,7 +211,7 @@ public class WBDataStore
 							}
 						}
 
-						if (dataStore_ instanceof BdbTerminologyStore)
+						if (WBDataStore.getInstance().dataStore_ instanceof BdbTerminologyStore)
 						{
 							logger.debug("Lucene Search: '" + localQuery + "'");
 							// sort of copied from Termstore.searchLucene(...)
@@ -241,7 +241,7 @@ public class WBDataStore
 								searchResults = LuceneManager.search(q);
 							}
 
-							BdbTerminologyStore bts = (BdbTerminologyStore) dataStore_;
+							BdbTerminologyStore bts = (BdbTerminologyStore) WBDataStore.getInstance().dataStore_;
 							for (int i = 0; i < searchResults.topDocs.totalHits; i++)
 							{
 								if (ssh.isCancelled())
@@ -305,7 +305,7 @@ public class WBDataStore
 		return ssh;
 	}
 	
-	private Query buildQuery(String searchString, Analyzer analyzer) throws IOException
+	private static Query buildQuery(String searchString, Analyzer analyzer) throws IOException
 	{
 		StringReader textReader = new StringReader(searchString);
 		TokenStream tokenStream = analyzer.tokenStream("desc", textReader);

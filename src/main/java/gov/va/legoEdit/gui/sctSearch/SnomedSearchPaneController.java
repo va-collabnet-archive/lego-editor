@@ -309,7 +309,7 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 		searchRunning.set(true);
 		searchResults.getItems().clear();
 		//we get called back when the results are ready.
-		ssh = WBDataStore.getInstance().descriptionSearch(searchText.getText(), this);
+		ssh = WBDataStore.descriptionSearch(searchText.getText(), this);
 	}
 
 	public BorderPane getBorderPane()

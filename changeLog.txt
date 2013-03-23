@@ -1,4 +1,7 @@
 Lego Editor Change Log
+2013/03/22 - 1.1
+  *  Fix main GUI thread blocking while WB loading bug.
+  
 2013/03/22 - 1.0
   *  Filtered '(' and ')' out of the lucene queries so they FSNs don't cause searches to fail.
   *  Fixed a bug where the PNCS filter drop down wasn't being updated after a new lego was created

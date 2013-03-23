@@ -220,7 +220,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 				synchronized (runningSearches)
 				{
 					int id = searchCounter++;
-					SnomedSearchHandle ssh = WBDataStore.getInstance().prefixSearch(text, 5, this, id);
+					SnomedSearchHandle ssh = WBDataStore.prefixSearch(text, 5, this, id);
 					runningSearches.put(id, ssh);
 				}
 			}
