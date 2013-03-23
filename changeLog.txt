@@ -1,5 +1,5 @@
 Lego Editor Change Log
-2013/03/?? - 0.58
+2013/03/22 - 1.0
   *  Filtered '(' and ')' out of the lucene queries so they FSNs don't cause searches to fail.
   *  Fixed a bug where the PNCS filter drop down wasn't being updated after a new lego was created
   *  Fixed a bug where rapid changes to the lego list filters could cause strange behavior
