@@ -23,8 +23,11 @@ import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.UUID;
 import javafx.application.Application;
@@ -79,7 +82,19 @@ public class LegoGUI extends Application
 	public static void main(String[] args)
 	{
 		logger.info("Lego Editor Startup");
-
+		InputStream is = LegoGUI.class.getClassLoader().getResourceAsStream("version.txt");
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		try
+		{
+			logger.info("Version " + br.readLine());
+			br.close();
+			is.close();
+		}
+		catch (IOException e)
+		{
+			logger.error("oops", e);
+		}
+		
 		// Redirect the unconfigured java.util logging to our logger.
 		SLF4JBridgeHandler.removeHandlersForRootLogger();
 		SLF4JBridgeHandler.install();
