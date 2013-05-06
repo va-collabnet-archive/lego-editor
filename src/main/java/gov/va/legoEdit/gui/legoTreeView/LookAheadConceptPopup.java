@@ -1,7 +1,6 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchResult;
-import gov.va.legoEdit.gui.sctSearch.SnomedSearchResultComparator;
 import gov.va.legoEdit.gui.util.TaskCompleteCallback;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.storage.wb.SnomedSearchHandle;
@@ -9,10 +8,9 @@ import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -210,7 +208,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 			ssh.cancel();
 		}
 
-		String text = sourceTextField.getText().trim();
+		String text = sourceTextField.getText();
 		if (text.length() > 0 && !Utility.isLong(text) && !Utility.isUUID(text))
 		{
 			try
@@ -430,8 +428,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 			}
 			else
 			{
-				final SortedSet<SnomedSearchResult> sortedResults = new TreeSet<SnomedSearchResult>(new SnomedSearchResultComparator());
-				sortedResults.addAll(ssh.getResults());
+				final Collection<SnomedSearchResult> sortedResults = ssh.getResults();
 				Platform.runLater(new Runnable()
 				{
 					@Override

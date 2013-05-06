@@ -1,4 +1,7 @@
 Lego Editor Change Log
+2013/06/06 - 1.?
+  *  Improve the result sorting of type-ahead-search.
+
 2013/03/22 - 1.1
   *  Fix main GUI thread blocking while WB loading bug.
   

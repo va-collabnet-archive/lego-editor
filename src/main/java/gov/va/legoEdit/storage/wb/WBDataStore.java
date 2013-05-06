@@ -2,6 +2,7 @@ package gov.va.legoEdit.storage.wb;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.sctSearch.SnomedSearchResult;
+import gov.va.legoEdit.gui.sctSearch.SnomedSearchResultComparator;
 import gov.va.legoEdit.gui.util.TaskCompleteCallback;
 import gov.va.legoEdit.storage.DataStoreException;
 import gov.va.legoEdit.util.Utility;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.lucene.analysis.Analyzer;
@@ -19,11 +21,11 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.Version;
 import org.ihtsdo.bdb.BdbTerminologyStore;
 import org.ihtsdo.cc.lucene.LuceneManager;
@@ -162,8 +164,7 @@ public class WBDataStore
 	}
 
 	/**
-	 * Returns null if search not available (only works with local DBs) -
-	 * otherwise, returns the list of descriptions that matched.
+	 * Logs an error and returns no results if a local database is not available.  Otherwise, returns results sorted by score.
 	 */
 	public static SnomedSearchHandle prefixSearch(String query, int sizeLimit, TaskCompleteCallback callback, Integer taskId)
 	{
@@ -171,7 +172,7 @@ public class WBDataStore
 	}
 
 	/**
-	 * Logs an error and returns no results if a local database is not available.
+	 * Logs an error and returns no results if a local database is not available.  Otherwise, returns results sorted by score.
 	 */
 	public static SnomedSearchHandle descriptionSearch(String query, TaskCompleteCallback callback)
 	{
@@ -181,7 +182,6 @@ public class WBDataStore
 	private static SnomedSearchHandle search(String query, final int resultLimit, final boolean prefixSearch, final TaskCompleteCallback callback, final Integer taskId)
 	{
 		final SnomedSearchHandle ssh = new SnomedSearchHandle();
-		query = query.trim();
 
 		if (!prefixSearch)
 		{
@@ -196,10 +196,9 @@ public class WBDataStore
 			@Override
 			public void run()
 			{
+				HashMap<Integer, SnomedSearchResult> tempUserResults = new HashMap<>();
 				try
 				{
-					ArrayList<ComponentChroncileBI<?>> resultTemp = new ArrayList<>();
-
 					if (localQuery.length() > 0)
 					{
 						if (Utility.isUUID(localQuery) || Utility.isLong(localQuery))
@@ -207,7 +206,9 @@ public class WBDataStore
 							ConceptVersionBI temp = WBUtility.lookupSnomedIdentifierAsCV(localQuery);
 							if (temp != null)
 							{
-								resultTemp.add(temp);
+								SnomedSearchResult sr = new SnomedSearchResult(temp.getConceptNid(), 2.0f);
+								sr.addMatchingString(localQuery);
+								tempUserResults.put(temp.getConceptNid(), sr);
 							}
 						}
 
@@ -248,8 +249,52 @@ public class WBDataStore
 								{
 									break;
 								}
+								
 								Document doc = searchResults.searcher.doc(searchResults.topDocs.scoreDocs[i].doc);
-								resultTemp.add(bts.getComponent(Integer.parseInt(doc.get("dnid"))));
+								ComponentChroncileBI<?> cc = bts.getComponent(Integer.parseInt(doc.get("dnid")));
+
+								SnomedSearchResult sr = tempUserResults.get(cc.getConceptNid());
+								if (sr == null)
+								{
+									//normalize the scores between 0 and 1
+									sr = new SnomedSearchResult(cc.getConceptNid(), searchResults.topDocs.scoreDocs[i].score / searchResults.topDocs.getMaxScore() );
+									tempUserResults.put(cc.getConceptNid(), sr);
+								}
+								
+								String matchingString = null;
+								
+								if (cc instanceof DescriptionAnalogBI)
+								{
+									matchingString = ((DescriptionAnalogBI<?>) cc).getText();
+								}
+								else
+								{
+									logger.error("Unexpected type returned from search: " + cc.getClass().getName());
+									matchingString = "oops";
+								}
+								
+								sr.addMatchingString(matchingString);
+								
+								//add one to the scores when we are doing a prefix search, and it hits.
+								if (prefixSearch && sr.getBestScore() <= 1.0f)
+								{
+									float adjustValue = 0f;
+									//exact match, bump by 2
+									if (matchingString.toLowerCase().equals(localQuery.trim().toLowerCase()))
+									{
+										adjustValue = 2.0f;
+									}
+									else if (matchingString.toLowerCase().startsWith(localQuery.trim().toLowerCase()))
+									{
+										//add 1, plus a bit more boost based on the length of the matches (shorter matches get more boost)
+										adjustValue = 1.0f + (1.0f - ((float)(matchingString.length() - localQuery.trim().length()) / (float)matchingString.length()));
+									}
+									
+									if (adjustValue > 0f)
+									{
+										sr.adjustScore(sr.getBestScore() + adjustValue);
+									}
+								}
 							}
 						}
 						else
@@ -258,40 +303,18 @@ public class WBDataStore
 						}
 					}
 
-					HashMap<Integer, SnomedSearchResult> userResults = new HashMap<>();
-					for (ComponentChroncileBI<?> cc : resultTemp)
+					//Now, sort the results.
+					ArrayList<SnomedSearchResult> userResults = new ArrayList<>(tempUserResults.size());
+					userResults.addAll(tempUserResults.values());
+					Collections.sort(userResults, new SnomedSearchResultComparator());
+					if (userResults.size() > resultLimit)
 					{
-						if (ssh.isCancelled())
-						{
-							break;
-						}
-						if (userResults.size() > resultLimit)
-						{
-							break;
-						}
-
-						SnomedSearchResult sr = userResults.get(cc.getConceptNid());
-						if (sr == null)
-						{
-							sr = new SnomedSearchResult(cc.getConceptNid());
-							userResults.put(cc.getConceptNid(), sr);
-						}
-						if (cc instanceof DescriptionAnalogBI)
-						{
-							sr.addMatchingString(((DescriptionAnalogBI<?>) cc).getText());
-						}
-						else if (cc instanceof ConceptVersionBI)
-						{
-							// This is the type returned when the do a UUID or SCTID search
-							sr.addMatchingString(localQuery);
-						}
-						else
-						{
-							logger.error("Unexpected type returned from search: " + cc.getClass().getName());
-							sr.addMatchingString("oops");
-						}
+						ssh.setResults(userResults.subList(0,  resultLimit - 1));
 					}
-					ssh.setResults(userResults.values());
+					else
+					{
+						ssh.setResults(userResults);
+					}
 				}
 				catch (Exception e)
 				{
@@ -322,10 +345,10 @@ public class WBDataStore
 		analyzer.close();
 		
 		BooleanQuery bq = new BooleanQuery();
-		if (terms.size() > 0)
+		if (terms.size() > 0 && !searchString.endsWith(" "))
 		{
 			String last = terms.remove(terms.size() - 1);
-			bq.add(new WildcardQuery((new Term("desc", last + "*"))), Occur.MUST);
+			bq.add(new PrefixQuery((new Term("desc", last))), Occur.MUST);
 		}
 		for (String s : terms)
 		{

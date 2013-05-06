@@ -15,7 +15,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -330,7 +329,6 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 					if (!ssh.isCancelled())
 					{
 						searchResults.getItems().addAll(ssh.getResults());
-						FXCollections.sort(searchResults.getItems(), new SnomedSearchResultComparator());
 					}
 				}
 				catch (Exception e)

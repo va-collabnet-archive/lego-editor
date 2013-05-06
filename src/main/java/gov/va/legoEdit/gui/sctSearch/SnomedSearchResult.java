@@ -3,7 +3,6 @@ package gov.va.legoEdit.gui.sctSearch;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
@@ -13,16 +12,15 @@ public class SnomedSearchResult
 {
 	Logger logger = LoggerFactory.getLogger(SnomedSearchResult.class);
 
-	private static AtomicInteger sortHelper = new AtomicInteger();
 	private int conceptNid;
 	private HashSet<String> matchingStrings = new HashSet<>();
-	private int sortOrder;
+	private float bestScore;  //best score, rather than score, as multiple matches may go into a snomedSearchResult
 	private ConceptVersionBI concept;
 
-	public SnomedSearchResult(int conceptNid)
+	public SnomedSearchResult(int conceptNid, float score)
 	{
 		this.conceptNid = conceptNid;
-		this.sortOrder = sortHelper.getAndIncrement();
+		this.bestScore = score;
 		try
 		{
 			// I tried using the FXConcept API here, but the performance was dreadful
@@ -40,10 +38,15 @@ public class SnomedSearchResult
 	{
 		matchingStrings.add(matchingString);
 	}
-
-	protected int getSortOrder()
+	
+	public void adjustScore(float newScore)
 	{
-		return sortOrder;
+		bestScore = newScore;
+	}
+
+	public float getBestScore()
+	{
+		return bestScore;
 	}
 
 	public int getConceptNid()
