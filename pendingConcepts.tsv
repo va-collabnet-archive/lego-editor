@@ -1,8 +1,8 @@
 #Format:
 #
-#sctID	Description	parentSCTID	parentDescription
+#SCTID	Description	parentSCTID	parentDescription
 #
-# sctID and Description are required.  parentSCTID is optional.  parentDescription is only provided for convenience, and is ignored 
+# SCTID and Description are required.  parentSCTID is optional.  parentDescription is only provided for convenience, and is ignored 
 # by the legoEditor.  The LegoEditor will populate/update this field automatically when the pendingConcept file is read. 
 #
 
@@ -30,25 +30,13 @@
 55	DISPOSITION TYPE (attribute)	410662002	Concept model attribute (attribute)
 56	INCLUDES (attribute)	410662002	Concept model attribute (attribute)
 57	HAS LOCATION (attribute)	410662002	Concept model attribute (attribute)
+58	SITE (attribute)	410662002	Concept model attribute (attribute)
 
 # New allowable value concept from Style Guide
-901	PropertyType	362981000	Qualifier value (qualifier value)
 #
 # All of these are currently in use in the data I have to import
-1001	Periwound observable (observable entity)	364528001	Skin observable (observable entity)
 
-620	Undermined
-621	Attached
-622	Unattached
-623	Rolled
-629	Finding of temperature of wound
-632	Cooler than general body temperature
-633	Warmer than general body temperature
-634	Cooler than opposite body part
-635	Warmer than opposite body part
-637	Intrawound
-639	Slough
-640	Skin structure of ischial tuberosity
+1001	Periwound observable (observable entity)	364528001	Skin observable (observable entity)
 1002	Suicide attempt (process)	415178003	Process (observable entity)
 1003	Suicidal ideation (process)	285231000	Mental function (observable entity)
 1004	Odor (property)
@@ -78,3 +66,147 @@
 1035	Sock Aid (device)	49062001	Device (physical object)
 1036	Condition (condition)	138875005	SNOMED CT Concept (SNOMED RT+CTV3)
 1037	Congestive heart failure (condition)	1036	Condition (condition)
+1038	Dyspnea (observable entity)	364053008	Characteristic of respiratory tract function (observable entity)
+1039	Dyspnea at rest (observable entity)	1038	Dyspnea (observable entity)
+1040	Dyspnea on mild exertion (observable entity)	1038	Dyspnea (observable entity)
+1041	Dyspnea on moderate exertion (observable entity)	1038	Dyspnea (observable entity)
+1042	Dyspnea on severe exertion (observable entity)	1038	Dyspnea (observable entity)
+1043	Night Sweats (observable entity)	364538006	Sweating observable (observable entity)
+1045	Level of risk (qualifier value)	118598001	Property of measurement (qualifier value)
+1049	Has supporting evidence (link assertion)	416698001	Link assertion (link assertion)
+1050	Venous thromboembolism risk status (observable entity)	364066008	Cardiovascular observable (observable entity)
+1052	Is supporting evidence for (link assertion)	416698001	Link assertion (link assertion)
+1053	Number of episodes of congestive heart failure (observable entity)	364066008	Cardiovascular observable (observable entity)
+1054	Cardiac rhythm disturbance (observable entity)	364073003	Feature of heart rhythm (observable entity)
+1056	Elevated body temperature (observable entity)	386725007	Body temperature (observable entity)
+1057	Surgical history (observable entity)	363788007	Clinical history/examination observable (observable entity)
+1059	Surgery for abdominal/pelvic cancer (observable entity)	1057	Surgical history (observable entity)
+1061	Degree of contraindication (qualifier value)	118598001	Property of measurement (qualifier value)
+1063	PLACEHOLDER	138875005	SNOMED CT Concept (SNOMED RT+CTV3)
+1064	Venous thromboembolism prophylaxis status (observable entity)	364066008	Cardiovascular observable (observable entity)
+1070	Central venous access (observable entity)	364100002	Venous feature (observable entity)
+1072	Coagulability (qualifer value)	118598001	Property of measurement (qualifier value)
+1075	Logical structure of data collection form (record artifact)	424545009	Record composition (record artifact)
+1080	Supporting evidence for observation (observable entity)	363788007	Clinical history/examination observable (observable entity)
+1081	Refers to observation (link assertion)	416698001	Link assertion (link assertion)
+1083	Oral contraceptive use (observable entity)	424136002	Contraceptive use behavior (observable entity)
+1084	Benefit  Outweighs Risk of Pharmacologic VTE Prophylaxis (observable entity)	1050	Venous thromboembolism risk status (observable entity)
+1085	Risk Outweighs Benefit of Pharmacologic VTE Prophylaxis  (observable entity)	1064	Venous thromboembolism prophylaxis status (observable entity)
+1086	Snoring (observable entity)	363817001	Sleep related observable (observable entity)
+1087	Number of episodes of respiratory failure (observable entity)	364048003	Respiratory observable (observable entity)
+1090	Number of asthma exacerbations (observable entity)	364048003	Respiratory observable (observable entity)
+1093	Accentuated P2 (observable entity)	364079004	Characteristic of second heart sound (observable entity)
+1094	Paradoxical splitting of P2  (observable entity)	364079004	Characteristic of second heart sound (observable entity)
+1095	Pulmonary ejection click (Observable entity)	364077002	Characteristic of heart sound (observable entity)
+1096	Right ventricle heave (observable entity)	364081002	Feature of right ventricle (observable entity)
+1098	Chest pain observable (observable entity)	406189006	Pain observable (observable entity)
+1099	Non-anginal chest pain observable (observable entity)	1098	Chest pain observable (observable entity)
+1100	Non-anginal chest pain on exertion (observable entity)	1099	Non-anginal chest pain observable (observable entity)
+1102	Non-anginal chest pain at rest (observable entity)	1099	Non-anginal chest pain observable (observable entity)
+1104	Frequency of cough  (observable entity)	364054002	Characteristic of cough (observable entity)
+1105	Near-constant cough (observable entity)	1104	Frequency of cough  (observable entity)
+1107	Productive cough (observable entity)	364054002	Characteristic of cough (observable entity)
+1108	Blood-tinged sputum (observable entity)	364695003	Sputum observable (observable entity)
+1109	Clear sputum (observable entity)	277896005	Color of sputum (observable entity)
+1110	Mucopurulent sputum (observable entity)	364695003	Sputum observable (observable entity)
+1111	Purulent sputum (observable entity)	364695003	Sputum observable (observable entity)
+1112	Ambidextrous (observable entity)	57427004	Handedness (observable entity)
+1113	Right handedness (observable entity)	57427004	Handedness (observable entity)
+1114	Left handedness (observable entity)	57427004	Handedness (observable entity)
+1116	Pericardial friction rub (observable entity)	364077002	Characteristic of heart sound (observable entity)
+1117	Abnormal heart sounds (observable entity)	271660002	Heart sounds (observable entity)
+1118	Opening snap (observable entity)	364077002	Characteristic of heart sound (observable entity)
+1119	Heart click (observable entity)	364077002	Characteristic of heart sound (observable entity)
+1122	Retirement for medical reasons (observable entity)	364703007	Employment detail (observable entity)
+1131	self-employment (observable entity)	224361009	Type of job (observable entity)
+1134	Full-time employment (observable entity)	224361009	Type of job (observable entity)
+1135	Part-time employment (observable entity)	224361009	Type of job (observable entity)
+1136	Seasonal employment (observable entity)	224361009	Type of job (observable entity)
+1138	Loss of job (observable entity)	160922003	Job details (observable entity)
+1148	Entitlement to benefit status by age (observable entity)	224193009	Entitlement to benefit status (observable entity)
+1149	Entitlement to benefit status by duration of work (observable entity)	224193009	Entitlement to benefit status (observable entity)
+1150	Numeric grade on a scale 0 to 2 (qualifier value)	272407005	Numeric grade (qualifier value)
+1151	Grade 0 on a scale of 0 to 2 (qualifier value)	1150	Numeric grade on a scale 0 to 2 (qualifier value)
+1152	Grade 1 on a scale of 0 to 2 (qualifier value)	1150	Numeric grade on a scale 0 to 2 (qualifier value)
+1153	Grade 2 on a scale of 0 to 2 (qualifier value)	1150	Numeric grade on a scale 0 to 2 (qualifier value)
+1159	Postmilitary employment status (observable entity)	224362002	Employment status (observable entity)
+1160	Retired from postmilitary employment (observable entity)	1159	Postmilitary employment status (observable entity)
+1165	Employed after military retirement (observable entity)	1159	Postmilitary employment status (observable entity)
+1166	Contraindication for procedure (observable entity)	363789004	General characteristic of patient (observable entity)
+1168	Metabolic Equivalent (qualifier value)	282412003	Unit of cardiothoracic assessment (qualifier value)
+1170	Using cane (observable entity)	142661009	Walking aid use
+1172	Using brace (observable entity)	165251008	Walking aid use (observable entity)
+1173	Using chrunches (observable entity)	165251008	Walking aid use (observable entity)
+1174	Using corrective shoes (observable entity)	165251008	Walking aid use (observable entity)
+1175	Using orthotic insert (observable entity)	165251008	Walking aid use (observable entity)
+1176	Using walker (observable entity)	165251008	Walking aid use (observable entity)
+1177	Incapacitating episodes of spine disease (observable entity)	364415005	Spinal region observable (observable entity)
+1191	Urgent desire to urinate (observable entity)	364196001	Micturition feature (observable entity)
+1192	Nocturia (observable entity)	364197005	Pattern of urination (observable entity)
+1193	Fecal leakage (observable entity)	364171004	Defecation observable (observable entity)
+1201	Numbness (observable entity)	363832008	Sensation observable (observable entity)
+1204	Paresthesia (observable entity)	363832008	Sensation observable (observable entity)
+1210	PNCS_VALUE_FIELD	362981000	Qualifier value (qualifier value)
+1214	Stiffness (observable entity)	364561008	Musculoskeletal observable (observable entity)
+1215	Spasm (observable entity)	364561008	Musculoskeletal observable (observable entity)
+1216	Weakness (observable entity)	364561008	Musculoskeletal observable (observable entity)
+1217	Use of sanitary pad required (observable entity)	129009001	Bladder control, function (observable entity)
+1218	Cervical spine observable (observable entity)	364415005	Spinal region observable (observable entity)
+1219	Protective muscle spasm (observable entity)	364561008	Musculoskeletal observable (observable entity)
+1220	Pain on motion (observable entity)	406189006	Pain observable (observable entity)
+1221	Speech Recognition Score on Maryland CNC Word List (observable entity)	251361006	Speech discrimination score (observable entity)
+1221	Tenderness (observable entity)	406189006	Pain observable (observable entity)
+1222	Thoracolumbar spine observable (observable entity)	364415005	Spinal region observable (observable entity)
+1223	Lordosis reversed (observable entity)	249707001	Form of spine (observable entity)
+1224	Cause of retirement (observable entity)	364703007	Employment detail (observable entity)
+1224	Head position finding (observable entity)	271605009	Position of body and posture (observable entity)
+1225	Eligible for retirement by age (observable entity)	1224	Cause of retirement (observable entity)
+1225	Symmetry of spine (observable entity)	364415005	Spinal region observable (observable entity)
+1226	Eligible for retirement by duration of work (observable entity)	1224	Cause of retirement (observable entity)
+1227	Posture fix in flexed position (observable entity)	111952004	Spinal posture (observable entity)
+1228	Retirement due to psychiatric problem (observable entity)	1224	Cause of retirement (observable entity)
+1229	Stoop trunk position (observable entity)	271605009	Position of body and posture (observable entity)
+1230	Pelvic tilt (observable entity)	271605009	Position of body and posture (observable entity)
+1231	Assignment to different duties (observable entity)	224463008	Details relating to changes in job (observable entity)
+1231	Pain on flexion (observable entity)	9964006	Flexion, function (observable entity)
+1232	Increased tardiness (observable entity)	224399002	Attendance at work (observable entity)
+1232	Pain on extenstion (observable entity)	24154002	Musculoskeletal extension, function (observable entity)
+1233	Increased absenteeism (observable entity)	224399002	Attendance at work (observable entity)
+1234	Hand dominance (observable entity)	284364006	Hand functions (observable entity)
+1234	Loss of control of spincture (observable entity)	129008009	Bowel control, function (observable entity)
+1235	Difficulty walking (observable entity)	364578004	Observable feature of walking (observable entity)
+1236	Difficulty chewing (observable entity)	1202003	Mastication (observable entity)
+1237	Difficulty breathing (observable entity)	248546008	Ease of respiration (observable entity)
+1239	Impaired ability to swallow (observable entity)	288935001	Ability to swallow (observable entity)
+1241	Numeric grade on a scale 0 to 4 (qualifier value)	272407005	Numeric grade (qualifier value)
+1246	Grade 0 on a scale of 0 to 4 (qualifier value)	1241	Numeric grade on a scale 0 to 4 (qualifier value)
+1247	Grade 1 on a scale of 0 to 4 (qualifier value)	1241	Numeric grade on a scale 0 to 4 (qualifier value)
+1248	Grade 2 on a scale of 0 to 4 (qualifier value)	1241	Numeric grade on a scale 0 to 4 (qualifier value)
+1249	Grade 3 on a scale of 0 to 4 (qualifier value)	1241	Numeric grade on a scale 0 to 4 (qualifier value)
+1250	Grade 4 on a scale of 0 to 4 (qualifier value)	1241	Numeric grade on a scale 0 to 4 (qualifier value)
+1251	Impairment (observable entity)	278844005	General clinical state (observable entity)
+1252	Functional impairment (observable entity)	1251	Impairment (observable entity)
+1254	Cervical spine - range of motion after repititive motion (observable entity)	404980009	Spine - range of movement (observable entity)
+1256	Range of cervical spine left lateral flexion after repititive motion (observable entity)	1254	Cervical spine - range of motion after repititive motion (observable entity)
+1258	Range of cervical spine right lateral flexion after repititive motion (observable entity)	1254	Cervical spine - range of motion after repititive motion (observable entity)
+1260	Range of extension of cervical spine after repititive motion (observable entity)	1254	Cervical spine - range of motion after repititive motion (observable entity)
+1261	Range of flexion of cervical spine after repititive motion (observable entity)	1254	Cervical spine - range of motion after repititive motion (observable entity)
+1262	Limititions on range of motion after repititive motion (observable entity)	404980009	Spine - range of movement (observable entity)
+1265	Range of cervical spine left lateral rotation after repititive motion (observable entity)	1254	Cervical spine - range of motion after repititive motion (observable entity)
+1267	Range of cervical spine right lateral rotation after repititive motion (observable entity)	1254	Cervical spine - range of motion after repititive motion (observable entity)
+1269	Symptomatic (observable entity)	278844005	General clinical state (observable entity)
+1275	Dizziness (observable entity)	278844005	General clinical state (observable entity)
+1276	Fatigue (observable entity)	359755007	Energy / stamina (observable entity)
+1285	Number of incapacitating episodes of spine disease (observable entity)	364415005	Spinal region observable (observable entity)
+620	Undermined
+621	Attached
+622	Unattached
+623	Rolled
+629	Finding of temperature of wound
+632	Cooler than general body temperature
+633	Warmer than general body temperature
+634	Cooler than opposite body part
+635	Warmer than opposite body part
+637	Intrawound
+639	Slough
+640	Skin structure of ischial tuberosity
