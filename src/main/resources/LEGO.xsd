@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
 
-<!-- Version 2013/03/06 -->
+<!-- Version 2013/08/20 -->
 <!-- 
 	Changelog:
+	8/20/13 - Added PNCS Value Field to the allowed measurementConstants
 	3/06/13	- Removed unnecessary enum values.
 	1/17/13	- Changing the wording of the measurementConstants to be more user friendly.
 	1/15	- Changed point from a float to a double and allowed to to be a double or a long.  Also changed the way it is structured, 
@@ -184,6 +185,7 @@
 			<xs:enumeration value="NOW" />
 			<xs:enumeration value="start active service" />
 			<xs:enumeration value="end active service" />
+			<xs:enumeration value="PNCS Value Field" />
 		</xs:restriction>
 	</xs:simpleType>
 
