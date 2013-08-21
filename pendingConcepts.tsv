@@ -156,9 +156,9 @@
 1220	Pain on motion (observable entity)	406189006	Pain observable (observable entity)
 1222	Thoracolumbar spine observable (observable entity)	364415005	Spinal region observable (observable entity)
 1223	Lordosis reversed (observable entity)	249707001	Form of spine (observable entity)
-1226	Eligible for retirement by duration of work (observable entity)	1224	Cause of retirement (observable entity)
+1226	Eligible for retirement by duration of work (observable entity)	1288	Cause of retirement (observable entity)
 1227	Posture fix in flexed position (observable entity)	111952004	Spinal posture (observable entity)
-1228	Retirement due to psychiatric problem (observable entity)	1224	Cause of retirement (observable entity)
+1228	Retirement due to psychiatric problem (observable entity)	1288	Cause of retirement (observable entity)
 1229	Stoop trunk position (observable entity)	271605009	Position of body and posture (observable entity)
 1230	Pelvic tilt (observable entity)	271605009	Position of body and posture (observable entity)
 1233	Increased absenteeism (observable entity)	224399002	Attendance at work (observable entity)
@@ -198,3 +198,17 @@
 637	Intrawound
 639	Slough
 640	Skin structure of ischial tuberosity
+
+#Some remapped concepts that were accidently duplicated
+1286	Speech Recognition Score on Maryland CNC Word List (observable entity)	251361006	Speech discrimination score (observable entity)
+1287	Tenderness (observable entity)	406189006	Pain observable (observable entity)
+1288	Cause of retirement (observable entity)	364703007	Employment detail (observable entity)
+1289	Head position finding (observable entity)	271605009	Position of body and posture (observable entity)
+1290	Eligible for retirement by age (observable entity)	1288	Cause of retirement (observable entity)
+1291	Symmetry of spine (observable entity)	364415005	Spinal region observable (observable entity)
+1292	Assignment to different duties (observable entity)	224463008	Details relating to changes in job (observable entity)
+1293	Pain on flexion (observable entity)	9964006	Flexion, function (observable entity)
+1294	Increased tardiness (observable entity)	224399002	Attendance at work (observable entity)
+1295	Pain on extenstion (observable entity)	24154002	Musculoskeletal extension, function (observable entity)
+1296	Hand dominance (observable entity)	284364006	Hand functions (observable entity)
+1297	Loss of control of spincture (observable entity)	129008009	Bowel control, function (observable entity)
