@@ -32,6 +32,7 @@
 			<includes>
 				<include>pendingConcepts.tsv</include>
 				<include>changeLog.txt</include>
+				<include>importSample.tsv</include>
 			</includes>
 		</fileSet>
 	</fileSets>
