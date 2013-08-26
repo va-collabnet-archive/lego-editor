@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javafx.application.Application;
@@ -36,6 +37,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TreeItem;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -479,6 +481,40 @@ public class LegoGUI extends Application
 		{
 			logger.error("Unexpected error displaying about dialog", e);
 			showErrorDialog("Unexpected Error", "Unexpected Error displaying about dialog", e.toString());
+		}
+	}
+	
+	public void showCreateLegosFromFileDialog()
+	{
+		try
+		{
+			FileChooser fc = new FileChooser();
+			fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Lego Creation Script (*.csv, *.tsv)", "*.csv", "*.tsv"));
+			fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("All Files (*.*)", "*"));
+			File legoCreationScriptFile = fc.showOpenDialog(mainStage_.getOwner());
+			if (legoCreationScriptFile != null)
+			{
+				System.out.println("Go" + legoCreationScriptFile);
+				
+				
+				Stage stage = new Stage();
+				stage.initModality(Modality.WINDOW_MODAL);
+				stage.initOwner(mainStage_);
+				stage.initStyle(StageStyle.UTILITY);
+				FXMLLoader loader = new FXMLLoader();
+				loader.setLocation(ErrorDialogController.class.getResource("ImportDialog.fxml"));
+				Scene scene = new Scene((Parent) loader.load(ImportDialogController.class.getResourceAsStream("ImportDialog.fxml")));
+				ImportDialogController idc = loader.getController();
+				scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
+				stage.setScene(scene);
+				idc.importFiles(Arrays.asList(new File[] {legoCreationScriptFile}));
+				
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Unexpected error displaying lego creation dialog", e);
+			showErrorDialog("Unexpected Error", "Unexpected Error displaying lego creation dialog", e.toString());
 		}
 	}
 

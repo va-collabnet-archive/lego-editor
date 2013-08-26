@@ -1,0 +1,35 @@
+# Format
+#
+# "LegoList Name"	"LegoList Description"	"PNCS Name"	"PNCS Value"	"PNCS ID"	"<Qualifier Concept Code>"	"<Value Concept Code or Text>"
+#
+# Items should be tab or comma seperated (but consistent with the file name - csv for comma, tsv for tab)
+# 'Qualifier Concept Code' and 'Value Concept Code or Text' are optional
+# If 'Value Concept Code' is a numeric value, it will be treated as a concept, if not, treated as plain text.
+
+Cervical spine - History	Legos about Cervical Spine History	Patient/Veteran Name	Name	26622
+Cervical spine - History	Legos about Cervical Spine History	History of cervical spine (neck) condition	Yes	28799
+Cervical spine - History	Legos about Cervical Spine History	History of cervical spine (neck) condition	No	28799
+Cervical spine - History	Legos about Cervical Spine History	Flare-ups impact the function of the cervical spine	Yes	28941
+Cervical spine - History	Legos about Cervical Spine History	Flare-ups impact the function of the cervical spine	No	28941
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	0	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	5	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	10	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	15	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	20	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	25	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	30	28897		fred
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	35	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	40	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Forward flexion ends at degrees	45 or greater	28897
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	No	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	0	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	5	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	10	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	15	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	20	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	25	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	30	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	35	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	40	28898
+Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	45 or greater	28898
+Something Else	TEST Name	Test Group Description	Test Value	87564	2667000	foo bar!

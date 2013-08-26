@@ -156,6 +156,8 @@ public class LegoGUIController implements Initializable
 	private Menu menuFile; // Value injected by FXMLLoader
 	@FXML// fx:id="menuFileCreateLego"
 	private MenuItem menuFileCreateLego; // Value injected by FXMLLoader
+	@FXML// fx:id="menuFileCreateLego"
+	private MenuItem menuFileCreateLegosFromFile; // Value injected by FXMLLoader
 	@FXML// fx:id="menuFileExit"
 	private MenuItem menuFileExit; // Value injected by FXMLLoader
 	@FXML// fx:id="menuFileExportLegoLists"
@@ -234,6 +236,7 @@ public class LegoGUIController implements Initializable
 		assert menuEditPreferences != null : "fx:id=\"menuEditPreferences\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFile != null : "fx:id=\"menuFile\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFileCreateLego != null : "fx:id=\"menuFileCreateLego\" was not injected: check your FXML file 'LegoGUI.fxml'.";
+		assert menuFileCreateLegosFromFile != null : "fx:id=\"menuFileCreateLegosFromFile\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFileExit != null : "fx:id=\"menuFileExit\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFileExportLegoLists != null : "fx:id=\"menuFileExportLegoLists\" was not injected: check your FXML file 'LegoGUI.fxml'.";
 		assert menuFileImport != null : "fx:id=\"menuFileImport\" was not injected: check your FXML file 'LegoGUI.fxml'.";
@@ -1039,6 +1042,16 @@ public class LegoGUIController implements Initializable
 			public void handle(ActionEvent t)
 			{
 				LegoGUI.getInstance().showLegoListPropertiesDialog(null, null);
+			}
+		});
+		
+		menuFileCreateLegosFromFile.setGraphic(Images.LEGO_ADD.createImageView());
+		menuFileCreateLegosFromFile.setOnAction(new EventHandler<ActionEvent>()
+		{
+			@Override
+			public void handle(ActionEvent t)
+			{
+				LegoGUI.getInstance().showCreateLegosFromFileDialog();
 			}
 		});
 
