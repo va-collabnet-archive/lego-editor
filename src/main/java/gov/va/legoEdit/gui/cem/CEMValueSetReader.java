@@ -14,10 +14,11 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
 /**
- * CEMValueSetReader
- * @author Dan Armbrust 
- * Copyright 2013
  * 
+ * CEMValueSetReader
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class CEMValueSetReader
 {

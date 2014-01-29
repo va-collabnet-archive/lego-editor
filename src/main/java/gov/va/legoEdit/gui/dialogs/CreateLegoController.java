@@ -43,6 +43,13 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * CreateLegoController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class CreateLegoController implements Initializable
 {
 	Logger logger = LoggerFactory.getLogger(CreateLegoController.class);

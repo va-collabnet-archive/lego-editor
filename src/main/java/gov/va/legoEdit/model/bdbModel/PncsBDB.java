@@ -8,6 +8,14 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.Relationship;
 import com.sleepycat.persist.model.SecondaryKey;
 
+/**
+ * 
+ * PncsBDB
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
+
 @Entity
 public class PncsBDB
 {

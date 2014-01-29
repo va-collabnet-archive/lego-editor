@@ -24,7 +24,7 @@ import com.sleepycat.persist.model.SecondaryKey;
 /**
  * This class handles the storage of the LEGO object into the BerkeleyDB.
  *
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  */
 @Entity
 public class LegoBDB

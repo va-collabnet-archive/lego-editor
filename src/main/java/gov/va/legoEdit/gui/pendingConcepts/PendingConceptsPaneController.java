@@ -46,6 +46,13 @@ import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * PendingConceptsPaneController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class PendingConceptsPaneController implements Initializable
 {
 	Logger logger = LoggerFactory.getLogger(PendingConceptsPaneController.class);

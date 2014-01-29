@@ -12,7 +12,7 @@ import gov.va.legoEdit.model.schemaModel.Value;
  * When things get too long, it cuts off. See the SchemaToString for alternate toString methods.
  * SchemaSummary
  * 
- * @author Dan Armbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  */
 public class SchemaSummary

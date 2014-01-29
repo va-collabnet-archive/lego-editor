@@ -3,6 +3,13 @@ package gov.va.legoEdit.gui.legoFilterPane;
 import gov.va.legoEdit.model.schemaModel.Pncs;
 import javafx.beans.value.ObservableObjectValue;
 
+/**
+ * 
+ * PncsItem
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class PncsItem
 {
 

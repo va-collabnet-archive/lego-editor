@@ -15,7 +15,7 @@ import javafx.scene.layout.StackPane;
 
 /**
  * LegoTreeNodeGraphic The node used to render all content in the tree.  Also has a progress indicator, an error indicator, and error tool tip.
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  * 
  */

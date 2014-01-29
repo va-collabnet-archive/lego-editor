@@ -8,8 +8,11 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
+ * 
+ * TimeConvert
  *
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class TimeConvert
 {

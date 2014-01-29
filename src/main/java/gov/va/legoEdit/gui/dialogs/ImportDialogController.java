@@ -43,6 +43,13 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * ImportDialogController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class ImportDialogController implements Initializable
 {
 	Logger logger = LoggerFactory.getLogger(ImportDialogController.class);

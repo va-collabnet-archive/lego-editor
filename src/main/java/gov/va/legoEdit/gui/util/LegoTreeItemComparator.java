@@ -5,7 +5,11 @@ import java.util.Comparator;
 import javafx.scene.control.TreeItem;
 
 /**
- * @author darmbrust
+ * 
+ * LegoTreeItemComparator
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class LegoTreeItemComparator implements Comparator<TreeItem<String>>
 {

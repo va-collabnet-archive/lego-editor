@@ -55,6 +55,13 @@ import org.ihtsdo.tk.binding.Taxonomies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * SnomedConceptViewController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class SnomedConceptViewController implements Initializable
 {
 	Logger logger = LoggerFactory.getLogger(SnomedConceptViewController.class);

@@ -95,6 +95,13 @@ import org.ihtsdo.tk.binding.Taxonomies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * LegoGUIController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoGUIController implements Initializable
 {
 	Logger logger = LoggerFactory.getLogger(LegoGUIController.class);

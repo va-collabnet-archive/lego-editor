@@ -47,7 +47,10 @@ import com.sun.javafx.scene.control.skin.VirtualFlow;
 
 /**
  * 
- * @author darmbrust
+ * LegoGUIModel
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class LegoGUIModel
 {

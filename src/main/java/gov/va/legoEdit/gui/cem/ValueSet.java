@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ValueSet
- * @author Dan Armbrust 
- * Copyright 2013
  * 
+ * ValueSet
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class ValueSet
 {

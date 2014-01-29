@@ -26,6 +26,13 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+/**
+ * 
+ * LegoListPropertiesController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoListPropertiesController implements Initializable
 {
     @FXML // fx:id="rootPane"

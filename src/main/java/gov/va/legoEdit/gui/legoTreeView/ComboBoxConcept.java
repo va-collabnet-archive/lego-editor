@@ -2,6 +2,13 @@ package gov.va.legoEdit.gui.legoTreeView;
 
 import gov.va.legoEdit.util.Utility;
 
+/**
+ * 
+ * ComboBoxConcept
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class ComboBoxConcept
 {
 	private String description_, id_;

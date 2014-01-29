@@ -8,6 +8,13 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 
+/**
+ * 
+ * CopyableLabel
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class CopyableLabel extends Label
 {
 	public CopyableLabel()

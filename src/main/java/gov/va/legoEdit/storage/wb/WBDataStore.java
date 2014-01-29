@@ -40,6 +40,13 @@ import org.ihtsdo.tk.rest.client.TtkRestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * WBDataStore
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class WBDataStore
 {
 

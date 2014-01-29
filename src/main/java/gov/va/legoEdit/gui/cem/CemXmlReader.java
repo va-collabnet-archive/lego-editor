@@ -22,11 +22,11 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 /**
- * CEMXmlReader
  * 
- * @author Dan Armbrust
- *         Copyright 2013
- * 
+ * CemXmlReader
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class CemXmlReader
 {

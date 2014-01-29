@@ -7,8 +7,11 @@ import gov.va.legoEdit.storage.CloseableIterator;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
+ * 
+ * LegoListBDBConvertingIterator
  *
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class LegoListBDBConvertingIterator implements CloseableIterator<LegoList>
 {

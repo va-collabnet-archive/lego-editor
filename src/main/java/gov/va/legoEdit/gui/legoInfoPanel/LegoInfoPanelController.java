@@ -8,7 +8,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 
-
+/**
+ * 
+ * LegoInfoPanelController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoInfoPanelController implements Initializable {
 
     @FXML //  fx:id="legoAuthor"

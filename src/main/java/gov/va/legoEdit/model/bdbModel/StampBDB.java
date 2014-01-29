@@ -6,6 +6,14 @@ import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.util.TimeConvert;
 import java.util.UUID;
 
+/**
+ * 
+ * StampBDB
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
+
 @Entity
 public class StampBDB
 {

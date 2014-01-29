@@ -9,7 +9,7 @@ import javafx.util.Callback;
 
 /**
  * LegoTreeView An enhanced tree view for Lego editing 
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  * 
  */

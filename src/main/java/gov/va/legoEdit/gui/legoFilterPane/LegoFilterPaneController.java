@@ -53,6 +53,13 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * LegoFilterPaneController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoFilterPaneController implements Initializable, ConceptLookupCallback, TaskCompleteCallback
 {
 	public static String ANY = "-ANY-";

@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * LegoCreationFromTSV
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  * 
  */

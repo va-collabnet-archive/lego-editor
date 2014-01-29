@@ -2,6 +2,13 @@ package gov.va.legoEdit.gui.sctSearch;
 
 import java.util.Comparator;
 
+/**
+ * 
+ * SnomedSearchResultComparator
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class SnomedSearchResultComparator implements Comparator<SnomedSearchResult>
 {
 	@Override

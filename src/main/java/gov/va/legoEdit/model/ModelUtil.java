@@ -2,6 +2,13 @@ package gov.va.legoEdit.model;
 
 import gov.va.legoEdit.model.schemaModel.Lego;
 
+/**
+ * 
+ * ModelUtil
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class ModelUtil
 {
     public static String makeUniqueLegoID(Lego lego)

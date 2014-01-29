@@ -5,6 +5,13 @@ import gov.va.legoEdit.model.schemaModel.Lego;
 import java.util.Collection;
 import java.util.HashMap;
 
+/**
+ * 
+ * UnsavedLegos
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class UnsavedLegos
 {
     private HashMap<String, Lego> legoIdToLego = new HashMap<String, Lego>();

@@ -43,6 +43,13 @@ import org.ihtsdo.tk.binding.TermAux;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * WBUtility
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class WBUtility
 {
 	private static UUID snomedIdType = TermAux.SNOMED_IDENTIFIER.getUuids()[0]; //SNOMED integer id
@@ -158,7 +165,7 @@ public class WBUtility
 			result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid);
 			if (result.getUUIDs().size() == 0)
 			{
-				// This is garbage that the WB API invented. Nothing like an undocumented getter which, rather than returning null when the thing
+				// This is sillyness of the WB API. Nothing like an undocumented getter which, rather than returning null when the thing
 				// you are asking for doesn't exist - it goes off and returns essentially a new, empty, useless node. Sigh.
 				throw new IllegalArgumentException();
 			}
@@ -173,7 +180,7 @@ public class WBUtility
 				//result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
 				if (result.getUUIDs().size() == 0)
 				{
-					// This is garbage that the WB API invented. Nothing like an undocumented getter which, rather than returning null when the thing
+					// This is sillyness of the WB API. Nothing like an undocumented getter which, rather than returning null when the thing
 					// you are asking for doesn't exist - it goes off and returns essentially a new, empty, useless node. Sigh.
 					result = null;
 				}

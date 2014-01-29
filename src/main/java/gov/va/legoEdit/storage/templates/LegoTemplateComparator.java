@@ -3,6 +3,13 @@ package gov.va.legoEdit.storage.templates;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
 import java.util.Comparator;
 
+/**
+ * 
+ * LegoTemplateComparator
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoTemplateComparator implements Comparator<LegoTemplate>
 {
     private AlphanumComparator ac = new AlphanumComparator(true);

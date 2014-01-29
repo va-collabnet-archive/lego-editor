@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author jefron
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  */
 public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 {

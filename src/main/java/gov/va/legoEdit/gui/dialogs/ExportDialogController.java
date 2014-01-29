@@ -43,6 +43,13 @@ import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * ExportDialogController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class ExportDialogController implements Initializable
 {
 	Logger logger = LoggerFactory.getLogger(ExportDialogController.class);

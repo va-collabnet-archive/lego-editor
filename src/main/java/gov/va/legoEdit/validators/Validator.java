@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Validators run in a background (non GUI) thread.
  * 
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a>
  * Copyright 2013
  */
 public class Validator

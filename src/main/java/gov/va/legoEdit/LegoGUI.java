@@ -53,6 +53,13 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import com.sun.javafx.tk.Toolkit;
 
+/**
+ * 
+ * LegoGUI
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoGUI extends Application
 {
 	private static Logger logger = LoggerFactory.getLogger(LegoGUI.class);

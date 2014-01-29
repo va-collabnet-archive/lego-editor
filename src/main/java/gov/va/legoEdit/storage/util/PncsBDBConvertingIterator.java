@@ -9,8 +9,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.sleepycat.persist.EntityCursor;
 
 /**
+ * 
+ * PncsBDBConvertingIterator
  *
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class PncsBDBConvertingIterator implements CloseableIterator<Pncs>
 {

@@ -8,7 +8,7 @@ import java.util.Iterator;
  * 
  * A runtime IteratorClosedException is thrown if you try to read a closed iterator.
  * 
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a>
  */
 public interface CloseableIterator<E> extends Iterator<E>
 {

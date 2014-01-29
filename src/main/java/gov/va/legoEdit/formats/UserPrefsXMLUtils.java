@@ -11,10 +11,12 @@ import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
+ * 
+ * UserPrefsXMLUtils
  *
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class UserPrefsXMLUtils
 {

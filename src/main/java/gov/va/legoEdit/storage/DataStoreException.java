@@ -1,8 +1,11 @@
 package gov.va.legoEdit.storage;
 
 /**
+ * 
+ * DataStoreException
  *
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class DataStoreException extends RuntimeException
 {

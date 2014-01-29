@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * 
  * The summary methods are a much more compact summary, used in top of the lego tree view.
  * SchemaToString
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  *
  */

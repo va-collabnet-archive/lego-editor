@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * ExpandedNode - Just a silly class to store the hierarchy of an expanded tree for later replication.  
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  * 
  */

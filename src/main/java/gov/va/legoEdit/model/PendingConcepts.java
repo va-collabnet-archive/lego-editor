@@ -19,6 +19,13 @@ import org.ihtsdo.tk.api.concept.ConceptVersionBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * PendingConcepts
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class PendingConcepts implements Observable
 {
 	public static File pendingConceptsFile = new File("pendingConcepts.tsv");

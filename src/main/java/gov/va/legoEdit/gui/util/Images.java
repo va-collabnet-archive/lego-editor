@@ -6,7 +6,7 @@ import javafx.scene.image.ImageView;
 /**
  * 
  * @author kec
- * @author Dan Armbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  */
 public enum Images
 {

@@ -33,6 +33,13 @@ import javafx.stage.StageStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * CemImportViewController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class CemImportViewController implements Initializable
 {
 	private static Logger logger = LoggerFactory.getLogger(CemImportViewController.class);

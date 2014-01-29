@@ -16,8 +16,11 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityCursor;
 
 /**
+ * 
+ * BDBIterator
  *
- * @author darmbrust
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class  BDBIterator<T> implements CloseableIterator<T>
 {

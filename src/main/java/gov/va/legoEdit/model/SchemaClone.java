@@ -11,6 +11,13 @@ import gov.va.legoEdit.model.schemaModel.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * SchemaClone
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class SchemaClone
 {
 	static Logger logger = LoggerFactory.getLogger(SchemaClone.class);

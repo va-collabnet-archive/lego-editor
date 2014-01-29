@@ -1,5 +1,12 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
+/**
+ * 
+ * LegoTreeNodeType
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public enum LegoTreeNodeType
 {
 	legoListByReference(1),

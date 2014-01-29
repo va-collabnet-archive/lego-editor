@@ -8,7 +8,10 @@ import java.util.List;
 
 /**
  * 
- * @author darmbrust
+ * DataStoreInterface
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public interface DataStoreInterface
 {

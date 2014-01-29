@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ConceptNode This class handles the GUI display of snomed concepts in the tree view
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  * 
  */

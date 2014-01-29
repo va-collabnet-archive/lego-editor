@@ -42,7 +42,10 @@ import org.xml.sax.SAXException;
 
 /**
  * 
- * @author darmbrust
+ * LegoXMLUtils
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class LegoXMLUtils
 {

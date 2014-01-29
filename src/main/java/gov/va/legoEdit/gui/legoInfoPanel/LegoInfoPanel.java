@@ -5,6 +5,13 @@ import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.AnchorPane;
 
+/**
+ * 
+ * LegoInfoPanel
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoInfoPanel
 {
     AnchorPane ap;

@@ -25,11 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 
  * AdvancedLegoFilter
- * 
- * @author Dan Armbrust
- *         Copyright 2013
- * 
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class AdvancedLegoFilter
 {

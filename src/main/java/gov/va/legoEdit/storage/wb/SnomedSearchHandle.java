@@ -4,11 +4,11 @@ import gov.va.legoEdit.gui.sctSearch.SnomedSearchResult;
 import java.util.Collection;
 
 /**
+ * 
  * SnomedSearchHandle
- * 
- * @author Dan Armbrust
- *         Copyright 2013
- * 
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
  */
 public class SnomedSearchHandle
 {

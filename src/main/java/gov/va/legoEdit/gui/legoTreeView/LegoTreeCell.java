@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * LegoTreeCell - A monstrosity of a class that handles the display and user interaction of each node within the lego tree.
- * @author Dan Armbrust 
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  * 
  */

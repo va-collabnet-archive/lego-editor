@@ -12,6 +12,13 @@ import gov.va.legoEdit.model.schemaModel.LegoList;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ * LegoListByReference
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoListByReference
 {
     private String groupName;

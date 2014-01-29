@@ -25,6 +25,13 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * UserPreferencesController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class UserPreferencesController implements Initializable
 {
 	private static Logger logger = LoggerFactory.getLogger(UserPreferencesController.class);

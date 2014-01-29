@@ -41,6 +41,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 
+/**
+ * 
+ * LegoTab
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class LegoTab extends Tab
 {
 	private Lego displayedLego;  

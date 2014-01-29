@@ -27,6 +27,13 @@ import gov.va.legoEdit.model.schemaModel.Value;
 import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+/**
+ * 
+ * SchemaEquals
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class SchemaEquals
 {
     public static boolean equals(LegoList a, LegoList b)

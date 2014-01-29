@@ -14,6 +14,13 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
+/**
+ * 
+ * XMLDisplayWindow
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class XMLDisplayWindow extends Stage
 {
     private WebView wv_;

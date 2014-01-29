@@ -26,6 +26,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+/**
+ * 
+ * CreateTemplateController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class CreateTemplateController implements Initializable
 {
     @FXML //  fx:id="cancelButton"

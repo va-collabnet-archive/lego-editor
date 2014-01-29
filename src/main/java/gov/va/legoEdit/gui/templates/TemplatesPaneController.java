@@ -45,6 +45,13 @@ import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * TemplatesPaneController
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class TemplatesPaneController implements Initializable
 {
 	Logger logger = LoggerFactory.getLogger(TemplatesPaneController.class);

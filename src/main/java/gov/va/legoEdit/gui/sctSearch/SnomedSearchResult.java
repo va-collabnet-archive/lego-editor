@@ -8,6 +8,13 @@ import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * SnomedSearchResult
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class SnomedSearchResult
 {
 	Logger logger = LoggerFactory.getLogger(SnomedSearchResult.class);

@@ -8,6 +8,13 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 
+ * Utility
+ *
+ * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
+ * Copyright 2013
+ */
 public class Utility
 {
 	private static BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
