@@ -5,6 +5,7 @@ Lego Editor Change Log
   *  Switch to Java 8 - get rid of old javaFX versions
   *  Clean up other technical debt / out of date things from the last year and a half.
   *  Allow setting of the next pending concept ID
+  *  Add the ability to export only the newest version of each lego (instead of all versions)
 
 2013/08/20 - 1.2.2
   *  Add the ability to create new LegoLists and Legos from a CSV or TSV text file.

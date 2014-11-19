@@ -2,6 +2,7 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.util.Images;
+import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
 import gov.va.legoEdit.util.Utility;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -25,6 +27,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
@@ -78,6 +81,8 @@ public class ExportDialogController implements Initializable
 	private ProgressBar progress; // Value injected by FXMLLoader
 	@FXML// fx:id="rootPane"
 	private AnchorPane rootPane; // Value injected by FXMLLoader
+	@FXML// fx:id="exportNewestOnly"
+	private CheckBox exportNewestOnly; // Value injected by FXMLLoader
 
 	private BooleanProperty exportRunning = new SimpleBooleanProperty(false);
 	private BooleanBinding exportToValid;
@@ -334,6 +339,7 @@ public class ExportDialogController implements Initializable
 		String fileExtension;
 		Transformer transformer = null;
 		boolean useTidy = false;
+		boolean onlyExportLatest = false;
 
 		public ExportRunnable(File exportTo, StreamSource xslExportTransform, String fileExtension)
 		{
@@ -342,6 +348,7 @@ public class ExportDialogController implements Initializable
 			this.fileExtension = fileExtension;
 		}
 		int count = 0;
+		int skipCount = 0;
 		StringBuilder status = new StringBuilder();
 
 		@Override
@@ -363,6 +370,7 @@ public class ExportDialogController implements Initializable
 				{
 					useTidy = true;
 				}
+				onlyExportLatest = exportNewestOnly.isSelected();
 
 				if (legoListsToExport == null)
 				{
@@ -413,7 +421,7 @@ public class ExportDialogController implements Initializable
 					{
 						detailedMessage.appendText(status.toString());
 						detailedMessage.appendText(System.getProperty("line.separator") + System.getProperty("line.separator"));
-						detailedMessage.appendText("Export Complete");
+						detailedMessage.appendText("Export Complete" + (skipCount > 0 ? ".  Skipped " + skipCount + " non-current Legos" : ""));
 						progress.setProgress(1.0);
 						exportButton.setText("Close");
 						exportRunning.set(false);
@@ -450,6 +458,43 @@ public class ExportDialogController implements Initializable
 			FileOutputStream fos = null;
 			try
 			{
+				if (onlyExportLatest)
+				{
+					HashMap<String, Lego> newestLegos = new HashMap<>();
+					
+					for (Lego l : ll.getLego())
+					{
+						Lego current = newestLegos.get(l.getLegoUUID());
+						if (current != null)
+						{
+							if (l.getStamp().getTime().toGregorianCalendar().getTime().getTime() > 
+								current.getStamp().getTime().toGregorianCalendar().getTime().getTime())
+							{
+								newestLegos.put(l.getLegoUUID(), l);
+								logger.info("Not exporting old version of Lego: " + l.getPncs().getName() + " " + l.getLegoUUID());
+								skipCount++;
+							}
+						}
+						else
+						{
+							newestLegos.put(l.getLegoUUID(), l);
+						}
+					}
+					
+					//Remove all of the non-current ones from the list
+					Iterator<Lego> iterator = ll.getLego().iterator();
+					while (iterator.hasNext())
+					{
+						Lego l = iterator.next();
+						Lego newestForUUID = newestLegos.get(l.getLegoUUID());
+						
+						if (!l.getStamp().getUuid().equals(newestForUUID.getStamp().getUuid()))
+						{
+							iterator.remove();
+						}
+					}
+				}
+				
 				fos = new FileOutputStream(new File(exportTo, ll.getGroupName() + fileExtension));
 				LegoXMLUtils.transform(ll, fos, transformer, useTidy);
 			}
