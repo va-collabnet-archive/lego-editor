@@ -165,6 +165,10 @@ public class PendingConceptsPaneController implements Initializable
 
 							setContextMenu(cm);
 						}
+						else
+						{
+							setText("");
+						}
 					}
 				};
 			}
