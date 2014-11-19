@@ -18,29 +18,30 @@ package gov.va.legoEdit.drools.definitions;
  * limitations under the License.
  */
 
+import gov.va.isaac.ExtendedAppContext;
 import gov.va.legoEdit.drools.facts.ConceptFact;
 import gov.va.legoEdit.drools.facts.DescFact;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-
-import org.drools.base.BaseEvaluator;
-import org.drools.base.ValueType;
-import org.drools.base.evaluators.EvaluatorDefinition;
-import org.drools.base.evaluators.Operator;
-import org.drools.common.InternalWorkingMemory;
-import org.drools.rule.VariableRestriction.ObjectVariableContextEntry;
-import org.drools.rule.VariableRestriction.VariableContextEntry;
-import org.drools.spi.Evaluator;
-import org.drools.spi.FieldValue;
-import org.drools.spi.InternalReadAccessor;
-import org.ihtsdo.tk.Ts;
-import org.ihtsdo.tk.api.ContradictionException;
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
-import org.ihtsdo.tk.api.coordinate.ViewCoordinate;
-import org.ihtsdo.tk.api.description.DescriptionVersionBI;
-import org.ihtsdo.tk.spec.ConceptSpec;
-import org.ihtsdo.tk.spec.ValidationException;
+import org.drools.core.base.BaseEvaluator;
+import org.drools.core.base.ValueType;
+import org.drools.core.base.evaluators.EvaluatorDefinition;
+import org.drools.core.base.evaluators.Operator;
+import org.drools.core.common.DefaultFactHandle;
+import org.drools.core.common.InternalFactHandle;
+import org.drools.core.common.InternalWorkingMemory;
+import org.drools.core.rule.VariableRestriction.ObjectVariableContextEntry;
+import org.drools.core.rule.VariableRestriction.VariableContextEntry;
+import org.drools.core.spi.Evaluator;
+import org.drools.core.spi.FieldValue;
+import org.drools.core.spi.InternalReadAccessor;
+import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
+import org.ihtsdo.otf.tcc.api.contradiction.ContradictionException;
+import org.ihtsdo.otf.tcc.api.coordinate.ViewCoordinate;
+import org.ihtsdo.otf.tcc.api.description.DescriptionVersionBI;
+import org.ihtsdo.otf.tcc.api.spec.ConceptSpec;
+import org.ihtsdo.otf.tcc.api.spec.ValidationException;
 
 public class IsKindOfEvaluatorDefinition implements EvaluatorDefinition {
 
@@ -81,22 +82,27 @@ public class IsKindOfEvaluatorDefinition implements EvaluatorDefinition {
 
         @Override
         public boolean evaluate(InternalWorkingMemory workingMemory,
-                InternalReadAccessor extractor, Object object, FieldValue value) {
-            return testKindOf(object, value.getValue());
+                InternalReadAccessor extractor, InternalFactHandle factHandle, FieldValue value) {
+            return testKindOf(extractor.getValue(workingMemory, factHandle), value.getValue());
         }
 
         @Override
         public boolean evaluate(InternalWorkingMemory workingMemory,
-                InternalReadAccessor leftExtractor, Object left,
-                InternalReadAccessor rightExtractor, Object right) {
+                InternalReadAccessor leftExtractor, InternalFactHandle left,
+                InternalReadAccessor rightExtractor, InternalFactHandle right) {
             final Object value1 = leftExtractor.getValue(workingMemory, left);
             final Object value2 = rightExtractor.getValue(workingMemory, right);
 
             return testKindOf(value1, value2);
         }
 
-        private boolean testKindOf(final Object value1, final Object value2) {
+        private boolean testKindOf(Object value1, final Object value2) {
             try {
+                if (value1 instanceof DefaultFactHandle)
+                {
+                    value1 = ((DefaultFactHandle)value1).getObject();
+                }
+                
                 ConceptVersionBI possibleKind = null;
                 if (ConceptVersionBI.class.isAssignableFrom(value1.getClass())) {
                     possibleKind = (ConceptVersionBI) value1;
@@ -105,7 +111,7 @@ public class IsKindOfEvaluatorDefinition implements EvaluatorDefinition {
                 } else if (DescFact.class.isAssignableFrom(value1.getClass())) {
                     DescriptionVersionBI<?> dv = ((DescFact)value1).getDesc();
                     ViewCoordinate vc = ((DescFact)value1).getVc();
-                    possibleKind = Ts.get().getConceptVersion(vc, dv.getConceptNid());
+                    possibleKind = ExtendedAppContext.getDataStore().getConceptVersion(vc, dv.getConceptNid());
                 }else {
                     throw new UnsupportedOperationException("Can't convert: " + value1);
                 }
@@ -134,13 +140,13 @@ public class IsKindOfEvaluatorDefinition implements EvaluatorDefinition {
 
         @Override
         public boolean evaluateCachedLeft(InternalWorkingMemory workingMemory,
-                VariableContextEntry context, Object right) {
+                VariableContextEntry context, InternalFactHandle right) {
             return testKindOf(((ObjectVariableContextEntry) context).left, right);
         }
 
         @Override
         public boolean evaluateCachedRight(InternalWorkingMemory workingMemory,
-                VariableContextEntry context, Object left) {
+                VariableContextEntry context, InternalFactHandle left) {
             return testKindOf(left, ((ObjectVariableContextEntry) context).right);
         }
 

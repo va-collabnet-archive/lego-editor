@@ -1,5 +1,7 @@
 package gov.va.legoEdit;
 
+import gov.va.isaac.AppContext;
+import gov.va.isaac.init.SystemInit;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.gui.cem.CemImportViewController;
 import gov.va.legoEdit.gui.dialogs.AboutDialogController;
@@ -43,14 +45,13 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import org.ihtsdo.fxmodel.concept.FxConcept;
-import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
-import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.ddo.concept.ConceptChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RefexPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RelationshipPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.VersionPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 import com.sun.javafx.tk.Toolkit;
 
 /**
@@ -88,7 +89,7 @@ public class LegoGUI extends Application
 		return instance_;
 	}
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		logger.info("Lego Editor Startup");
 		InputStream is = LegoGUI.class.getClassLoader().getResourceAsStream("version.txt");
@@ -104,12 +105,24 @@ public class LegoGUI extends Application
 			logger.error("oops", e);
 		}
 		
-		// Redirect the unconfigured java.util logging to our logger.
-		SLF4JBridgeHandler.removeHandlersForRootLogger();
-		SLF4JBridgeHandler.install();
-		// TODO LOGGER there are some performance implications of the above... that can be mitigated by using logback.
-		// Need to get switched over to logback (but it isn't in the repo at the moment)
-		// http://www.slf4j.org/legacy.html
+		IOException dbLocateException = SystemInit.doBasicSystemInit();
+		if (dbLocateException != null)
+		{
+			//TODO fix URL
+			AppContext.getCommonDialogs().showErrorDialog(
+					"No Snomed Database",
+					"The Snomed Database was not found.",
+					"Please download the file "
+							+ System.getProperty("line.separator")
+							+ System.getProperty("line.separator")
+							+ "https://csfe.aceworkspace.net/sf/frs/do/downloadFile/projects.veterans_administration_project/frs.lego_editor.snomed_database_0_56_and_newer/frs4344?dl=1"
+							+ System.getProperty("line.separator") + System.getProperty("line.separator") + " and unzip it into "
+							+ System.getProperty("line.separator") + new File("").getAbsolutePath() + System.getProperty("line.separator")
+							+ " and then restart the editor.");
+			Thread.sleep(20000);
+			throw dbLocateException;
+		}
+
 		launch(args);
 	}
 
@@ -356,7 +369,7 @@ public class LegoGUI extends Application
 		{
 			try
 			{
-				showSnomedConceptDialog(WBDataStore.Ts().getFxConcept(conceptUUID, StandardViewCoordinates.getSnomedLatest(), 
+				showSnomedConceptDialog(WBDataStore.FxTs().getFxConcept(conceptUUID, StandardViewCoordinates.getSnomedStatedLatest(), 
 						VersionPolicy.LAST_VERSIONS, RefexPolicy.REFEX_MEMBERS, RelationshipPolicy.ORIGINATING_RELATIONSHIPS));
 			}
 			catch (Exception e)
@@ -367,7 +380,7 @@ public class LegoGUI extends Application
 		}
 	}
 
-	public void showSnomedConceptDialog(FxConcept concept)
+	public void showSnomedConceptDialog(ConceptChronicleDdo concept)
 	{
 		try
 		{

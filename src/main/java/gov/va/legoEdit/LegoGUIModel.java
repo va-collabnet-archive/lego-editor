@@ -1,6 +1,7 @@
 package gov.va.legoEdit;
 
 import edu.stanford.ejalbert.BrowserLauncher;
+import gov.va.isaac.util.TaskCompleteCallback;
 import gov.va.legoEdit.formats.LegoXMLUtils;
 import gov.va.legoEdit.formats.UserPrefsXMLUtils;
 import gov.va.legoEdit.gui.legoFilterPane.LegoFilterPaneController;
@@ -8,7 +9,6 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.ExpandedNode;
 import gov.va.legoEdit.gui.util.LegoTreeItemComparator;
-import gov.va.legoEdit.gui.util.TaskCompleteCallback;
 import gov.va.legoEdit.model.LegoListByReference;
 import gov.va.legoEdit.model.LegoReference;
 import gov.va.legoEdit.model.ModelUtil;
@@ -34,7 +34,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
-import javafx.scene.control.IndexedCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javax.xml.transform.Transformer;
@@ -42,8 +41,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.sun.javafx.scene.control.skin.TreeViewSkin;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 
 /**
  * 
@@ -147,20 +144,22 @@ public class LegoGUIModel
 		
 		int targetScrollPos = 0;
 		//Now this is a hack....
-		if (treeView.getChildrenUnmodifiable().size() > 0)
-		{
-			TreeViewSkin<?> tks = ((TreeViewSkin<?>)treeView.getChildrenUnmodifiable().get(0));
-			if (tks.getChildrenUnmodifiable().size() > 0)
-			{
-				VirtualFlow vf = (VirtualFlow)tks.getChildrenUnmodifiable().get(0);
-				IndexedCell<?> first = vf.getFirstVisibleCell();
-				IndexedCell<?> last = vf.getLastVisibleCell();
-				if (first != null && last != null)
-				{
-					targetScrollPos = first.getIndex() + (int)Math.floor(((double)(last.getIndex() - first.getIndex())) / 2.0);
-				}
-			}
-		}
+		//TODO - find a new hack for this
+//		if (treeView.getChildrenUnmodifiable().size() > 0)
+//		{
+//			treeView.scrollTo(arg0);
+//			TreeViewSkin<?> tks = ((TreeViewSkin<?>)treeView.getChildrenUnmodifiable().get(0));
+//			if (tks.getChildrenUnmodifiable().size() > 0)
+//			{
+//				VirtualFlow vf = (VirtualFlow)tks.getChildrenUnmodifiable().get(0);
+//				IndexedCell<?> first = vf.getFirstVisibleCell();
+//				IndexedCell<?> last = vf.getLastVisibleCell();
+//				if (first != null && last != null)
+//				{
+//					targetScrollPos = first.getIndex() + (int)Math.floor(((double)(last.getIndex() - first.getIndex())) / 2.0);
+//				}
+//			}
+//		}
 		
 		final int scrollTo = (targetScrollPos > 0 ? targetScrollPos : 0);
 		
@@ -440,6 +439,7 @@ public class LegoGUIModel
 					
 					LegoXMLUtils.transform(l, fos, transformer, true);
 					
+					//TODO replace both of these with Application.getHostServices.showDocument(...)?
 					try
 					{
 						BrowserLauncher bl = new BrowserLauncher();

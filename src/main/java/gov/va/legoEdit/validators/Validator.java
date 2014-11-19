@@ -23,7 +23,7 @@ import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import java.util.List;
 import java.util.UUID;
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
+import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

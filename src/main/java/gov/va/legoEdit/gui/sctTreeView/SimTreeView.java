@@ -21,39 +21,39 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.util.Callback;
-import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
-import org.ihtsdo.fxmodel.concept.FxConcept;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipChronicle;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipVersion;
-import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
-import org.ihtsdo.helper.uuid.Type3UuidFactory;
-import org.ihtsdo.tk.api.TerminologyStoreDI;
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
-import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
+import org.ihtsdo.otf.tcc.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.metadata.binding.Snomed;
+import org.ihtsdo.otf.tcc.ddo.TaxonomyReferenceWithConcept;
+import org.ihtsdo.otf.tcc.ddo.concept.ConceptChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.relationship.RelationshipChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.relationship.RelationshipVersionDdo;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RefexPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RelationshipPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.VersionPolicy;
+import org.ihtsdo.otf.tcc.ddo.store.FxTerminologyStoreDI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
+public class SimTreeView extends TreeView<TaxonomyReferenceWithConcept>
 {
 	Logger logger = LoggerFactory.getLogger(SimTreeView.class);
-	private TerminologyStoreDI ts_;
+	private FxTerminologyStoreDI ts_;
 	SimTreeItem visibleRootItem;
 
 	protected static volatile boolean shutdownRequested = false;
 
-	public SimTreeView(FxConcept rootFxConcept, TerminologyStoreDI ts)
+	public SimTreeView(ConceptChronicleDdo rootFxConcept, FxTerminologyStoreDI ts)
 	{
 		super();
 		ts_ = ts;
 
 		getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-		setCellFactory(new Callback<TreeView<FxTaxonomyReferenceWithConcept>, TreeCell<FxTaxonomyReferenceWithConcept>>()
+		setCellFactory(new Callback<TreeView<TaxonomyReferenceWithConcept>, TreeCell<TaxonomyReferenceWithConcept>>()
 		{
 			@Override
-			public TreeCell<FxTaxonomyReferenceWithConcept> call(TreeView<FxTaxonomyReferenceWithConcept> p)
+			public TreeCell<TaxonomyReferenceWithConcept> call(TreeView<TaxonomyReferenceWithConcept> p)
 			{
 				return new SimTreeCell(ts_);
 			}
@@ -73,12 +73,12 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 
 		// connect to
 
-		FxTaxonomyReferenceWithConcept hiddenRootConcept = new FxTaxonomyReferenceWithConcept();
+		TaxonomyReferenceWithConcept hiddenRootConcept = new TaxonomyReferenceWithConcept();
 		SimTreeItem hiddenRootItem = new SimTreeItem(hiddenRootConcept, ts_);
 		setShowRoot(false);
 		setRoot(hiddenRootItem);
 
-		FxTaxonomyReferenceWithConcept visibleRootConcept = new FxTaxonomyReferenceWithConcept();
+		TaxonomyReferenceWithConcept visibleRootConcept = new TaxonomyReferenceWithConcept();
 		visibleRootConcept.setConcept(rootFxConcept);
 
 		visibleRootItem = new SimTreeItem(visibleRootConcept, Images.ROOT.createImageView(), ts_);
@@ -87,10 +87,11 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 		visibleRootItem.addChildren();
 
 		// put this event handler on the root
-		visibleRootItem.addEventHandler(TreeItem.branchCollapsedEvent(), new EventHandler<TreeItem.TreeModificationEvent<Object>>()
+		visibleRootItem.addEventHandler(TreeItem.<TaxonomyReferenceWithConcept>branchCollapsedEvent(), 
+				new EventHandler<TreeItem.TreeModificationEvent<TaxonomyReferenceWithConcept>>()
 		{
 			@Override
-			public void handle(TreeItem.TreeModificationEvent<Object> t)
+			public void handle(TreeItem.TreeModificationEvent<TaxonomyReferenceWithConcept> t)
 			{
 				// remove grandchildren
 				SimTreeItem sourceTreeItem = (SimTreeItem) t.getSource();
@@ -98,16 +99,17 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 			}
 		});
 
-		visibleRootItem.addEventHandler(TreeItem.branchExpandedEvent(), new EventHandler<TreeItem.TreeModificationEvent<Object>>()
+		visibleRootItem.addEventHandler(TreeItem.<TaxonomyReferenceWithConcept>branchExpandedEvent(), 
+				new EventHandler<TreeItem.TreeModificationEvent<TaxonomyReferenceWithConcept>>()
 		{
 			@Override
-			public void handle(TreeItem.TreeModificationEvent<Object> t)
+			public void handle(TreeItem.TreeModificationEvent<TaxonomyReferenceWithConcept> t)
 			{
 				// add grandchildren
 				SimTreeItem sourceTreeItem = (SimTreeItem) t.getSource();
 				ProgressIndicator p2 = new ProgressIndicator();
 
-				p2.setSkin(new TaxonomyProgressIndicatorSkin(p2));
+				//p2.setSkin(new TaxonomyProgressIndicatorSkin(p2));
 				p2.setPrefSize(16, 16);
 				p2.setProgress(-1);
 				sourceTreeItem.setProgressIndicator(p2);
@@ -124,7 +126,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 				Dragboard db = startDragAndDrop(TransferMode.COPY);
 
 				/* Put a string on a dragboard */
-				TreeItem<FxTaxonomyReferenceWithConcept> dragItem = getSelectionModel().getSelectedItem();
+				TreeItem<TaxonomyReferenceWithConcept> dragItem = getSelectionModel().getSelectedItem();
 				if (dragItem == null)
 				{
 					// Don't know why, but I've seen this happen...
@@ -180,14 +182,14 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 							return;
 						}
 
-						FxConcept fxc = new FxConcept(WBDataStore.Ts().getSnapshot(StandardViewCoordinates.getSnomedLatest()), cv,
+						ConceptChronicleDdo fxc = new ConceptChronicleDdo(WBDataStore.Ts().getSnapshot(StandardViewCoordinates.getSnomedStatedLatest()), cv,
 								VersionPolicy.ACTIVE_VERSIONS, RefexPolicy.REFEX_MEMBERS, RelationshipPolicy.ORIGINATING_RELATIONSHIPS);
 
 						boolean found = false;
-						for (FxRelationshipChronicle rel : fxc.getOriginRelationships())
+						for (RelationshipChronicleDdo rel : fxc.getOriginRelationships())
 						{
-							FxRelationshipVersion rv = rel.getVersions().get(rel.getVersions().size() - 1);
-							if (rv.getTypeReference().getUuid().equals(Type3UuidFactory.SNOMED_ISA_REL_UUID))
+							RelationshipVersionDdo rv = rel.getVersions().get(rel.getVersions().size() - 1);
+							if (rv.getTypeReference().getUuid().equals(Snomed.IS_A))
 							{
 								pathToRoot.add(rv.getDestinationReference().getUuid());
 								current = rv.getDestinationReference().getUuid();
@@ -276,7 +278,7 @@ public class SimTreeView extends TreeView<FxTaxonomyReferenceWithConcept>
 					}
 					else
 					{
-						for (TreeItem<FxTaxonomyReferenceWithConcept> child : item.getChildren())
+						for (TreeItem<TaxonomyReferenceWithConcept> child : item.getChildren())
 						{
 							if (child != null && child.getValue() != null && child.getValue().getConcept() != null
 									&& child.getValue().getConcept().getPrimordialUuid().equals(targetChild))

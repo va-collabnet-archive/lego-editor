@@ -2,7 +2,6 @@ package gov.va.legoEdit.gui.dialogs;
 
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
-import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeNodeType;
 import gov.va.legoEdit.gui.util.CustomClipboard;
@@ -17,6 +16,7 @@ import gov.va.legoEdit.model.schemaModel.Pncs;
 import gov.va.legoEdit.model.schemaModel.Stamp;
 import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.storage.LegoStatus;
 import gov.va.legoEdit.util.TimeConvert;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -245,7 +245,7 @@ public class CreateLegoController implements Initializable
 				{
 					s.setModule(up.getModule());
 					s.setPath(up.getPath());
-					s.setStatus(LegoTreeCell.statusChoices_.get(0));
+					s.setStatus(LegoStatus.Active.name());
 				}
 				s.setTime(TimeConvert.convert(System.currentTimeMillis()));
 				s.setUuid(UUID.randomUUID().toString());

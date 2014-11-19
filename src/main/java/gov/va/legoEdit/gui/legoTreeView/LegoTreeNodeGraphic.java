@@ -50,7 +50,7 @@ public class LegoTreeNodeGraphic
 		errorImage.setTranslateX(-1.0);
 		sp.getChildren().add(errorImage);
 		StackPane.setAlignment(errorImage, Pos.TOP_LEFT);
-		StackPane.setMargin(errorImage, new Insets(5.0, 0, 0, 0));
+		StackPane.setMargin(errorImage, new Insets(5.0, 0.0, 0.0, 0));
 
 		tt = new Tooltip("");
 		Tooltip.install(errorImage, tt);
@@ -80,8 +80,8 @@ public class LegoTreeNodeGraphic
 				}
 				else
 				{
-					StackPane.setMargin(errorImage, new Insets(2.0, 0, 0, 0));
-					pi.setTranslateY(-3.0);
+					StackPane.setMargin(errorImage, new Insets(7.0, 0, 0, 0));
+					pi.setTranslateY(0.0);
 				}
 				
 			}

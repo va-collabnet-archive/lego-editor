@@ -1,9 +1,9 @@
 package gov.va.legoEdit.gui.legoTreeView;
 
-import gov.va.legoEdit.gui.sctSearch.SnomedSearchResult;
-import gov.va.legoEdit.gui.util.TaskCompleteCallback;
+import gov.va.isaac.search.CompositeSearchResult;
+import gov.va.isaac.search.SearchHandle;
+import gov.va.isaac.util.TaskCompleteCallback;
 import gov.va.legoEdit.model.schemaModel.Concept;
-import gov.va.legoEdit.storage.wb.SnomedSearchHandle;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 {
+	//TODO use ISAAC version?
 	Logger logger = LoggerFactory.getLogger(LookAheadConceptPopup.class);
 	private TextField sourceTextField;
 	VBox popupContent = new VBox();
@@ -59,7 +60,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 	};
 	private int searchCounter = 0;
 	private volatile int lastProcessedId = -1;
-	private HashMap<Integer, SnomedSearchHandle> runningSearches = new HashMap<>();
+	private HashMap<Integer, SearchHandle> runningSearches = new HashMap<>();
 	private boolean above = false;
 
 	public LookAheadConceptPopup(Control field)
@@ -203,7 +204,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 
 	private synchronized void showOrHidePopupForTextChange()
 	{
-		for (SnomedSearchHandle ssh : runningSearches.values())
+		for (SearchHandle ssh : runningSearches.values())
 		{
 			ssh.cancel();
 		}
@@ -218,7 +219,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 				synchronized (runningSearches)
 				{
 					int id = searchCounter++;
-					SnomedSearchHandle ssh = WBDataStore.prefixSearch(text, 5, this, id);
+					SearchHandle ssh = WBDataStore.prefixSearch(text, 5, this, id);
 					runningSearches.put(id, ssh);
 				}
 			}
@@ -256,17 +257,17 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 		displayedSearchResults.fireEvent(event);
 	}
 
-	private VBox processResult(SnomedSearchResult result, final int idx)
+	private VBox processResult(CompositeSearchResult result, final int idx)
 	{
 		VBox box = new VBox();
 
-		Concept c = WBUtility.convertConcept(result.getConcept());
+		Concept c = WBUtility.convertConcept(result.getContainingConcept());
 
 		Label concept = new Label(c.getDesc());
 		concept.getStyleClass().add("boldLabel");
 		box.getChildren().add(concept);
 
-		for (String s : result.getMatchStrings())
+		for (String s : result.getMatchingStrings())
 		{
 			if (s.equals(c.getDesc()))
 			{
@@ -410,7 +411,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 	{
 		try
 		{
-			SnomedSearchHandle ssh = null;
+			SearchHandle ssh = null;
 			synchronized (runningSearches)
 			{
 				ssh = runningSearches.remove(taskId);
@@ -428,7 +429,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 			}
 			else
 			{
-				final Collection<SnomedSearchResult> sortedResults = ssh.getResults();
+				final Collection<CompositeSearchResult> sortedResults = ssh.getResults();
 				Platform.runLater(new Runnable()
 				{
 					@Override
@@ -437,7 +438,7 @@ public class LookAheadConceptPopup extends Popup implements TaskCompleteCallback
 						displayedSearchResults.getChildren().clear();
 						uuidArray.clear();
 						currentSelection = -1;
-						for (SnomedSearchResult result : sortedResults)
+						for (CompositeSearchResult result : sortedResults)
 						{
 							int idx = displayedSearchResults.getChildren().size();
 							displayedSearchResults.getChildren().add(processResult(result, idx));

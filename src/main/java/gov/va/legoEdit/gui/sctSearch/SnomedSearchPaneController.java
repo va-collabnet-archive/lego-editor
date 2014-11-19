@@ -1,10 +1,11 @@
 package gov.va.legoEdit.gui.sctSearch;
 
+import gov.va.isaac.search.CompositeSearchResult;
+import gov.va.isaac.search.SearchHandle;
+import gov.va.isaac.util.TaskCompleteCallback;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.CustomClipboard;
 import gov.va.legoEdit.gui.util.Images;
-import gov.va.legoEdit.gui.util.TaskCompleteCallback;
-import gov.va.legoEdit.storage.wb.SnomedSearchHandle;
 import gov.va.legoEdit.storage.wb.WBDataStore;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import java.io.IOException;
@@ -39,7 +40,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
+import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,7 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 {
 	Logger logger = LoggerFactory.getLogger(SnomedSearchPaneController.class);
 	private BooleanProperty searchRunning = new SimpleBooleanProperty(false);
-	private SnomedSearchHandle ssh = null;
+	private SearchHandle ssh = null;
 
 	@FXML // fx:id="searchButton"
 	private Button searchButton; // Value injected by FXMLLoader
@@ -63,7 +64,7 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 	@FXML // fx:id="searchText"
 	private TextField searchText; // Value injected by FXMLLoader
 	@FXML // fx:id="searchResults"
-	private ListView<SnomedSearchResult> searchResults; // Value injected by FXMLLoader
+	private ListView<CompositeSearchResult> searchResults; // Value injected by FXMLLoader
 	@FXML // fx:id="borderPane"
 	private BorderPane borderPane; // Value injected by FXMLLoader
 
@@ -96,28 +97,28 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 		AnchorPane.setLeftAnchor(borderPane, 0.0);
 		AnchorPane.setRightAnchor(borderPane, 0.0);
 
-		searchResults.setCellFactory(new Callback<ListView<SnomedSearchResult>, ListCell<SnomedSearchResult>>()
+		searchResults.setCellFactory(new Callback<ListView<CompositeSearchResult>, ListCell<CompositeSearchResult>>()
 		{
 			@Override
-			public ListCell<SnomedSearchResult> call(ListView<SnomedSearchResult> arg0)
+			public ListCell<CompositeSearchResult> call(ListView<CompositeSearchResult> arg0)
 			{
-				return new ListCell<SnomedSearchResult>()
+				return new ListCell<CompositeSearchResult>()
 				{
 					@Override
-					protected void updateItem(final SnomedSearchResult item, boolean empty)
+					protected void updateItem(final CompositeSearchResult item, boolean empty)
 					{
 						super.updateItem(item, empty);
 						if (!empty)
 						{
 							VBox box = new VBox();
 							box.setFillWidth(true);
-							final ConceptVersionBI wbConcept = item.getConcept();
+							final ConceptVersionBI wbConcept = item.getContainingConcept();
 							String preferredText = (wbConcept != null ? WBUtility.getDescription(wbConcept) : "error - see log");
 							Label concept = new Label(preferredText);
 							concept.getStyleClass().add("boldLabel");
 							box.getChildren().add(concept);
 
-							for (String s : item.getMatchStrings())
+							for (String s : item.getMatchingStrings())
 							{
 								if (s.equals(preferredText))
 								{
@@ -137,9 +138,9 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 								@Override
 								public void handle(ActionEvent event)
 								{
-									if (item.getConcept() != null)
+									if (item.getContainingConcept() != null)
 									{
-										CustomClipboard.set(item.getConcept().getUUIDs().get(0).toString());
+										CustomClipboard.set(item.getContainingConcept().getUUIDs().get(0).toString());
 										LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(CustomClipboard.getString());
 									}
 								}
@@ -153,7 +154,7 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 								@Override
 								public void handle(ActionEvent event)
 								{
-									LegoGUI.getInstance().showSnomedConceptDialog(item.getConcept().getUUIDs().get(0));
+									LegoGUI.getInstance().showSnomedConceptDialog(item.getContainingConcept().getUUIDs().get(0));
 								}
 							});
 							mi.setGraphic(Images.CONCEPT_VIEW.createImageView());
@@ -165,7 +166,7 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 								@Override
 								public void handle(ActionEvent arg0)
 								{
-									LegoGUI.getInstance().getLegoGUIController().findConceptInTree(item.getConcept().getUUIDs().get(0));
+									LegoGUI.getInstance().getLegoGUIController().findConceptInTree(item.getContainingConcept().getUUIDs().get(0));
 								}
 							});
 							mi.setGraphic(Images.ROOT.createImageView());
@@ -178,10 +179,10 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 								@Override
 								public void handle(ActionEvent event)
 								{
-									if (item.getConcept() != null)
+									if (item.getContainingConcept() != null)
 									{
 										LegoGUI.getInstance().getLegoGUIController().getLegoFilterPaneController()
-												.filterOnConcept(item.getConcept().getUUIDs().get(0).toString());
+												.filterOnConcept(item.getContainingConcept().getUUIDs().get(0).toString());
 									}
 								}
 							});
@@ -219,12 +220,12 @@ public class SnomedSearchPaneController implements Initializable, TaskCompleteCa
 				Dragboard db = searchResults.startDragAndDrop(TransferMode.COPY);
 
 				/* Put a string on a dragboard */
-				SnomedSearchResult dragItem = searchResults.getSelectionModel().getSelectedItem();
+				CompositeSearchResult dragItem = searchResults.getSelectionModel().getSelectedItem();
 
-				if (dragItem.getConcept() != null)
+				if (dragItem.getContainingConcept() != null)
 				{
 					ClipboardContent content = new ClipboardContent();
-					content.putString(dragItem.getConcept().getUUIDs().get(0).toString());
+					content.putString(dragItem.getContainingConcept().getUUIDs().get(0).toString());
 					db.setContent(content);
 					LegoGUI.getInstance().getLegoGUIController().snomedDragStarted();
 					event.consume();

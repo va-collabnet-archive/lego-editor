@@ -4,9 +4,9 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.drools.runtime.rule.Activation;
-import org.drools.runtime.rule.ConsequenceExceptionHandler;
-import org.drools.runtime.rule.WorkingMemory;
+import org.kie.api.runtime.rule.ConsequenceExceptionHandler;
+import org.kie.api.runtime.rule.Match;
+import org.kie.api.runtime.rule.RuleRuntime;
 
 /**
  *
@@ -28,10 +28,14 @@ public class DroolsExceptionHandler
         // nothing to do. 
     }
 
-    @Override
-    public void handleException(Activation actvtn, 
-                            WorkingMemory wm, Exception ex) {
-        throw new DroolsException( ex, wm, actvtn);
-    }
+	/**
+	 * @see org.kie.api.runtime.rule.ConsequenceExceptionHandler#handleException(org.kie.api.runtime.rule.Match, org.kie.api.runtime.rule.RuleRuntime, java.lang.Exception)
+	 */
+	@Override
+	public void handleException(Match match, RuleRuntime workingMemory, Exception exception)
+	{
+		throw new DroolsException(match, workingMemory, exception);
+		
+	}
 
 }

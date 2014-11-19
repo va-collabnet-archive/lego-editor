@@ -165,7 +165,7 @@ public class PointNode
 		sp_.getChildren().add(cb_);
 		sp_.getChildren().add(invalidImage_);
 		StackPane.setAlignment(invalidImage_, Pos.CENTER_RIGHT);
-		StackPane.setMargin(invalidImage_, new Insets(0.0, 20.0, 0.0, 0.0));
+		StackPane.setMargin(invalidImage_, new Insets(0.0, 30.0, 0.0, 0.0));
 		Utility.tpe.execute(new Runnable()
 		{
 			@Override

@@ -17,10 +17,11 @@ package gov.va.legoEdit.drools.manager;
  */
 
 import java.util.Collection;
-import org.drools.FactHandle;
-import org.drools.definition.rule.Rule;
-import org.drools.runtime.rule.Activation;
-import org.drools.runtime.rule.WorkingMemory;
+import org.kie.api.definition.rule.Rule;
+import org.kie.api.runtime.rule.FactHandle;
+import org.kie.api.runtime.rule.Match;
+import org.kie.api.runtime.rule.RuleRuntime;
+
 
 /**
  * Based on example at:
@@ -32,14 +33,15 @@ public class DroolsException extends RuntimeException
 {
 
 	private static final long serialVersionUID = 1L;
-	private WorkingMemory workingMemory;
-	private Activation activation;
+	private Match activation;
+	private RuleRuntime workingMemory;
 
-	public DroolsException(Throwable thrwbl, WorkingMemory workingMemory, Activation activation)
+
+	public DroolsException(Match match, RuleRuntime workingMemory, Exception exception)
 	{
-		super(thrwbl);
+		super(exception);
 		this.workingMemory = workingMemory;
-		this.activation = activation;
+		this.activation = match;
 	}
 
 	@Override

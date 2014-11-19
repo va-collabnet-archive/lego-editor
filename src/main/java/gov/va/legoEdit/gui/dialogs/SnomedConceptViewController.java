@@ -39,19 +39,19 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
-import org.ihtsdo.fxmodel.concept.FxConcept;
-import org.ihtsdo.fxmodel.concept.component.attribute.FxConceptAttributesChronicle;
-import org.ihtsdo.fxmodel.concept.component.attribute.FxConceptAttributesVersion;
-import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionChronicle;
-import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
-import org.ihtsdo.fxmodel.concept.component.identifier.FxIdentifier;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipChronicle;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipVersion;
-import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
-import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
-import org.ihtsdo.tk.binding.Taxonomies;
+import org.ihtsdo.otf.tcc.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.metadata.binding.Taxonomies;
+import org.ihtsdo.otf.tcc.ddo.concept.ConceptChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.attribute.ConceptAttributesChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.attribute.ConceptAttributesVersionDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.description.DescriptionChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.description.DescriptionVersionDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.identifier.IdentifierDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.relationship.RelationshipChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.relationship.RelationshipVersionDdo;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RefexPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RelationshipPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.VersionPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,12 +112,12 @@ public class SnomedConceptViewController implements Initializable
 
 	}
 
-	public void init(FxConcept concept)
+	public void init(ConceptChronicleDdo concept)
 	{
-		FxConceptAttributesChronicle ca = concept.getConceptAttributes();
-		final FxConceptAttributesVersion cav = ca.getVersions().get(ca.getVersions().size() - 1);
+		ConceptAttributesChronicleDdo ca = concept.getConceptAttributes();
+		final ConceptAttributesVersionDdo cav = ca.getVersions().get(ca.getVersions().size() - 1);
 		conceptDefined.setText(cav.isDefined() + "");
-		conceptStatus.setText(cav.getStatusReference().getText());
+		conceptStatus.setText(cav.getStatusString());
 		fsnLabel.setText(WBUtility.getDescription(concept));
 		CopyableLabel.addCopyMenu(fsnLabel);
 		uuid.setText(concept.getPrimordialUuid().toString());
@@ -208,15 +208,15 @@ public class SnomedConceptViewController implements Initializable
 			}
 		};
 
-		for (FxDescriptionChronicle d : concept.getDescriptions())
+		for (DescriptionChronicleDdo d : concept.getDescriptions())
 		{
-			FxDescriptionVersion dv = d.getVersions().get(d.getVersions().size() - 1);
+			DescriptionVersionDdo dv = d.getVersions().get(d.getVersions().size() - 1);
 			descriptions.getItems().add(
 					new StringWithRefList(new StringWithRef(dv.getTypeReference().getText(), dv.getTypeReference().getUuid()), new StringWithRef(dv.getText())));
 		}
 		setupTable(new String[] { "Type", "Text" }, descriptions, cellValueFactory, cellFactory);
 
-		for (final FxIdentifier id : ca.getAdditionalIds())
+		for (final IdentifierDdo id : ca.getAdditionalIds())
 		{
 			HBox hbox = new HBox();
 			CopyableLabel l = new CopyableLabel(id.getAuthorityRef().getText());
@@ -239,9 +239,9 @@ public class SnomedConceptViewController implements Initializable
 			idVBox.getChildren().add(hbox);
 		}
 
-		for (FxRelationshipChronicle r : concept.getOriginRelationships())
+		for (RelationshipChronicleDdo r : concept.getOriginRelationships())
 		{
-			FxRelationshipVersion rv = r.getVersions().get(r.getVersions().size() - 1);
+			RelationshipVersionDdo rv = r.getVersions().get(r.getVersions().size() - 1);
 			sourceRelationships.getItems().add(
 					new StringWithRefList(new StringWithRef(rv.getTypeReference().getText(), rv.getTypeReference().getUuid()), new StringWithRef(rv
 							.getDestinationReference().getText(), rv.getDestinationReference().getUuid())));
@@ -252,10 +252,10 @@ public class SnomedConceptViewController implements Initializable
 		
 		try
 		{
-			FxConcept fxc = WBDataStore.Ts().getFxConcept(Taxonomies.SNOMED.getUuids()[0], StandardViewCoordinates.getSnomedLatest(), VersionPolicy.ACTIVE_VERSIONS,
+			ConceptChronicleDdo fxc = WBDataStore.FxTs().getFxConcept(Taxonomies.SNOMED.getUuids()[0], StandardViewCoordinates.getSnomedStatedLatest(), VersionPolicy.ACTIVE_VERSIONS,
 					RefexPolicy.REFEX_MEMBERS, RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS);
 
-			sctTree = new SimTreeView(fxc, WBDataStore.Ts());
+			sctTree = new SimTreeView(fxc, WBDataStore.FxTs());
 			splitRight.getChildren().add(sctTree);
 			VBox.setVgrow(sctTree, Priority.ALWAYS);
 			treeViewSearchRunning.set(true);

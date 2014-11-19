@@ -1,7 +1,6 @@
 package gov.va.legoEdit.storage;
 
 import gov.va.legoEdit.LegoGUIModel;
-import gov.va.legoEdit.gui.legoTreeView.LegoTreeCell;
 import gov.va.legoEdit.model.ModelUtil;
 import gov.va.legoEdit.model.bdbModel.LegoBDB;
 import gov.va.legoEdit.model.bdbModel.LegoListBDB;
@@ -950,7 +949,7 @@ public class BDBDataStoreImpl implements DataStoreInterface
 			if (s == null)
 			{
 				s = new Stamp();
-				s.setStatus(LegoTreeCell.statusChoices_.get(0));
+				s.setStatus(LegoStatus.Active.name());
 			}
 			if (s.getAuthor() == null || s.getAuthor().length() == 0)
 			{

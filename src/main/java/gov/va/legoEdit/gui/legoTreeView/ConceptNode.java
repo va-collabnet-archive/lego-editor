@@ -21,14 +21,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.Event;
-import javafx.event.EventDispatchChain;
-import javafx.event.EventDispatcher;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
@@ -36,9 +34,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
@@ -109,41 +104,6 @@ public class ConceptNode implements ConceptLookupCallback
 		cb_.setItems(FXCollections.observableArrayList(LegoGUI.getInstance().getLegoGUIController().getCommonlyUsedConcept().getSuggestions(cut)));
 		cb_.setVisibleRowCount(11);
 		
-		// Another hack to fix strange behavior in javafx... left arrow key in the combobox editor doesn't work as expected unless you filter it..
-		cb_.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>()
-		{
-			@Override
-			public void handle(KeyEvent event)
-			{
-				if (event.getCode() == KeyCode.LEFT)
-				{
-					event.consume();
-				}
-			}
-		});
-
-		//Ugly nasty hack to suppress the default context menu (that we can't control)
-		//http://javafx-jira.kenai.com/browse/RT-24823
-		final EventDispatcher initial = cb_.getEditor().getEventDispatcher();
-		cb_.getEditor().setEventDispatcher(new EventDispatcher()
-		{
-			@Override
-			public Event dispatchEvent(Event event, EventDispatchChain tail)
-			{
-				if (event instanceof MouseEvent)
-				{
-					//shot in the dark guess for the goofball one button wonders of the world
-					MouseEvent mouseEvent = (MouseEvent)event;
-					if (mouseEvent.getButton() == MouseButton.SECONDARY || 
-							(mouseEvent.getButton() == MouseButton.PRIMARY && mouseEvent.isControlDown()))  
-					{
-						event.consume();
-					}
-				}
-				return initial.dispatchEvent(event, tail);
-			}
-		});
-		
 		if (typeLabel != null && typeLabel.length() > 0)
 		{
 			typeLabel_ = new Label(typeLabel);
@@ -213,9 +173,9 @@ public class ConceptNode implements ConceptLookupCallback
 		sp.getChildren().add(pi_);
 		StackPane.setAlignment(cb_, Pos.CENTER_LEFT);
 		StackPane.setAlignment(pending, Pos.CENTER_RIGHT);
-		StackPane.setMargin(pending, new Insets(2.0, 20.0, 0.0, 0.0));
+		StackPane.setMargin(pending, new Insets(2.0, 30.0, 0.0, 0.0));
 		StackPane.setAlignment(lookupFailImage_, Pos.CENTER_RIGHT);
-		StackPane.setMargin(lookupFailImage_, new Insets(0.0, 20.0, 0.0, 0.0));
+		StackPane.setMargin(lookupFailImage_, new Insets(0.0, 30.0, 0.0, 0.0));
 		StackPane.setAlignment(pi_, Pos.CENTER_RIGHT);
 		StackPane.setMargin(pi_, new Insets(0.0, 20.0, 0.0, 0.0));
 
@@ -282,12 +242,10 @@ public class ConceptNode implements ConceptLookupCallback
 		{
 			Tooltip t = new Tooltip(c_.getDesc());
 			cb_.setTooltip(t);
-			cb_.getEditor().setTooltip(t);
 		}
 		else
 		{
 			cb_.setTooltip(null);
-			cb_.getEditor().setTooltip(null);
 		}
 	}
 
@@ -319,6 +277,11 @@ public class ConceptNode implements ConceptLookupCallback
 	public Node getNode()
 	{
 		return hbox_;
+	}
+	
+	public void setContextMenu(ContextMenu cm)
+	{
+		cb_.getEditor().setContextMenu(cm);
 	}
 
 	public Concept getConcept()

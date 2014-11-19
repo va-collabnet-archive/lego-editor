@@ -1,7 +1,7 @@
 package gov.va.legoEdit.drools.facts;
 
-import org.ihtsdo.tk.api.coordinate.ViewCoordinate;
-import org.ihtsdo.tk.api.description.DescriptionVersionBI;
+import org.ihtsdo.otf.tcc.api.coordinate.ViewCoordinate;
+import org.ihtsdo.otf.tcc.api.description.DescriptionVersionBI;
 
 /**
  *

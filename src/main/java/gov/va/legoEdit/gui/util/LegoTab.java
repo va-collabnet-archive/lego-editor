@@ -48,6 +48,7 @@ import com.sun.javafx.scene.control.skin.TabPaneSkin;
  * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  */
+@SuppressWarnings("restriction")
 public class LegoTab extends Tab
 {
 	private Lego displayedLego;  
@@ -99,7 +100,7 @@ public class LegoTab extends Tab
 		hbox.getChildren().add(titleLabel);
 
 		final StackPane closeBtn = new StackPane();
-		closeBtn.getStyleClass().setAll(new String[] { "tab-close-button" });
+		closeBtn.getStyleClass().add("tab-close-button");
 		closeBtn.setStyle("-fx-cursor:hand;");
 		closeBtn.setPadding(new Insets(0, 7, 0, 7));
 		closeBtn.visibleProperty().bind(this.selectedProperty());

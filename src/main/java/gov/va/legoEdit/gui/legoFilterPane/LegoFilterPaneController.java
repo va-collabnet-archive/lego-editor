@@ -1,5 +1,6 @@
 package gov.va.legoEdit.gui.legoFilterPane;
 
+import gov.va.isaac.util.TaskCompleteCallback;
 import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.LegoGUIModel;
 import gov.va.legoEdit.gui.legoTreeView.LegoTreeItem;
@@ -7,7 +8,6 @@ import gov.va.legoEdit.gui.legoTreeView.LegoTreeView;
 import gov.va.legoEdit.gui.legoTreeView.LookAheadConceptPopup;
 import gov.va.legoEdit.gui.util.AlphanumComparator;
 import gov.va.legoEdit.gui.util.Images;
-import gov.va.legoEdit.gui.util.TaskCompleteCallback;
 import gov.va.legoEdit.model.SchemaToString;
 import gov.va.legoEdit.model.schemaModel.Concept;
 import gov.va.legoEdit.model.schemaModel.Pncs;

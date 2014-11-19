@@ -25,21 +25,22 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.ihtsdo.fxmodel.concept.FxConcept;
-import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionChronicle;
-import org.ihtsdo.fxmodel.concept.component.description.FxDescriptionVersion;
-import org.ihtsdo.fxmodel.concept.component.refex.FxRefexChronicle;
-import org.ihtsdo.fxmodel.concept.component.refex.type_comp.FxRefexCompVersion;
-import org.ihtsdo.helper.uuid.UuidFactory;
-import org.ihtsdo.tk.api.concept.ConceptChronicleBI;
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
-import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
-import org.ihtsdo.tk.api.description.DescriptionChronicleBI;
-import org.ihtsdo.tk.api.description.DescriptionVersionBI;
-import org.ihtsdo.tk.api.id.IdBI;
-import org.ihtsdo.tk.api.refex.RefexChronicleBI;
-import org.ihtsdo.tk.binding.SnomedMetadataRf2;
-import org.ihtsdo.tk.binding.TermAux;
+import org.ihtsdo.otf.tcc.api.concept.ConceptChronicleBI;
+import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
+import org.ihtsdo.otf.tcc.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.coordinate.Status;
+import org.ihtsdo.otf.tcc.api.description.DescriptionChronicleBI;
+import org.ihtsdo.otf.tcc.api.description.DescriptionVersionBI;
+import org.ihtsdo.otf.tcc.api.id.IdBI;
+import org.ihtsdo.otf.tcc.api.metadata.binding.SnomedMetadataRf2;
+import org.ihtsdo.otf.tcc.api.metadata.binding.TermAux;
+import org.ihtsdo.otf.tcc.api.refex.RefexChronicleBI;
+import org.ihtsdo.otf.tcc.api.uuid.UuidFactory;
+import org.ihtsdo.otf.tcc.ddo.concept.ConceptChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.description.DescriptionChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.description.DescriptionVersionDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.refex.RefexChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.refex.type_comp.RefexCompVersionDdo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +61,6 @@ public class WBUtility
 	private static Integer preferredNid = null;
 	private static UUID SYNONYM_UUID = SnomedMetadataRf2.SYNONYM_RF2.getUuids()[0];
 	private static Integer synonymNid = null;
-	private static UUID ACTIVE_VALUE_UUID = UUID.fromString("d12702ee-c37f-385f-a070-61d56d4d0f1f");
-	private static Integer ActiveValueTypeNid = null;
 	
 	public static UserPreferences up = LegoGUIModel.getInstance().getUserPreferences();
 
@@ -162,7 +161,7 @@ public class WBUtility
 		try
 		{
 			UUID uuid = UUID.fromString(identifier.trim());
-			result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid);
+			result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedStatedLatest(), uuid);
 			if (result.getUUIDs().size() == 0)
 			{
 				// This is sillyness of the WB API. Nothing like an undocumented getter which, rather than returning null when the thing
@@ -176,7 +175,7 @@ public class WBUtility
 			try
 			{
 				//getConceptVersionFromAlternateId seems broke after the DB update, make the UUID myself instead.
-				result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), UuidFactory.getUuidFromAlternateId(snomedIdType, identifier.trim()));
+				result = WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedStatedLatest(), UuidFactory.getUuidFromAlternateId(snomedIdType, identifier.trim()));
 				//result = WBDataStore.Ts().getConceptVersionFromAlternateId(StandardViewCoordinates.getSnomedLatest(), snomedIdType, identifier.trim());
 				if (result.getUUIDs().size() == 0)
 				{
@@ -261,23 +260,6 @@ public class WBUtility
 		return synonymNid;
 	}
 
-	private static int getActiveValueTypeNid()
-	{
-		if (ActiveValueTypeNid == null)
-		{
-			try
-			{
-				ActiveValueTypeNid = WBDataStore.Ts().getNidForUuids(ACTIVE_VALUE_UUID);
-			}
-			catch (IOException e)
-			{
-				logger.error("Couldn't find nid for Active Value UUID", e);
-				ActiveValueTypeNid = -1;
-			}
-		}
-		return ActiveValueTypeNid;
-	}
-	
 	public static Concept getConceptForNid(Integer nid)
 	{
 		if (nid == null)
@@ -306,15 +288,15 @@ public class WBUtility
 		String bestFound = null;
 		try
 		{
-			if (concept.getDescs() != null)
+			if (concept.getDescriptions() != null)
 			{
-				for (DescriptionChronicleBI desc : concept.getDescs())
+				for (DescriptionChronicleBI desc : concept.getDescriptions())
 				{
 					DescriptionVersionBI<?> descVer = desc.getVersions().toArray(new DescriptionVersionBI[desc.getVersions().size()])[desc.getVersions().size() - 1];
 
 					if (descVer.getTypeNid() == getFSNTypeNid())
 					{
-						if (descVer.getStatusNid() == getActiveValueTypeNid())
+						if (descVer.getStatus() == Status.ACTIVE)
 						{
 							if (up.getUseFSN())
 							{
@@ -333,7 +315,7 @@ public class WBUtility
 					}
 					else if (descVer.getTypeNid() == getSynonymTypeNid() && isPreferred(descVer.getAnnotations()))
 					{
-						if (descVer.getStatusNid() == getActiveValueTypeNid())
+						if (descVer.getStatus() == Status.ACTIVE)
 						{
 							if (!up.getUseFSN())
 							{
@@ -364,7 +346,7 @@ public class WBUtility
 	{
 		try
 		{
-			return getDescription(WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedLatest(), uuid));
+			return getDescription(WBDataStore.Ts().getConceptVersion(StandardViewCoordinates.getSnomedStatedLatest(), uuid));
 		}
 		catch (Exception e)
 		{
@@ -373,7 +355,7 @@ public class WBUtility
 		}
 	}
 
-	public static String getDescription(FxConcept concept)
+	public static String getDescription(ConceptChronicleDdo concept)
 	{
 		// Go hunting for a FSN
 		if (concept == null)
@@ -392,12 +374,12 @@ public class WBUtility
 		String fsn = null;
 		String preferred = null;
 		String bestFound = null;
-		for (FxDescriptionChronicle d : concept.getDescriptions())
+		for (DescriptionChronicleDdo d : concept.getDescriptions())
 		{
-			FxDescriptionVersion dv = d.getVersions().get(d.getVersions().size() - 1);
+			DescriptionVersionDdo dv = d.getVersions().get(d.getVersions().size() - 1);
 			if (dv.getTypeReference().getUuid().equals(FSN_UUID))
 			{
-				if (dv.getStatusReference().getUuid().equals(ACTIVE_VALUE_UUID))
+				if (dv.getStatus() == Status.ACTIVE)
 				{
 					if (up.getUseFSN())
 					{
@@ -415,7 +397,7 @@ public class WBUtility
 			}
 			else if (dv.getTypeReference().getUuid().equals(SYNONYM_UUID))
 			{
-				if (dv.getStatusReference().getUuid().equals(ACTIVE_VALUE_UUID) && isPreferred(dv.getAnnotations()))
+				if (dv.getStatus() == Status.ACTIVE && isPreferred(dv.getAnnotations()))
 				{
 					if (!up.getUseFSN())
 					{
@@ -436,13 +418,13 @@ public class WBUtility
 		return (fsn != null ? fsn : (preferred != null ? preferred : (bestFound != null ? bestFound : concept.getConceptReference().getText())));
 	}
 	
-	private static boolean isPreferred(List<FxRefexChronicle<?, ?>> annotations)
+	private static boolean isPreferred(List<RefexChronicleDdo<?, ?>> annotations)
 	{
-		for (FxRefexChronicle<?, ?> frc : annotations)
+		for (RefexChronicleDdo<?, ?> frc : annotations)
 		{
 			for (Object version : frc.getVersions())
 			{
-				if (version instanceof FxRefexCompVersion && ((FxRefexCompVersion<?,?>)version).getComp1Ref().getUuid().equals(PREFERRED_UUID))
+				if (version instanceof RefexCompVersionDdo && ((RefexCompVersionDdo<?,?>)version).getComp1Ref().getUuid().equals(PREFERRED_UUID))
 				{
 					return true;
 				}
@@ -455,7 +437,7 @@ public class WBUtility
 	{
 		for (RefexChronicleBI<?> rc : collection)
 		{
-			if (rc.getRefexNid() == getPreferredTypeNid());
+			if (rc.getAssemblageNid() == getPreferredTypeNid());
 			{
 				return true;
 			}

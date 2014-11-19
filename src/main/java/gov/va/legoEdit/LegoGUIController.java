@@ -86,12 +86,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
-import org.ihtsdo.fxmodel.concept.FxConcept;
-import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
-import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
-import org.ihtsdo.tk.binding.Taxonomies;
+import org.ihtsdo.otf.tcc.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.metadata.binding.Taxonomies;
+import org.ihtsdo.otf.tcc.ddo.concept.ConceptChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RefexPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RelationshipPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.VersionPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -968,7 +968,7 @@ public class LegoGUIController implements Initializable
 		// Do the SCT connecting in a background thread - if it is a local DB, it will be slow.
 		Runnable r = new Runnable()
 		{
-			FxConcept fxc;
+			ConceptChronicleDdo fxc;
 
 			@Override
 			public void run()
@@ -976,8 +976,8 @@ public class LegoGUIController implements Initializable
 				logger.info("Opening Workbench Database");
 				try
 				{
-					fxc = WBDataStore.Ts().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
-							StandardViewCoordinates.getSnomedLatest(), VersionPolicy.ACTIVE_VERSIONS,
+					fxc = WBDataStore.FxTs().getFxConcept(Taxonomies.SNOMED.getUuids()[0],
+							StandardViewCoordinates.getSnomedStatedLatest(), VersionPolicy.ACTIVE_VERSIONS,
 							RefexPolicy.REFEX_MEMBERS,
 							RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS);
 					logger.info("Finished Opening Workbench Database");
@@ -989,7 +989,7 @@ public class LegoGUIController implements Initializable
 						{
 							try
 							{
-								sctTree = new SimTreeView(fxc, WBDataStore.Ts());
+								sctTree = new SimTreeView(fxc, WBDataStore.FxTs());
 								AnchorPane.setTopAnchor(sctTree, 0.0);
 								AnchorPane.setBottomAnchor(sctTree, 0.0);
 								AnchorPane.setLeftAnchor(sctTree, 0.0);

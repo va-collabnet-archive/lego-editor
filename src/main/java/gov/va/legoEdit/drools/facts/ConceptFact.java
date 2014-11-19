@@ -5,8 +5,8 @@ package gov.va.legoEdit.drools.facts;
  * @author jefron
  */
 
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
-import org.ihtsdo.tk.api.coordinate.ViewCoordinate;
+import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
+import org.ihtsdo.otf.tcc.api.coordinate.ViewCoordinate;
 
 public class ConceptFact extends ComponentFact<ConceptVersionBI> {
 

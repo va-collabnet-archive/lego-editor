@@ -5,8 +5,8 @@
 package gov.va.legoEdit.drools;
 
 import java.util.UUID;
-import org.ihtsdo.tk.binding.Snomed;
-import org.ihtsdo.tk.spec.ConceptSpec;
+import org.ihtsdo.otf.tcc.api.metadata.binding.Snomed;
+import org.ihtsdo.otf.tcc.api.spec.ConceptSpec;
 
 /**
  *

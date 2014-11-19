@@ -36,6 +36,7 @@ import gov.va.legoEdit.model.schemaModel.Units;
 import gov.va.legoEdit.model.schemaModel.Value;
 import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.storage.LegoStatus;
 import gov.va.legoEdit.storage.WriteException;
 import gov.va.legoEdit.util.TimeConvert;
 import java.util.Arrays;
@@ -82,9 +83,9 @@ public class LegoTreeCell<T> extends TreeCell<T>
 {
 	private static Logger logger = LoggerFactory.getLogger(LegoTreeCell.class);
 	private static String sep = " \u25BB ";
-	public static ObservableList<String> statusChoices_ = FXCollections.observableArrayList(new String[] { "Active", "Inactive" });
-	public static ObservableList<String> booleanChoices_ = FXCollections.observableArrayList(new String[] { "True", "False" });
-	public static ObservableList<String> inclusiveChoices_ = FXCollections.observableArrayList(new String[] { "\u2264", "<" });
+	private static ObservableList<String> statusChoices_ = FXCollections.observableArrayList(new String[] { LegoStatus.Active.name(), LegoStatus.Inactive.name()});
+	private static ObservableList<String> booleanChoices_ = FXCollections.observableArrayList(new String[] { "True", "False" });
+	private static ObservableList<String> inclusiveChoices_ = FXCollections.observableArrayList(new String[] { "\u2264", "<" });
 	public static boolean isMac = (System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0);
 
 	private LegoTreeView treeView;
@@ -346,15 +347,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 						final ConceptNode cn = new ConceptNode("Type", ac.getType().getConcept(), ConceptUsageType.TYPE, treeItem, treeView);
 						final ContextMenu typeMenu = new ContextMenu();
 						addMenus(ac.getType().getConcept(), cn, treeItem, typeMenu);
-						cn.getNode().setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
-						{
-							@Override
-							public void handle(ContextMenuEvent event)
-							{
-								typeMenu.show(cn.getNode(), event.getScreenX(), event.getScreenY());
-								event.consume(); //prevent the node menu - also see hack code inside ConceptNode which suppresses lower down menus
-							}
-						});
+						cn.setContextMenu(typeMenu);
 						nodeBox.getChildren().add(Utility.prependLabel(treeItem.getValue(), cn.getNode(), 5.0));
 						HBox.setHgrow(cn.getNode(), Priority.SOMETIMES);
 					}
@@ -631,16 +624,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 						final ConceptNode cn = new ConceptNode("", e.getConcept(), cut, treeItem, treeView);
 						final ContextMenu conceptContextMenu = new ContextMenu();
 						addMenus(e.getConcept(), cn, treeItem, conceptContextMenu);
-
-						cn.getNode().setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
-						{
-							@Override
-							public void handle(ContextMenuEvent event)
-							{
-								conceptContextMenu.show(cn.getNode(), event.getScreenX(), event.getScreenY());
-								event.consume(); //prevent the node menu - also see hack code inside ConceptNode which suppresses lower down menus
-							}
-						});
+						cn.setContextMenu(conceptContextMenu);
 						hbox.getChildren().add(cn.getNode());
 						HBox.setHgrow(cn.getNode(), Priority.SOMETIMES);
 					}
@@ -683,15 +667,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 						final ConceptNode cn = new ConceptNode("Type", r.getType().getConcept(), ConceptUsageType.TYPE, treeItem, treeView);
 						final ContextMenu typeMenu = new ContextMenu();
 						addMenus(r.getType().getConcept(), cn, treeItem, typeMenu);
-						cn.getNode().setOnContextMenuRequested(new EventHandler<ContextMenuEvent>()
-						{
-							@Override
-							public void handle(ContextMenuEvent event)
-							{
-								typeMenu.show(cn.getNode(), event.getScreenX(), event.getScreenY());
-								event.consume(); //prevent the node menu - also see hack code inside ConceptNode which suppresses lower down menus
-							}
-						});
+						cn.setContextMenu(typeMenu);
 						hbox.getChildren().add(cn.getNode());
 						HBox.setHgrow(cn.getNode(), Priority.SOMETIMES);
 						HBox.setMargin(cn.getNode(), new Insets(0,0,0,5.0));
@@ -931,7 +907,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		hbox.getChildren().add(low.getNode());
 		HBox.setHgrow(low.getNode(), Priority.SOMETIMES);
 		final ComboBox<String> cbLow = new ComboBox<>(inclusiveChoices_);
-		cbLow.setMaxWidth(10.0);
+		cbLow.setMaxWidth(60.0);
 		cbLow.getSelectionModel().select((b.isLowerPointInclusive() != null && !b.isLowerPointInclusive().booleanValue() ? 1 : 0));
 		cbLow.valueProperty().addListener(new ChangeListener<String>()
 		{
@@ -950,7 +926,7 @@ public class LegoTreeCell<T> extends TreeCell<T>
 		middle.setAlignment(Pos.CENTER_LEFT);
 		hbox.getChildren().add(middle);
 		final ComboBox<String> cbHigh = new ComboBox<>(inclusiveChoices_);
-		cbHigh.setMaxWidth(10.0);
+		cbHigh.setMaxWidth(60.0);
 		cbHigh.getSelectionModel().select((b.isUpperPointInclusive() != null && !b.isUpperPointInclusive().booleanValue() ? 1 : 0));
 		cbHigh.valueProperty().addListener(new ChangeListener<String>()
 		{

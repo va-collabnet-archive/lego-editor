@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import javafx.application.Platform;
-import org.ihtsdo.fxmodel.FxComponentReference;
-import org.ihtsdo.fxmodel.FxTaxonomyReferenceWithConcept;
-import org.ihtsdo.fxmodel.concept.FxConcept;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipChronicle;
-import org.ihtsdo.fxmodel.concept.component.relationship.FxRelationshipVersion;
-import org.ihtsdo.fxmodel.fetchpolicy.RefexPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.RelationshipPolicy;
-import org.ihtsdo.fxmodel.fetchpolicy.VersionPolicy;
-import org.ihtsdo.tk.api.TerminologyStoreDI;
-import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.ddo.ComponentReference;
+import org.ihtsdo.otf.tcc.ddo.TaxonomyReferenceWithConcept;
+import org.ihtsdo.otf.tcc.ddo.concept.ConceptChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.relationship.RelationshipChronicleDdo;
+import org.ihtsdo.otf.tcc.ddo.concept.component.relationship.RelationshipVersionDdo;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RefexPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.RelationshipPolicy;
+import org.ihtsdo.otf.tcc.ddo.fetchpolicy.VersionPolicy;
+import org.ihtsdo.otf.tcc.ddo.store.FxTerminologyStoreDI;
  
 /**
  *
@@ -26,25 +26,25 @@ class GetSimTreeItemConcept implements Callable<Boolean> {
    RelationshipPolicy     relationshipPolicy =
       RelationshipPolicy.ORIGINATING_AND_DESTINATION_TAXONOMY_RELATIONSHIPS;
    RefexPolicy refexPolicy = RefexPolicy.ANNOTATION_MEMBERS;
-   FxConcept   concept;
+   ConceptChronicleDdo   concept;
    SimTreeItem treeItem;
-   TerminologyStoreDI ts;
+   FxTerminologyStoreDI ts;
 
    //~--- constructors --------------------------------------------------------
 
-   public GetSimTreeItemConcept(SimTreeItem treeItem, TerminologyStoreDI ts) {
+   public GetSimTreeItemConcept(SimTreeItem treeItem, FxTerminologyStoreDI ts) {
       this.treeItem = treeItem;
       this.ts = ts;
    }
 
-   public GetSimTreeItemConcept(SimTreeItem treeItem, boolean addChildren, TerminologyStoreDI ts) {
+   public GetSimTreeItemConcept(SimTreeItem treeItem, boolean addChildren, FxTerminologyStoreDI ts) {
       this.treeItem    = treeItem;
       this.addChildren = addChildren;
       this.ts = ts;
    }
 
    public GetSimTreeItemConcept(SimTreeItem treeItem, VersionPolicy versionPolicy, RefexPolicy refexPolicy,
-                                RelationshipPolicy relationshipPolicy, TerminologyStoreDI ts) {
+                                RelationshipPolicy relationshipPolicy, FxTerminologyStoreDI ts) {
       this.treeItem           = treeItem;
       this.versionPolicy      = versionPolicy;
       this.refexPolicy        = refexPolicy;
@@ -56,7 +56,7 @@ class GetSimTreeItemConcept implements Callable<Boolean> {
 
    @Override
    public Boolean call() throws Exception {
-      FxComponentReference reference;
+      ComponentReference reference;
 
       if (addChildren) {
          reference = treeItem.getValue().getRelationshipVersion().getOriginReference();
@@ -70,7 +70,7 @@ class GetSimTreeItemConcept implements Callable<Boolean> {
       }
       
       concept = ts.getFxConcept(reference,
-              StandardViewCoordinates.getSnomedLatest(), versionPolicy, refexPolicy,
+              StandardViewCoordinates.getSnomedStatedLatest(), versionPolicy, refexPolicy,
               relationshipPolicy);
 
       if ((concept.getConceptAttributes() == null) || concept.getConceptAttributes().getVersions().isEmpty()
@@ -83,13 +83,13 @@ class GetSimTreeItemConcept implements Callable<Boolean> {
       }
 
       if (addChildren) {
-         for (FxRelationshipChronicle fxrc : concept.getDestinationRelationships()) {
+         for (RelationshipChronicleDdo fxrc : concept.getDestinationRelationships()) {
              if (SimTreeView.shutdownRequested)
              {
                  return false;
              }
-             for (FxRelationshipVersion rv : fxrc.getVersions()) {
-               FxTaxonomyReferenceWithConcept fxtrc     = new FxTaxonomyReferenceWithConcept(rv);
+             for (RelationshipVersionDdo rv : fxrc.getVersions()) {
+               TaxonomyReferenceWithConcept fxtrc     = new TaxonomyReferenceWithConcept(rv);
                SimTreeItem                    childItem = new SimTreeItem(fxtrc, ts);
 
                childrenToAdd.add(childItem);
@@ -105,7 +105,7 @@ class GetSimTreeItemConcept implements Callable<Boolean> {
       Platform.runLater(new Runnable() {
          @Override
          public void run() {
-            FxTaxonomyReferenceWithConcept itemValue = treeItem.getValue();
+            TaxonomyReferenceWithConcept itemValue = treeItem.getValue();
 
             treeItem.setValue(null);
             treeItem.getChildren().clear();

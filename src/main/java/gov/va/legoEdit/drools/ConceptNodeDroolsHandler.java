@@ -19,22 +19,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import org.drools.KnowledgeBase;
-import org.drools.KnowledgeBaseConfiguration;
-import org.drools.KnowledgeBaseFactory;
-import org.drools.builder.KnowledgeBuilder;
-import org.drools.builder.KnowledgeBuilderConfiguration;
-import org.drools.builder.KnowledgeBuilderFactory;
-import org.drools.builder.ResourceType;
-import org.drools.builder.conf.EvaluatorOption;
-import org.drools.conf.ConsequenceExceptionHandlerOption;
-import org.drools.io.Resource;
-import org.drools.io.ResourceFactory;
-import org.drools.runtime.StatefulKnowledgeSession;
-import org.drools.runtime.rule.ConsequenceExceptionHandler;
-import org.ihtsdo.bdb.BdbTerminologyStore;
-import org.ihtsdo.tk.api.concept.ConceptVersionBI;
-import org.ihtsdo.tk.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
+import org.ihtsdo.otf.tcc.api.coordinate.StandardViewCoordinates;
+import org.ihtsdo.otf.tcc.datastore.BdbTerminologyStore;
+import org.kie.api.KieBaseConfiguration;
+import org.kie.api.io.Resource;
+import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.rule.ConsequenceExceptionHandler;
+import org.kie.internal.KnowledgeBase;
+import org.kie.internal.KnowledgeBaseFactory;
+import org.kie.internal.builder.KnowledgeBuilder;
+import org.kie.internal.builder.KnowledgeBuilderConfiguration;
+import org.kie.internal.builder.KnowledgeBuilderFactory;
+import org.kie.internal.builder.conf.EvaluatorOption;
+import org.kie.internal.conf.ConsequenceExceptionHandlerOption;
+import org.kie.internal.io.ResourceFactory;
+import org.kie.internal.runtime.StatefulKnowledgeSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author jefron
  * @author darmbrust
  */
+@SuppressWarnings("deprecation")
 public class ConceptNodeDroolsHandler
 {
 	public static String drools_dialect_java_compiler;
@@ -52,8 +53,9 @@ public class ConceptNodeDroolsHandler
 	private static Boolean initFailed = null;
 	private static volatile ConceptNodeDroolsHandler instance_;
 	
+	//TODO the new KIE APIs are hopelessly broken, can't seem to make the non-deprecated APIs work
 	private KnowledgeBase kbase;
-	private KnowledgeBaseConfiguration kBaseConfig;
+	private KieBaseConfiguration kBaseConfig;
 	private static Logger logger = LoggerFactory.getLogger(ConceptNodeDroolsHandler.class);
 
 	/**
@@ -159,7 +161,7 @@ public class ConceptNodeDroolsHandler
 		try
 		{
 			ksession.setGlobal("actions", actions);
-			ksession.insert(new ConceptFact(Context.DROP_OBJECT, concept, StandardViewCoordinates.getSnomedLatest()));
+			ksession.insert(new ConceptFact(Context.DROP_OBJECT, concept, StandardViewCoordinates.getSnomedStatedLatest()));
 			ksession.insert(new AssertionFact(usageType));
 			ksession.fireAllRules();
 
@@ -192,11 +194,11 @@ public class ConceptNodeDroolsHandler
 			ConceptVersionBI typeConcept = WBUtility.lookupSnomedIdentifierAsCV(type.getUuid());
 			ConceptVersionBI destConcept = WBUtility.lookupSnomedIdentifierAsCV(dest.getUuid());
 
-			ksession.insert(new ConceptFact(Context.SOURCE_CONCEPT, cv, StandardViewCoordinates.getSnomedLatest()));
+			ksession.insert(new ConceptFact(Context.SOURCE_CONCEPT, cv, StandardViewCoordinates.getSnomedStatedLatest()));
 
 			if (typeConcept != null)
 			{
-				ksession.insert(new ConceptFact(Context.TYPE_CONCEPT, typeConcept, StandardViewCoordinates.getSnomedLatest()));
+				ksession.insert(new ConceptFact(Context.TYPE_CONCEPT, typeConcept, StandardViewCoordinates.getSnomedStatedLatest()));
 			}
 			else
 			{
@@ -204,7 +206,7 @@ public class ConceptNodeDroolsHandler
 			}
 			if (destConcept != null)
 			{
-				ksession.insert(new ConceptFact(Context.DESTINATION_CONCEPT, destConcept, StandardViewCoordinates.getSnomedLatest()));
+				ksession.insert(new ConceptFact(Context.DESTINATION_CONCEPT, destConcept, StandardViewCoordinates.getSnomedStatedLatest()));
 			}
 			else
 			{
