@@ -78,6 +78,7 @@ public class LegoGUI extends Application
 	private CreateLegoController clc_;
 	private YesNoDialogController yndc_;
 	private CreateTemplateController ctc_;
+	private UserPreferencesController upc_;
 
 	public LegoGUI()
 	{
@@ -194,6 +195,7 @@ public class LegoGUI extends Application
 		userPrefsStage_.initStyle(StageStyle.UTILITY);
 		loader = new FXMLLoader();
 		scene = new Scene((Parent) loader.load(UserPreferencesController.class.getResourceAsStream("UserPreferences.fxml")));
+		upc_ = loader.getController();
 		scene.getStylesheets().add(LegoGUI.class.getResource("/styles.css").toString());
 		userPrefsStage_.setScene(scene);
 
@@ -337,6 +339,7 @@ public class LegoGUI extends Application
 
 	public void showUserPreferences()
 	{
+		upc_.resetVariables();
 		userPrefsStage_.show();
 	}
 	

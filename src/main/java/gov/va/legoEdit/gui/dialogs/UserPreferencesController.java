@@ -52,11 +52,14 @@ public class UserPreferencesController implements Initializable
 	private ChoiceBox<String> summaryView; // Value injected by FXMLLoader
 	@FXML// fx:id="useFSNDescription"
 	private ChoiceBox<String> useFSNDescription; // Value injected by FXMLLoader
+	@FXML// fx:id="pendingConceptId"
+	private TextField pendingConceptId; // Value injected by FXMLLoader
 
 	private UserPreferences up;
 	private BooleanProperty authorValid = new SimpleBooleanProperty(true);
 	private BooleanProperty moduleValid = new SimpleBooleanProperty(true);
 	private BooleanProperty pathValid = new SimpleBooleanProperty(true);
+	private BooleanProperty pendingConceptIdValid = new SimpleBooleanProperty(true);
 
 	private BooleanBinding formValid;
 
@@ -79,17 +82,18 @@ public class UserPreferencesController implements Initializable
 		path.setText(up.getPath());
 		summaryView.getSelectionModel().select(up.getShowSummary() ? 0 : 1);
 		useFSNDescription.getSelectionModel().select(up.getUseFSN() ? 0 : 1);
+		pendingConceptId.setText(up.getNextPendingId() == 0 ? "" : up.getNextPendingId() +"");
 
 		formValid = new BooleanBinding()
 		{
 			{
-				super.bind(authorValid, moduleValid, pathValid);
+				super.bind(authorValid, moduleValid, pathValid, pendingConceptIdValid);
 			}
 
 			@Override
 			protected boolean computeValue()
 			{
-				return authorValid.get() && moduleValid.get() && pathValid.get();
+				return authorValid.get() && moduleValid.get() && pathValid.get() && pendingConceptIdValid.get();
 			}
 		};
 
@@ -118,6 +122,16 @@ public class UserPreferencesController implements Initializable
 				up.setPath(path.getText());
 				up.setShowSummary(summaryView.getSelectionModel().getSelectedIndex() == 0 ? true : false);
 				up.setUseFSN(useFSNDescription.getSelectionModel().getSelectedIndex() == 0 ? true : false);
+				String temp = pendingConceptId.getText().trim();
+				if (temp.length() > 0)
+				{
+					up.setNextPendingId(Long.parseLong(temp));
+				}
+				else
+				{
+					up.setNextPendingId(0);
+				}
+				
 				try
 				{
 					UserPrefsXMLUtils.writeUserPreferences(up);
@@ -183,5 +197,42 @@ public class UserPreferencesController implements Initializable
 				}
 			}
 		});
+		
+		pendingConceptId.textProperty().addListener(new ChangeListener<String>()
+		{
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+			{
+				if (newValue.length() > 0)
+				{
+					try
+					{
+						Long.parseLong(newValue);
+						pendingConceptIdValid.setValue(true);
+					}
+					catch (NumberFormatException e)
+					{
+						pendingConceptIdValid.setValue(false);
+					}
+				}
+				else
+				{
+					pendingConceptIdValid.setValue(true);
+				}
+				if (pendingConceptIdValid.get())
+				{
+					pendingConceptId.setEffect(null);
+				}
+				else
+				{
+					pendingConceptId.setEffect(Utility.redDropShadow);
+				}
+			}
+		});
+	}
+	
+	public void resetVariables()
+	{
+		pendingConceptId.setText(up.getNextPendingId() == 0 ? "" : up.getNextPendingId() +"");
 	}
 }

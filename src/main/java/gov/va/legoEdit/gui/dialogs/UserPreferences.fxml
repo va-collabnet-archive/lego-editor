@@ -1,84 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import java.util.*?>
 <?import javafx.collections.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="259.0" prefWidth="570.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.dialogs.UserPreferencesController">
-  <children>
-    <Label alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Editor Preferences" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
-      <font>
-        <Font size="16.0" />
-      </font>
-    </Label>
-    <GridPane styleClass="itemBorder" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
-      <children>
-        <Label styleClass="boldLabel" text="Author Name" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <Label styleClass="boldLabel" text="Module" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <Label styleClass="boldLabel" text="Path" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <TextField fx:id="author" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        <TextField fx:id="module" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <TextField fx:id="path" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Label styleClass="boldLabel" text="Summary View" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-        <ChoiceBox fx:id="summaryView" GridPane.columnIndex="1" GridPane.rowIndex="3">
-          <items>
-            <FXCollections fx:factory="observableArrayList">
-              <String fx:value="On" />
-              <String fx:value="Off" />
-            </FXCollections>
-          </items>
-        </ChoiceBox>
-        <Label styleClass="boldLabel" text="Description Type" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-        <ChoiceBox fx:id="useFSNDescription" GridPane.columnIndex="1" GridPane.rowIndex="4">
-          <items>
-            <FXCollections fx:factory="observableArrayList">
-              <String fx:value="Display Fully Specified Name" />
-              <String fx:value="Display Synonym Preferred" />
-            </FXCollections>
-          </items>
-        </ChoiceBox>
-      </children>
-      <columnConstraints>
-        <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="160.0" minWidth="160.0" prefWidth="160.0" />
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="392.0" />
-      </columnConstraints>
-      <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-      </rowConstraints>
-    </GridPane>
-    <GridPane alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-      <children>
-        <Button fx:id="okButton" alignment="CENTER" mnemonicParsing="false" text="Ok" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0">
-          <GridPane.margin>
-            <Insets right="20.0" />
-          </GridPane.margin>
-        </Button>
-        <Button fx:id="cancelButton" mnemonicParsing="false" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="0">
-          <GridPane.margin>
-            <Insets left="20.0" />
-          </GridPane.margin>
-        </Button>
-      </children>
-      <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-      </columnConstraints>
-      <padding>
-        <Insets bottom="10.0" />
-      </padding>
-      <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      </rowConstraints>
-    </GridPane>
-  </children>
+<AnchorPane id="AnchorPane" fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+	prefHeight="274.0" prefWidth="570.0" styleClass="dialogBackground" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8"
+	fx:controller="gov.va.legoEdit.gui.dialogs.UserPreferencesController">
+	<children>
+		<Label alignment="CENTER" contentDisplay="CENTER" styleClass="titleLabel" text="Editor Preferences" AnchorPane.leftAnchor="0.0"
+			AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="10.0">
+			<font>
+				<Font size="16.0" />
+			</font>
+		</Label>
+		<GridPane styleClass="itemBorder" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+			<children>
+				<Label styleClass="boldLabel" text="Author Name" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+				<Label styleClass="boldLabel" text="Module" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+				<Label styleClass="boldLabel" text="Path" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+				<TextField fx:id="author" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+				<TextField fx:id="module" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+				<TextField fx:id="path" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+				<Label styleClass="boldLabel" text="Summary View" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+				<ChoiceBox fx:id="summaryView" GridPane.columnIndex="1" GridPane.rowIndex="3">
+					<items>
+						<FXCollections fx:factory="observableArrayList">
+							<String fx:value="On" />
+							<String fx:value="Off" />
+						</FXCollections>
+					</items>
+				</ChoiceBox>
+				<Label styleClass="boldLabel" text="Description Type" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+				<ChoiceBox fx:id="useFSNDescription" GridPane.columnIndex="1" GridPane.rowIndex="4">
+					<items>
+						<FXCollections fx:factory="observableArrayList">
+							<String fx:value="Display Fully Specified Name" />
+							<String fx:value="Display Synonym Preferred" />
+						</FXCollections>
+					</items>
+				</ChoiceBox>
+				<Label styleClass="boldLabel" text="Next Pending Concept ID" GridPane.rowIndex="5">
+					<tooltip>
+						<Tooltip text="The minimum ID to recommend for the next Pending Concept" />
+					</tooltip>
+				</Label>
+				<TextField fx:id="pendingConceptId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+			</children>
+			<columnConstraints>
+				<ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="194.0" minWidth="195.0" prefWidth="195.0" />
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="394.0" />
+			</columnConstraints>
+			<rowConstraints>
+				<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+				<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+				<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+				<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+				<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+				<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+			</rowConstraints>
+		</GridPane>
+		<GridPane alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+			<children>
+				<Button fx:id="okButton" alignment="CENTER" mnemonicParsing="false" text="Ok" GridPane.columnIndex="0" GridPane.halignment="RIGHT"
+					GridPane.rowIndex="0">
+					<GridPane.margin>
+						<Insets right="20.0" />
+					</GridPane.margin>
+				</Button>
+				<Button fx:id="cancelButton" mnemonicParsing="false" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="0">
+					<GridPane.margin>
+						<Insets left="20.0" />
+					</GridPane.margin>
+				</Button>
+			</children>
+			<columnConstraints>
+				<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+				<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+			</columnConstraints>
+			<padding>
+				<Insets bottom="10.0" />
+			</padding>
+			<rowConstraints>
+				<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+			</rowConstraints>
+		</GridPane>
+	</children>
 </AnchorPane>

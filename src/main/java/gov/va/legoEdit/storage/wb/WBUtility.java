@@ -35,6 +35,7 @@ import org.ihtsdo.otf.tcc.api.id.IdBI;
 import org.ihtsdo.otf.tcc.api.metadata.binding.SnomedMetadataRf2;
 import org.ihtsdo.otf.tcc.api.metadata.binding.TermAux;
 import org.ihtsdo.otf.tcc.api.refex.RefexChronicleBI;
+import org.ihtsdo.otf.tcc.api.refex.type_long.RefexLongVersionBI;
 import org.ihtsdo.otf.tcc.api.uuid.UuidFactory;
 import org.ihtsdo.otf.tcc.ddo.concept.ConceptChronicleDdo;
 import org.ihtsdo.otf.tcc.ddo.concept.component.description.DescriptionChronicleDdo;
@@ -125,12 +126,26 @@ public class WBUtility
 			c.setUuid(concept.getUUIDs().get(0).toString());
 			try
 			{
-				for (IdBI x : concept.getAdditionalIds())
+				for (RefexChronicleBI<?> annotation : concept.getAnnotations())
 				{
-					if (x.getAuthorityNid() == getSnomedIdTypeNid() && Utility.isLong(x.getDenotation().toString()))
+					if (annotation.getAssemblageNid() == getSnomedIdTypeNid())
 					{
-						c.setSctid(Long.parseLong(x.getDenotation().toString()));
+						RefexLongVersionBI<?> sctid = (RefexLongVersionBI<?>) annotation.getPrimordialVersion();
+						c.setSctid(sctid.getLong1());
 						break;
+					}
+				}
+				
+				if (c.getSctid() == null)
+				{
+					//old way for old econ files
+					for (IdBI x : concept.getAdditionalIds())
+					{
+						if (x.getAuthorityNid() == getSnomedIdTypeNid() && Utility.isLong(x.getDenotation().toString()))
+						{
+							c.setSctid(Long.parseLong(x.getDenotation().toString()));
+							break;
+						}
 					}
 				}
 			}

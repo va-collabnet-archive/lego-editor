@@ -1,6 +1,10 @@
 package gov.va.legoEdit.model;
 
+import gov.va.legoEdit.LegoGUI;
+import gov.va.legoEdit.LegoGUIModel;
+import gov.va.legoEdit.formats.UserPrefsXMLUtils;
 import gov.va.legoEdit.model.schemaModel.Concept;
+import gov.va.legoEdit.model.userPrefs.UserPreferences;
 import gov.va.legoEdit.storage.wb.WBUtility;
 import gov.va.legoEdit.util.Utility;
 import java.io.File;
@@ -13,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import javax.xml.bind.JAXBException;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import org.ihtsdo.otf.tcc.api.concept.ConceptVersionBI;
@@ -178,7 +183,7 @@ public class PendingConcepts implements Observable
 		loadCheck();
 		while (true)
 		{
-			long temp = ++highestInUseId;
+			long temp = Math.max((highestInUseId + 1), LegoGUIModel.getInstance().getUserPreferences().getNextPendingId());
 			Concept possible = new PendingConcept();
 			possible.setSctid(temp);
 			if (areIdentifiersUnique(possible))
@@ -198,7 +203,7 @@ public class PendingConcepts implements Observable
 		
 		List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.UTF_8);
 		StringBuilder replacement = new StringBuilder();
-		String eol = System.getProperty("line.separator");
+		String eol = System.getProperty("\r\n");
 		for (String line : lines)
 		{
 			if (line.startsWith("#") || line.length() == 0)
@@ -236,6 +241,21 @@ public class PendingConcepts implements Observable
 		
 		Files.write(pendingConceptsFile.toPath(), replacement.toString().getBytes(), 
 				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+		
+		UserPreferences up = LegoGUIModel.getInstance().getUserPreferences();
+		if (up.getNextPendingId() <= highestInUseId)
+		{
+			up.setNextPendingId(highestInUseId + 1);
+			try
+			{
+				UserPrefsXMLUtils.writeUserPreferences(up);
+			}
+			catch (JAXBException e)
+			{
+				logger.error("Unexpected error storing preferences", e);
+				LegoGUI.getInstance().showErrorDialog("Error storing preferences", "Failed to store the user preferences", e.toString());
+			}
+		}
 	}
 	
 	private String buildLine(Concept c)
@@ -375,8 +395,22 @@ public class PendingConcepts implements Observable
 						}
 					}
 				}
+				UserPreferences up = LegoGUIModel.getInstance().getUserPreferences();
+				if (up.getNextPendingId() <= highestInUseId)
+				{
+					up.setNextPendingId(highestInUseId + 1);
+					try
+					{
+						UserPrefsXMLUtils.writeUserPreferences(up);
+					}
+					catch (JAXBException e)
+					{
+						logger.error("Unexpected error storing preferences", e);
+						LegoGUI.getInstance().showErrorDialog("Error storing preferences", "Failed to store the user preferences", e.toString());
+					}
+				}
 			}
-			catch (IOException e)
+			catch (Exception e)
 			{
 				logger.error("Unexpected error loading pending concepts file", e);
 			}

@@ -25,6 +25,7 @@ public class UserPreferences
 	@XmlAttribute(name = "path") protected String path;
 	@XmlAttribute(name = "showSummary") protected boolean showSummary = true;
 	@XmlAttribute(name = "useFSN") protected boolean useFSN = true;
+	@XmlAttribute(name= "nextPendingID") protected long nextPendingID;
 
 	/**
 	 * Gets the value of the author property.
@@ -127,5 +128,15 @@ public class UserPreferences
 		{
 			LegoGUI.getInstance().getLegoGUIController().rebuildSCTTree();
 		}
+	}
+	
+	public long getNextPendingId()
+	{
+		return nextPendingID;
+	}
+	
+	public void setNextPendingId(long value)
+	{
+		this.nextPendingID = value;
 	}
 }
