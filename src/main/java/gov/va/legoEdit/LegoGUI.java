@@ -109,14 +109,13 @@ public class LegoGUI extends Application
 		IOException dbLocateException = SystemInit.doBasicSystemInit();
 		if (dbLocateException != null)
 		{
-			//TODO fix URL
 			AppContext.getCommonDialogs().showErrorDialog(
 					"No Snomed Database",
 					"The Snomed Database was not found.",
 					"Please download the file "
 							+ System.getProperty("line.separator")
 							+ System.getProperty("line.separator")
-							+ "https://csfe.aceworkspace.net/sf/frs/do/downloadFile/projects.veterans_administration_project/frs.lego_editor.snomed_database_0_56_and_newer/frs4344?dl=1"
+							+ "https://csfe.aceworkspace.net/sf/frs/do/downloadFile/projects.veterans_administration_project/frs.isaac.isaac_databases/frs16904?dl=1"
 							+ System.getProperty("line.separator") + System.getProperty("line.separator") + " and unzip it into "
 							+ System.getProperty("line.separator") + new File("").getAbsolutePath() + System.getProperty("line.separator")
 							+ " and then restart the editor.");

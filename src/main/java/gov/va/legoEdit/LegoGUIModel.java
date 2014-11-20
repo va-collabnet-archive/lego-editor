@@ -144,7 +144,7 @@ public class LegoGUIModel
 		
 		int targetScrollPos = 0;
 		//Now this is a hack....
-		//TODO - find a new hack for this
+		//TODO [JAVA8] find a new hack for this
 //		if (treeView.getChildrenUnmodifiable().size() > 0)
 //		{
 //			treeView.scrollTo(arg0);
@@ -439,7 +439,7 @@ public class LegoGUIModel
 					
 					LegoXMLUtils.transform(l, fos, transformer, true);
 					
-					//TODO replace both of these with Application.getHostServices.showDocument(...)?
+					//TODO [JAVA8] replace both of these with Application.getHostServices.showDocument(...)?
 					try
 					{
 						BrowserLauncher bl = new BrowserLauncher();

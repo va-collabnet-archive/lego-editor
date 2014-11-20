@@ -100,7 +100,7 @@ public final class SimTreeCell extends TreeCell<TaxonomyReferenceWithConcept> {
                                 TaxonomyReferenceWithConcept.WhichConcept.DESTINATION), ts);
                         ProgressIndicator indicator = new ProgressIndicator();
 
-                        //TODO
+                        //TODO [JAVA8] replace taxonomy progress indicator?
                         //indicator.setSkin(new TaxonomyProgressIndicatorSkin(indicator));
                         indicator.setPrefSize(16, 16);
                         indicator.setProgress(-1);
