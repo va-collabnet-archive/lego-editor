@@ -29,7 +29,7 @@ public class PendingConceptMerge extends PendingConcepts
 	public PendingConceptMerge() throws Exception
 	{
 		super();
-		highestInUseId = 12000;  //make our remaps go higher than anything existing
+		highestInUseId = 11000;  //make our remaps go higher than anything existing
 		//File pendingToMerge = new File("pendingMerge/collabnet/pendingConcepts.tsv");
 		//File pendingToMerge = new File("pendingMerge/DS_pendingConcepts.tsv");
 		File pendingToMerge = new File("pendingMerge/HS_pendingConcepts.tsv");
