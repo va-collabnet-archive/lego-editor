@@ -16,7 +16,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<isaac.version>1.0-Sprint_16-SNAPSHOT</isaac.version>
+		<isaac.version>1.9-Release_01</isaac.version>
 		<otf-versioning.version>1.1-va-1.8</otf-versioning.version>
 		<maven-release-plugin.version>2.0</maven-release-plugin.version>
 		<kie.version>6.0.1.Final</kie.version> <!-- Drools -->
@@ -237,15 +237,6 @@
 	<profiles>
 		<profile>
 			<id>installer</id>
-			<dependencies>
-				<dependency>
-					<groupId>gov.va.isaac.db</groupId>
-					<artifactId>solor-snomed</artifactId>
-					<version>2014.11.12</version>
-					<classifier>active-only</classifier>
-					<type>bdb.zip</type>
-				</dependency>
-			</dependencies>
 			<build>
 				<plugins>
 					<plugin>
@@ -257,12 +248,19 @@
 								<id>unpack-snomedDB</id>
 								<phase>package</phase>
 								<goals>
-									<goal>unpack-dependencies</goal>
+									<goal>unpack</goal>
 								</goals>
 								<configuration>
-									<includeGroupIds>gov.va.isaac.db</includeGroupIds>
-									<includeArtifactIds>solor-snomed</includeArtifactIds>
-									<outputDirectory>${project.build.directory}/snomedDB</outputDirectory>
+									<artifactItems>
+										<artifactItem>
+											<groupId>gov.va.isaac.db</groupId>
+											<artifactId>solor-snomed</artifactId>
+											<version>2014.11.12</version>
+											<classifier>active-only</classifier>
+											<type>bdb.zip</type>
+											<outputDirectory>${project.build.directory}/snomedDB</outputDirectory>
+										</artifactItem>
+									</artifactItems>
 								</configuration>
 							</execution>
 						</executions>
