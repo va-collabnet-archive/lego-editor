@@ -89,7 +89,6 @@
 1043	Night Sweats (observable entity)	364538006	Sweating observable (observable entity)
 1045	Level of risk (qualifier value)	118598001	Property of measurement (qualifier value)
 1049	Has supporting evidence (link assertion)	416698001	Link assertion (link assertion)
-1050	Venous thromboembolism risk status (observable entity)	364066008	Cardiovascular observable (observable entity)
 1052	Is supporting evidence for (link assertion)	416698001	Link assertion (link assertion)
 1053	Number of episodes of congestive heart failure (observable entity)	364066008	Cardiovascular observable (observable entity)
 1054	Cardiac rhythm disturbance (observable entity)	364073003	Feature of heart rhythm (observable entity)
@@ -105,7 +104,7 @@
 1080	Supporting evidence for observation (observable entity)	363788007	Clinical history/examination observable (observable entity)
 1081	Refers to observation (link assertion)	416698001	Link assertion (link assertion)
 1083	Oral contraceptive use (observable entity)	424136002	Contraceptive use behavior (observable entity)
-1084	Benefit  Outweighs Risk of Pharmacologic VTE Prophylaxis (observable entity)	1050	Venous thromboembolism risk status (observable entity)
+1084	Benefit  Outweighs Risk of Pharmacologic VTE Prophylaxis (observable entity)	12431	Venous thromboembolism risk status (observable entity)
 1085	Risk Outweighs Benefit of Pharmacologic VTE Prophylaxis  (observable entity)	1064	Venous thromboembolism prophylaxis status (observable entity)
 1086	Snoring (observable entity)	363817001	Sleep related observable (observable entity)
 1087	Number of episodes of respiratory failure (observable entity)	364048003	Respiratory observable (observable entity)
@@ -213,3 +212,7 @@
 637	Intrawound
 639	Slough
 640	Skin structure of ischial tuberosity
+1047	Major orthopedic surgery (process)	415178003	Process (observable entity)
+1048	Risk of venous thromboembolism (observable entity)	278844005	General clinical state (observable entity)
+12431	Venous thromboembolism risk status (observable entity)	364066008	Cardiovascular observable (observable entity)
+12432	Venous thromboembolism risk level (observable entity)	278844005	General clinical state (observable entity)
