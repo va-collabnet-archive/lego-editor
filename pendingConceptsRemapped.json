@@ -1,10 +1,362 @@
 {
-  "12432": {
-    "key": 1050,
-    "value": "Venous thromboembolism risk level (observable entity)"
+  "12544": {
+    "key": 2196,
+    "value": "Unemployed (observable entity)"
+  },
+  "12545": {
+    "key": 2198,
+    "value": "Strong interpersonal bonds to family/unit members and community support (observable entity)"
+  },
+  "12546": {
+    "key": 2198,
+    "value": "Reasons for unemployment (observable entity)"
+  },
+  "12547": {
+    "key": 2199,
+    "value": "Support through ongoing medical and mental health care relationships (observable entity)"
+  },
+  "12548": {
+    "key": 2199,
+    "value": "Medical problems (observable entity)"
+  },
+  "12549": {
+    "key": 2208,
+    "value": "Suicide risk factor ? History of unintentional/undetermined overdose (observable entity)"
+  },
+  "12550": {
+    "key": 2208,
+    "value": "Air force (occupation)"
+  },
+  "12551": {
+    "key": 2211,
+    "value": "Suicide risk factor ? Substance use: current withdrawal (observable entity)"
+  },
+  "12552": {
+    "key": 2211,
+    "value": "Army (occupation)"
+  },
+  "12553": {
+    "key": 2213,
+    "value": "Suicide risk factor ? Substance use: ongoing illicit drug (observable entity)"
+  },
+  "12554": {
+    "key": 2213,
+    "value": "Coast guard (occupation)"
+  },
+  "12555": {
+    "key": 2215,
+    "value": "Healthcare setting observable (observable entity)"
+  },
+  "12556": {
+    "key": 2215,
+    "value": "Navy (occupation)"
+  },
+  "12557": {
+    "key": 2220,
+    "value": "Frequency of suicidal ideation (observable entity)"
+  },
+  "12558": {
+    "key": 2220,
+    "value": "Regurgitation of food (observable entity)"
   },
   "12431": {
     "key": 1050,
     "value": "Venous thromboembolism risk status (observable entity)"
+  },
+  "12559": {
+    "key": 2221,
+    "value": "Many times daily (qualifier value)"
+  },
+  "12432": {
+    "key": 1050,
+    "value": "Venous thromboembolism risk level (observable entity)"
+  },
+  "12560": {
+    "key": 2221,
+    "value": "Anxiety about body function or health (observable entity)"
+  },
+  "12561": {
+    "key": 2222,
+    "value": "Recency of suicidal ideation (observable entity)"
+  },
+  "12562": {
+    "key": 2222,
+    "value": "Sneezing (observable entity)"
+  },
+  "12563": {
+    "key": 2225,
+    "value": "Not in past year (qualifier value)"
+  },
+  "12564": {
+    "key": 2225,
+    "value": "Procedure ordered (observable entity)"
+  },
+  "12565": {
+    "key": 2226,
+    "value": "In the past week (qualifier value)"
+  },
+  "12566": {
+    "key": 2226,
+    "value": "Immunology consultation (procedure)"
+  },
+  "12567": {
+    "key": 2227,
+    "value": "In the past year (qualifier value)"
+  },
+  "12568": {
+    "key": 2227,
+    "value": "Ear, nose and throat consultation (procedure)"
+  },
+  "12569": {
+    "key": 2228,
+    "value": "In the past month (qualifier value)"
+  },
+  "12570": {
+    "key": 2228,
+    "value": "Airborn hazard (observable entity)"
+  },
+  "12571": {
+    "key": 2232,
+    "value": "Suicide plan (observable entity)"
+  },
+  "12572": {
+    "key": 2232,
+    "value": "Exposure to aircraft (observable entity)"
+  },
+  "12573": {
+    "key": 2233,
+    "value": "Specific suicide plan (observable entity)"
+  },
+  "12574": {
+    "key": 2233,
+    "value": "Exposure to generator (observable entity)"
+  },
+  "12575": {
+    "key": 2235,
+    "value": "Specific imminent suicide plan with intent (no means) (observable entity)"
+  },
+  "12576": {
+    "key": 2235,
+    "value": "Exposure to asbestos (observable entity)"
+  },
+  "12577": {
+    "key": 2236,
+    "value": "Specific imminent suicide plan with intent and access to means (observable entity)"
+  },
+  "12578": {
+    "key": 2236,
+    "value": "Exposure to tear gas (observable entity)"
+  },
+  "12579": {
+    "key": 2237,
+    "value": "Specific suicide plan with intent but not imminent (observable entity)"
+  },
+  "12580": {
+    "key": 2237,
+    "value": "Exposure to OC gas (observable entity)"
+  },
+  "12581": {
+    "key": 2238,
+    "value": "Vague suicide plan  (observable entity)"
+  },
+  "12582": {
+    "key": 2238,
+    "value": "Exposure to fueling operation (oservable entity)"
+  },
+  "12583": {
+    "key": 2241,
+    "value": "Sedating antidepressant (substance)"
+  },
+  "12584": {
+    "key": 2241,
+    "value": "Exposure to improvised explosive device blast (observable entity)"
+  },
+  "12585": {
+    "key": 2242,
+    "value": "Characteristic of pain of extremity (observable entity)"
+  },
+  "12586": {
+    "key": 2242,
+    "value": "Exposure to odors from sewage ponds (observable entity)"
+  },
+  "12587": {
+    "key": 2243,
+    "value": "Aching in extremity (observable entity)"
+  },
+  "12588": {
+    "key": 2243,
+    "value": "Exposure to pesticides (observable entity)"
+  },
+  "12589": {
+    "key": 2244,
+    "value": "Sensation of heaviness in limb (observable entity)"
+  },
+  "12590": {
+    "key": 2244,
+    "value": "Exposure to sandstorm (observable entity)"
+  },
+  "12591": {
+    "key": 2246,
+    "value": "Extent of weakening (observable entity)"
+  },
+  "12592": {
+    "key": 2246,
+    "value": "Exposure to smoke from combat (observable entity)"
+  },
+  "12593": {
+    "key": 2247,
+    "value": "Persistent diastasis (observable entity)"
+  },
+  "12594": {
+    "key": 2247,
+    "value": "Exposure to smoke from industrial sites (observable entity)"
+  },
+  "12595": {
+    "key": 2250,
+    "value": "Hernia well-supported by belt (observable entity)"
+  },
+  "12596": {
+    "key": 2250,
+    "value": "Exposure to smoke from burning oil well fires (observable entity)"
+  },
+  "12597": {
+    "key": 2251,
+    "value": "Hernia well-supported by truss (observable entity)"
+  },
+  "12598": {
+    "key": 2251,
+    "value": "Cardboard (substance)"
+  },
+  "12599": {
+    "key": 2252,
+    "value": "Heart size (observable entity)"
+  },
+  "12600": {
+    "key": 2252,
+    "value": "Job title (observable entity)"
+  },
+  "12601": {
+    "key": 2253,
+    "value": "Stress incontinence (observable entity)"
+  },
+  "12602": {
+    "key": 2253,
+    "value": "Last military rank held (observable entity)"
+  },
+  "12603": {
+    "key": 2254,
+    "value": "Changing of absorbent material (regime/therapy)"
+  },
+  "12604": {
+    "key": 2254,
+    "value": "Airman basic (occupation)"
+  },
+  "12605": {
+    "key": 2256,
+    "value": "Urinary incontinence (observable entity)"
+  },
+  "12606": {
+    "key": 2256,
+    "value": "Airman first class (occupation)"
+  },
+  "12607": {
+    "key": 2259,
+    "value": "Symptom of lower extremity (observable entity)"
+  },
+  "12608": {
+    "key": 2259,
+    "value": "Chief master sergeant of the air force (occupation)"
+  },
+  "12609": {
+    "key": 2262,
+    "value": "Symptom of extremity on right side (observable entity)"
+  },
+  "12610": {
+    "key": 2262,
+    "value": "Command chief master sergeant (occupation)"
+  },
+  "12523": {
+    "key": 2171,
+    "value": "Suicide risk factor - Age (observable entity)"
+  },
+  "12524": {
+    "key": 2171,
+    "value": "Heart size (observable entity)"
+  },
+  "12525": {
+    "key": 2174,
+    "value": "Suicide risk factor - Gender (observable entity)"
+  },
+  "12526": {
+    "key": 2174,
+    "value": "Manual dexterity (observable entity)"
+  },
+  "12527": {
+    "key": 2179,
+    "value": "Suicide attempt by alcohol (observable entity)"
+  },
+  "12528": {
+    "key": 2179,
+    "value": "Lack of stamina (observable entity)"
+  },
+  "12529": {
+    "key": 2180,
+    "value": "Suicide attempt by automobile (observable entity)"
+  },
+  "12530": {
+    "key": 2180,
+    "value": "Memory loss (observable entity)"
+  },
+  "12531": {
+    "key": 2183,
+    "value": "Suicide attempt by sharp object (observable entity)"
+  },
+  "12532": {
+    "key": 2183,
+    "value": "Loss of control of spincture of bladder (observable entity)"
+  },
+  "12533": {
+    "key": 2184,
+    "value": "Suicide attempt by firearm (observable entity)"
+  },
+  "12534": {
+    "key": 2184,
+    "value": "Date of retirement (observable entity)"
+  },
+  "12535": {
+    "key": 2188,
+    "value": "Good impulse control (observable entity)"
+  },
+  "12536": {
+    "key": 2188,
+    "value": "Duration of current employment (observable entity)"
+  },
+  "12537": {
+    "key": 2190,
+    "value": "Intact marriage (observable entity)"
+  },
+  "12538": {
+    "key": 2190,
+    "value": "Duration of current unemployment (observable entity)"
+  },
+  "12539": {
+    "key": 2193,
+    "value": "Cultural or spiritual and religious beliefs about the meaning and value of life (observable entity)"
+  },
+  "12540": {
+    "key": 2193,
+    "value": "Currently employed (observable entity)"
+  },
+  "12541": {
+    "key": 2195,
+    "value": "Good skills and problem solving or coping and conflict resolution (observable entity)"
+  },
+  "12542": {
+    "key": 2195,
+    "value": "Retired (observable entity)"
+  },
+  "12543": {
+    "key": 2196,
+    "value": "Optimistic outlook ? Identification of future goals (observable entity)"
   }
 }
