@@ -239,11 +239,11 @@
 			<id>installer</id>
 			<dependencies>
 				<dependency>
-					<groupId>gov.va</groupId>
-					<artifactId>lego-editor-snomed-db</artifactId>
-					<version>2012.07.31-build-6</version>
-					<classifier>latest</classifier>
-					<type>zip</type>
+					<groupId>gov.va.isaac.db</groupId>
+					<artifactId>solor-snomed</artifactId>
+					<version>2014.11.12</version>
+					<classifier>active-only</classifier>
+					<type>bdb.zip</type>
 				</dependency>
 			</dependencies>
 			<build>
@@ -260,11 +260,9 @@
 									<goal>unpack-dependencies</goal>
 								</goals>
 								<configuration>
-									<includeGroupIds>gov.va</includeGroupIds>
-									<includeArtifactIds>lego-editor-snomed-db</includeArtifactIds>
-									<outputDirectory>
-										${project.build.directory}/snomedDB
-									</outputDirectory>
+									<includeGroupIds>gov.va.isaac.db</includeGroupIds>
+									<includeArtifactIds>solor-snomed</includeArtifactIds>
+									<outputDirectory>${project.build.directory}/snomedDB</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>
