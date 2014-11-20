@@ -270,7 +270,7 @@ public class ConceptNode implements ConceptLookupCallback
 
 		lookupsInProgress_.incrementAndGet();
 		lookupInProgress.invalidate();
-		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), this, null);
+		WBUtility.lookupSnomedIdentifier(cb_.getValue().getId(), cb_.getValue().getDescription(), this, null);
 		return true;
 	}
 

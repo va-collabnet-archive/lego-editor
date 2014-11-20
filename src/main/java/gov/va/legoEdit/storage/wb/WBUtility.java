@@ -84,7 +84,7 @@ public class WBUtility
 	 * Looks up the identifier (sctid or UUID).  Checks the pendingConcepts list if not found in Snomed.
 	 * @param callId is just an optional field that will be returned to the caller in the callback.
 	 */
-	public static void lookupSnomedIdentifier(final String identifier, final ConceptLookupCallback callback, final Integer callId)
+	public static void lookupSnomedIdentifier(final String identifier, final String description, final ConceptLookupCallback callback, final Integer callId)
 	{
 		logger.debug("Threaded Lookup: '" + identifier + "'");
 		final long submitTime = System.currentTimeMillis();
@@ -93,7 +93,7 @@ public class WBUtility
 			@Override
 			public void run()
 			{
-				Concept c = lookupSnomedIdentifier(identifier);
+				Concept c = lookupSnomedIdentifier(identifier, description);
 				callback.lookupComplete(c, submitTime, callId);
 			}
 		};
@@ -111,7 +111,25 @@ public class WBUtility
 		{
 			// check the pending concepts file
 			logger.debug("Lookup Pending Concepts: '" + identifier + "'");
-			return PendingConcepts.getInstance().getConcept(identifier);
+			return PendingConcepts.getInstance().getConcept(identifier, null);
+		}
+		return convertConcept(result);
+	}
+	
+	/**
+	 * Looks up the identifier (sctid or UUID).  Checks the pendingConcepts list if not found in Snomed.
+	 * Description (optional) is used if we are looking up against the pending Concepts, and find multiple 
+	 * matches due to ID management issues - the description will match us to the correct new ID.
+	 */
+	public static Concept lookupSnomedIdentifier(String identifier, String description)
+	{
+		logger.debug("Lookup: '" + identifier + "'");
+		ConceptVersionBI result = lookupSnomedIdentifierAsCV(identifier);
+		if (result == null)
+		{
+			// check the pending concepts file
+			logger.debug("Lookup Pending Concepts: '" + identifier + "' '" + description +"'");
+			return PendingConcepts.getInstance().getConcept(identifier, description);
 		}
 		return convertConcept(result);
 	}
@@ -468,7 +486,7 @@ public class WBUtility
 	{
 		ArrayList<Concept> failures = new ArrayList<>();
 
-		// walk through the legolist, and to a lookup on each concept, flagging errors on the ones that failed lookup.
+		// walk through the legolist, and do a lookup on each concept, flagging errors on the ones that failed lookup.
 		for (Lego l : ll.getLego())
 		{
 			for (Assertion a : l.getAssertion())
@@ -498,10 +516,10 @@ public class WBUtility
 		}
 		if (e.getConcept() != null)
 		{
-			Concept result = lookupSnomedIdentifier(e.getConcept().getUuid());
+			Concept result = lookupSnomedIdentifier(e.getConcept().getUuid(), e.getConcept().getDesc());
 			if (result == null)
 			{
-				result = lookupSnomedIdentifier(e.getConcept().getSctid() + "");
+				result = lookupSnomedIdentifier(e.getConcept().getSctid() + "", e.getConcept().getDesc());
 			}
 			if (result != null)
 			{

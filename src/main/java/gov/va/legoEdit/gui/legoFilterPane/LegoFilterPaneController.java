@@ -419,7 +419,7 @@ public class LegoFilterPaneController implements Initializable, ConceptLookupCal
 					}
 					info.lookupsInProgress.incrementAndGet();
 					info.isLookupInProgress.invalidate();
-					WBUtility.lookupSnomedIdentifier(newValue, LegoFilterPaneController.this, conceptId);
+					WBUtility.lookupSnomedIdentifier(newValue, null, LegoFilterPaneController.this, conceptId);
 				}
 			}
 		});

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import javax.xml.bind.JAXBException;
 import javafx.beans.InvalidationListener;
@@ -34,13 +35,19 @@ import org.slf4j.LoggerFactory;
 public class PendingConcepts implements Observable
 {
 	public static File pendingConceptsFile = new File("pendingConcepts.tsv");
+	public static File pendingConceptsRemapFile = new File("pendingConceptsRemapped.json");
+	
 	private static Logger logger = LoggerFactory.getLogger(PendingConcepts.class);
+	private static volatile PendingConcepts instance_;
+	
+	private volatile boolean loadCompleted = false;
+	protected PendingConceptsRemapped pcr_;
+	
 	private HashMap<String, PendingConcept> pendingConcepts = new HashMap<>();  //UUID to concept
 	private HashMap<Long, Concept> parentConcepts = new HashMap<>();
-	private long highestInUseId = 0;
-	private static volatile PendingConcepts instance_;
+	protected long highestInUseId = 0;
 	private ArrayList<InvalidationListener> listeners_ = new ArrayList<>();
-	private volatile boolean loadCompleted = false;
+	
 
 	public static PendingConcepts getInstance()
 	{
@@ -57,7 +64,10 @@ public class PendingConcepts implements Observable
 		return instance_;
 	}
 
-	private PendingConcepts()
+	/**
+	 * Do not use - only protected for extension use
+	 */
+	protected PendingConcepts()
 	{
 		Utility.tpe.submit(new ReadData());
 	}
@@ -95,6 +105,10 @@ public class PendingConcepts implements Observable
 	{
 		//no load check here - will cause a startup deadlock.  
 		if (pendingConcepts.containsKey(potentialPendingConcept.getUuid()))
+		{
+			return false;
+		}
+		if (pcr_.hasRemap(potentialPendingConcept.getSctid()))
 		{
 			return false;
 		}
@@ -156,6 +170,90 @@ public class PendingConcepts implements Observable
 		}
 	}
 	
+	/**
+	 * This is really only suited for offline use - by PendingConceptMerge
+	 * returns the new ID
+	 */
+	protected Long remap(long currentID, String description)
+	{
+		loadCheck();
+		PendingConcept c = new PendingConcept();
+		c.setSctid(getUnusedId());
+		c.setDesc(description);
+		c.setUuid(UUID.nameUUIDFromBytes((c.getSctid() + "").getBytes()).toString());
+		if (areIdentifiersUnique(c))
+		{
+			pendingConcepts.put(c.getUuid(), c);
+			if (c.getSctid() > highestInUseId)
+			{
+				highestInUseId = c.getSctid();
+			}
+			
+			//Update the parentConcepts
+			fixParentMapping(currentID, c.getSctid());
+			
+			deleteConcept(currentID);
+			notifyListeners();
+		}
+		else
+		{
+			throw new IllegalArgumentException("The provided concept is not unique");
+		}
+		try
+		{
+			rewritePendingConceptsFile();
+			registerRemap(currentID, description, c.getSctid());
+		}
+		catch (IOException e)
+		{
+			//No undo attempt here - this is usually only done offline
+			logger.error("Pending concepts Store failed", e);
+			throw new IllegalArgumentException("Sorry, store failed");
+		}
+		return c.getSctid();
+	}
+	
+	/**
+	 * This is really only suited for offline use - by PendingConceptMerge
+	 */
+	protected void registerRemap(long oldID, String description, Long newID) throws IOException
+	{
+		pcr_.remap(oldID, description, newID);
+		pcr_.store(pendingConceptsRemapFile);
+	}
+	
+	/**
+	 * This is really only suited for offline use - by PendingConceptMerge
+	 */
+	protected void fixParentMapping(long oldID, long newID)
+	{
+		//Fix the mapping this concept has (if any)
+		Concept linkedParent = parentConcepts.get(oldID);
+		if (linkedParent != null)
+		{
+			parentConcepts.put(newID, linkedParent);
+		}
+		
+		//Fix and mappings that other use
+		for (Concept otherLinkedParent : parentConcepts.values())
+		{
+			//fix others that map to this concept
+			if (otherLinkedParent.getSctid().longValue() == oldID)
+			{
+				otherLinkedParent.setSctid(newID);
+				otherLinkedParent.setUuid(UUID.nameUUIDFromBytes((newID + "").getBytes()).toString());
+			}
+		}
+	}
+	
+	/**
+	 * This is really only suited for offline use - by PendingConceptMerge
+	 */
+	protected void addParent(Long pendingConceptID, Concept parent)
+	{
+		parentConcepts.put(pendingConceptID, parent);
+	}
+	
 	public void deleteConcept(long id) throws IllegalArgumentException
 	{
 		loadCheck();
@@ -193,7 +291,7 @@ public class PendingConcepts implements Observable
 		}
 	}
 	
-	private void rewritePendingConceptsFile() throws IOException
+	protected void rewritePendingConceptsFile() throws IOException
 	{
 		//Read through the existing file, keeping the comments, and any lines we don't understand.  
 		//only keep the concepts if they our in our current list.  Finally, add any concepts that are missing.
@@ -203,7 +301,7 @@ public class PendingConcepts implements Observable
 		
 		List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.UTF_8);
 		StringBuilder replacement = new StringBuilder();
-		String eol = System.getProperty("\r\n");
+		String eol = "\r\n";
 		for (String line : lines)
 		{
 			if (line.startsWith("#") || line.length() == 0)
@@ -264,7 +362,7 @@ public class PendingConcepts implements Observable
 		return c.getSctid() + "\t" + c.getDesc() + (parent == null ? "" : "\t" + parent.getSctid() + "\t" + parent.getDesc());
 	}
 
-	public PendingConcept getConcept(String sctIdOrUUID)
+	public PendingConcept getConcept(String sctIdOrUUID, String description)
 	{
 		if (sctIdOrUUID == null)
 		{
@@ -276,7 +374,38 @@ public class PendingConcepts implements Observable
 		{
 			temp = pendingConcepts.get(UUID.nameUUIDFromBytes((sctIdOrUUID.trim() + "").getBytes()).toString()); 
 		}
+		
+		//check and see if it was remapped
+		if (temp == null && description != null)
+		{
+			try
+			{
+				Long sctID = Long.parseLong(sctIdOrUUID.trim());
+				Long newID = pcr_.getNewID(sctID, description);
+				if (newID != null)
+				{
+					temp = getConcept(newID + "", null);
+				}
+			}
+			catch (NumberFormatException e)
+			{
+				//noop
+			}
+		}
 		return temp;
+	}
+	
+	public boolean isIDInUse(Long sctID)
+	{
+		PendingConcept temp = getConcept(sctID + "", null);
+		if (temp == null)
+		{
+			return pcr_.hasRemap(sctID);
+		}
+		else
+		{
+			return true;
+		}
 	}
 	
 	/**
@@ -326,8 +455,21 @@ public class PendingConcepts implements Observable
 			logger.info("Loading pending concepts from: " + pendingConceptsFile.getAbsolutePath());
 			try
 			{
-				if (pendingConceptsFile.exists())
+				if (pendingConceptsRemapFile.isFile())
 				{
+					logger.info("Loading pending concepts remap file from: " + pendingConceptsRemapFile.getAbsolutePath());
+					pcr_ = PendingConceptsRemapped.read(pendingConceptsRemapFile);
+				}
+				else
+				{
+					logger.info("No pending concepts remap file found");
+					pcr_ = new PendingConceptsRemapped();
+				}
+				
+				if (pendingConceptsFile.isFile())
+				{
+					HashMap<Long, Long> parentsToLookup = new HashMap<>();  //Map the provided concept to the parent SCTID it is linked to
+					
 					List<String> lines = Files.readAllLines(pendingConceptsFile.toPath(), StandardCharsets.UTF_8);
 					for (String s : lines)
 					{
@@ -351,25 +493,16 @@ public class PendingConcepts implements Observable
 							c.setDesc(parts[1]);
 							c.setUuid(UUID.nameUUIDFromBytes(parts[0].getBytes()).toString());
 							
-							Concept parent = null;
-
 							if (parts.length > 2)
 							{
-								long parentSCTID = Long.parseLong(parts[2]);
-								//Use this lookup, since it doesn't loop back to pending.
-								ConceptVersionBI wbParentConcept =  WBUtility.lookupSnomedIdentifierAsCV(parentSCTID + "");
-								if (wbParentConcept == null)
+								try
 								{
-									//See if it is a different pending concept (must be higher in the file, for this to work)
-									parent = pendingConcepts.get(UUID.nameUUIDFromBytes((parentSCTID + "").getBytes()).toString());
+									long parentSCTID = Long.parseLong(parts[2]);
+									parentsToLookup.put(c.getSctid(), parentSCTID);
 								}
-								else if (wbParentConcept != null)
+								catch (NumberFormatException e)
 								{
-									parent = WBUtility.convertConcept(wbParentConcept);
-								}
-								if (parent == null)
-								{
-									logger.error("The specified parent concept for " + c.getSctid() + " doesn't exist and will be ignored");
+									logger.error("Invalid Parent ID in pending concepts file - line '" + s + "'");
 								}
 							}
 							
@@ -384,14 +517,39 @@ public class PendingConcepts implements Observable
 							{
 								highestInUseId = c.getSctid();
 							}
-							if (parent != null)
-							{
-								parentConcepts.put(c.getSctid(), parent);
-							}
 						}
 						else
 						{
 							logger.error("Pending concepts need an ID and a description");
+						}
+					}
+
+					//Delay this till the end, so that the pending concept file doesn't have to be ordered.
+					for (Entry<Long, Long> conceptToParent : parentsToLookup.entrySet())
+					{
+						Concept parent = null;
+						
+						Long conceptID = conceptToParent.getKey();
+						Long parentID = conceptToParent.getValue();
+						
+						//Use this lookup, since it doesn't loop back to pending.
+						ConceptVersionBI wbParentConcept =  WBUtility.lookupSnomedIdentifierAsCV(parentID + "");
+						if (wbParentConcept == null)
+						{
+							parent = pendingConcepts.get(UUID.nameUUIDFromBytes((parentID + "").getBytes()).toString());
+						}
+						else if (wbParentConcept != null)
+						{
+							parent = WBUtility.convertConcept(wbParentConcept);
+						}
+						if (parent == null)
+						{
+							logger.error("The specified parent concept for " + conceptID + " doesn't exist and will be ignored");
+						}
+						
+						if (parent != null)
+						{
+							parentConcepts.put(conceptID, parent);
 						}
 					}
 				}

@@ -110,9 +110,7 @@ public class CreatePendingConceptController implements Initializable
 				{
 					try
 					{
-						Long.parseLong(conceptId.getText().trim());
-						Concept currentConcept = PendingConcepts.getInstance().getConcept(conceptId.getText());
-						if (currentConcept != null)
+						if (PendingConcepts.getInstance().isIDInUse(Long.parseLong(conceptId.getText().trim())))
 						{
 							conceptIdInvalidReason.setText("The specified concept ID already exists as a pending concept");
 							return false;

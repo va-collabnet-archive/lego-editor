@@ -951,7 +951,7 @@ public class LegoGUIController implements Initializable
 	
 	public void findPendingConcept(String conceptId)
 	{
-		Concept concept = PendingConcepts.getInstance().getConcept(conceptId);
+		Concept concept = PendingConcepts.getInstance().getConcept(conceptId, null);
 		if (concept != null)
 		{
 			pcpc.searchFor(concept.getDesc());
