@@ -149,7 +149,7 @@
 1165	Employed after military retirement (observable entity)	1159	Postmilitary employment status (observable entity)
 1166	Contraindication for procedure (observable entity)	363789004	General characteristic of patient (observable entity)
 1168	Metabolic Equivalent (qualifier value)	282412003	Unit of cardiothoracic assessment (qualifier value)
-1170	Using cane (observable entity)	142661009	Walking aid use
+1170	Using cane (observable entity)	165251008	Walking aid use (observable entity)
 1172	Using brace (observable entity)	165251008	Walking aid use (observable entity)
 1173	Using chrunches (observable entity)	165251008	Walking aid use (observable entity)
 1174	Using corrective shoes (observable entity)	165251008	Walking aid use (observable entity)
