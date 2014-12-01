@@ -1,5 +1,5 @@
 Lego Editor Change Log
-2014/11/19 - 2.0.1
+2014/12/01 - 2.0.2
   * Fix lego list scroll issue that was broken with the Java 8 upgrade
   * Add more detail to summary panel during export when legos are skipped for being non-current
 
