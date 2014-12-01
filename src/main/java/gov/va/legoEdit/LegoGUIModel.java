@@ -34,6 +34,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.scene.control.IndexedCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javax.xml.transform.Transformer;
@@ -41,6 +42,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 
 /**
  * 
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:daniel.armbrust.list@gmail.com">Dan Armbrust</a> 
  * Copyright 2013
  */
+@SuppressWarnings("restriction")
 public class LegoGUIModel
 {
 	Logger logger = LoggerFactory.getLogger(LegoGUIModel.class);
@@ -144,22 +147,16 @@ public class LegoGUIModel
 		
 		int targetScrollPos = 0;
 		//Now this is a hack....
-		//TODO [JAVA8] find a new hack for this
-//		if (treeView.getChildrenUnmodifiable().size() > 0)
-//		{
-//			treeView.scrollTo(arg0);
-//			TreeViewSkin<?> tks = ((TreeViewSkin<?>)treeView.getChildrenUnmodifiable().get(0));
-//			if (tks.getChildrenUnmodifiable().size() > 0)
-//			{
-//				VirtualFlow vf = (VirtualFlow)tks.getChildrenUnmodifiable().get(0);
-//				IndexedCell<?> first = vf.getFirstVisibleCell();
-//				IndexedCell<?> last = vf.getLastVisibleCell();
-//				if (first != null && last != null)
-//				{
-//					targetScrollPos = first.getIndex() + (int)Math.floor(((double)(last.getIndex() - first.getIndex())) / 2.0);
-//				}
-//			}
-//		}
+		if (treeView.getChildrenUnmodifiable().size() > 0)
+		{
+			VirtualFlow<?> vf = (VirtualFlow<?>)treeView.getChildrenUnmodifiable().get(0);
+			IndexedCell<?> first = vf.getFirstVisibleCell();
+			IndexedCell<?> last = vf.getLastVisibleCell();
+			if (first != null && last != null)
+			{
+				targetScrollPos = first.getIndex() + (last.getIndex() > 0 ? 1 : 0);
+			}
+		}
 		
 		final int scrollTo = (targetScrollPos > 0 ? targetScrollPos : 0);
 		

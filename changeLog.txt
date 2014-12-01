@@ -1,4 +1,8 @@
 Lego Editor Change Log
+2014/11/19 - 2.0.1
+  * Fix lego list scroll issue that was broken with the Java 8 upgrade
+  * Add more detail to summary panel during export when legos are skipped for being non-current
+
 2014/11/19 - 2.0
   *  Get rid of all of the old tcc / tk3 libraries, instead, point at current OTF code from ISAAC
   *  Use otf-util module from ISAAC for common code like search

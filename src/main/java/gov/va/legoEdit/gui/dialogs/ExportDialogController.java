@@ -5,6 +5,7 @@ import gov.va.legoEdit.gui.util.Images;
 import gov.va.legoEdit.model.schemaModel.Lego;
 import gov.va.legoEdit.model.schemaModel.LegoList;
 import gov.va.legoEdit.storage.BDBDataStoreImpl;
+import gov.va.legoEdit.util.TimeConvert;
 import gov.va.legoEdit.util.Utility;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -92,6 +93,7 @@ public class ExportDialogController implements Initializable
 	private volatile boolean requestCancel = false;
 	static private File initialTransformDirectory = null;
 	static private File initialExportToDirectory = null;
+	private static String eol = System.getProperty("line.separator");
 
 	@Override
 	// This method is called by the FXMLLoader when initialization is complete
@@ -384,8 +386,8 @@ public class ExportDialogController implements Initializable
 						}
 						process(legoListsIteratorToExport.next());
 						
-						status.append(System.getProperty("line.separator"));
-						status.append(System.getProperty("line.separator"));
+						status.append(eol);
+						status.append(eol);
 					}
 				}
 				else
@@ -399,8 +401,8 @@ public class ExportDialogController implements Initializable
 						}
 						process(ll);
 	
-						status.append(System.getProperty("line.separator"));
-						status.append(System.getProperty("line.separator"));
+						status.append(eol);
+						status.append(eol);
 						count++;
 					}
 				}
@@ -420,7 +422,7 @@ public class ExportDialogController implements Initializable
 					public void run()
 					{
 						detailedMessage.appendText(status.toString());
-						detailedMessage.appendText(System.getProperty("line.separator") + System.getProperty("line.separator"));
+						detailedMessage.appendText(eol + eol);
 						detailedMessage.appendText("Export Complete" + (skipCount > 0 ? ".  Skipped " + skipCount + " non-current Legos" : ""));
 						progress.setProgress(1.0);
 						exportButton.setText("Close");
@@ -471,6 +473,8 @@ public class ExportDialogController implements Initializable
 								current.getStamp().getTime().toGregorianCalendar().getTime().getTime())
 							{
 								newestLegos.put(l.getLegoUUID(), l);
+								status.append(eol + "Not exporting old version of Lego " + l.getPncs().getName() + " - " + l.getPncs().getValue() + " - "
+										+ TimeConvert.format(l.getStamp().getTime()));
 								logger.info("Not exporting old version of Lego: " + l.getPncs().getName() + " " + l.getLegoUUID());
 								skipCount++;
 							}
