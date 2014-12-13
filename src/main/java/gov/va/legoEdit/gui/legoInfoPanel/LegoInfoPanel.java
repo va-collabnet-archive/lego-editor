@@ -3,7 +3,7 @@ package gov.va.legoEdit.gui.legoInfoPanel;
 import gov.va.legoEdit.LegoGUI;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 
 /**
  * 
@@ -14,7 +14,7 @@ import javafx.scene.layout.AnchorPane;
  */
 public class LegoInfoPanel
 {
-    AnchorPane ap;
+    Region ap;
     LegoInfoPanelController lipc;
     
     public LegoInfoPanel(String pncsName, String pncsValue, String pncsID, String legoUUID, String author, String module, String date, String path)
@@ -23,7 +23,7 @@ public class LegoInfoPanel
         
         try
         {
-            ap = (AnchorPane)loader.load(LegoInfoPanel.class.getResourceAsStream("LegoInfoPanel.fxml"));
+            ap = (Region)loader.load(LegoInfoPanel.class.getResourceAsStream("LegoInfoPanel.fxml"));
         }
         catch (IOException e)
         {
@@ -40,7 +40,7 @@ public class LegoInfoPanel
         lipc.update(author, module, date, path);
     }
     
-    public AnchorPane getPane()
+    public Region getPane()
     {
         return ap;
     }

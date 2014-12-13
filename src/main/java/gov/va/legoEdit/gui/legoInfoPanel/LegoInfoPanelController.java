@@ -1,12 +1,24 @@
 package gov.va.legoEdit.gui.legoInfoPanel;
 
 
+import gov.va.legoEdit.LegoGUI;
 import gov.va.legoEdit.gui.util.CopyableLabel;
+import gov.va.legoEdit.gui.util.CustomClipboard;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 
 /**
  * 
@@ -30,10 +42,11 @@ public class LegoInfoPanelController implements Initializable {
     @FXML //  fx:id="pncsID"
     private Label pncsID; // Value injected by FXMLLoader
     @FXML //  fx:id="pncsName"
-    private Label pncsName; // Value injected by FXMLLoader
+    private Text pncsName; // Value injected by FXMLLoader
     @FXML //  fx:id="pncsValue"
     private Label pncsValue; // Value injected by FXMLLoader
 
+    private ContextMenu pncsNameContextMenu;
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources)
@@ -49,7 +62,7 @@ public class LegoInfoPanelController implements Initializable {
         // initialize your logic here: all @FXML variables will have been injected
     }
     
-    protected void finishInit(String pncsName, String pncsValue, String pncsID, final String legoUUID, String author, String module, String date, String path)
+    protected void finishInit(String pncsNameString, String pncsValue, String pncsID, final String legoUUID, String author, String module, String date, String path)
     {
         this.legoAuthor.setText(author);
         this.legoDate.setText(date);
@@ -57,7 +70,20 @@ public class LegoInfoPanelController implements Initializable {
         this.legoPath.setText(path);
         this.legoUUID.setText(legoUUID);
         this.pncsID.setText(pncsID);
-        this.pncsName.setText(pncsName);
+        this.pncsName.wrappingWidthProperty().bind(((Region)this.pncsName.getParent()).widthProperty().subtract(20));
+        this.pncsName.setText(pncsNameString);
+        // *cough* HACK *cough* - for some reason, it doesn't layout the height right unless you do this...
+        this.pncsName.wrappingWidthProperty().addListener(new ChangeListener<Number>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+            {
+                Platform.runLater(() ->    
+                {
+                    pncsName.getParent().requestLayout();
+                });
+            }
+        });
         this.pncsValue.setText(pncsValue);
         
         CopyableLabel.addCopyMenu(this.legoAuthor);
@@ -66,7 +92,30 @@ public class LegoInfoPanelController implements Initializable {
         CopyableLabel.addCopyMenu(this.legoPath);
         CopyableLabel.addCopyMenu(this.legoUUID);
         CopyableLabel.addCopyMenu(this.pncsID);
-        CopyableLabel.addCopyMenu(this.pncsName);
+        pncsNameContextMenu = new ContextMenu();
+        MenuItem mi = new MenuItem("Copy");
+        mi.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent arg0)
+            {
+                CustomClipboard.set(pncsName.getText());
+                LegoGUI.getInstance().getLegoGUIController().updateRecentCodes(pncsName.getText());
+            }
+        });
+        pncsNameContextMenu.getItems().add(mi);
+        
+        this.pncsName.setOnMousePressed(new EventHandler<MouseEvent>() 
+        {
+            @Override
+            public void handle(MouseEvent event) 
+            {
+                if (event.isSecondaryButtonDown()) 
+                {
+                    pncsNameContextMenu.show(pncsName, event.getScreenX(), event.getScreenY());
+                }
+            };
+        });
         CopyableLabel.addCopyMenu(this.pncsValue);
     }
     

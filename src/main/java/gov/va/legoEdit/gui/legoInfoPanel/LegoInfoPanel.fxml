@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
-<?import java.util.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="102.0" xmlns:fx="http://javafx.com/fxml" fx:controller="gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanelController">
-  <children>
-    <HBox id="HBox" alignment="CENTER" spacing="5.0" styleClass="itemBorder" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-      <children>
-        <GridPane HBox.hgrow="ALWAYS">
+
+        <GridPane styleClass="itemBorder" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanelController">
           <children>
             <Label styleClass="boldLabel" text="Author" GridPane.columnIndex="0" GridPane.rowIndex="2" />
             <Label fx:id="legoAuthor" text="author here" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -25,9 +22,8 @@
             <Label fx:id="pncsValue" text="value here" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Label styleClass="boldLabel" text="ID" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Label fx:id="pncsID" text="id here" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Label fx:id="pncsName" styleClass="boldLabel" text="name here" GridPane.columnIndex="0" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
             <Label styleClass="boldLabel" text="LEGO ID" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <Label fx:id="legoUUID" text="uuid here" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+            <Label fx:id="legoUUID" text="uuid here" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" /><Text fx:id="pncsName" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="boldLabel" text="name here" textAlignment="CENTER" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
           </children>
           <columnConstraints>
             <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
@@ -36,14 +32,13 @@
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
           </columnConstraints>
           <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" vgrow="NEVER" />
           </rowConstraints>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding>
         </GridPane>
-      </children>
-    </HBox>
-  </children>
-</AnchorPane>

@@ -190,7 +190,8 @@ public class LegoTab extends Tab
 
 		VBox tabContent = new VBox();
 		tabContent.getChildren().add(lip.getPane());
-		VBox.setVgrow(lip.getPane(), Priority.NEVER);
+		lip.getPane().setMaxHeight(Double.MAX_VALUE);
+		VBox.setVgrow(lip.getPane(), Priority.SOMETIMES);
 
 		if (LegoGUIModel.getInstance().getUserPreferences().getShowSummary())
 		{
