@@ -85,6 +85,7 @@ public class LegoInfoPanelController implements Initializable {
             }
         });
         this.pncsValue.setText(pncsValue);
+        this.pncsValue.setWrapText(true);
         
         CopyableLabel.addCopyMenu(this.legoAuthor);
         CopyableLabel.addCopyMenu(this.legoDate);

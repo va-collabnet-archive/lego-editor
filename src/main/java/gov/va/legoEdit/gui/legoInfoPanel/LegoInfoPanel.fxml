@@ -8,37 +8,40 @@
 <?scenebuilder-stylesheet ../../../../../../resources/styles.css?>
 
 
-        <GridPane styleClass="itemBorder" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanelController">
-          <children>
-            <Label styleClass="boldLabel" text="Author" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <Label fx:id="legoAuthor" text="author here" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label fx:id="legoDate" text="date here" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Label fx:id="legoModule" text="module here" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label styleClass="boldLabel" text="Path" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-            <Label fx:id="legoPath" text="path here" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-            <Label styleClass="boldLabel" text="Date" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <Label styleClass="boldLabel" text="Module" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-            <Label styleClass="boldLabel" text="Value" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <Label fx:id="pncsValue" text="value here" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label styleClass="boldLabel" text="ID" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Label fx:id="pncsID" text="id here" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Label styleClass="boldLabel" text="LEGO ID" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <Label fx:id="legoUUID" text="uuid here" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" /><Text fx:id="pncsName" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="boldLabel" text="name here" textAlignment="CENTER" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
-          </children>
-          <columnConstraints>
-            <ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="NEVER" maxWidth="55.0" minWidth="55.0" prefWidth="55.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-          </columnConstraints>
-          <rowConstraints>
-            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" vgrow="NEVER" />
-            <RowConstraints minHeight="10.0" vgrow="NEVER" />
-          </rowConstraints>
-<padding>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding>
-        </GridPane>
+<GridPane styleClass="itemBorder" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="gov.va.legoEdit.gui.legoInfoPanel.LegoInfoPanelController">
+	<children>
+		<Label styleClass="boldLabel" text="Author" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+		<Label fx:id="legoAuthor" text="author here" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+		<Label fx:id="legoDate" text="date here" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+		<Label fx:id="legoModule" text="module here" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+		<Label styleClass="boldLabel" text="Path" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+		<Label fx:id="legoPath" text="path here" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+		<Label styleClass="boldLabel" text="Date" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+		<Label styleClass="boldLabel" text="Module" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+		<Label styleClass="boldLabel" text="Value" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+		<Label fx:id="pncsValue" text="value here" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+		<Label styleClass="boldLabel" text="ID" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+		<Label fx:id="pncsID" text="id here" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+		<Label styleClass="boldLabel" text="LEGO ID" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+		<Label fx:id="legoUUID" text="uuid here" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+		<Text fx:id="pncsName" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="boldLabel" text="name here" textAlignment="CENTER"
+			GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+	</children>
+	<columnConstraints>
+		<ColumnConstraints fillWidth="false" hgrow="NEVER" maxWidth="75.0" minWidth="75.0" prefWidth="75.0" />
+		<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+		<ColumnConstraints hgrow="NEVER" maxWidth="55.0" minWidth="55.0" prefWidth="55.0" />
+		<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+	</columnConstraints>
+	<rowConstraints>
+		<RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+		<RowConstraints minHeight="10.0" vgrow="NEVER" />
+		<RowConstraints minHeight="10.0" vgrow="NEVER" />
+		<RowConstraints minHeight="10.0" vgrow="NEVER" />
+		<RowConstraints minHeight="10.0" vgrow="NEVER" />
+	</rowConstraints>
+	<padding>
+		<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+	</padding>
+</GridPane>

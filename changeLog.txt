@@ -1,4 +1,8 @@
 Lego Editor Change Log
+2014/12/13 - 2.0.3
+  * Enhance csv / tsv import parser to handle escape characters, quotes, etc.
+  * Fix wrapping of long PNCS Names / IDs
+  
 2014/12/01 - 2.0.2
   * Fix lego list scroll issue that was broken with the Java 8 upgrade
   * Add more detail to summary panel during export when legos are skipped for being non-current
