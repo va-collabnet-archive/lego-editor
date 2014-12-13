@@ -183,7 +183,7 @@ public class ImportDialogController implements Initializable
 							{
 								//This one is different - many Lego Lists and Legos within a single file.
 								HashMap<String, ArrayList<LegoCreationFromScriptFile>> legosToCreate =  LegoCreationFromScriptFile.readFile(f, 
-										(fileName.endsWith(".csv") ? "," : "\t"));
+										(fileName.endsWith(".csv") ? ',' : '\t'));
 								
 								int t = 0;
 								for (ArrayList<LegoCreationFromScriptFile> x : legosToCreate.values())

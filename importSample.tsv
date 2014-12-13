@@ -5,6 +5,10 @@
 # Items should be tab or comma seperated (but consistent with the file name - csv for comma, tsv for tab)
 # 'Qualifier Concept Code' and 'Value Concept Code or Text' are optional
 # If 'Value Concept Code' is a numeric value, it will be treated as a concept, if not, treated as plain text.
+# Items may be surrounded by double quotes, or may simply be csv or tsv seperated.
+# In a CSV file to escape a comma, or in a TSV file to escape a tab - prefex it with \
+# Prefexing is not necessary if the fields around surrounded by "double quotes" however.
+# To escape a double quote, prefix it with \.  See the last line for examples.
 
 Cervical spine - History	Legos about Cervical Spine History	Patient/Veteran Name	Name	26622
 Cervical spine - History	Legos about Cervical Spine History	History of cervical spine (neck) condition	Yes	28799
@@ -32,4 +36,4 @@ Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Object
 Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	35	28898
 Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	40	28898
 Cervical spine - History	Legos about Cervical Spine History	Initial ROM - Objective evidance of painful motion begins at degrees	45 or greater	28898
-Something Else	TEST Name	Test Group Description	Test Value	87564	2667000	foo bar!
+"Something	Else"	"TEST\" Name"	"Test	Group Description"	Test Value	87564	2667000	foo bar!

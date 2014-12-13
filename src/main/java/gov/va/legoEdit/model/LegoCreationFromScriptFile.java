@@ -1,12 +1,14 @@
 package gov.va.legoEdit.model;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -56,37 +58,37 @@ public class LegoCreationFromScriptFile
 		return pncsId;
 	}
 	
-	public static HashMap<String, ArrayList<LegoCreationFromScriptFile>> readFile(File f, String sepChar) throws IOException
+	public static HashMap<String, ArrayList<LegoCreationFromScriptFile>> readFile(File f, char sepChar) throws IOException
 	{
 		HashMap<String, ArrayList<LegoCreationFromScriptFile>> results = new HashMap<>();
 		
-		List<String> lines = Files.readAllLines(f.toPath(), StandardCharsets.UTF_8);
-		int lineNumber = 0;
-		for (String line : lines)
+		CSVFormat format = CSVFormat.newFormat(sepChar).withAllowMissingColumnNames().withQuote('"').withRecordSeparator("\r\n")
+				.withIgnoreEmptyLines(true).withCommentMarker('#').withEscape('\\').withIgnoreSurroundingSpaces();
+		
+		CSVParser parser = null;
+		try
 		{
-			lineNumber++;
-			if (line.startsWith("#") || line.length() == 0)
-			{
-				continue;
-			}
-			else
+			parser = new CSVParser(new FileReader(f), format);
+			
+			Iterator<CSVRecord> it = parser.iterator();
+			while (it.hasNext())
 			{
 				try
 				{
-					String[] parts = line.split(sepChar);
+					CSVRecord parts = it.next();
 					LegoCreationFromScriptFile item = new LegoCreationFromScriptFile();
-					item.legoListName = parts[0].trim();
-					item.legoListDescription = parts[1].trim();
-					item.pncsName = parts[2].trim();
-					item.pncsValue = parts[3].trim();
-					item.pncsId = Integer.parseInt(parts[4].trim());
-					if (parts.length > 5 && StringUtils.isNotBlank(parts[5]))
+					item.legoListName = parts.get(0);
+					item.legoListDescription = parts.get(1);
+					item.pncsName = parts.get(2);
+					item.pncsValue = parts.get(3);
+					item.pncsId = Integer.parseInt(parts.get(4));
+					if (parts.size() > 5 && StringUtils.isNotBlank(parts.get(5)))
 					{
-						item.qualifierConcept = Long.parseLong(parts[5]);
+						item.qualifierConcept = Long.parseLong(parts.get(5));
 					}
-					if (parts.length > 6)
+					if (parts.size() > 6)
 					{
-						item.valueItem = parts[6];
+						item.valueItem = parts.get(6);
 					}
 					
 					ArrayList<LegoCreationFromScriptFile> group = results.get(item.legoListName);
@@ -99,7 +101,7 @@ public class LegoCreationFromScriptFile
 					if (StringUtils.isBlank(item.legoListName) || StringUtils.isBlank(item.legoListDescription) || StringUtils.isBlank(item.pncsName) ||
 							StringUtils.isBlank(item.pncsValue))
 					{
-						throw new IOException("Missing a required value on line " + lineNumber);
+						throw new IOException("Missing a required value on line " + parser.getCurrentLineNumber());
 					}
 					group.add(item);
 				}
@@ -109,8 +111,15 @@ public class LegoCreationFromScriptFile
 				}
 				catch (Exception e) 
 				{
-					throw new IOException("Invalid format on line " + lineNumber + " '" + line + "' - " + e);
+					throw new IOException("Invalid format on line " + parser.getCurrentLineNumber() + " - " + e);
 				}
+			}
+		}
+		finally
+		{
+			if (parser != null)
+			{
+				parser.close();
 			}
 		}
 		return results;
